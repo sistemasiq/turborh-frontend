@@ -1,0 +1,223 @@
+<template>
+  <q-layout class="main-layout overflow-hidden-y">
+    <q-page-container>
+      <q-page style="position: relative; right: 0px; margin-left: 300px">
+        <div class="personaldata-background">
+          <div class="justify-between row" style="margin-top: 20px; margin-bottom: 30px; position: relative; display: inline-block;">
+            <q-img
+              :src="getUserImage"
+              style="width: 300px; height: 300px; border-radius: 160px"
+            >
+            </q-img>
+            <q-file
+              accept=".jpg, image/*"
+              v-model="selectedImage"
+              borderless
+              use-chips
+              rounded
+              clearable
+              standout
+              outlined
+              v-if="!selectedImage && !canUpload"
+              bg-color="white"
+              style="height: 50px; width: 55px; position: absolute; top: 90%; left: 75%; transform: translate(-50%, -50%); justify-content: center;"
+            >
+            <q-tooltip>Selecciona tu imagen</q-tooltip>
+
+              <template v-slot:prepend>
+                <q-icon name="add_a_photo" color="black" size="25px" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" />
+
+              </template>
+            </q-file>
+
+            <q-btn
+                  v-if="selectedImage"
+                  color="cyan-3"
+                  label="Subir imagen"
+                  icon="cloud_upload"
+                  @click.prevent="uploadImage"
+                  :disable="!canUpload"
+                  :loading="isUploading"
+                  style="height: 40px; width: 170px; position: absolute; top: 107%; left: 52%; transform: translate(-50%, -50%);"
+                >
+                <q-tooltip>Da click para subir tu imagen</q-tooltip>
+              </q-btn>
+          </div>
+
+                <q-card-section class="q-mt-xl q-ml-xl">
+              <p class="text-h4 text-weight-bold">
+                {{
+                  fullName === "undefined undefined undefined"
+                    ? "Nombre completo "
+                    : fullName
+                }}
+              </p>
+              <p class="text-h5 text-weight-regular">{{ userName }}</p>
+              <p class="text-h6">
+                Especialidad: {{ specialization === "" ? "" : specialization }}
+              </p>
+              <p class="text-h6">Edad: {{ age === "" ? "" : age }}</p>
+            </q-card-section>
+
+        </div>
+
+
+        <div class="row" style="margin-left: 30px; margin-top: 10px">
+          <ApplicationsCard></ApplicationsCard>
+        </div>
+      </q-page>
+    </q-page-container>
+  </q-layout>
+</template>
+
+<script setup>
+import ApplicationsCard from "src/components/ApplicationsCards.vue";
+import { getS3FileUrl } from "src/services/profiles.js";
+import { useAuthStore } from "src/stores/auth";
+import { storeToRefs } from "pinia";
+import { useRequestUser } from "src/stores/requestUser";
+import { ref, onMounted, computed } from "vue";
+import { useLocalStorageStore } from "src/stores/localStorage";
+import { getUserImagesPath } from "src/utils/folderPaths";
+import { getAge } from "src/utils/operations";
+import axios from "axios";
+
+const useLocalStorage = useLocalStorageStore();
+const useRequest = useRequestUser();
+const useAuth = useAuthStore();
+const selectedImage = ref();
+
+const { user } = storeToRefs(useAuth);
+const { savedApplication } = storeToRefs(useRequest);
+
+const userName = ref("");
+const fullName = ref("Nombre completo");
+const specialization = ref("");
+const age = ref(0);
+
+const isUploading = ref(false);
+
+const photoUUID = ref("");
+
+onMounted(() => {
+  setUserInfo();
+});
+
+const canUpload = computed(() => selectedImage.value);
+
+const getUserImage = computed(() => {
+  if (photoUUID.value === null || photoUUID.value === undefined) {
+    return getS3FileUrl(getUserImagesPath, "default_user_icon.png");
+  } else {
+    return getS3FileUrl(getUserImagesPath, photoUUID.value);
+  }
+});
+
+const setUserInfo = () => {
+  let userStored = useLocalStorage.load("user");
+  let applicationStored = useLocalStorage.load("savedApplication");
+
+  if (userStored) {
+    user.value = userStored;
+  }
+
+  if(applicationStored){
+    savedApplication.value = applicationStored;
+  }
+
+  userName.value = user.value.userName;
+  photoUUID.value = user.value.photoUUID;
+
+  applicationStored = applicationStored
+    ? applicationStored
+    : savedApplication.value;
+  console.log(applicationStored);
+  if (applicationStored) {
+    fullName.value =
+      applicationStored.nombre +
+      " " +
+      applicationStored.apellido_paterno +
+      " " +
+      applicationStored.apellido_materno;
+    specialization.value = applicationStored.especialidad;
+    age.value = getAge(applicationStored.fecha_nacimiento);
+    if(age.value === NaN){
+      age.value = 0;
+    }
+    console.log("Age: " + getAge(applicationStored.fecha_nacimiento));
+
+  }
+};
+
+const uploadImage = async () => {
+  const formData = new FormData();
+
+  formData.append("file", selectedImage.value);
+  formData.append("folderPath", getUserImagesPath);
+
+  try {
+    isUploading.value = true;
+
+    let request;
+    if (user.value.photoUUID) {
+      console.log("updated file");
+      request = await axios.put(
+        `/updateFile/${user.value.photoUUID}`,
+        formData,
+        {
+          headers: {
+            file: "multipart/form-data",
+          },
+        }
+      );
+      if (request.status === 200) {
+        selectedImage.value = "";
+      }
+    } else {
+      console.log("updated file");
+      request = await axios.post("/upload", formData, {
+        headers: {
+          file: "multipart/form-data",
+        },
+      });
+    }
+    if (request.status === 200) {
+      updateUserImage(request.data);
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isUploading.value = false;
+  }
+};
+
+const updateUserImage = async (imageUUID) => {
+  try {
+    const request = await axios.put(
+      `/auth/update/image/${imageUUID}/user/${user.value.id}`
+    );
+
+    if (request.status === 200) {
+      user.value.photoUUID = imageUUID;
+      useLocalStorage.save("user", user.value);
+      photoUUID.value = imageUUID;
+    }
+  } catch (error) {}
+};
+</script>
+
+<style scoped>
+.main-layout {
+  background: rgb(255, 255, 255);
+}
+
+.personaldata-background {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  left: 50px;
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+</style>
