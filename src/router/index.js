@@ -62,7 +62,9 @@ const router = createRouter({
         { path: "historial-requisiciones", component: () => import('../views/requisition/RequisitionHistoryView.vue') },
         { path: "historial-requisiciones-solicitudes", component: () => import('../views/requisition/RequisitionApplicantsView.vue') },
         { path: "catalogo-puestos", component: () => import('../views/requisition/JobCatalog.vue') },
-        { path: "edicion-puesto", component: () => import('../views/requisition/JobEditionView.vue') }
+        { path: "edicion-puesto", component: () => import('../views/requisition/JobEditionView.vue') },
+        { path: "catalogo-maquinaria", component: () => import('../views/requisition/MachineryCatalogView.vue') },
+
       ],
       beforeEnter: authGuard
     },

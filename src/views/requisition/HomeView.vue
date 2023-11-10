@@ -63,7 +63,7 @@
           header-class="bg-blue-1"
         >
           <q-item
-          v-if="!isAdmin"
+            v-if="hasPermitRequisitionCreation"
             clickable
             @click.prevent="onNewRequisitionClicked"
             :inset-level="1"
@@ -87,8 +87,8 @@
             </q-item-section>
           </q-item>
         </q-expansion-item>
-
-    <!--     <q-expansion-item
+        <!-- TODO: Remover cuando se verifique que no se ocupa -->
+        <!-- <q-expansion-item
         v-if="isRh"
           icon="description"
           label="Solicitudes de usuarios"
@@ -105,12 +105,12 @@
               </q-item-section>
             </q-item>
           </div>
-        </q-expansion-item>
- -->
+        </q-expansion-item> -->
+
         <q-expansion-item
           v-if="isRh"
           icon="description"
-          label="Catálogo de puestos"
+          label="Catálogos"
           header-class="bg-blue-1"
         >
           <div class="content" ref="contentRef">
@@ -130,19 +130,37 @@
                 >
               </q-item-section>
             </q-item>
+
+            <q-item
+              clickable
+              to="/home/catalogo-maquinaria"
+              :inset-level="1"
+              class="custom-item"
+            >
+              <q-item-section avatar class="items-seleccion-elements">
+                <q-icon name="handyman" class="icon-user" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Maquinaría y herramientas</q-item-label>
+                <q-item-label caption
+                  >Modifica el catalogo de maquinaría y herramientas</q-item-label
+                >
+              </q-item-section>
+            </q-item>
           </div>
         </q-expansion-item>
 
-        <q-item clickable to="/agenda" class="bg-blue-1">
-            <q-item-section avatar>
-              <q-icon name="calendar_month" />
-            </q-item-section>
-            <q-item-section class="text-left q-pt-md q-pb-md">
-              <q-item-label >Agenda</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item v-if="isRh" clickable to="/agenda" class="bg-blue-1">
+          <q-item-section avatar>
+            <q-icon name="calendar_month" />
+          </q-item-section>
+          <q-item-section class="text-left q-pt-md q-pb-md">
+            <q-item-label>Agenda</q-item-label>
+          </q-item-section>
+        </q-item>
       </q-list>
-
+      
+      
       <q-btn class="logout-button" @click="logout" flat>
         <q-icon name="logout" class="logout-icon" />
         <label>Cerrar Sesión</label>
@@ -170,7 +188,6 @@ import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { storeToRefs } from "pinia";
 import { getAdminImagesPath, getAssetsPath } from "src/utils/folderPaths";
 import { useRequisitionStore } from "src/stores/requisition";
-import { notifyPositive } from "src/utils/notifies.js";
 import axios from "axios";
 
 const $q = useQuasar();
@@ -182,8 +199,9 @@ const useLocalStorage = useLocalStorageStore();
 const drawer = ref(false);
 const componentKey = ref(0);
 const userName = ref("");
-const { showingDetails } = storeToRefs(useRequisitionDetails);
-const { user, logged, isRh, isAdmin } = storeToRefs(useAuth);
+const { showingDetails, updatingRequisition } = storeToRefs(useRequisitionDetails);
+const { user, logged, isRh, hasPermitRequisitionCreation } =
+  storeToRefs(useAuth);
 
 onMounted(() => {
   loadLocalStorage();
@@ -192,6 +210,7 @@ onMounted(() => {
 const selectedImage = ref();
 
 const photoUUID = ref("default.png");
+
 const getUserImage = computed(() =>
   getS3FileUrl(getAdminImagesPath, photoUUID.value)
 );
@@ -206,7 +225,8 @@ const loadLocalStorage = () => {
   if (userStored) {
     user.value = userStored;
     userName.value = user.value.userName;
-    photoUUID.value = user.value.photoUUID === null ? photoUUID.value : user.value.photoUUID;
+    photoUUID.value =
+      user.value.photoUUID === null ? photoUUID.value : user.value.photoUUID;
   }
 
   console.log(user.value);
@@ -217,6 +237,8 @@ const loadLocalStorage = () => {
 const onNewRequisitionClicked = () => {
   router.push("/home/nueva-requisicion-1");
   showingDetails.value = false;
+  updatingRequisition.value = false;
+
 };
 
 const uploadImage = async () => {
@@ -239,7 +261,7 @@ const uploadImage = async () => {
           },
         }
       );
-      if(request.status === 200) {
+      if (request.status === 200) {
         selectedImage.value = "";
       }
     } else {
@@ -275,11 +297,23 @@ const updateUserImage = async (imageUUID) => {
   }
 };
 
-watch(showingDetails, (newValue) => {
-  if (newValue === false) {
-    componentKey.value += 1;
+watch(
+  showingDetails, // Watch the desired store value
+  (newValue) => {
+    if (!newValue) {
+      componentKey.value += 1;
+    }
   }
-});
+);
+
+watch(
+  updatingRequisition, // Watch the desired store value
+  (newValue) => {
+    if (!newValue) {
+      componentKey.value += 1;
+    }
+  }
+);
 
 const logout = () => {
   useLocalStorage.remove("user");

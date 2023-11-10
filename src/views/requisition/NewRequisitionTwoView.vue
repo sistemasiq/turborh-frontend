@@ -3,10 +3,22 @@
     <q-page-container>
       <q-page>
         <q-card flat bordered class="rounded-borders">
-          <q-card-section style="height: 100%">
-            <p class="text-h4" style="font-size: 25px">
+          <q-card-section class="row items-center">
+            <p class="text-h6">
               {{ showingDetails ? "Detalles" : "Perfil Requerido" }}
             </p>
+            <q-btn
+              v-if="isAdmin && showingDetails"
+              class="bg-grey-4"
+              rounded
+              flat
+              color="black"
+              icon="edit"
+              style="margin-left: 90%"
+              @click.prevent="openNotes = !openNotes"
+            >
+              <Tooltip :text="'Añadir comentarios'" />
+            </q-btn>
           </q-card-section>
           <q-card-section class="requisition-content">
             <div class="pagination">
@@ -29,8 +41,8 @@
                 outlined
                 color="cyan-1"
                 label="Edad"
+                class="q-ml-md"
                 label-color="white"
-                style="margin-left: 3%; width: 7%"
                 type="number"
                 min="18"
                 max="65"
@@ -46,26 +58,24 @@
                 color="cyan-1"
                 label="Inglés"
                 label-color="white"
-                style="margin-left: 3%; width: 20%"
+                class="q-ml-xl"
                 readonly
               >
               </q-input>
 
-              <div class="gender-content">
-                <div class="gender-title">
-                  <p>Sexo:</p>
-                </div>
-                <div style="display: flex">
+              <div class="column q-ml-xl">
+                <p class="text-body2 text-white q-ml-md">Sexo:</p>
+                <div>
                   <q-radio
                     val="M"
                     color="cyan"
                     unchecked-icon="radio_button_unchecked"
                     checked-icon="radio_button_checked"
                     size="lg"
-                    class="checkbox"
+                    class="text-white"
                     v-model="gender"
+                    dark
                     label="Masculino"
-                    style="color: white"
                     :disable="showingDetails"
                   />
                   <q-radio
@@ -74,29 +84,29 @@
                     unchecked-icon="radio_button_unchecked"
                     checked-icon="radio_button_checked"
                     size="lg"
-                    class="checkbox"
+                    class="text-white"
                     v-model="gender"
+                    dark
                     label="Femenino"
-                    style="color: white"
                     :disable="showingDetails"
                   />
                 </div>
               </div>
-              <div class="gender-content">
-                <div class="gender-title">
-                  <p>Estado civil</p>
+              <div class="column q-ml-xl">
+                <div>
+                  <p class="text-white text-body2 q-ml-md">Estado civil</p>
                 </div>
-                <div style="display: flex">
+                <div>
                   <q-radio
                     val="C"
                     color="cyan"
                     unchecked-icon="radio_button_unchecked"
                     checked-icon="radio_button_checked"
                     size="lg"
-                    class="checkbox"
+                    class="text-white"
                     v-model="civilStatus"
+                    dark
                     label="Casado"
-                    style="color: white"
                     :disable="showingDetails"
                   />
                   <q-radio
@@ -105,73 +115,75 @@
                     unchecked-icon="radio_button_unchecked"
                     checked-icon="radio_button_checked"
                     size="lg"
-                    class="checkbox"
+                    class="text-white"
+                    dark
                     v-model="civilStatus"
                     label="Soltero"
-                    style="color: white"
                     :disable="showingDetails"
                   />
                 </div>
               </div>
             </div>
 
-            <div class="title">
-              <p>Escolaridad:</p>
-            </div>
-            <div class="schooling-content rounded-borders">
-              <q-radio
-              val="S"
-                color="cyan"
-                unchecked-icon="radio_button_unchecked"
-                checked-icon="radio_button_checked"
-                size="lg"
-                class="checkbox"
-                v-model="educationRequired"
-                label="Secundaria"
-                disable
-              />
-              <q-radio
-              val="B"
-                color="cyan"
-                unchecked-icon="radio_button_unchecked"
-                checked-icon="radio_button_checked"
-                size="lg"
-                class="checkbox"
-                v-model="educationRequired"
-                label="Bachillerato"
-                disable
-              />
-              <q-radio
-              val="P"
-                color="cyan"
-                unchecked-icon="radio_button_unchecked"
-                checked-icon="radio_button_checked"
-                size="lg"
-                class="checkbox"
-                v-model="educationRequired"
-                label="Profesional"
-                disable
-              />
-              <q-radio
-              val="M"
-                color="cyan"
-                unchecked-icon="radio_button_unchecked"
-                checked-icon="radio_button_checked"
-                size="lg"
-                class="checkbox"
-                v-model="educationRequired"
-                label="Maestria"
-                disable
-              />
-            </div>
+            <q-card class="column q-ma-md transparent" flat>
+              <q-card-section class="text-body2 text-white">
+                Escolaridad:
+              </q-card-section>
+              <q-card-section
+                style="width: 40%"
+                class="bg-white rounded-borders"
+              >
+                <q-radio
+                  val="S"
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  v-model="educationRequired"
+                  label="Secundaria"
+                  disable
+                />
+                <q-radio
+                  val="B"
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  v-model="educationRequired"
+                  label="Bachillerato"
+                  disable
+                />
+                <q-radio
+                  val="P"
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  v-model="educationRequired"
+                  label="Profesional"
+                  disable
+                />
+                <q-radio
+                  val="M"
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  v-model="educationRequired"
+                  label="Maestria"
+                  disable
+                />
+              </q-card-section>
+            </q-card>
+
             <q-input
+              class="q-ma-md"
               v-model="experienceRequired"
               dark
               outlined
               color="cyan-1"
               label="Experiencia"
               label-color="white"
-              style="margin-left: 3%; margin-top: 3%; font-size: medium"
               type="textarea"
               readonly
             >
@@ -183,61 +195,77 @@
               color="cyan-1"
               label="Observaciones sobre el puesto"
               label-color="white"
-              style="margin-left: 3%; margin-top: 3%; font-size: medium"
+              class="q-ma-md"
               type="textarea"
               :readonly="showingDetails"
             >
             </q-input>
-            <div class="misc-content rounded-borders">
-              <q-checkbox
-                color="cyan"
-                unchecked-icon="radio_button_unchecked"
-                checked-icon="radio_button_checked"
-                size="lg"
-                class="checkbox"
-                v-model="extraHoursRequired"
-                label="Derecho a tiempo extra"
-                disable
-              />
-              <q-checkbox
-                color="cyan"
-                unchecked-icon="radio_button_unchecked"
-                checked-icon="radio_button_checked"
-                size="lg"
-                class="checkbox"
-                v-model="travelAvailabilityRequired"
-                label="Disponibilidad para viajar"
-                disable
-              />
-            </div>
-            <div class="title">
-              <p>Condiciones:</p>
-            </div>
+            <q-card class="column q-ma-md transparent" flat>
+              <q-card-section
+                style="width: 40%"
+                class="bg-white rounded-borders"
+              >
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="extraHoursRequired"
+                  label="Derecho a tiempo extra"
+                  disable
+                />
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="travelAvailabilityRequired"
+                  label="Disponibilidad para viajar"
+                  disable
+                />
+              </q-card-section>
+            </q-card>
             <q-input
               v-model="conditions"
               dark
               outlined
               color="cyan-1"
-              label="Especificar"
+              label="Condiciones especificas del puesto."
               label-color="white"
-              style="margin-left: 3%"
+              class="q-ma-md"
               type="textarea"
               :readonly="showingDetails"
             >
             </q-input>
             <q-btn
-              v-if="!showingDetails"
+              v-if="updatingRequisition"
               unelevated
-              rounded
-              style="margin-left: 80%"
-              class="btn-brand q-mt-xl"
+              size="lg"
+              icon="update"
+              label="actualizar"
+              style="margin-left: 85%"
+              class="q-mt-xl bg-green-5 text-white"
+              @click.prevent="updateRequisition()"
+              :disable="disableSaveRequisitionButton()"
+            />
+            <q-btn
+              v-if="!showingDetails && !updatingRequisition"
+              unelevated
+              size="lg"
+              icon="save"
+              label="guardar"
+              style="margin-left: 85%"
+              class="q-mt-xl bg-green-5 text-white"
               @click.prevent="saveRequisition()"
               :disable="disableSaveRequisitionButton()"
-            >
-              Guardar
-            </q-btn>
+            />
           </q-card-section>
         </q-card>
+        <q-dialog v-model="openNotes" persistent>
+          <NoteRequisitionComponent :current-note="requisitionData.notes" />
+        </q-dialog>
       </q-page>
     </q-page-container>
   </q-layout>
@@ -250,9 +278,14 @@ import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useJobStore } from "src/stores/job";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
+import { useAuthStore } from "src/stores/auth";
+import NoteRequisitionComponent from "src/components/NoteRequisitionComponent.vue";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import Tooltip from "src/components/Tooltip.vue";
 import axios from "axios";
+import router from "src/router";
 
+const useAuth = useAuthStore();
 const useRequisition = useRequisitionStore();
 const useRequisitionDetails = useRequisitionDetailsStore();
 const useJob = useJobStore();
@@ -270,8 +303,14 @@ const travelAvailabilityRequired = ref(false);
 
 const currentPage = ref(2);
 
+const openNotes = ref(false);
+
+const { isAdmin, user } = storeToRefs(useAuth);
+
 //Obtiene los valores de la store de detalles de la requisicion
-const { showingDetails, requisitionData } = storeToRefs(useRequisitionDetails);
+const { showingDetails, requisitionData, updatingRequisition } = storeToRefs(
+  useRequisitionDetails
+);
 const {
   gender,
   civilStatus,
@@ -294,17 +333,21 @@ const {
 } = storeToRefs(useJob);
 
 onMounted(() => {
-  if (!showingDetails.value) {
+  ageRequired.value =
+    ageRequired.value === 0 || !ageRequired.value ? 18 : ageRequired.value;
+  if (!showingDetails.value && !updatingRequisition.value) {
     setDefaultJobValues();
   } else {
     showRequisitionDetails();
   }
 });
 const showRequisitionDetails = () => {
-  console.log(requisitionData.value);
   ageRequired.value = requisitionData.value.age;
   gender.value = requisitionData.value.gender;
   civilStatus.value = requisitionData.value.civilStatus;
+  conditions.value = requisitionData.value.conditions;
+  observations.value = requisitionData.value.observations;
+  experienceRequired.value = requisitionData.value.experience;
   setDefaultJobValues();
 };
 
@@ -317,9 +360,8 @@ const onNumberTypePaste = (event) => {
   }
 };
 
-
 const setDefaultJobValues = () => {
-  if (!showingDetails.value) {
+  if (!showingDetails.value && !updatingRequisition.value) {
     englishLevelRequired.value = englishLevel.value;
     experienceRequired.value = experience.value;
     extraHoursRequired.value = extraHours.value === 1 ? true : false;
@@ -327,7 +369,7 @@ const setDefaultJobValues = () => {
       travelAvailability.value === 1 ? true : false;
     return;
   }
-  
+
   educationRequired.value = requisitionData.value.schooling;
   englishLevelRequired.value = requisitionData.value.englishLevel;
   experienceRequired.value = requisitionData.value.experience;
@@ -337,14 +379,16 @@ const setDefaultJobValues = () => {
     requisitionData.value.travelAvailability === 1 ? true : false;
 };
 
-
 const disableSaveRequisitionButton = () => {
   return (
     applicant.value === "Solicitante" ||
     !gender.value ||
     !civilStatus.value ||
     !motiveCreation.value ||
-    job.value === "Puesto Solicitado"
+    vacancyNumbers.value === 0 ||
+    job.value === "Puesto Solicitado" ||
+    ageRequired.value < 18 ||
+    !ageRequired.value
   );
 };
 
@@ -357,10 +401,15 @@ const saveRequisition = async () => {
     gender,
     applicantId,
   } = storeToRefs(useRequisition);
-  const { jobId, educationRequired, extraHours, travelAvailability, englishLevel } =
-    storeToRefs(useJob);
+  const {
+    jobId,
+    educationRequired,
+    extraHours,
+    travelAvailability,
+    englishLevel,
+  } = storeToRefs(useJob);
 
-  const requisitionData = {
+  const newRequisition = {
     jobId: jobId.value,
     personalId: applicantId.value,
     vacancyNumber: vacancyNumbers.value,
@@ -379,7 +428,7 @@ const saveRequisition = async () => {
   try {
     $q.loading.show();
 
-    const request = await axios.post("/requisicion", requisitionData);
+    const request = await axios.post("/requisicion", newRequisition);
     if (request.status === 201) {
       await fetchLastNumRequisition();
 
@@ -387,14 +436,68 @@ const saveRequisition = async () => {
     } else {
       $q.notify(
         notifyNegative(
-          "Hubo un error al crear la requisicion. Intente de nuevo."
+          "Hubo un error al crear su requisicion. Intente de nuevo."
         )
       );
     }
   } catch (error) {
     $q.notify(
-      notifyNegative("Hubo un error al crear la requisicion. Intente de nuevo.")
+      notifyNegative("Hubo un error al crear su requisicion. Intente de nuevo.")
     );
+  }
+};
+
+const updateRequisition = async () => {
+  const {
+    vacancyNumbers,
+    motiveCreation,
+    ageRequired,
+    civilStatus
+  } = storeToRefs(useRequisition);
+  const {
+    jobId,
+  } = storeToRefs(useJob);
+
+  const updatedRequisition = {
+    numRequisition: requisitionData.value.numRequisition,
+    createdBy: user.value.personalId,
+    jobId: jobId.value,
+    personalId: user.value.personalId,
+    vacancyNumber: vacancyNumbers.value,
+    motiveCreation: motiveCreation.value,
+    age: ageRequired.value,
+    gender: gender.value,
+    civilStatus: civilStatus.value,
+    observations: observations.value,
+    conditions: conditions.value,
+  };
+
+  try {
+    $q.loading.show();
+
+    const request = await axios.put("/requisicion/actualizar", updatedRequisition);
+    if (request.status === 200) {
+      router.replace("/home/historial-requisiciones");
+      
+      $q.notify(
+        notifyPositive("Su requisición ha sido actualizada correctamente.")
+      );
+    } else {
+      $q.notify(
+        notifyNegative(
+          "Hubo un error al actualizar su requisicion. Intente de nuevo."
+        )
+      );
+    }
+  } catch (error) {
+    $q.notify(
+      notifyNegative(
+        "Hubo un error al actualizar su requisicion. Intente de nuevo."
+      )
+    );
+    console.log(error);
+  }finally{
+    $q.loading.hide();
   }
 };
 
@@ -406,7 +509,7 @@ const fetchLastNumRequisition = async () => {
       noRequisition.value = request.data;
       $q.notify(
         notifyPositive(
-          `Su requisicion ha sido guardada con el FOLIO: ${request.data}`
+          `Su requisicion ha sido guardada con el FOLIO: ${request.data}`, 5000
         )
       );
     }
@@ -455,7 +558,6 @@ const resetRequisitionStoreValues = () => {
 
 .rounded-borders {
   border-radius: 15px;
-  background-color: #ffffff;
 }
 
 .requisition-content {
@@ -465,7 +567,6 @@ const resetRequisitionStoreValues = () => {
 }
 
 .schooling-content {
-  background-color: #ffffff;
   height: 100%;
   width: 70%;
   margin-left: 3%;
@@ -473,7 +574,6 @@ const resetRequisitionStoreValues = () => {
 }
 
 .misc-content {
-  background-color: #ffffff;
   height: 100%;
   width: 50%;
   margin-left: 3%;
@@ -484,7 +584,6 @@ const resetRequisitionStoreValues = () => {
 .gender-title {
   font-weight: bold;
   font-size: 16px;
-  color: aliceblue;
   padding-left: 10%;
 }
 
@@ -493,14 +592,9 @@ const resetRequisitionStoreValues = () => {
   margin-left: 3%;
 }
 
-.checkbox {
-  margin-left: 3%;
-}
-
 .title {
   padding-top: 3%;
   font-size: 16px;
-  color: aliceblue;
   padding-left: 3%;
 }
 </style>

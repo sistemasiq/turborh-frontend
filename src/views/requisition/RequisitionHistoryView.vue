@@ -18,9 +18,9 @@
     :rows-per-page-options="[10, 20, 30]"
   >
     <template v-slot:top-right>
-      <q-card-actions horizontal align="center">
+      <q-card-actions>
         <q-radio
-        val="all"
+          val="all"
           unchecked-icon="remove_circle_outline"
           checked-icon="check_circle"
           v-model="filterRadioValue"
@@ -29,11 +29,46 @@
           color="teal-5"
         />
         <q-radio
-        val="authorized"
+          v-if="isAdmin"
+          :val="user.role === 'i' ? 'API' : 'APL'"
           unchecked-icon="remove_circle_outline"
           checked-icon="check_circle"
           v-model="filterRadioValue"
-          label="Autorizadas"
+          label="Autorizadas por este usuario"
+          size="lg"
+          color="teal-5"
+        />
+        <q-radio
+          v-if="isAdmin"
+          :val="user.role === 'i' ? 'APL' : 'API'"
+          unchecked-icon="remove_circle_outline"
+          checked-icon="check_circle"
+          v-model="filterRadioValue"
+          :label="
+            user.role === 'i'
+              ? 'Autorizadas por: Lic. Ramiro Mata'
+              : 'Autorizadas por: Ing. Gerardo García'
+          "
+          size="lg"
+          color="teal-5"
+        />
+        <q-radio
+          v-if="isRh"
+          val="AC"
+          unchecked-icon="remove_circle_outline"
+          checked-icon="check_circle"
+          v-model="filterRadioValue"
+          label="Autorizadas completamente"
+          size="lg"
+          color="teal-5"
+        />
+        <q-radio
+          v-if="isRh"
+          val="P"
+          unchecked-icon="remove_circle_outline"
+          checked-icon="check_circle"
+          v-model="filterRadioValue"
+          label="Publicadas"
           size="lg"
           color="teal-5"
         />
@@ -42,10 +77,21 @@
           checked-icon="check_circle"
           v-model="filterRadioValue"
           label="Sin autorizar"
-          val="unauthorized"
+          val="DC"
           size="lg"
           color="teal-5"
-          class="q-mr-xl"
+          :class="isRh ? 'q-mr-xs' : 'q-mr-lg'"
+        />
+        <q-radio
+          v-if="isRh"
+          unchecked-icon="remove_circle_outline"
+          checked-icon="check_circle"
+          v-model="filterRadioValue"
+          label="Canceladas"
+          val="C"
+          size="lg"
+          color="teal-5"
+          class="q-mr-lg"
         />
         <q-input
           borderless
@@ -65,17 +111,6 @@
             <q-icon name="search" />
           </template>
         </q-input>
-        <!-- TODO: Evaluar si es totalmente necesario este boton -->
-        <!-- <q-btn
-          unelevated
-          class="q-ml-md"
-          style="background-color: #38638a"
-          rounded
-          color="white"
-          flat
-          icon="print"
-          label="Imprimir busqueda"
-        /> -->
       </q-card-actions>
     </template>
 
@@ -95,38 +130,36 @@
         </q-btn>
       </q-td>
     </template>
-    <template v-if="!isAdmin" v-slot:body-cell-authorized="{ row }">
-      <q-td :style="{ color: row.authorized ? 'green' : 'red' }">
-        <div>{{ row.authorized ? "Autorizada" : "Sin autorizar" }}</div>
+    <template
+      v-if="hasPermitRequisitionAuthorization"
+      v-slot:body-cell-authorized="{ row }"
+    >
+      <q-td :class="getDesignStatusRequisition(row).rowLabelColor">
+        <div>{{ getDesignStatusRequisition(row).rowLabel }}</div>
       </q-td>
     </template>
     <template v-slot:body-cell-authorized="{ row }">
       <q-td>
-        <div :class="getDesignAuthorizedLabel(row).textColor">
-          {{ getDesignAuthorizedLabel(row).text }}
+        <div :class="getDesignStatusRequisition(row).rowLabelColor">
+          {{ getDesignStatusRequisition(row).rowLabel }}
         </div>
       </q-td>
     </template>
     <template v-slot:body-cell-details="{ row }">
-      <q-td style="position: absolute; right: 2%; height: 48px">
+      <q-td>
         <q-btn
-          v-if="isAdmin"
+          v-if="hasPermitRequisitionAuthorization"
           class="q-ml-sm"
-          style="width: 70px; height: 16px"
-          :class="
-            disableAuthRequisitionButton(row)
-              ? 'bg-grey'
-              : getDesignStatusRequisition(row).buttonColor
-          "
+          :class="getDesignStatusRequisition(row).buttonColor"
           rounded
           flat
           :icon="getDesignStatusRequisition(row).buttonIcon"
           color="white"
           @click.prevent="openAuthRequisitionDialogue(row)"
-          :disable="disableAuthRequisitionButton(row)"
+          :disable="row.state === 'P' || row.state === 'C'"
         >
           <q-tooltip
-            class="bg-grey text-white text-body2"
+            class="bg-dark text-white text-body2"
             anchor="top middle"
             self="center middle"
             transition-show="slide-up"
@@ -135,20 +168,39 @@
             transition-duration="300"
             :offset="[10, 25]"
           >
-            {{
-              disableAuthRequisitionButton(row)
-                ? "No es posible deautorizar esta requisición"
-                : getDesignStatusRequisition(row).tooltipText
-            }}
+            {{ getDesignStatusRequisition(row).tooltipText }}
           </q-tooltip>
         </q-btn>
         <q-btn
+          v-if="isRh"
           class="q-ml-sm"
-          style="
-            background: rgba(139, 139, 139, 15%);
-            width: 70px;
-            height: 16px;
+          rounded
+          flat
+          icon="publish"
+          color="white"
+          :class="
+            disablePublishRequisitionButton(row) ? 'bg-grey' : 'bg-green-5'
           "
+          :disable="disablePublishRequisitionButton(row)"
+          @click.prevent="openPublishRequisitionDialogue(row)"
+        >
+          <Tooltip :text="statePublishButtonTooltip[row.state]" />
+        </q-btn>
+        <q-btn
+          v-if="isBoss && row.state === 'DC'"
+          class="q-ml-sm bg-grey-4"
+          rounded
+          flat
+          color="black"
+          icon="edit"
+          @click.prevent="
+            showDetails(row.numRequisition, row.staffName, row.jobId, true)
+          "
+        >
+          <Tooltip :text="'Editar requisición'" />
+        </q-btn>
+        <q-btn
+          class="q-ml-sm bg-grey-4"
           rounded
           flat
           color="black"
@@ -157,16 +209,27 @@
             showDetails(row.numRequisition, row.staffName, row.jobId)
           "
         >
-        <Tooltip :text="'Ver detalles'" />
+          <Tooltip :text="'Ver detalles'" />
         </q-btn>
         <q-btn
           @click.prevent="createReport(row.numRequisition)"
           unelevated
           rounded
-          class="text-capitalize"
+          class="text-capitalize bg-grey-4"
           icon="picture_as_pdf"
         >
           <Tooltip :text="'Generar reporte en PDF'" />
+        </q-btn>
+        <q-btn
+          v-if="isRh && row.state != 'C'"
+          class="q-ml-sm bg-red-5"
+          rounded
+          flat
+          icon="delete"
+          color="white"
+          @click.prevent="openCancelRequisitionDialogue(row)"
+        >
+          <Tooltip :text="'Cancelar requisición'" />
         </q-btn>
       </q-td>
     </template>
@@ -184,11 +247,56 @@
         <q-btn
           rounded
           flat
-          :label="getDesignStatusRequisition(selectedRequisition).buttonText"
+          :label="
+            getDesignStatusRequisition(selectedRequisition).dialogueButtonText
+          "
           :class="getDesignStatusRequisition(selectedRequisition).buttonColor"
           v-close-popup
           class="text-white bg-red"
           @click.prevent="updateRequisitionAuthorization(selectedRequisition)"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+  <q-dialog v-model="showPublishRequisitionDialogue" persistent>
+    <q-card rounded style="border-radius: 30px">
+      <q-card-section class="row items-center">
+        <span class="q-ml-sm text-h6 text-weight-regular">
+          {{ getDesignStatusRequisition(selectedRequisition).dialogueText }}
+        </span>
+      </q-card-section>
+
+      <q-card-actions align="center">
+        <q-btn flat label="Cancelar" color="primary" v-close-popup />
+        <q-btn
+          rounded
+          flat
+          label="OK"
+          :class="getDesignStatusRequisition(selectedRequisition).buttonColor"
+          v-close-popup
+          class="text-white bg-red"
+          @click.prevent="updateRequisitionState(selectedRequisition, 'P')"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+  <q-dialog v-model="showCancelRequisitionDialogue" persistent>
+    <q-card rounded style="border-radius: 30px">
+      <q-card-section class="row items-center">
+        <span class="q-ml-sm text-h6 text-weight-regular">
+          ¿Quieres cancelar esta requisición?
+        </span>
+      </q-card-section>
+
+      <q-card-actions align="center">
+        <q-btn flat label="Cancelar" color="primary" v-close-popup />
+        <q-btn
+          rounded
+          flat
+          label="OK"
+          v-close-popup
+          class="text-white bg-red-5"
+          @click.prevent="disableRequisition(selectedRequisition)"
         />
       </q-card-actions>
     </q-card>
@@ -220,10 +328,12 @@ import { useAuthStore } from "src/stores/auth";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 import { getAxiosBaseUrl } from "src/services/profiles";
+import { useLocalStorageStore } from "src/stores/localStorage";
 import Tooltip from "src/components/Tooltip.vue";
 
 import axios from "axios";
 
+const useLocalStorage = useLocalStorageStore();
 const useRequisitionDetails = useRequisitionDetailsStore();
 const router = useRouter();
 const useAuth = useAuthStore();
@@ -240,77 +350,188 @@ const reportViewLink = ref(reportSrc.value);
 const showReport = ref(false);
 
 const showAuthRequisitionDialogue = ref(false);
+const showPublishRequisitionDialogue = ref(false);
+const showCancelRequisitionDialogue = ref(false);
 const selectedRequisition = ref();
 
-const { numRequisitionDetails } = storeToRefs(useRequisitionDetails);
-const { isAdmin, isRh, user } = storeToRefs(useAuth);
+const {
+  isAdmin,
+  isRh,
+  user,
+  hasPermitRequisitionAuthorization,
+  isIng,
+  isLic,
+  isBoss,
+} = storeToRefs(useAuth);
+
+const {
+  requisitionData,
+  showingDetails,
+  numRequisitionDetails,
+  applicantDetails,
+  jobDetails,
+  updatingRequisition
+} = storeToRefs(useRequisitionDetails);
 
 const filterRadioValue = ref("all");
+
+const stateRowLabels = {
+  DC: "Sin autorizar",
+  C: "CANCELADA",
+  API: "Autorizada por: Ing. Gerardo García",
+  APL: "Autorizada por: Lic. Ramiro Mata",
+  AC: "Autorizada completamente",
+  P: "Publicada",
+};
+
+const stateRowLabelsColors = {
+  DC: "text-red-5",
+  C: "text-red-10",
+  API: "text-green-10",
+  APL: "text-green-10",
+  AC: "text-green-5",
+  P: "text-cyan-5",
+};
+
+const stateButtonColors = {
+  DC: "bg-green",
+  C: "bg-grey-5",
+  API: isIng.value ? "bg-red-5" : "bg-green-10",
+  APL: isLic.value ? "bg-red-5" : "bg-green-10",
+  AC: isRh.value ? "bg-green-5" : "bg-red-5",
+  P: "bg-grey-5",
+};
+
+const stateButtonIcons = {
+  DC: "done",
+  C: "delete",
+  API: isIng.value ? "remove" : "done",
+  APL: isLic.value ? "remove" : "done",
+  AC: "remove",
+  P: "verified",
+};
+
+const stateButtonTooltipText = {
+  DC: "Autorizar requisición",
+  C: "Requisición cancelada",
+  API: isIng.value ? "Desautorizar requisición" : "Autorizar requisición",
+  APL: isLic.value ? "Desautorizar requisición" : "Autorizar requisición",
+  AC: "Desautorizar requisición",
+  P: "Esta requisición ya ha sido publicada",
+};
+
+const stateDialogText = {
+  DC: "¿Quieres autorizar esta requisición?",
+  C: "Requisición cancelada",
+  API: isIng.value
+    ? "¿Quieres desautorizar esta requisición?"
+    : "¿Quieres autorizar esta requisición?",
+  APL: isLic.value
+    ? "¿Quieres desautorizar esta requisición?"
+    : "¿Quieres autorizar esta requisición?",
+  AC: isRh.value
+    ? "¿Quieres publicar esta requisición?"
+    : "¿Quieres desautorizar esta requisición?",
+  P: "¿Quieres cancelar esta requisición?",
+};
+
+const statePublishButtonTooltip = {
+  DC: "No es posible publicar esta requisición",
+  API: "No es posible publicar esta requisición",
+  APL: "No es posible publicar esta requisición",
+  AC: "Publicar requisición",
+  P: "Esta requisición ya ha sido publicada",
+};
+
+const stateChangeNotifyText = {
+  DC: "Requisición desautorizada correctamente",
+  API: "Requisición autorizada correctamente",
+  APL: "Requisición autorizada correctamente",
+  AC: "Requisición autorizada correctamente",
+  P: "Requisición publicada correctamente",
+};
+
+const disablePublishRequisitionButton = (item) => {
+  return !isRh || item.state != "AC";
+};
 
 const openAuthRequisitionDialogue = (row) => {
   showAuthRequisitionDialogue.value = true;
   selectedRequisition.value = row;
 };
 
+const openPublishRequisitionDialogue = (row) => {
+  showPublishRequisitionDialogue.value = true;
+  selectedRequisition.value = row;
+};
+
+const openCancelRequisitionDialogue = (row) => {
+  showCancelRequisitionDialogue.value = true;
+  selectedRequisition.value = row;
+};
+
 const filteredRequisitions = computed(() => {
   return totalRequisitions.value.filter((item) => {
-    return isAdmin.value ? filterItemAdmin(item) : filterItem(item);
+    return filterItem(item);
   });
 });
 
 const filterItem = (item) => {
-  if (filterRadioValue.value === "authorized") {
-    return item.authorized === 1;
-  } else if (filterRadioValue.value === "unauthorized") {
-    return item.authorized === 0;
-  } else if (filterRadioValue.value === "all") {
+  if (filterRadioValue.value === "all") {
     return item;
   }
-};
-
-const filterItemAdmin = (item) => {
-  if (filterRadioValue.value === "authorized") {
-    return user.value.role === "i"
-      ? item.authorizedIng === 1
-      : item.authorizedLic === 1;
-  } else if (filterRadioValue.value === "unauthorized") {
-    return user.value.role === "i"
-      ? item.authorizedIng === 0
-      : item.authorizedLic === 0;
-  } else if (filterRadioValue.value === "all") {
-    return item;
-  }
+  return item.state == filterRadioValue.value;
 };
 
 const updateRequisitionAuthorization = async (requisition) => {
-  const adminUser = user.value.role === "i" ? "ing" : "lic";
-  const currentAuthState =
-    user.value.role === "i"
-      ? requisition.authorizedIng
-      : requisition.authorizedLic;
-  const newAuthState = currentAuthState === 1 ? 0 : 1;
+  const isIngUpdating = isIng.value ? true : false;
 
   try {
     $q.loading.show();
     const request = await axios.put(
-      `/requisicion/autorizar/${adminUser}/${newAuthState}/num/${requisition.numRequisition}`
+      `/requisicion/autorizar/${requisition.numRequisition}/hechoPorIng/${isIngUpdating}`
     );
 
     if (request.status === 201) {
-      requisition.authorizedIng =
-        user.value.role === "i" ? newAuthState : currentAuthState;
-      requisition.authorizedLic =
-        user.value.role === "l" ? newAuthState : currentAuthState;
-      requisition.authorized =
-        requisition.authorizedIng === 1 && requisition.authorizedLic === 1
-          ? 1
-          : 0;
+      requisition.state = request.data;
       updateSelectedRequisition(requisition);
-      const message =
-        newAuthState === 1
-          ? `La requisicion ${requisition.numRequisition} ha sido autorizada.`
-          : `La requisicion ${requisition.numRequisition} ha sido desautorizada.`;
-      $q.notify(notifyPositive(message));
+      $q.notify(notifyPositive("Cambio de estado correctamente"));
+    }
+  } catch (error) {
+  } finally {
+    $q.loading.hide();
+  }
+};
+
+const updateRequisitionState = async (requisition, newState) => {
+  try {
+    $q.loading.show();
+    const request = await axios.put(
+      `/requisicion/estado/${newState}/num/${requisition.numRequisition}`
+    );
+
+    if (request.status === 201) {
+      requisition.state = newState;
+      updateSelectedRequisition(requisition);
+      $q.notify(notifyPositive(stateChangeNotifyText[newState]));
+    }
+  } catch (error) {
+  } finally {
+    $q.loading.hide();
+  }
+};
+
+const disableRequisition = async (requisition) => {
+  try {
+    $q.loading.show();
+    const request = await axios.put(
+      `/requisicion/desactivar/${requisition.numRequisition}`
+    );
+
+    if (request.status === 200) {
+      requisition.state = "C";
+      updateSelectedRequisition(requisition);
+      $q.notify(notifyPositive("Cambio de estado correctamente"));
     }
   } catch (error) {
   } finally {
@@ -322,20 +543,15 @@ onMounted(() => {
   fetchRequisitions();
 });
 
-const getDesignStatusRequisition = (row) => {
-  const active =
-    user.value.role === "i" ? row.authorizedIng : row.authorizedLic;
-
+const getDesignStatusRequisition = (item) => {
   return {
-    tooltipText:
-      active === 1 ? "Desautorizar requisición" : "Autorizar requisición",
-    buttonColor: active === 1 ? "bg-red-5" : "bg-green-5",
-    buttonIcon: active === 1 ? "remove" : "done",
-    dialogueText:
-      active === 1
-        ? "¿Quieres desautorizar esta requisición?"
-        : "¿Quieres autorizar esta requisición?",
-    buttonText: active === 1 ? "Remover" : "Autorizar",
+    tooltipText: stateButtonTooltipText[item.state],
+    buttonColor: stateButtonColors[item.state],
+    buttonIcon: stateButtonIcons[item.state],
+    dialogueText: stateDialogText[item.state],
+    dialogueButtonText: "OK",
+    rowLabel: stateRowLabels[item.state] || "Estado desconocido",
+    rowLabelColor: stateRowLabelsColors[item.state] || "bg-grey",
   };
 };
 
@@ -399,36 +615,30 @@ const columns = [
   },
 ];
 
-const getDesignAuthorizedLabel = (row) => {
-  const active =
-    user.value.role === "i" ? row.authorizedIng : row.authorizedLic;
-
-  return {
-    textColor: active === 1 ? "text-green" : "text-red",
-    text: active === 1 ? "Autorizada" : "Sin autorizar",
-  };
-};
-
 const showApplicants = (requisitionId) => {
   numRequisitionDetails.value = requisitionId;
   if (!numRequisitionDetails.value) {
     return;
   }
+
+  useLocalStorage.save("numRequisitionDetails", numRequisitionDetails.value);
   router.push("historial-requisiciones-solicitudes");
 };
 
-const showDetails = async (numRequisition, applicantName, jobId) => {
-  const {
-    requisitionData,
-    showingDetails,
-    numRequisitionDetails,
-    applicantDetails,
-    jobDetails,
-  } = storeToRefs(useRequisitionDetails);
+const showDetails = async (
+  numRequisition,
+  applicantName,
+  jobId,
+  isUpdating = false
+) => {
   numRequisitionDetails.value = numRequisition;
   applicantDetails.value = applicantName;
   jobDetails.value = jobId;
-  showingDetails.value = true;
+
+  showingDetails.value = isUpdating ? false : true;
+  updatingRequisition.value = isUpdating;
+
+
 
   try {
     const request = await axios.get(
@@ -437,6 +647,7 @@ const showDetails = async (numRequisition, applicantName, jobId) => {
 
     if (request.status === 200) {
       requisitionData.value = request.data;
+      console.log(request.data);
     }
   } catch (error) {
     console.log("Error fetching requisition details " + error);
@@ -449,7 +660,12 @@ const fetchRequisitions = async () => {
   try {
     loading.value = true;
 
-    const request = await axios.get(`/requisicion/todo`);
+    const endpoint =
+      isAdmin.value || isRh.value
+        ? `/requisicion/todo`
+        : `/requisicion/personal/${user.value.personalId}`;
+
+    const request = await axios.get(endpoint);
 
     if (request.status === 200) {
       totalRequisitions.value = request.data;
@@ -473,12 +689,13 @@ const updateSelectedRequisition = (updatedRequisition) => {
 
 const createReport = async (numRequisition) => {
   try {
-    $q.loading.show({message: "Generando reporte..."});
-    const endpoint = `requisicion/reporte?numRequisition=${numRequisition}&endpointURL=${getAxiosBaseUrl()}`
-    console.log("endpoint "+endpoint)
-    const request = await axios.get(endpoint, {
-      responseType: "arraybuffer",
-    });
+    $q.loading.show({ message: "Generando reporte..." });
+    const request = await axios.get(
+      `reporte/requisicion?numRequisition=${numRequisition}&endpointURL=${getAxiosBaseUrl()}`,
+      {
+        responseType: "arraybuffer",
+      }
+    );
 
     if (request.status === 200) {
       const blob = new Blob([request.data], { type: "application/pdf" });
@@ -491,60 +708,4 @@ const createReport = async (numRequisition) => {
     $q.loading.hide();
   }
 };
-
-const disableAuthRequisitionButton = (row) => {
-  return row.authorized === 1 && row.candidatesNumber > 0 ? true : false;
-};
 </script>
-
-<style scoped>
-.rounded-borders {
-  border-radius: 15px;
-  background-color: #ffffff;
-}
-
-.button.details {
-  background-color: #38638a;
-  color: #ffffff;
-}
-
-.button.print {
-  background-color: #7ee7e7;
-  color: #38638a;
-  width: 200px;
-  left: 85%;
-  position: absolute;
-}
-
-.filter {
-  height: 100%;
-  margin-left: 18%;
-  margin-top: 2%;
-  width: 95%;
-  padding-left: 10%;
-  color: #ffffff;
-}
-
-.text-requests {
-  font-size: 24px;
-  background-color: #f1f6fc;
-  border-radius: 100px;
-  color: #fd999a;
-  width: 50px;
-  margin-left: 20%;
-}
-
-.history-item {
-  margin: 1%;
-  flex: 1;
-}
-
-.history-item p {
-  font-size: 20px;
-}
-
-.filter-icon {
-  margin-left: 0.5%;
-  margin-bottom: 0.1%;
-}
-</style>

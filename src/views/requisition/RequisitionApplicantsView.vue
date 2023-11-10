@@ -161,8 +161,17 @@ const showReport = ref(false);
 const createReportWithNotes = ref(false);
 
 onMounted(() => {
+  loadLocalStore();
   fetchApplicants();
 });
+
+const loadLocalStore = () => {
+  const numRequisitionStored = useLocalStorage.load("numRequisitionDetails");
+
+  if(numRequisitionStored){
+    numRequisitionDetails.value = numRequisitionStored;
+  }
+}
 
 const fetchApplicants = async () => {
   if (!numRequisitionDetails.value) return;
@@ -207,7 +216,7 @@ const createReport = async (applicationId) => {
   try {
     $q.loading.show({ message: "Generando reporte..." });
     const request = await axios.get(
-      `solicitud/reporte?id=${applicationId}&addNotes=${
+      `reporte/solicitud?id=${applicationId}&addNotes=${
         createReportWithNotes.value
       }&endpointURL=${getAxiosBaseUrl()}`,
       {
@@ -229,6 +238,8 @@ const createReport = async (applicationId) => {
 };
 
 const addNotes = (applicationId) => {
+  console.log("Add notes to application "+applicationId);
+  
   fetchUserApplication(applicationId);
   viewingApplication.value = true;
 };
@@ -243,7 +254,8 @@ const fetchUserApplication = async (applicationId) => {
       useLocalStorage.save("savedApplication", savedApplication.value);
 
       await fetchUserApplicationNotes(applicationId);
-
+      useLocalStorage.save("addingNotesApplicationId", applicationId);
+      useLocalStorage.save("viewingApplication", viewingApplication.value);
       router.push("/userHome/solicitud-1");
     }
   } catch (error) {

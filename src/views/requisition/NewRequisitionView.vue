@@ -3,22 +3,34 @@
         <q-page-container>
             <q-page>
                 <q-card flat bordered class="rounded-borders">
-                    <q-card-section style="height: 100%;">
-                        <p class="text-h4" style="font-size: 25px;">{{ showingDetails ? "Detalles" : "Perfil Requerido" }}</p>
+                    <q-card-section class="row items-center">
+                        <p class="text-h6">{{ showingDetails ? "Detalles" : "Perfil Requerido" }}</p>
+                        <q-btn
+                            v-if="isAdmin && showingDetails"
+                            class="bg-grey-4"
+                            rounded
+                            flat
+                            color="black"
+                            icon="edit"
+                            style="margin-left: 90%;"
+                            @click.prevent="openNotes = !openNotes"
+                        >
+                          <Tooltip :text="'Añadir comentarios'" />
+                        </q-btn>
                     </q-card-section>
                     <q-card-section class="requisition-content">
                         <div class="pagination">
                             <router-link :to="{ path: '/home/nueva-requisicion-' + currentPage }">
                                 <q-pagination v-model="currentPage" color="cyan" :max="2" :max-pages="2" boundary-numbers />
                             </router-link>
-
+                            
                         </div>
                         <div class="requisition-dropdown row items-center">
                             <q-input v-if="showingDetails" v-model="numRequisitionDetails" dark outlined color="cyan-1" label="No Requisición" label-color="white"
                                 style="margin-left: 3%; width:10%;" :readonly="showingDetails">
                             </q-input>
                             <q-btn-dropdown style="height: 55px;" icon="search" :label="selectedApplicant" no-ripple
-                            class="transparent q-ml-xl" outline text-color="white" :disable="showingDetails">
+                            class="transparent q-ml-xl" outline text-color="white" :disable="showingDetails || !isRh">
                                 <q-list>
                                     <q-item v-for="(item, index) in applicants" :key="index" clickable v-close-popup
                                         @click.prevent="handleSelectedApplicant(item)">
@@ -108,23 +120,27 @@
 
                     </q-card-section>
 
+                    <UpdateRequisitionButton/>
 
                 </q-card>
+                <q-dialog v-model="openNotes" persistent>
+                   <NoteRequisitionComponent :current-note="requisitionData.notes"/>
+                </q-dialog>
             </q-page>
         </q-page-container>
     </q-layout>
 </template>
 
 <script setup>
-
-import { ref, onMounted} from 'vue';
+import Tooltip from 'src/components/Tooltip.vue';
+import { ref, onMounted, computed} from 'vue';
 import { useRequisitionStore } from 'src/stores/requisition';
 import { useRequisitionDetailsStore } from 'src/stores/requisitionDetails';
 import { useAuthStore } from 'src/stores/auth'
 import { useJobStore } from 'src/stores/job';
 import { storeToRefs } from 'pinia';
 import axios from "axios";
-
+import NoteRequisitionComponent from 'src/components/NoteRequisitionComponent.vue';
 const useRequisition = useRequisitionStore();
 const useRequisitionDetails = useRequisitionDetailsStore();
 const useAuth = useAuthStore();
@@ -144,15 +160,20 @@ const currentPage = ref(1);
 
 const isFetchingJobs = ref(false);
 
+const openNotes = ref(false);
 
-const {  showingDetails, requisitionData, numRequisitionDetails, applicantDetails, jobDetails } = storeToRefs(useRequisitionDetails);
+const note = ref("");
+
+
+const {  showingDetails, requisitionData, numRequisitionDetails, applicantDetails, jobDetails, updatingRequisition } = storeToRefs(useRequisitionDetails);
 const {  applicantId, applicant, job, vacancyNumbers, motiveCreation } = storeToRefs(useRequisition);
-const { user } = storeToRefs(useAuth);
+const { user, isRh, isAdmin } = storeToRefs(useAuth);
 const { jobId, jobFunctions, jobSkills, englishLevel, educationRequired, experience, extraHours, travelAvailability } = storeToRefs(useJob);
 
-onMounted(() => {
 
-    if(!showingDetails.value){
+onMounted(() => {
+    vacancyNumbers.value = vacancyNumbers.value === 0 ? 1 : vacancyNumbers.value;
+    if(!showingDetails.value && !updatingRequisition.value){
         newCreation();
     }else{
         showRequisitionDetails();
@@ -161,11 +182,19 @@ onMounted(() => {
 })
 
 const showRequisitionDetails = () => {  
-
+    
+    if(updatingRequisition.value){
+        fetchJobs();
+        fetchJobData(requisitionData.value.jobId);
+    }
     selectedApplicant.value = applicantDetails.value;
     motiveCreation.value = requisitionData.value.motiveCreation;
+    vacancyNumbers.value = requisitionData.value.vacancyNumber;
+    note.value = requisitionData.value.notes;
+    console.log(requisitionData.value);
     fetchJobDataDetails()
 }
+
 
 const newCreation = () => {
     selectedApplicant.value = applicant.value;
@@ -225,12 +254,11 @@ const fetchJobs = async () => {
     }
 }
 
-const fetchJobData = async () => {
+const fetchJobData = async (id) => {
 
     try {
-        const request = await axios.get(`/puestos/buscar/${selectedJob.value.id}`);
+        const request = await axios.get(`/puestos/buscar/${id}`);
         if (request.status === 200) {
-            console.log(request.data)
             jobId.value = request.data.id;
             jobFunctions.value = request.data.functions;
             jobSkills.value = request.data.skills;
@@ -316,7 +344,7 @@ const handleSelectedJob = (selectedItem) => {
     selectedJob.value = selectedItem;
     job.value = selectedJob.value;
 
-    fetchJobData();
+    fetchJobData(selectedJob.value.id);
 }
 
 

@@ -183,8 +183,8 @@ const fetchVacants = async () => {
       message: "Cargando vacantes...",
       position: "bottom",
     });
-
-    const request = await axios.get(`/requisicion/autorizada`);
+    
+    const request = await axios.get(`/requisicion/estado/P`);
 
     if (request.status === 200) {
       currentVacants.value = request.data;
@@ -199,7 +199,6 @@ const fetchVacants = async () => {
 };
 
 const fetchJobDetails = async (jobId, itemId) => {
-  console.log("OBTENIENDO DATOS EL PUESTO CON ID: "+jobId);
   showJobDetails.value = true;
   currentRequisitionId.value = itemId;
   jobDetails.value = null;

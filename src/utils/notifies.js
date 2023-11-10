@@ -5,7 +5,8 @@ export const notifyPositive = (message, duration = 2000) => {
     timeout: duration,
     progress: true,
     html: true,
-    position: "top"
+    position: "top",
+    actions: duration > 2000 ? [{ label: "CERRAR", color: "yellow" }] : ""
   };
 };
 

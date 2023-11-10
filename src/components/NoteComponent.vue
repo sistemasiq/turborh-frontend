@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useNotesStore } from "src/stores/notes";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
@@ -43,12 +43,13 @@ const useRequest = useRequestUser();
 
 const props = defineProps(["closeNote", "currentRoute"]);
 const note = ref("");
+const previousNote = ref("");
 
-onUnmounted(() => {
-  $q.notify(
-      notifyPositive("Nota guardada.", 600)
-    );
-})
+onMounted(() => {
+  previousNote.value = note.value;
+});
+
+
 
 const {
   notesFrontPage,
@@ -100,6 +101,9 @@ const saveNote = async (currentRoute) => {
   if (!noteStore) return;
   noteStore.value = note.value;
   
+  if(note.value === previousNote.value)
+  return;
+  
   try {
     const notes = {
       applicationId: savedApplication.value.solicitud_id,
@@ -119,7 +123,7 @@ const saveNote = async (currentRoute) => {
     const request = await axios.put("/solicitud/notas", notes);
 
     if (request.status === 201) {
-      
+      $q.notify(notifyPositive("Nota guardada.", 600));
     }
   } catch (error) {
     $q.notify(

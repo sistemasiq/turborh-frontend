@@ -196,7 +196,7 @@
         dense
         icon="arrow_back"
         class="logout-btn z-top"
-        :class="isRh ? 'q-ml-md' : 'q-ml-xs'"
+        :class="isRh ? 'q-ml-md absolute-bottom q-mb-xl' : 'q-ml-xs'"
         label="Regresar"
         @click.prevent="goToRequisitionApplicants"
         v-if="isRh"
@@ -308,11 +308,6 @@ onMounted(() => {
   loadLocalStorage();
 });
 
-const getTooltipText = computed(() => {
-  console.log("Active application: " + activeApplication)
-  return activeApplication ? 'Elimina tu solicitud de trabajo' : 'Activa tu solicitud de trabajo';
-})
-
 const loadLocalStorage = () => {
   const userStored = useLocalStorage.load("user");
   const loggedStored = useLocalStorage.load("logged");
@@ -412,6 +407,8 @@ const onUpdateApplication = () => {
 
   updatingApplication.value = true;
   viewingApplication.value = false;
+  useLocalStorage.save("updatingApplication", updatingApplication.value);
+  useLocalStorage.save("viewingApplication", viewingApplication.value);
 };
 
 const onViewApplication = () => {

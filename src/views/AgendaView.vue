@@ -1398,7 +1398,7 @@ const getAppointmentsCatalog = async () => {
 
     if (request.status === 200) {
       events.value = request.data;
-      console.log("LISTA DE CITAS: ", request.data);
+      console.log("TABLA DE CITAS: ", request.data);
       loading.value = false;
       disableCheckbox.value = false;
     }
