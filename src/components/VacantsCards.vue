@@ -188,9 +188,11 @@ const fetchVacants = async () => {
 
     if (request.status === 200) {
       currentVacants.value = request.data;
+      console.log(request.data);
       notifyRequisitions();
-      if(!request.data){
+      if(request.data.length === 0){
         router.replace("/userHome/sin-vacantes")
+        
       }
     } 
   } catch (error) {

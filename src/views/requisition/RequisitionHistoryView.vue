@@ -172,23 +172,19 @@
           </q-tooltip>
         </q-btn>
         <q-btn
-          v-if="isRh"
-          class="q-ml-sm"
+          class="q-ml-sm bg-green-5"
           rounded
           flat
           icon="publish"
           color="white"
-          :class="
-            disablePublishRequisitionButton(row) ? 'bg-grey' : 'bg-green-5'
-          "
-          :disable="disablePublishRequisitionButton(row)"
+          :style="disablePublishRequisitionButton(row) ? 'visibility:hidden;' : ''"
           @click.prevent="openPublishRequisitionDialogue(row)"
         >
           <Tooltip :text="statePublishButtonTooltip[row.state]" />
         </q-btn>
         <q-btn
-          v-if="isBoss && row.state === 'DC'"
-          class="q-ml-sm bg-grey-4"
+          v-if="(isBoss || isRh) && row.state === 'DC'"
+          class="q-ml-sm"
           rounded
           flat
           color="black"
@@ -196,8 +192,10 @@
           @click.prevent="
             showDetails(row.numRequisition, row.staffName, row.jobId, true)
           "
+          :class="row.state !== 'DC' ? 'bg-grey' : 'bg-grey-4'"
+          :disable="row.state !== 'DC'"
         >
-          <Tooltip :text="'Editar requisición'" />
+          <Tooltip v-if="row.state !== 'C'" :text="'Editar requisición'" />
         </q-btn>
         <q-btn
           class="q-ml-sm bg-grey-4"
@@ -221,13 +219,14 @@
           <Tooltip :text="'Generar reporte en PDF'" />
         </q-btn>
         <q-btn
-          v-if="isRh && row.state != 'C'"
-          class="q-ml-sm bg-red-5"
+          class="q-ml-sm"
           rounded
           flat
           icon="delete"
           color="white"
           @click.prevent="openCancelRequisitionDialogue(row)"
+          :style = "row.state === 'C' ? 'visibility:hidden' : ''"
+          :class="row.state === 'C' ? 'bg-grey' : 'bg-red-5'"
         >
           <Tooltip :text="'Cancelar requisición'" />
         </q-btn>
@@ -297,6 +296,7 @@
           v-close-popup
           class="text-white bg-red-5"
           @click.prevent="disableRequisition(selectedRequisition)"
+          :disable="isFetchingCandidates"
         />
       </q-card-actions>
     </q-card>
@@ -329,6 +329,7 @@ import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 import { getAxiosBaseUrl } from "src/services/profiles";
 import { useLocalStorageStore } from "src/stores/localStorage";
+import { sendEmail, canceledRequisition } from "src/services/mail";
 import Tooltip from "src/components/Tooltip.vue";
 
 import axios from "axios";
@@ -353,6 +354,8 @@ const showAuthRequisitionDialogue = ref(false);
 const showPublishRequisitionDialogue = ref(false);
 const showCancelRequisitionDialogue = ref(false);
 const selectedRequisition = ref();
+const selectedRequisitionCandidates = ref([]);
+const isFetchingCandidates = ref(false);
 
 const {
   isAdmin,
@@ -451,6 +454,7 @@ const stateChangeNotifyText = {
   P: "Requisición publicada correctamente",
 };
 
+
 const disablePublishRequisitionButton = (item) => {
   return !isRh || item.state != "AC";
 };
@@ -468,7 +472,40 @@ const openPublishRequisitionDialogue = (row) => {
 const openCancelRequisitionDialogue = (row) => {
   showCancelRequisitionDialogue.value = true;
   selectedRequisition.value = row;
+
+  if(selectedRequisition.value.candidatesNumber > 0) {
+    onCancelFetchApplicants();
+  }
+
 };
+
+const onCancelSendEmailToCandidates = async () => {
+  const promises = selectedRequisitionCandidates.value.map(candidate => {
+    // Assuming `canceledRequisition` function constructs the necessary data for each candidate
+    const emailData = canceledRequisition(candidate.email, candidate.name, candidate.jobName);
+
+    // Call sendEmail for each candidate
+    return sendEmail("canceled-appointment", emailData);
+  });
+
+  try {
+    // Using Promise.all to send all emails concurrently
+    const results = await Promise.all(promises);
+
+    // Process the results (if necessary)
+    const successCount = results.filter(result => result).length;
+    const failureCount = results.length - successCount;
+    console.log(`Emails sent successfully: ${successCount}, Failures: ${failureCount}`);
+    $q.notify(notifyPositive("Los candidatos han sido notificados"));
+
+  } catch (error) {
+    console.error("Error sending emails:", error);
+    $q.notify(notifyNegative("Error al notificar a los candidatos"));
+    // Handle errors, possibly by notifying the user
+  }
+};
+
+
 
 const filteredRequisitions = computed(() => {
   return totalRequisitions.value.filter((item) => {
@@ -531,9 +568,17 @@ const disableRequisition = async (requisition) => {
     if (request.status === 200) {
       requisition.state = "C";
       updateSelectedRequisition(requisition);
+      
+      if(selectedRequisitionCandidates.value.length > 0){
+        await onCancelSendEmailToCandidates();
+      }
+
+      
       $q.notify(notifyPositive("Cambio de estado correctamente"));
     }
   } catch (error) {
+    console.log(error);
+    $q.notify(notifyNegative("Error al cambiar el estado de la requisición"));
   } finally {
     $q.loading.hide();
   }
@@ -614,6 +659,24 @@ const columns = [
     field: "details",
   },
 ];
+
+const onCancelFetchApplicants = async () => {
+  try {
+    isFetchingCandidates.value = true;
+    const request = await axios.get(
+      `/candidatos/${selectedRequisition.value.id}`
+    );
+
+    if (request.status === 200) {
+      selectedRequisitionCandidates.value = request.data;
+      console.log(selectedRequisitionCandidates.value)
+    }
+  } catch (error) {
+    console.log(`Error fetching applicants ${error}`);
+  } finally {
+    isFetchingCandidates.value = false;
+  }
+};
 
 const showApplicants = (requisitionId) => {
   numRequisitionDetails.value = requisitionId;

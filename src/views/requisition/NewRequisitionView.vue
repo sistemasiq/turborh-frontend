@@ -30,7 +30,7 @@
                                 style="margin-left: 3%; width:10%;" :readonly="showingDetails">
                             </q-input>
                             <q-btn-dropdown style="height: 55px;" icon="search" :label="selectedApplicant" no-ripple
-                            class="transparent q-ml-xl" outline text-color="white" :disable="showingDetails || !isRh">
+                            class="transparent q-ml-xl" outline text-color="white" :disable="showingDetails || !isRh || (updatingRequisition && isRh)">
                                 <q-list>
                                     <q-item v-for="(item, index) in applicants" :key="index" clickable v-close-popup
                                         @click.prevent="handleSelectedApplicant(item)">
@@ -120,10 +120,8 @@
 
                     </q-card-section>
 
-                    <UpdateRequisitionButton/>
-
                 </q-card>
-                <q-dialog v-model="openNotes" persistent>
+                <q-dialog v-model="openNotes">
                    <NoteRequisitionComponent :current-note="requisitionData.notes"/>
                 </q-dialog>
             </q-page>

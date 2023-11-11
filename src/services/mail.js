@@ -27,6 +27,18 @@ export const canceledAppointment = {
   emailType: "not required",
 };
 
+export const canceledRequisition = (emailToSend, recipientName, jobName) => {
+  return {
+    to: emailToSend,
+    name: recipientName,
+    subject: "Postulacion cancelada",
+    firstText: `Lamentamos informarte que hemos tenido que cancelar su postulación al puesto '${jobName}'. Sin embargo, estamos trabajando en la reprogramación y te contactaremos pronto para informarte sobre nuevas vacantes. Apreciamos tu comprensión y paciencia.`,
+    lastText:
+      "Agradecemos tu paciencia y compromiso con Turbomaquinas S.A de C.V.",
+    emailType: "not required",
+  };
+};
+
 export const finishedAppointment = {
   subject: "Entrevista Completada!",
   firstText:

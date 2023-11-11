@@ -263,7 +263,7 @@
             />
           </q-card-section>
         </q-card>
-        <q-dialog v-model="openNotes" persistent>
+        <q-dialog v-model="openNotes">
           <NoteRequisitionComponent :current-note="requisitionData.notes" />
         </q-dialog>
       </q-page>
@@ -462,7 +462,6 @@ const updateRequisition = async () => {
     numRequisition: requisitionData.value.numRequisition,
     createdBy: user.value.personalId,
     jobId: jobId.value,
-    personalId: user.value.personalId,
     vacancyNumber: vacancyNumbers.value,
     motiveCreation: motiveCreation.value,
     age: ageRequired.value,
@@ -478,7 +477,6 @@ const updateRequisition = async () => {
     const request = await axios.put("/requisicion/actualizar", updatedRequisition);
     if (request.status === 200) {
       router.replace("/home/historial-requisiciones");
-      
       $q.notify(
         notifyPositive("Su requisición ha sido actualizada correctamente.")
       );
