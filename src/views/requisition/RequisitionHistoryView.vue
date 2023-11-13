@@ -177,7 +177,7 @@
           flat
           icon="publish"
           color="white"
-          :style="disablePublishRequisitionButton(row) ? 'visibility:hidden;' : ''"
+          :style="!isRh || row.state !== 'AC' ? 'visibility:hidden' : ''"
           @click.prevent="openPublishRequisitionDialogue(row)"
         >
           <Tooltip :text="statePublishButtonTooltip[row.state]" />
@@ -191,8 +191,6 @@
           @click.prevent="
             showDetails(row.numRequisition, row.staffName, row.jobId, true)
           "
-          :class="row.state !== 'DC' ? 'bg-grey' : 'bg-grey-4'"
-          :disable="row.state !== 'DC'"
           :style="row.state !== 'DC' ? 'visibility:hidden' : ''"
         >
           <Tooltip v-if="row.state !== 'C'" :text="'Editar requisición'" />
@@ -456,7 +454,7 @@ const stateChangeNotifyText = {
 
 
 const disablePublishRequisitionButton = (item) => {
-  return !isRh || item.state != "AC";
+  return !isRh || item.state !== "AC";
 };
 
 const openAuthRequisitionDialogue = (row) => {

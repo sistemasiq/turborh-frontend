@@ -13,6 +13,7 @@
 
     <q-card-section class="q-pt-none">
       <q-input
+      :readonly="!isRh && !isAdmin"
         filled
         v-model="note"
         type="textarea"
