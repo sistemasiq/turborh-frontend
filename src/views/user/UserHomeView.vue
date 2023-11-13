@@ -311,11 +311,8 @@ onMounted(() => {
 const loadLocalStorage = () => {
   const userStored = useLocalStorage.load("user");
   const loggedStored = useLocalStorage.load("logged");
-  const savedApplicationStored = useLocalStorage.load("savedApplication");
-
-  if (savedApplicationStored) {
-    savedApplication.value = savedApplicationStored;
-  }
+  const isViewingApplication = useLocalStorage.load("viewingApplication");
+  const isUpdatingApplication = useLocalStorage.load("updatingApplication");
 
   if (userStored) {
     user.value = userStored;
@@ -323,6 +320,14 @@ const loadLocalStorage = () => {
   }
 
   if (loggedStored) logged.value = loggedStored;
+
+  if(isViewingApplication){
+    viewingApplication.value = isViewingApplication;
+  }
+  if(isUpdatingApplication){
+    updatingApplication.value = isUpdatingApplication;
+  }
+
 };
 
 const goToRequisitionApplicants = () => {
@@ -416,6 +421,9 @@ const onViewApplication = () => {
 
   viewingApplication.value = true;
   updatingApplication.value = false;
+
+  useLocalStorage.save("updatingApplication", updatingApplication.value);
+  useLocalStorage.save("viewingApplication", viewingApplication.value);
 };
 
 const pathMapping = {

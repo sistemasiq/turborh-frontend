@@ -1,7 +1,7 @@
 <template>
   <q-card flat bordered class="rounded-borders bg-white fit">
     <q-card-section class="row items-center">
-      <p class="text-h5 q-mt-xl">Agregar comentarios: </p>
+      <p class="text-h5 q-mt-xl">{{ isRh || isAdmin ? 'Agregar comentarios: ' : 'Comentarios de la requisición'}}</p>
       <q-btn
         icon="close"
         flat
@@ -22,7 +22,7 @@
       />
     </q-card-section>
 
-    <div class="text-right q-mr-md q-mb-md">
+    <div v-if="isRh || isAdmin" class="text-right q-mr-md q-mb-md">
       <q-btn color="green-5" icon="save" label="Guardar" @click="saveNote" :loading="savingNote" />
     </div>
   </q-card>
@@ -36,20 +36,22 @@
   import { notifyNegative, notifyPositive } from "src/utils/notifies";
   import axios from "axios";
   import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
+  import { useAuthStore } from "src/stores/auth";
   
   const $q = useQuasar();
   const props = defineProps(["currentNote"]);
   const note = ref("");
 
   const useRequisitionDetails = useRequisitionDetailsStore();
+  const useAuth = useAuthStore();
 
   const { requisitionData } = storeToRefs(useRequisitionDetails)
+  const { isRh, isAdmin } = storeToRefs(useAuth);
 
   const savingNote = ref(false);
 
   onMounted(() => {
     note.value = props.currentNote;
-    console.log(note.value);
   })
   
   const saveNote = async() => {

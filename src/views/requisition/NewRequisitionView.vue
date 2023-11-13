@@ -6,7 +6,19 @@
                     <q-card-section class="row items-center">
                         <p class="text-h6">{{ showingDetails ? "Detalles" : "Perfil Requerido" }}</p>
                         <q-btn
-                            v-if="isAdmin && showingDetails"
+                            v-if="isBoss && (showingDetails || updatingRequisition)"
+                            class="bg-grey-4"
+                            rounded
+                            flat
+                            color="black"
+                            icon="visibility"
+                            style="margin-left: 90%;"
+                            @click.prevent="openNotes = !openNotes"
+                        >
+                          <Tooltip :text="'Ver comentarios'" />
+                        </q-btn>
+                        <q-btn
+                            v-if="(isAdmin || isRh) && (showingDetails || updatingRequisition)"
                             class="bg-grey-4"
                             rounded
                             flat
@@ -165,7 +177,7 @@ const note = ref("");
 
 const {  showingDetails, requisitionData, numRequisitionDetails, applicantDetails, jobDetails, updatingRequisition } = storeToRefs(useRequisitionDetails);
 const {  applicantId, applicant, job, vacancyNumbers, motiveCreation } = storeToRefs(useRequisition);
-const { user, isRh, isAdmin } = storeToRefs(useAuth);
+const { user, isRh, isAdmin, isBoss } = storeToRefs(useAuth);
 const { jobId, jobFunctions, jobSkills, englishLevel, educationRequired, experience, extraHours, travelAvailability } = storeToRefs(useJob);
 
 

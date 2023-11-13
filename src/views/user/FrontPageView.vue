@@ -190,8 +190,6 @@ const getUserImage = computed(() => {
 
 const setUserInfo = () => {
 
-  const isViewingApplication = useLocalStorage.load("viewingApplication");
-  const isUpdatingApplication = useLocalStorage.load("updatingApplication");
   const userStored = useLocalStorage.load("user");
 
   if (userStored) {
@@ -201,12 +199,6 @@ const setUserInfo = () => {
     photoUUID.value = userStored.photoUUID;
   }
 
-  if(isViewingApplication){
-    viewingApplication.value = isViewingApplication;
-  }
-  if(isUpdatingApplication){
-    updatingApplication.value = isUpdatingApplication;
-  }
 };
 
 

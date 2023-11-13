@@ -183,7 +183,6 @@
           <Tooltip :text="statePublishButtonTooltip[row.state]" />
         </q-btn>
         <q-btn
-          v-if="(isBoss || isRh) && row.state === 'DC'"
           class="q-ml-sm"
           rounded
           flat
@@ -194,6 +193,7 @@
           "
           :class="row.state !== 'DC' ? 'bg-grey' : 'bg-grey-4'"
           :disable="row.state !== 'DC'"
+          :style="row.state !== 'DC' ? 'visibility:hidden' : ''"
         >
           <Tooltip v-if="row.state !== 'C'" :text="'Editar requisición'" />
         </q-btn>
@@ -225,7 +225,7 @@
           icon="delete"
           color="white"
           @click.prevent="openCancelRequisitionDialogue(row)"
-          :style = "row.state === 'C' ? 'visibility:hidden' : ''"
+          :style = "row.state === 'C' || !isRh ? 'visibility:hidden' : ''"
           :class="row.state === 'C' ? 'bg-grey' : 'bg-red-5'"
         >
           <Tooltip :text="'Cancelar requisición'" />
