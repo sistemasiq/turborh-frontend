@@ -154,12 +154,7 @@ export const useRequestUser = defineStore("requestUser", () => {
     },
   ]);
 
-  const savedApplication = computed(() => {
-    const applicationStored = useLocalStorage.load("savedApplication");
-    if(applicationStored){
-      return applicationStored;
-    }
-  });
+  const savedApplication = ref();
 
   
   const userHasApplication = computed(() => {
