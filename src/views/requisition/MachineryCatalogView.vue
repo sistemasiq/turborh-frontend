@@ -1,6 +1,6 @@
 <template>
     <q-table flat bordered style="background: rgb(247, 248, 255)" title="Maquinaría y herramientas"
-        v-bind:rows="filteredRows" separator="horizontal" @request="showJobs" :columns="columns" row-key="name"
+        v-bind:rows="filteredRows" separator="horizontal" @request="showMachineryTools" :columns="columns" row-key="name"
         :loading="loading" :filter="filter" loading-label="Cargando puestos..." rows-per-page-label="Puestos por página"
         :table-header-class="{ 'table-header-style': [true] }" :table-class="{ 'table-body-style': [true] }"
         class="my-sticky-header-table q-pa-md" v-bind:no-data-label="noDataLabel"
@@ -126,8 +126,8 @@
     </q-dialog>
 </template>
   
-  /* Script
-  ==================================================================================================================================================*/
+/* Script
+==================================================================================================================================================*/
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import Tooltip from "src/components/Tooltip.vue";
@@ -141,179 +141,180 @@ const router = useRouter();
 const useJobCatalog = useJobCatalogStore();
 const { jobId, jobName, readOnly, updatingJob } = storeToRefs(useJobCatalog);
 
-const name = ref();
-const selectedMachinery = ref();
+const $q = useQuasar();
+
+const deleteDialog = ref(false);
+const selectedJob = ref();
+const showDeletedJobs = ref(false);
 const filter = ref("");
 const noDataLabel = ref("No hay puestos existentes");
 const loading = ref(false);
 const totalTableRows = ref([]);
 const disableCheckbox = ref(false);
-const fixed = ref();
-const types = ["Maquinaría", "Herramientas", "Instrumentos de medición", "Otro"];
 
 
 onMounted(() => {
-    readOnly.value = false;
-    showJobs();
+  readOnly.value = false;
+  showJobs();
 });
 
 
 
 const getDesignStatusJob = (props) => {
-    const active = props.row.active;
-    console.log("ACTIVE: " + active);
-    return {
-        tooltipText: active === 1 ? "Desactivar" : "Activar",
-        buttonColor: active === 1 ? "bg-red-5" : "bg-orange-5",
-        buttonIcon: active === 1 ? "delete" : "restore",
-        dialogText:
-            active === 1
-                ? "¿Quieres eliminar este puesto?"
-                : "¿Quieres activar este puesto?",
-    };
+  const active = props.row.active;
+  console.log("ACTIVE: " + active);
+  return {
+    tooltipText: active === 1 ? "Desactivar" : "Activar",
+    buttonColor: active === 1 ? "bg-red-5" : "bg-orange-5",
+    buttonIcon: active === 1 ? "delete" : "restore",
+    dialogText:
+      active === 1
+        ? "¿Quieres eliminar este puesto?"
+        : "¿Quieres activar este puesto?",
+  };
 };
 
 const showJobs = async () => {
-    try {
-        loading.value = true;
-        disableCheckbox.value = true;
-        const request = await axios.get(`/puestos/catalogo`, { timeout: 18000 });
+  try {
+    loading.value = true;
+    disableCheckbox.value = true;
+    const request = await axios.get(`/machinerytools/catalog`, { timeout: 18000 });
 
-        if (request.status === 200) {
-            totalTableRows.value = request.data;
-            console.log(request.data);
-            loading.value = false;
-            disableCheckbox.value = false;
-        }
-    } catch (error) {
-        if (axios.isCancel(error)) {
-            console.log("La solicitud fue cancelada.");
-        } else {
-            console.log("Error:", error);
-            console.log(
-                "Error al conectar con el servidor: Tiempo de espera agotado."
-            );
-            $q.notify({
-                type: "negative",
-                message: "Hubo un problema al obtener la lista de puestos",
-                position: "top",
-                timeout: 5000,
-                actions: [{ label: "Cerrar", color: "yellow" }],
-            });
-            loading.value = false;
-            noDataLabel.value = "Error al obtener la lista de puestos";
-            disableCheckbox.value = true;
-        }
+    if (request.status === 200) {
+      totalTableRows.value = request.data;
+      console.log(request.data);
+      loading.value = false;
+      disableCheckbox.value = false;
     }
+  } catch (error) {
+    if (axios.isCancel(error)) {
+      console.log("La solicitud fue cancelada.");
+    } else {
+      console.log("Error:", error);
+      console.log(
+        "Error al conectar con el servidor: Tiempo de espera agotado."
+      );
+      $q.notify({
+        type: "negative",
+        message: "Hubo un problema al obtener la lista de maquinaria y herramientas",
+        position: "top",
+        timeout: 5000,
+        actions: [{ label: "Cerrar", color: "yellow" }],
+      });
+      loading.value = false;
+      noDataLabel.value = "Error al obtener la lista de maquinaria y herramientas";
+      disableCheckbox.value = true;
+    }
+  }
 };
 
 const filteredRows = computed(() => {
-    return totalTableRows.value.filter((job) => {
-        return showDeletedJobs.value ? job.active === 0 : job.active === 1;
-    });
+  return totalTableRows.value.filter((job) => {
+    return showDeletedJobs.value ? job.active === 0 : job.active === 1;
+  });
 });
 
 const changeJobStatus = (newJobStatus) => {
-    totalTableRows.value.forEach((element) => {
-        if (element.id === newJobStatus.id) {
-            element.active = newJobStatus.active;
-        }
-    });
+  totalTableRows.value.forEach((element) => {
+    if (element.id === newJobStatus.id) {
+      element.active = newJobStatus.active;
+    }
+  });
 };
 
 const createJob = () => {
-    router.push("/home/edicion-puesto");
+  router.push("/machinerytools/createnew");
 };
 
 const updateJob = async (props) => {
-    jobId.value = props.row.id;
-    jobName.value = props.row.jobName;
-    updatingJob.value = true;
-    router.push("/home/edicion-puesto");
+  jobId.value = props.row.id;
+  jobName.value = props.row.jobName;
+  updatingJob.value = true;
+  router.push("/home/edicion-puesto");
 };
 
 const confirmDeleteJob = async () => {
-    try {
-        const newJobStatus = {
-            active: selectedJob.value.active === 1 ? 0 : 1,
-            id: selectedJob.value.id,
-        };
+  try {
+    const newJobStatus = {
+      active: selectedJob.value.active === 1 ? 0 : 1,
+      id: selectedJob.value.id,
+    };
 
-        loading.value = true;
-        const request = await axios.put(`/puestos/estado`, newJobStatus, {
-            timeout: 15000,
-        });
+    loading.value = true;
+    const request = await axios.put(`/puestos/estado`, newJobStatus, {
+      timeout: 15000,
+    });
 
-        if (request.status === 200) {
-            $q.notify({
-                type: "positive",
-                message: selectedJob.value.active
-                    ? "El puesto se ha desactivado correctamente"
-                    : "El puesto se ha activado correctamente",
-                position: "top",
-                timeout: 5000,
-                actions: [{ label: "Cerrar", color: "yellow" }],
-            });
-            loading.value = false;
-            changeJobStatus(newJobStatus);
-        }
-    } catch (error) {
-        if (axios.isCancel(error)) {
-            console.log("La solicitud fue cancelada.");
-        } else {
-            console.log("Error:", error);
-            console.log(
-                "Error al conectar con el servidor: Tiempo de espera agotado."
-            );
-            $q.notify({
-                type: "negative",
-                message: "Hubo un problema al desactivar el puesto",
-                position: "top",
-                timeout: 5000,
-                actions: [{ label: "Cerrar", color: "yellow" }],
-            });
-            loading.value = false;
-        }
+    if (request.status === 200) {
+      $q.notify({
+        type: "positive",
+        message: selectedJob.value.active
+          ? "El puesto se ha desactivado correctamente"
+          : "El puesto se ha activado correctamente",
+        position: "top",
+        timeout: 5000,
+        actions: [{ label: "Cerrar", color: "yellow" }],
+      });
+      loading.value = false;
+      changeJobStatus(newJobStatus);
     }
-    // Cerrar el diálogo de confirmación de eliminación
-    deleteDialog.value = false;
+  } catch (error) {
+    if (axios.isCancel(error)) {
+      console.log("La solicitud fue cancelada.");
+    } else {
+      console.log("Error:", error);
+      console.log(
+        "Error al conectar con el servidor: Tiempo de espera agotado."
+      );
+      $q.notify({
+        type: "negative",
+        message: "Hubo un problema al desactivar el puesto",
+        position: "top",
+        timeout: 5000,
+        actions: [{ label: "Cerrar", color: "yellow" }],
+      });
+      loading.value = false;
+    }
+  }
+  // Cerrar el diálogo de confirmación de eliminación
+  deleteDialog.value = false;
 };
 
 const deleteJob = (props) => {
-    selectedJob.value = props.row;
-    deleteDialog.value = true;
+  selectedJob.value = props.row;
+  deleteDialog.value = true;
 };
 
 const seeJob = (id) => {
-    readOnly.value = true;
-    jobId.value = id;
-    router.push("/home/edicion-puesto");
+  readOnly.value = true;
+  jobId.value = id;
+  router.push("/home/edicion-puesto");
 };
 
 const columns = [
-    {
-        name: "jobName",
-        label: "Nombre",
-        required: true,
-        align: "left",
-        field: (row) => row.jobName,
-        sortable: true,
-    },
-    {
-        name: "departmentName",
-        label: "Tipo",
-        required: true,
-        align: "left",
-        field: (row) => row.departmentName,
-        sortable: true,
-    },
-    {
-        name: "edicionPuestos",
-        label: "Opciones de edición",
-        required: true,
-        align: "center",
-        field: "edicionPuestos",
-    },
+  {
+    name: "machineryName",
+    label: "Nombre",
+    required: true,
+    align: "left",
+    field: (row) => row.jobName,
+    sortable: true,
+  },
+  {
+    name: "type",
+    label: "Tipo",
+    required: true,
+    align: "left",
+    field: (row) => row.departmentName,
+    sortable: true,
+  },
+  {
+    name: "edicionPuestos",
+    label: "Opciones de edición",
+    required: true,
+    align: "center",
+    field: "edicionPuestos",
+  },
 ];
 </script>
   
