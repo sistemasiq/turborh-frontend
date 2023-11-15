@@ -48,6 +48,28 @@ export const finishedAppointment = {
   emailType: "not required",
 };
 
+export const sendSecurityCode = (to, userName, code) => {
+  return {
+    to: to,
+    subject: "Código de seguridad",
+    name: userName,
+    firstText: `Tu código para restablecer la contraseña es '${code}'`,
+    lastText: "Copia he ingresa este código en el campo de verificación",
+    emailType: "not required",
+  };
+};
+
+export const passwordChange = (to, userName) => {
+  return {
+    to: to,
+    subject: "Aviso de cambio de contraseña",
+    name: userName,
+    firstText: "Queremos comunicarte que tu contraseña a sido cambiada.",
+    lastText:  "Ahora podrás acceder a tu cuenta utilizando tu nueva contraseña. Si tienes alguna pregunta o necesitas información adicional, no dudes en contactarnos a este mismo correo.",
+    emailType: "not required",
+  }
+}
+
 export const sendEmail = async (type, data) => {
   try {
     const mailResponse = await axios.post(`/mail/send/${type}`, data);

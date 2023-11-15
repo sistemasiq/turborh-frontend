@@ -95,25 +95,24 @@
                     </q-form>
                   </q-card-section>
                   <q-card-actions
-                    class="row q-ma-auto"
+                    class="q-ma-auto"
+                    vertical
                     style="
                       justify-content: center;
                       align-items: center;
-                      padding-top: 5%;
+                      padding-top: 2%;
                     "
                   >
-                    <div class="column">
+                    <div class="row justify-between">
                       <q-btn
                         unelevated
                         rounded
-                        class="btn-brand text-capitalize"
+                        class="btn-brand q-mr-lg text-capitalize"
                         @click.prevent="onLoginClick"
                         :disabled="disableLoginButton()"
                       >
                         Ingresar
                       </q-btn>
-                    </div>
-                    <div class="column" style="padding-left: 3%">
                       <q-btn
                         class="btn-text text-capitalize"
                         flat
@@ -121,6 +120,9 @@
                       >
                         Registrate
                       </q-btn>
+                    </div>
+                    <div class="q-mt-lg">
+                      <q-btn flat class="text-white" @click="toRestorePassword()">¿Has olvidado tu contraseña?</q-btn>
                     </div>
                   </q-card-actions>
                 </q-card>
@@ -181,6 +183,10 @@ const changePasswordVisibility = () => {
 const onRegisterClick = () => {
   router.push("/register");
 };
+
+const toRestorePassword = () => {
+  router.push("/restore-password");
+}
 
 const disableLoginButton = () => {
   return !userName.value || !password.value;
@@ -268,14 +274,14 @@ onBeforeUnmount(() => {
 <style scoped>
 .btn-brand {
   color: black;
-  width: 250px;
+  width: 200px;
   height: 60px;
   font-size: larger;
-  background-color: #99c5cc !important;
+  background-color: #81d7e4 !important;
 }
 
 .btn-brand:hover {
-  background-color: #d4f9ff !important;
+  background-color: #b6f5ff !important;
 }
 
 .btn-brand span {

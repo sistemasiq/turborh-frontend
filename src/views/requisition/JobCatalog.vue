@@ -70,23 +70,25 @@
     </template>
 
     <template v-slot:body-cell-jobKey="{ row }">
-      <q-td>
+      <q-td class="text-center">
         <div>{{ row.jobKey }}</div>
       </q-td>
     </template>
     <template v-slot:body-cell-departmentName="{ row }">
-      <q-td class="row">
-        <p
+      <q-td class=" text-center">
+        <div class="row">
+          <p
           class="q-pa-sm"
           v-for="(item, index) in row.departments"
           :key="item.id"
         >
           {{ row.departments[index].key }}
         </p>
+        </div>
       </q-td>
     </template>
     <template v-slot:body-cell-edicionPuestos="props">
-      <q-td class="row" style="position: absolute; right: 0%; height: 48px">
+      <q-td class="text-right" >
         <q-btn
           class="q-ml-sm"
           style="background: rgb(47, 171, 171); width: 70px; height: 16px"
@@ -347,7 +349,7 @@ const columns = [
     name: "departmentName",
     label: "Departamento",
     required: true,
-    align: "left",
+    align: "center",
     field: (row) => row.departmentName,
     sortable: true,
   },
@@ -355,7 +357,7 @@ const columns = [
     name: "jobKey",
     label: "Clave",
     required: true,
-    align: "left",
+    align: "center",
     sortable: true,
     field: (row) => row.jobKey,
   },
@@ -363,7 +365,7 @@ const columns = [
     name: "edicionPuestos",
     label: "Opciones de edición",
     required: true,
-    align: "center",
+    align: "right",
     field: "edicionPuestos",
   },
 ];
