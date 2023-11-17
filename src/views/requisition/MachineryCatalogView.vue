@@ -142,11 +142,11 @@
         <q-btn
           rounded
           flat
-          :label="selectedJob.active ? 'Desactivar' : 'Activar'"
+          :label="selectedTool.active ? 'Desactivar' : 'Activar'"
           v-close-popup
-          :class="selectedJob.active ? 'bg-red-5' : 'bg-orange-5'"
+          :class="selectedTool.active ? 'bg-red-5' : 'bg-orange-5'"
           class="text-white"
-          @click.prevent="confirmDeleteJob()"
+          @click.prevent="confirmDeleteTools()"
         />
       </q-card-actions>
     </q-card>
@@ -201,12 +201,12 @@
           @click="createJob()"
         />
         <q-btn
-        v-if="operation = 'update'"
+        v-if="operation == 'update'"
           flat
           label="Guardar"
           color="blue"
           v-close-popup
-          @click="createJob()"
+          @click="updateTool()"
         />
       </q-card-actions>
     </q-card>
@@ -227,7 +227,9 @@ const router = useRouter();
 const $q = useQuasar();
 
 const createDialog = ref(false);
-const createdBy = ref("102");
+const id = ref("");
+const createdBy = ref("101");
+const modifiedBy = ref ("101")
 const name = ref("");
 const selectedType = ref("");
 const deleteDialog = ref(false);
@@ -238,7 +240,9 @@ const noDataLabel = ref("No hay puestos existentes");
 const loading = ref(false);
 const totalTableRows = ref([]);
 const disableCheckbox = ref(false);
-const operation = ref("")
+const operation = ref("");
+const selectedTool = ref("");
+
 
 const types = [
   "Maquinaria",
@@ -342,16 +346,108 @@ const createJob = async () => {
   }
 };
 
-const updateJob = async (props) => {
-  console.log(props);
-};
+const updateTool = async () => {
+  const url = `/machinerytools/editmachinerytools`;
+  if (selectedType.value != "" && name.value != "") {
+    const elementType = selectedType.value.substring(0, 2).toUpperCase();
+    console.log("elementType: ",elementType);
+    const data = {
+      id: id.value,
+      modifiedBy: modifiedBy.value,
+      type: elementType,
+      name: name.value,
+    };
+    try {
+      $q.loading.show("Cargando...");
+      const request = await axios.put(url, data);
 
-const confirmDeleteJob = async () => {
-  console.log("confirmDeleteJob");
+      if (request.status == 200) {
+        console.log(request.data);
+        totalTableRows.value.push(request.data);
+
+        let updateTool = request.data;
+        const toolIndex = totalTableRows.value
+        .map((tool) =>{
+          return tool.id;
+        })
+        .indexOf(data, id);
+        totalTableRows.value[toolIndex] = updateTool;//[].active=0
+
+        $q.loading.hide();
+        $q.notify(notifyPositive("Registro exitoso"));
+      }
+    } catch (error) {
+      $q.notify(notifyNegative("Hubo un error al actualizar el elemento"));
+      console.log(error);
+    } finally {
+      createdBy.value = "";
+      selectedType.value = "";
+      name.value = "";
+    }
+  } else {
+    $q.notify(notifyNegative("Ambos campos deben ser llenados"));
+  }};
+
+  const confirmDeleteTools = async () => {
+  try {
+    const newToolStatus = {
+      active: selectedTool.value.active === 1 ? 0 : 1,
+      id: selectedTool.value.id,
+    };
+
+    loading.value = true;
+    const request = await axios.put(`machinerytools/offmachinerytools`, newToolStatus, {
+      timeout: 15000,
+    });
+
+    if (request.status === 200) {
+      $q.notify({
+        type: "positive",
+        message: selectedTool.value.active
+          ? "El puesto se ha desactivado correctamente"
+          : "El puesto se ha activado correctamente",
+        position: "top",
+        timeout: 5000,
+        actions: [{ label: "Cerrar", color: "yellow" }],
+      });
+      
+        const toolIndex = totalTableRows.value
+        .map((tool) =>{
+          return tool.id;
+        })
+        .indexOf(data, id);
+        totalTableRows.value[toolIndex].active = 0;//[].active=0
+
+        $q.loading.hide();
+        $q.notify(notifyPositive("Registro exitoso"));
+      changeJobStatus(newToolStatus);
+    }
+  } catch (error) {
+    if (axios.isCancel(error)) {
+      console.log("La solicitud fue cancelada.");
+    } else {
+      console.log("Error:", error);
+      console.log(
+        "Error al conectar con el servidor: Tiempo de espera agotado."
+      );
+      $q.notify({
+        type: "negative",
+        message: "Hubo un problema al desactivar el puesto",
+        position: "top",
+        timeout: 5000,
+        actions: [{ label: "Cerrar", color: "yellow" }],
+      });
+      loading.value = false;
+    }
+  }
+  // Cerrar el diálogo de confirmación de eliminación
+  deleteDialog.value = false;
 };
 
 const deleteJob = (props) => {
-  console.log("delete job");
+  selectedTool.value = props.row;
+  deleteDialog.value = true;
+  active.value = props.active
 };
 
 const cardEdition = (opType, props) => {
@@ -362,7 +458,8 @@ const cardEdition = (opType, props) => {
     selectedType.value = "";
     name.value = "";
   }else if(operation.value == 'update') {
-    createdBy.value = props.createdBy;
+    id.value = props.id
+    modifiedBy.value = props.modifiedBy;
     selectedType.value = props.type;
     name.value = props.name;
   }
@@ -375,9 +472,6 @@ const filteredRows = computed(() => {
   });
 });
 
-const changeJobStatus = (newJobStatus) => {
-  console.log("change job status");
-};
 </script>
 
 /* Style
