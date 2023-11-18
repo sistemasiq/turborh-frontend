@@ -58,7 +58,7 @@
           color="white"
           icon="add"
           label="Crear"
-          @click.prevent="cardEdition('create')"
+          @click.prevent="cardEdition('create', '')"
         />
       </q-card-actions>
     </template>
@@ -107,7 +107,7 @@
           flat
           color="white"
           :icon="getDesignStatusJob(props).buttonIcon"
-          @click="deleteDialog = !deleteDialog"
+          @click="deleteTool(props.row)"
         >
           <q-tooltip
             class="bg-dark text-white text-body2"
@@ -130,7 +130,7 @@
       <q-card-section class="row items-center">
         <span class="q-ml-sm text-h6 text-weight-regular">
           {{
-            selectedJob.active
+            isToolActive == 1
               ? "¿Quieres desactivar este puesto?"
               : "¿Quieres activar este puesto?"
           }}
@@ -298,20 +298,17 @@ const getDesignStatusJob = (props) => {
 
 const showJobs = async () => {
   try {
-    loading.value = true;
-    disableCheckbox.value = true;
+    $q.loading.show("Cargando...");
     const request = await axios.get(`/machinerytools/catalog`, {
       timeout: 18000,
     });
 
     if (request.status === 200) {
       totalTableRows.value = request.data;
-      loading.value = false;
-      disableCheckbox.value = false;
-      console.log(request.data);
+      $q.loading.hide();
     }
   } catch (error) {
-    console.log("La solicitud fue cancelada.");
+    console.log("Hubo un error al obtener los datos: " + error);
   }
 };
 
@@ -320,6 +317,7 @@ const createJob = async () => {
   if (selectedType.value != "" && name.value != "") {
     const elementType = selectedType.value.substring(0, 2).toUpperCase();
     console.log("elementType: ",elementType);
+
     const data = {
       createdBy: createdBy.value,
       type: elementType,
@@ -370,7 +368,7 @@ const confirmDeleteTool = async () => {
         timeout: 5000,
         actions: [{ label: "Cerrar", color: "yellow" }],
       });
-      
+
         const toolIndex = totalTableRows.value
         .map((tool) =>{
           return tool.id;
@@ -405,7 +403,8 @@ const confirmDeleteTool = async () => {
 const deleteTool= (row) => {
   isToolActive.value = row.active
   id.value = row.id
-  console.log("Entró 1");
+  deleteDialog.value = !deleteDialog.value;
+  console.log("Entró 1: ", row.active);
 };
 
 const cardEdition = (opType, props) => {

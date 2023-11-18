@@ -9,115 +9,87 @@
       <div class="text-grey-10 text-h6" style="text-align: center">
         Restablecer Contraseña
       </div>
-      <q-card
-        v-if="verificationStep == 1"
-        class="fixed-center"
-        style="min-width: fit-content; width: 30%; border-radius: 10px"
-      >
-        <q-card-section>
-          <div class="text-h6">
-            Te enviaremos un código a tu correo electrónico
-          </div>
-        </q-card-section>
-
-        <q-separator color="blue-grey-5" />
-
-        <q-card-section>
-          <div class="text-grey-7 text-body1">
-            Te enviaremos un código al correo asociado a tu cuenta de usuario
-          </div>
-          <q-card-actions align="center">
-            <q-input
-              outlined
-              v-model="email"
-              label="Ingresa tu correo electrónico"
-              clearable
-              standout="text-green-13"
-              label-color="grey-8"
-              class="q-mt-md"
-              style="width: 70%"
-              lazy-rules
-              :rules="[
-                (value) => !!value || 'Este campo no puede estar vacío.',
-                (value) =>
-                  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
-                    value
-                  ) || 'El correo electrónico debe ser válido',
-              ]"
-            >
-              <template v-slot:prepend>
-                <q-icon name="email" />
-              </template>
-            </q-input>
-          </q-card-actions>
-        </q-card-section>
-
-        <q-separator color="blue-grey-5" />
-
-        <q-card-section>
-          <q-card-actions class="justify-end">
-            <q-btn
-              flat
-              label="Cancelar"
-              class="bg-grey-4 text-grey-8 q-mr-sm"
-              style="border-radius: 8px"
-              @click="toLogin()"
-            />
-            <q-btn
-              flat
-              icon="send"
-              label="Enviar"
-              class="bg-green-13 text-white"
-              style="border-radius: 8px"
-              @click="sendVerificationCode()"
-            />
-          </q-card-actions>
-        </q-card-section>
-      </q-card>
 
       <!-- Code verification -->
-
       <q-card
-        v-if="verificationStep == 2"
-        class="fixed-center"
+        class="fixed-center q-mt-md "
         style="min-width: fit-content; width: 30%; border-radius: 10px"
       >
-        <q-card-section>
-          <div class="text-h6">Ingresa tu código de verificación</div>
+        <q-card-section horizontal>
+          <div class="q-pa-sm  row justify-between" style="width: 100%;">
+            <div class="text-h6 q-pa-sm">
+            Crea una nueva contraseña
+          </div>
+          <q-btn round flat icon="help" size="md" @click="helpDialog = !helpDialog" />
+          </div>
         </q-card-section>
 
         <q-separator color="blue-grey-5" />
 
         <q-card-section class="q-mb-md">
           <div class="text-grey-7 text-body1">
-            Revisa tu bandeja de correo electrónico.
-          </div>
-          <div class="row text-grey-7 text-body1">
-            Se envió un código de 6 dígitos al correo:
-            <p class="text-weight-medium">{{ email }}</p>
+            Utiliza letras y números para crear una contraseña más segura.
           </div>
           <q-card-actions align="center">
             <q-input
               outlined
-              v-model="securityCode"
-              label="Ingresa tu código de verificación "
-              mask="######"
-              clearable
-              counter
+              v-model="password"
+              :type="isPasswordVisible ? 'text  ' : 'password'"
+              label="Ingresa tu nueva contraseña"
               standout="text-green-13"
               label-color="grey-8"
               class="q-mt-md"
-              style="width: 70%"
-              lazy-rules
               :rules="[
                 (value) => !!value || 'Este campo no puede estar vacío.',
               ]"
+              style="width: 70%"
             >
-              <template v-slot:prepend>
-                <q-icon name="lock" />
+              <template v-slot:append>
+                <q-icon
+                  :name="isPasswordVisible ? 'visibility_off' : 'visibility'"
+                  class="cursor-pointer"
+                  @click="isPasswordVisible = !isPasswordVisible"
+                />
+              </template>
+            </q-input>
+
+            <q-input
+              outlined
+              v-model="confirmPassword"
+              :type="isPasswordVisible ? 'text  ' : 'password'"
+              label="Confirma tu contraseña"
+              standout="text-green-13"
+              label-color="grey-8"
+              :rules="[
+                (value) => !!value || 'Este campo no puede estar vacío.',
+              ]"
+              style="width: 70%"
+            >
+              <template v-slot:append>
+                <q-icon
+                  :name="isPasswordVisible ? 'visibility_off' : 'visibility'"
+                  class="cursor-pointer"
+                  @click="isPasswordVisible = !isPasswordVisible"
+                />
               </template>
             </q-input>
           </q-card-actions>
+          <div class="row text-grey-8">
+            Nivel de seguridad de la contraseña:
+            <q-badge
+            class="q-ml-xs"
+            :label="evaluateSecurityLevel"
+              :color="
+                evaluateSecurityLevel === 'Bajo'
+                  ? 'red-13'
+                  : evaluateSecurityLevel === 'Buena'
+                  ? 'amber-14'
+                  : evaluateSecurityLevel === 'Optima'
+                  ? 'green-13'
+                  : 'grey'
+              "
+            />
+          </div>
         </q-card-section>
 
         <q-separator color="blue-grey-5" />
@@ -133,14 +105,68 @@
             />
             <q-btn
               flat
-              label="Verificar"
+              label="Confirmar"
               class="bg-green-13 text-white"
               style="border-radius: 8px"
-              @click="verification()"
+              @click.prevent="changePassword()"
+              :disable="disableButton()"
             />
           </q-card-actions>
         </q-card-section>
       </q-card>
+
+      <q-dialog
+      v-model="helpDialog"
+      >
+        <q-card
+        class="fixed-center"
+        style="min-width: fit-content; width: 30%; border-radius: 10px"
+      >
+      <q-card-section horizontal>
+          <div class="q-pa-sm  row justify-between items-center" style="width: 100%;">
+            <div class="text-h6 q-pa-sm">
+              Crear una contraseña segura
+          </div>
+          <q-btn style="width: fit-content; height: fit-content;" round flat icon="close" size="md" @click="helpDialog = !helpDialog" />
+          </div>
+        </q-card-section>
+
+        <q-separator color="blue-grey-5" />
+
+        <q-card-section class="q-mb-md">
+
+          <div class="text-grey-7 text-body1">
+
+          </div>
+          <div class="row text-grey-8">
+            Sigue las siguientes recomendaciones para crear una contraseña
+            <q-badge
+            class="q-ml-xs"
+            label="Optima"
+              color="green-13"
+            />
+          </div>
+          <div class="q-ml-md q-mt-sm">
+            <div class="row text-grey-8">
+            <q-icon name="arrow_right" color="black" size="xs"/>
+            No uses información personal (e. nombres, apodos, etc.)
+          </div>
+          <div class="row text-grey-8">
+            <q-icon name="arrow_right" color="black" size="xs"/>
+            Usa simbolos y números (e. * . - 4 , etc)
+          </div>
+          <div class="row text-grey-8">
+            <q-icon name="arrow_right" color="black" size="xs"/>
+            Combina mayusculas y minusculas
+          </div>
+          <div class="row text-grey-8">
+            <q-icon name="arrow_right" color="black" size="xs"/>
+            Escribe mínimo 6 caracteres
+          </div>
+          </div>
+        </q-card-section>
+      </q-card>
+      </q-dialog>
     </q-page-container>
   </q-layout>
 </template>
@@ -166,13 +192,10 @@ const useAuth = useAuthStore();
 const { userEmail } = storeToRefs(useAuth);
 const $q = useQuasar();
 const router = useRouter();
-const randomNumber = ref();
-const verificationStep = ref(1);
-const securityCode = ref();
 const password = ref("");
 const confirmPassword = ref("");
 const isPasswordVisible = ref(true);
-const email = ref("");
+const email = userEmail;
 const securityPasswordLevel = ref("Baja");
 const helpDialog = ref(false);
 
@@ -180,49 +203,8 @@ const toLogin = () => {
   router.push("/login");
 };
 
-const toChangePassword = () => {
-  router.push("/change-password");
-};
-
-const generateRandomNumber = () => {
-  // Generate a number between 100000 and 999999 which is the verification code
-  randomNumber.value = Math.floor(100000 + Math.random() * 900000);
-  return randomNumber.value;
-};
-
-const sendVerificationCode = () => {
-  //Call the 'generateRandomNumber' function to generate the verification code and send an email to the user
-  if (email.value != "") {
-    try {
-      $q.loading.show({ message: "Cargando..." });
-      userEmail.value = email.value;
-      generateRandomNumber();
-
-      const mailData = sendSecurityCode(email.value, randomNumber.value);
-      console.log(mailData);
-      sendEmail("security-code", mailData);
-      verificationStep.value = 2;
-    } catch (error) {
-      console.log("Error de envío de correo: " + error);
-    } finally {
-      $q.loading.hide();
-    }
-  } else if (email.value == "") {
-    $q.notify(notifyNegative("Ingrese su correo electrónico"));
-  }
-};
-
-const verification = () => {
-  if (securityCode.value != "") {
-    if (securityCode.value == randomNumber.value) {
-      verificationStep.value = 3;
-      toChangePassword();
-      $q.notify(notifyPositive("Código verificado"));
-      console.log("well done");
-    } else {
-      $q.notify(notifyNegative("Código incorrecto, intente nuevamente"));
-    }
-  }
+const toPasswordRestored = () => {
+  router.push("/password-restored");
 };
 
 const changePassword = async () => {
@@ -239,7 +221,7 @@ const changePassword = async () => {
         const mailData = passwordChange(email.value);
 
         sendEmail("password-changed-confirmation", mailData);
-        verificationStep.value = 4;
+        toPasswordRestored();
         $q.notify(notifyPositive("Contraseña actualizada"));
       }
     } catch (error) {
@@ -258,7 +240,7 @@ const disableButton = () => {
 
 const upperCaseRegex = /[A-Z]/;
 const lowerCaseRegex = /[a-z]/;
-const numberRegex = /[0-9]/;
+const numberRegex = /\d/;
 const specialCharactersRegex = /[!@#$%^&*()_+{}:;<>,.?~/-]/;
 
 const evaluateSecurityLevel = computed(() => {

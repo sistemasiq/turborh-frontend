@@ -1,3 +1,4 @@
+//Get the date of birth of the user, and return the age of the user
 export const getAge = (date) => {
     const today = new Date();
     const birthDate = new Date(date);
@@ -14,9 +15,10 @@ export const getAge = (date) => {
     return isNaN(years) ? " " : years;
 }
 
-export const userCredentials = (id, password) => {
+//Made to build the object thay will be sended to change the password
+export const userCredentials = (email, password) => {
   return {
-    id: id,
+    email: email,
     password: password
   }
 }
