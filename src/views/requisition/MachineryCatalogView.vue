@@ -107,7 +107,7 @@
           flat
           color="white"
           :icon="getDesignStatusJob(props).buttonIcon"
-          @click.prevent="deleteJob(props)"
+          @click="deleteDialog = !deleteDialog"
         >
           <q-tooltip
             class="bg-dark text-white text-body2"
@@ -146,7 +146,7 @@
           v-close-popup
           :class="selectedTool.active ? 'bg-red-5' : 'bg-orange-5'"
           class="text-white"
-          @click.prevent="confirmDeleteTools()"
+          @click.prevent="confirmDeleteTool()"
         />
       </q-card-actions>
     </q-card>
@@ -242,6 +242,7 @@ const totalTableRows = ref([]);
 const disableCheckbox = ref(false);
 const operation = ref("");
 const selectedTool = ref("");
+const isToolActive = ref();
 
 
 const types = [
@@ -346,61 +347,20 @@ const createJob = async () => {
   }
 };
 
-const updateTool = async () => {
-  const url = `/machinerytools/editmachinerytools`;
-  if (selectedType.value != "" && name.value != "") {
-    const elementType = selectedType.value.substring(0, 2).toUpperCase();
-    console.log("elementType: ",elementType);
-    const data = {
-      id: id.value,
-      modifiedBy: modifiedBy.value,
-      type: elementType,
-      name: name.value,
-    };
-    try {
-      $q.loading.show("Cargando...");
-      const request = await axios.put(url, data);
-
-      if (request.status == 200) {
-        console.log(request.data);
-        totalTableRows.value.push(request.data);
-
-        let updateTool = request.data;
-        const toolIndex = totalTableRows.value
-        .map((tool) =>{
-          return tool.id;
-        })
-        .indexOf(data, id);
-        totalTableRows.value[toolIndex] = updateTool;//[].active=0
-
-        $q.loading.hide();
-        $q.notify(notifyPositive("Registro exitoso"));
-      }
-    } catch (error) {
-      $q.notify(notifyNegative("Hubo un error al actualizar el elemento"));
-      console.log(error);
-    } finally {
-      createdBy.value = "";
-      selectedType.value = "";
-      name.value = "";
-    }
-  } else {
-    $q.notify(notifyNegative("Ambos campos deben ser llenados"));
-  }};
-
-  const confirmDeleteTools = async () => {
+const confirmDeleteTool = async () => {
+  console.log("Entró 2");
+  const apiUrl = "/machinerytools/offmachinerytools";
+  $q.loading.show();
   try {
-    const newToolStatus = {
-      active: selectedTool.value.active === 1 ? 0 : 1,
-      id: selectedTool.value.id,
-    };
-
-    loading.value = true;
-    const request = await axios.put(`machinerytools/offmachinerytools`, newToolStatus, {
-      timeout: 15000,
+    const request = await axios.put(apiUrl, null, {
+      params: {
+        id: id.value,
+      },
     });
 
     if (request.status === 200) {
+      console.log("Entró 3");
+
       $q.notify({
         type: "positive",
         message: selectedTool.value.active
@@ -420,7 +380,7 @@ const updateTool = async () => {
 
         $q.loading.hide();
         $q.notify(notifyPositive("Registro exitoso"));
-      changeJobStatus(newToolStatus);
+      changeJobStatus(params);
     }
   } catch (error) {
     if (axios.isCancel(error)) {
@@ -439,15 +399,13 @@ const updateTool = async () => {
       });
       loading.value = false;
     }
-  }
-  // Cerrar el diálogo de confirmación de eliminación
-  deleteDialog.value = false;
+}
 };
 
-const deleteJob = (props) => {
-  selectedTool.value = props.row;
-  deleteDialog.value = true;
-  active.value = props.active
+const deleteTool= (row) => {
+  isToolActive.value = row.active
+  id.value = row.id
+  console.log("Entró 1");
 };
 
 const cardEdition = (opType, props) => {
