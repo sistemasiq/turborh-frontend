@@ -200,11 +200,11 @@ const securityPasswordLevel = ref("Baja");
 const helpDialog = ref(false);
 
 const toLogin = () => {
-  router.push("/login");
+  router.replace("/login");
 };
 
 const toPasswordRestored = () => {
-  router.push("/password-restored");
+  router.replace("/password-restored");
 };
 
 const changePassword = async () => {

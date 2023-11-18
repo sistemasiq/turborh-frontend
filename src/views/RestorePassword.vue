@@ -177,11 +177,11 @@ const securityPasswordLevel = ref("Baja");
 const helpDialog = ref(false);
 
 const toLogin = () => {
-  router.push("/login");
+  router.replace("/login");
 };
 
 const toChangePassword = () => {
-  router.push("/change-password");
+  router.replace("/change-password");
 };
 
 const generateRandomNumber = () => {
