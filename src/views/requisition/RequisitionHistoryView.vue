@@ -183,7 +183,7 @@
           <Tooltip :text="statePublishButtonTooltip[row.state]" />
         </q-btn>
         <q-btn
-          class="q-ml-sm"
+          class="q-ml-sm bg-grey-4"
           rounded
           flat
           color="black"

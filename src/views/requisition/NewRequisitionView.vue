@@ -4,15 +4,16 @@
             <q-page>
                 <q-card flat bordered class="rounded-borders">
                     <q-card-section class="row items-center">
-                        <p class="text-h6">{{ showingDetails ? "Detalles" : "Perfil Requerido" }}</p>
+                        <p class="text-h6">Perfil Requerido</p>
                         <q-btn
                             v-if="isBoss && (showingDetails || updatingRequisition)"
                             class="bg-grey-4"
                             rounded
                             flat
                             color="black"
+                            label="ver comentarios"
                             icon="visibility"
-                            style="margin-left: 90%;"
+                            style="margin-left: 70%;"
                             @click.prevent="openNotes = !openNotes"
                         >
                           <Tooltip :text="'Ver comentarios'" />
@@ -22,12 +23,12 @@
                             class="bg-grey-4"
                             rounded
                             flat
+                            label="Añadir comentarios"
                             color="black"
                             icon="edit"
-                            style="margin-left: 90%;"
+                            style="margin-left: 70%;"
                             @click.prevent="openNotes = !openNotes"
                         >
-                          <Tooltip :text="'Añadir comentarios'" />
                         </q-btn>
                     </q-card-section>
                     <q-card-section class="requisition-content">

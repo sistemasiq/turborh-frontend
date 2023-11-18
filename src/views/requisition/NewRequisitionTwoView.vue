@@ -4,20 +4,32 @@
       <q-page>
         <q-card flat bordered class="rounded-borders">
           <q-card-section class="row items-center">
-            <p class="text-h6">
-              {{ showingDetails ? "Detalles" : "Perfil Requerido" }}
-            </p>
+            <p class="text-h6">Perfil Requerido</p>
             <q-btn
-              v-if="isAdmin && showingDetails"
+              v-if="isBoss && (showingDetails || updatingRequisition)"
               class="bg-grey-4"
               rounded
               flat
+              label="Ver comentarios"
               color="black"
-              icon="edit"
-              style="margin-left: 90%"
+              icon="visibility"
+              style="margin-left: 70%"
               @click.prevent="openNotes = !openNotes"
             >
-              <Tooltip :text="'Añadir comentarios'" />
+            </q-btn>
+            <q-btn
+              v-if="
+                (isAdmin || isRh) && (showingDetails || updatingRequisition)
+              "
+              class="bg-grey-4"
+              rounded
+              flat
+              label="Añadir comentarios"
+              color="black"
+              icon="edit"
+              style="margin-left: 70%"
+              @click.prevent="openNotes = !openNotes"
+            >
             </q-btn>
           </q-card-section>
           <q-card-section class="requisition-content">
@@ -130,7 +142,7 @@
                 Escolaridad:
               </q-card-section>
               <q-card-section
-                style="width: 40%"
+                style="width: 80%"
                 class="bg-white rounded-borders"
               >
                 <q-radio
@@ -247,8 +259,8 @@
               label="actualizar"
               style="margin-left: 85%"
               class="q-mt-xl bg-green-5 text-white"
-              @click.prevent="updateRequisition()"
-              :disable="disableSaveRequisitionButton()"
+              @click.prevent="openConfirmation = true"
+              :disable="disableSaveRequisitionButton"
             />
             <q-btn
               v-if="!showingDetails && !updatingRequisition"
@@ -258,21 +270,42 @@
               label="guardar"
               style="margin-left: 85%"
               class="q-mt-xl bg-green-5 text-white"
-              @click.prevent="saveRequisition()"
-              :disable="disableSaveRequisitionButton()"
+              @click.prevent="openConfirmation = true"
+              :disable="disableSaveRequisitionButton"
             />
           </q-card-section>
         </q-card>
         <q-dialog v-model="openNotes">
           <NoteRequisitionComponent :current-note="requisitionData.notes" />
         </q-dialog>
+        <q-dialog v-model="openConfirmation" persistent>
+    <q-card rounded style="border-radius: 30px">
+      <q-card-section class="row items-center">
+        <span class="q-ml-sm text-h6 text-weight-regular">
+          {{ !updatingRequisition ? '¿Quieres guardar tu requisición?' : '¿Quieres actualizar tu requisición?' }}
+        </span>
+      </q-card-section>
+
+      <q-card-actions align="center">
+        <q-btn flat label="Cancelar" color="primary" v-close-popup />
+        <q-btn
+          rounded
+          flat
+          label="OK"
+          v-close-popup
+          class="text-white bg-green-5"
+          @click.prevent="updatingRequisition ? updateRequisition() : saveRequisition()"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
       </q-page>
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRequisitionStore } from "src/stores/requisition";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useJobStore } from "src/stores/job";
@@ -281,7 +314,6 @@ import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth";
 import NoteRequisitionComponent from "src/components/NoteRequisitionComponent.vue";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
-import Tooltip from "src/components/Tooltip.vue";
 import axios from "axios";
 import router from "src/router";
 
@@ -305,7 +337,9 @@ const currentPage = ref(2);
 
 const openNotes = ref(false);
 
-const { isAdmin, user } = storeToRefs(useAuth);
+const { isAdmin, user, isRh, isBoss } = storeToRefs(useAuth);
+
+const openConfirmation = ref(false);
 
 //Obtiene los valores de la store de detalles de la requisicion
 const { showingDetails, requisitionData, updatingRequisition } = storeToRefs(
@@ -379,18 +413,18 @@ const setDefaultJobValues = () => {
     requisitionData.value.travelAvailability === 1 ? true : false;
 };
 
-const disableSaveRequisitionButton = () => {
+const disableSaveRequisitionButton = computed(() => {
   return (
     applicant.value === "Solicitante" ||
     !gender.value ||
     !civilStatus.value ||
     !motiveCreation.value ||
-    vacancyNumbers.value === 0 ||
+    vacancyNumbers.value <= 0 ||
     job.value === "Puesto Solicitado" ||
     ageRequired.value < 18 ||
     !ageRequired.value
   );
-};
+})
 
 const saveRequisition = async () => {
   const {
@@ -448,15 +482,9 @@ const saveRequisition = async () => {
 };
 
 const updateRequisition = async () => {
-  const {
-    vacancyNumbers,
-    motiveCreation,
-    ageRequired,
-    civilStatus
-  } = storeToRefs(useRequisition);
-  const {
-    jobId,
-  } = storeToRefs(useJob);
+  const { vacancyNumbers, motiveCreation, ageRequired, civilStatus } =
+    storeToRefs(useRequisition);
+  const { jobId } = storeToRefs(useJob);
 
   const updatedRequisition = {
     numRequisition: requisitionData.value.numRequisition,
@@ -474,7 +502,10 @@ const updateRequisition = async () => {
   try {
     $q.loading.show();
 
-    const request = await axios.put("/requisicion/actualizar", updatedRequisition);
+    const request = await axios.put(
+      "/requisicion/actualizar",
+      updatedRequisition
+    );
     if (request.status === 200) {
       router.replace("/home/historial-requisiciones");
       $q.notify(
@@ -494,7 +525,7 @@ const updateRequisition = async () => {
       )
     );
     console.log(error);
-  }finally{
+  } finally {
     $q.loading.hide();
   }
 };
@@ -507,7 +538,8 @@ const fetchLastNumRequisition = async () => {
       noRequisition.value = request.data;
       $q.notify(
         notifyPositive(
-          `Su requisicion ha sido guardada con el FOLIO: ${request.data}`, 5000
+          `Su requisicion ha sido guardada con el FOLIO: ${request.data}`,
+          5000
         )
       );
     }
