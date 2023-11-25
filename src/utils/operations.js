@@ -20,3 +20,8 @@ export const userCredentials = (id, password) => {
     password: password
   }
 }
+
+export const requestSuccessfull = (status) => {
+  return status === 200 || status === 201 || status === 202;
+}
+

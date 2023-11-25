@@ -462,7 +462,7 @@ const removeTools = (item) => {
   if (index != -1) {
     toolsData.value.splice(index, 1);
   }
-  tools.value.push(item.name);
+  tools.value.push(item.toolName);
   sortAlphabetical(tools.value);
 };
 
@@ -482,7 +482,7 @@ const removeMeasuringInstruments = (item) => {
   if (index != -1) {
     measuringInstrumentsData.value.splice(index, 1);
   }
-  measuringInstruments.value.push(item.name);
+  measuringInstruments.value.push(item.measuringInstrumentName);
   sortAlphabetical(measuringInstruments.value);
 };
 
@@ -502,7 +502,7 @@ const removeOtherTool = (item) => {
   if (index != -1) {
     otherToolsData.value.splice(index, 1);
   }
-  otherTools.value.push(item.name);
+  otherTools.value.push(item.otherToolName);
   sortAlphabetical(otherTools.value);
 };
 

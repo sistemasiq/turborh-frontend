@@ -35,9 +35,9 @@
   import { storeToRefs } from "pinia";
   import { useQuasar } from "quasar";
   import { notifyNegative, notifyPositive } from "src/utils/notifies";
-  import axios from "axios";
   import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
   import { useAuthStore } from "src/stores/auth";
+  import { updateRequisitionNotes } from "src/services/requisition";
   
   const $q = useQuasar();
   const props = defineProps(["currentNote"]);
@@ -58,9 +58,9 @@
   const saveNote = async() => {
     try {
       savingNote.value = true;
-      const request = await axios.put(`requisicion/nota/${note.value}/num/${requisitionData.value.numRequisition}`)
+      const notesUpdated = await updateRequisitionNotes(note.value, requisitionData.value.numRequisition);
 
-      if(request.status === 200){
+      if(notesUpdated){
         $q.notify(notifyPositive("Comentarios guardados correctamente", 600))
         requisitionData.value.notes = note.value;
         savingNote.value = false;

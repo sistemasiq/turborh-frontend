@@ -123,6 +123,7 @@ import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { useRequestUser } from "src/stores/requestUser";
 import { useNotesStore } from "src/stores/notes";
 import Tooltip from "src/components/Tooltip.vue";
+import { createUserApplicationReport } from "src/services/report";
 import axios from "axios";
 import router from "src/router";
 
@@ -215,18 +216,11 @@ const downloadDocument = async (uuid) => {
 const createReport = async (applicationId) => {
   try {
     $q.loading.show({ message: "Generando reporte..." });
-    const request = await axios.get(
-      `reporte/solicitud?id=${applicationId}&addNotes=${
-        createReportWithNotes.value
-      }&endpointURL=${getAxiosBaseUrl()}`,
-      {
-        responseType: "arraybuffer",
-      }
-    );
 
-    if (request.status === 200) {
-      const blob = new Blob([request.data], { type: "application/pdf" });
-      reportSrc.value = URL.createObjectURL(blob);
+    const report = await createUserApplicationReport(applicationId, createReportWithNotes.value);
+
+    if (report) {
+      reportSrc.value = report;
       showReport.value = true;
     }
   } catch (error) {
