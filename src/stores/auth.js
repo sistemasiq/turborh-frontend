@@ -43,6 +43,7 @@ export const useAuthStore = defineStore("auth", () => {
     }
   });
 
+  const userEmail = ref('');
   return {
     user,
     logged,
@@ -54,6 +55,7 @@ export const useAuthStore = defineStore("auth", () => {
     isLic,
     hasPermitRequisitionAuthorization,
     hasPermitRequisitionCreation,
-    getUserPhotoUUID
+    getUserPhotoUUID,
+    userEmail
   };
 });

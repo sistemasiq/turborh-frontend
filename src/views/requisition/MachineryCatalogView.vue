@@ -11,8 +11,8 @@
     row-key="name"
     :loading="loading"
     :filter="filter"
-    loading-label="Cargando puestos..."
-    rows-per-page-label="Puestos por página"
+    loading-label="Cargando herramientas..."
+    rows-per-page-label="Herramientas por página"
     :table-header-class="{ 'table-header-style': [true] }"
     :table-class="{ 'table-body-style': [true] }"
     class="my-sticky-header-table q-pa-md"
@@ -58,7 +58,7 @@
           color="white"
           icon="add"
           label="Crear"
-          @click.prevent="cardEdition('create')"
+          @click.prevent="cardEdition('create', '')"
         />
       </q-card-actions>
     </template>
@@ -107,7 +107,7 @@
           flat
           color="white"
           :icon="getDesignStatusJob(props).buttonIcon"
-          @click="deleteDialog = !deleteDialog"
+          @click.prevent="deleteTool(props.row)"
         >
           <q-tooltip
             class="bg-dark text-white text-body2"
@@ -130,9 +130,9 @@
       <q-card-section class="row items-center">
         <span class="q-ml-sm text-h6 text-weight-regular">
           {{
-            selectedJob.active
-              ? "¿Quieres desactivar este puesto?"
-              : "¿Quieres activar este puesto?"
+            isToolActive === 1
+              ? "¿Quieres desactivar esta herramienta?"
+              : "¿Quieres activar esta herramienta?"
           }}
         </span>
       </q-card-section>
@@ -142,7 +142,7 @@
         <q-btn
           rounded
           flat
-          :label="selectedTool.active ? 'Desactivar' : 'Activar'"
+          label="OK"
           v-close-popup
           :class="selectedTool.active ? 'bg-red-5' : 'bg-orange-5'"
           class="text-white"
@@ -236,7 +236,7 @@ const deleteDialog = ref(false);
 const selectedJob = ref();
 const showDeletedJobs = ref(false);
 const filter = ref("");
-const noDataLabel = ref("No hay puestos existentes");
+const noDataLabel = ref("No hay herramiemtas existentes");
 const loading = ref(false);
 const totalTableRows = ref([]);
 const disableCheckbox = ref(false);
@@ -291,27 +291,24 @@ const getDesignStatusJob = (props) => {
     buttonIcon: active === 1 ? "delete" : "restore",
     dialogText:
       active === 1
-        ? "¿Quieres eliminar este puesto?"
-        : "¿Quieres activar este puesto?",
+        ? "¿Quieres eliminar esta herramienta?"
+        : "¿Quieres activar esta herramienta?",
   };
 };
 
 const showJobs = async () => {
   try {
-    loading.value = true;
-    disableCheckbox.value = true;
+    $q.loading.show("Cargando...");
     const request = await axios.get(`/machinerytools/catalog`, {
       timeout: 18000,
     });
 
     if (request.status === 200) {
       totalTableRows.value = request.data;
-      loading.value = false;
-      disableCheckbox.value = false;
-      console.log(request.data);
+      $q.loading.hide();
     }
   } catch (error) {
-    console.log("La solicitud fue cancelada.");
+    console.log("Hubo un error al obtener los datos: " + error);
   }
 };
 
@@ -320,6 +317,7 @@ const createJob = async () => {
   if (selectedType.value != "" && name.value != "") {
     const elementType = selectedType.value.substring(0, 2).toUpperCase();
     console.log("elementType: ",elementType);
+
     const data = {
       createdBy: createdBy.value,
       type: elementType,
@@ -349,7 +347,7 @@ const createJob = async () => {
 
 const confirmDeleteTool = async () => {
   console.log("Entró 2");
-  const apiUrl = "/machinerytools/offmachinerytools";
+  const apiUrl = selectedTool.value.active ? "/machinerytools/offmachinerytools" : "/machinerytools/onmachinerytools";
   $q.loading.show();
   try {
     const request = await axios.put(apiUrl, null, {
@@ -364,23 +362,15 @@ const confirmDeleteTool = async () => {
       $q.notify({
         type: "positive",
         message: selectedTool.value.active
-          ? "El puesto se ha desactivado correctamente"
-          : "El puesto se ha activado correctamente",
+          ? "La herramienta se ha desactivado correctamente"
+          : "La herramienta se ha activado correctamente",
         position: "top",
         timeout: 5000,
         actions: [{ label: "Cerrar", color: "yellow" }],
       });
-      
-        const toolIndex = totalTableRows.value
-        .map((tool) =>{
-          return tool.id;
-        })
-        .indexOf(data, id);
-        totalTableRows.value[toolIndex].active = 0;//[].active=0
 
-        $q.loading.hide();
-        $q.notify(notifyPositive("Registro exitoso"));
-      changeJobStatus(params);
+       selectedTool.value.active = selectedTool.value.active === 0 ? 1: 0;
+       updateMachinery(selectedTool.value);
     }
   } catch (error) {
     if (axios.isCancel(error)) {
@@ -392,21 +382,68 @@ const confirmDeleteTool = async () => {
       );
       $q.notify({
         type: "negative",
-        message: "Hubo un problema al desactivar el puesto",
+        message: "Hubo un problema al desactivar la herramienta",
         position: "top",
         timeout: 5000,
         actions: [{ label: "Cerrar", color: "yellow" }],
       });
       loading.value = false;
     }
+}finally{
+  $q.loading.hide();
 }
 };
+
+const updateTool = async () => {
+  const url = `/machinerytools/editmachinerytools`;
+  if (selectedType.value != "" && name.value != "") {
+    const elementType = selectedType.value.substring(0, 2).toUpperCase();
+    console.log("elementType: ",elementType);
+    const data = {
+      id: id.value,
+      modifiedBy: modifiedBy.value,
+      type: elementType,
+      name: name.value,
+    };
+    try {
+      $q.loading.show("Cargando...");
+      const request = await axios.put(url, data);
+      if (request.status == 200) {
+        console.log(request.data);
+        updateMachinery(request.data)//[].active=0
+
+        $q.notify(notifyPositive("Registro exitoso"));
+      }
+    } catch (error) {
+      $q.notify(notifyNegative("Hubo un error al actualizar el elemento"));
+      console.log(error);
+    } finally {
+      createdBy.value = "";
+      selectedType.value = "";
+      name.value = "";
+      $q.loading.hide();
+    }
+  } else {
+    $q.notify(notifyNegative("Ambos campos deben ser llenados"));
+  }};
 
 const deleteTool= (row) => {
   isToolActive.value = row.active
   id.value = row.id
-  console.log("Entró 1");
+  selectedTool.value = row;
+  deleteDialog.value = true;
+  console.log("Entró 1: ", row.active);
 };
+
+const updateMachinery =(updatedMachinery) => {
+  totalTableRows.value.forEach((element) => {
+    if(element.id === updatedMachinery.id){
+      element.name = updatedMachinery.name;
+      element.type = updatedMachinery.type;
+      element.active = updatedMachinery.active;
+    }
+  })
+}
 
 const cardEdition = (opType, props) => {
   operation.value = opType;

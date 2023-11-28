@@ -6,7 +6,7 @@ export const scheduledAppointment = {
     "Es un placer confirmar que hemos agendado una entrevista contigo para el puesto(s) en Turbomaquinas S.A de C.V. a los que te haz postulado. Durante esta entrevista, discutiremos tus habilidades y experiencia en relación con el puesto. También tendrás la oportunidad de aprender más sobre nuestra empresa y hacer cualquier pregunta que puedas tener. Agradecemos tu interés en unirte a nuestro equipo y esperamos conocerte mejor durante la entrevista virtual. Los datos de la entrevista son los siguientes:",
   lastText:
     "Si tienes alguna pregunta o necesitas más información no dudes en contactarnos a este mismo correo.",
-  emailType: "required",
+  emailType: "appointment",
 };
 
 export const modifiedAppointment = {
@@ -15,7 +15,7 @@ export const modifiedAppointment = {
     "Espero te encuentres bien. En nombre de Turbomaquinas S.A de C.V, te agradezco por tu interés en unirte a nuestro equipo y por haber enviado tu solicitud de empleo. Queremos informarte que hemos tenido que realizar un cambio en la cita de entrevista que teníamos programada contigo. La nueva fecha y hora para la entrevista es la siguiente:",
   lastText:
     "Agradecemos tu comprensión en esta situación. Estamos ansiosos por conocerte mejor y seguir adelante con el proceso para entrevistarte. Si tienes alguna pregunta o necesitas información adicional, no dudes en contactarnos a este mismo correo.",
-  emailType: "required",
+  emailType: "appointment",
 };
 
 export const canceledAppointment = {
@@ -48,14 +48,14 @@ export const finishedAppointment = {
   emailType: "not required",
 };
 
-export const sendSecurityCode = (to, userName, code) => {
+export const sendSecurityCode = (to, code) => {
   return {
     to: to,
     subject: "Código de seguridad",
-    name: userName,
-    firstText: `Tu código para restablecer la contraseña es '${code}'`,
+    firstText: `Tu código para restablecer la contraseña es el siguiente:`,
+    verificationCode: code,
     lastText: "Copia he ingresa este código en el campo de verificación",
-    emailType: "not required",
+    emailType: "authentication",
   };
 };
 

@@ -44,6 +44,7 @@
                         type="text"
                         label="Nombre de usuario"
                         label-color="white"
+                        lazy-rules
                         :rules="[
                           (value) =>
                             !!value || 'Este campo no puede estar vacío.',
