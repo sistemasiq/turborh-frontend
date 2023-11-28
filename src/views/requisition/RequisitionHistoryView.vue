@@ -223,7 +223,7 @@
           icon="delete"
           color="white"
           @click.prevent="openCancelRequisitionDialogue(row)"
-          :style = "row.state === 'C' || !isRh ? 'visibility:hidden' : ''"
+          :style="row.state === 'C' || !isRh ? 'visibility:hidden' : ''"
           :class="row.state === 'C' ? 'bg-grey' : 'bg-red-5'"
         >
           <Tooltip :text="'Cancelar requisición'" />
@@ -272,7 +272,7 @@
           :class="getDesignStatusRequisition(selectedRequisition).buttonColor"
           v-close-popup
           class="text-white bg-red"
-          @click.prevent="updateRequisitionState(selectedRequisition, 'P')"
+          @click.prevent="updateRequisitionStateTo(selectedRequisition, 'P')"
         />
       </q-card-actions>
     </q-card>
@@ -325,12 +325,20 @@ import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useAuthStore } from "src/stores/auth";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
-import { getAxiosBaseUrl } from "src/services/profiles";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { sendEmail, canceledRequisition } from "src/services/mail";
 import Tooltip from "src/components/Tooltip.vue";
+import { createRequisitionReport } from "src/services/report";
 
 import axios from "axios";
+import {
+  getAllRequisitions,
+  getRequisitionByNum,
+  getRequisitionsByPersonalId,
+  updateRequisitionStateByAdmin,
+  updateRequisitionState,
+  cancelRequisition
+} from "src/services/requisition";
 
 const useLocalStorage = useLocalStorageStore();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -371,7 +379,7 @@ const {
   numRequisitionDetails,
   applicantDetails,
   jobDetails,
-  updatingRequisition
+  updatingRequisition,
 } = storeToRefs(useRequisitionDetails);
 
 const filterRadioValue = ref("all");
@@ -453,10 +461,6 @@ const stateChangeNotifyText = {
 };
 
 
-const disablePublishRequisitionButton = (item) => {
-  return !isRh || item.state !== "AC";
-};
-
 const openAuthRequisitionDialogue = (row) => {
   showAuthRequisitionDialogue.value = true;
   selectedRequisition.value = row;
@@ -471,39 +475,36 @@ const openCancelRequisitionDialogue = (row) => {
   showCancelRequisitionDialogue.value = true;
   selectedRequisition.value = row;
 
-  if(selectedRequisition.value.candidatesNumber > 0) {
+  if (selectedRequisition.value.candidatesNumber > 0) {
     onCancelFetchApplicants();
   }
-
 };
 
 const onCancelSendEmailToCandidates = async () => {
-  const promises = selectedRequisitionCandidates.value.map(candidate => {
-    // Assuming `canceledRequisition` function constructs the necessary data for each candidate
-    const emailData = canceledRequisition(candidate.email, candidate.name, candidate.jobName);
-
-    // Call sendEmail for each candidate
+  const promises = selectedRequisitionCandidates.value.map((candidate) => {
+    const emailData = canceledRequisition(
+      candidate.email,
+      candidate.name,
+      candidate.jobName
+    );
     return sendEmail("canceled-appointment", emailData);
   });
 
   try {
-    // Using Promise.all to send all emails concurrently
     const results = await Promise.all(promises);
 
-    // Process the results (if necessary)
-    const successCount = results.filter(result => result).length;
+    const successCount = results.filter((result) => result).length;
     const failureCount = results.length - successCount;
-    console.log(`Emails sent successfully: ${successCount}, Failures: ${failureCount}`);
+    console.log(
+      `Emails mandados correctamente: ${successCount}, Fallos: ${failureCount}`
+    );
     $q.notify(notifyPositive("Los candidatos han sido notificados"));
-
   } catch (error) {
-    console.error("Error sending emails:", error);
+    console.error("Error al mandar los emails:", error);
     $q.notify(notifyNegative("Error al notificar a los candidatos"));
     // Handle errors, possibly by notifying the user
   }
 };
-
-
 
 const filteredRequisitions = computed(() => {
   return totalRequisitions.value.filter((item) => {
@@ -523,12 +524,12 @@ const updateRequisitionAuthorization = async (requisition) => {
 
   try {
     $q.loading.show();
-    const request = await axios.put(
-      `/requisicion/autorizar/${requisition.numRequisition}/hechoPorIng/${isIngUpdating}`
-    );
+    const newState = await updateRequisitionStateByAdmin(requisition.numRequisition, isIngUpdating);
 
-    if (request.status === 201) {
-      requisition.state = request.data;
+    console.log(newState);
+
+    if (newState) {
+      requisition.state = newState;
       updateSelectedRequisition(requisition);
       $q.notify(notifyPositive("Cambio de estado correctamente"));
     }
@@ -538,14 +539,12 @@ const updateRequisitionAuthorization = async (requisition) => {
   }
 };
 
-const updateRequisitionState = async (requisition, newState) => {
+const updateRequisitionStateTo = async (requisition, newState) => {
   try {
     $q.loading.show();
-    const request = await axios.put(
-      `/requisicion/estado/${newState}/num/${requisition.numRequisition}`
-    );
+    const updatedStateCorrectly = await updateRequisitionState(newState, requisition.numRequisition)
 
-    if (request.status === 201) {
+    if (updatedStateCorrectly) {
       requisition.state = newState;
       updateSelectedRequisition(requisition);
       $q.notify(notifyPositive(stateChangeNotifyText[newState]));
@@ -559,24 +558,22 @@ const updateRequisitionState = async (requisition, newState) => {
 const disableRequisition = async (requisition) => {
   try {
     $q.loading.show();
-    const request = await axios.put(
-      `/requisicion/desactivar/${requisition.numRequisition}`
-    );
+    
+    const requisitionCanceled = await cancelRequisition(requisition.numRequisition);
 
-    if (request.status === 200) {
+    if (requisitionCanceled) {
       requisition.state = "C";
       updateSelectedRequisition(requisition);
-      
-      if(selectedRequisitionCandidates.value.length > 0){
+
+      if (selectedRequisitionCandidates.value.length > 0) {
         await onCancelSendEmailToCandidates();
       }
 
-      
-      $q.notify(notifyPositive("Cambio de estado correctamente"));
+      $q.notify(notifyPositive("La requisición ha sido cancelada correctamente"));
     }
   } catch (error) {
     console.log(error);
-    $q.notify(notifyNegative("Error al cambiar el estado de la requisición"));
+    $q.notify(notifyNegative("Hubo un erro al cancelar la requisición"));
   } finally {
     $q.loading.hide();
   }
@@ -662,12 +659,12 @@ const onCancelFetchApplicants = async () => {
   try {
     isFetchingCandidates.value = true;
     const request = await axios.get(
-      `/candidatos/${selectedRequisition.value.id}`
+      `candidatos/${selectedRequisition.value.id}`
     );
 
     if (request.status === 200) {
       selectedRequisitionCandidates.value = request.data;
-      console.log(selectedRequisitionCandidates.value)
+      console.log(selectedRequisitionCandidates.value);
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
@@ -699,16 +696,12 @@ const showDetails = async (
   showingDetails.value = isUpdating ? false : true;
   updatingRequisition.value = isUpdating;
 
-
-
   try {
-    const request = await axios.get(
-      `/requisicion/buscar/${numRequisitionDetails.value}`
-    );
 
-    if (request.status === 200) {
-      requisitionData.value = request.data;
-      console.log(request.data);
+    const requisitionSearched = await getRequisitionByNum(numRequisitionDetails.value);
+
+    if (requisitionSearched) {
+      requisitionData.value = requisitionSearched;
     }
   } catch (error) {
     console.log("Error fetching requisition details " + error);
@@ -721,15 +714,13 @@ const fetchRequisitions = async () => {
   try {
     loading.value = true;
 
-    const endpoint =
+    const requisitionsFetched =
       isAdmin.value || isRh.value
-        ? `/requisicion/todo`
-        : `/requisicion/personal/${user.value.personalId}`;
+        ? await getAllRequisitions()
+        : await getRequisitionsByPersonalId(user.value.personalId);
 
-    const request = await axios.get(endpoint);
-
-    if (request.status === 200) {
-      totalRequisitions.value = request.data;
+    if (requisitionsFetched) {
+      totalRequisitions.value = requisitionsFetched;
     } else {
       console.log("Error on fetch requisitions with status " + request.status);
     }
@@ -751,16 +742,10 @@ const updateSelectedRequisition = (updatedRequisition) => {
 const createReport = async (numRequisition) => {
   try {
     $q.loading.show({ message: "Generando reporte..." });
-    const request = await axios.get(
-      `reporte/requisicion?numRequisition=${numRequisition}&endpointURL=${getAxiosBaseUrl()}`,
-      {
-        responseType: "arraybuffer",
-      }
-    );
 
-    if (request.status === 200) {
-      const blob = new Blob([request.data], { type: "application/pdf" });
-      reportSrc.value = URL.createObjectURL(blob);
+    const report = await createRequisitionReport(numRequisition);
+    if (report) {
+      reportSrc.value = report;
       showReport.value = true;
     }
   } catch (error) {

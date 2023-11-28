@@ -151,11 +151,11 @@ import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import axios from "axios";
-import { getAdminRoute, getUserRoute } from "src/services/profiles.js";
+import { getAdminRoute, getUserRoute, getS3FileUrl } from "src/services/profiles.js";
 import { notifyPositive, notifyNegative } from "src/utils/notifies.js";
-import { getS3FileUrl } from "src/services/profiles.js";
 import { getAssetsPath } from "src/utils/folderPaths";
 import { useRequestUser } from "src/stores/requestUser";
+import { logUser } from "src/services/user";
 
 
 const useAuth = useAuthStore();
@@ -195,17 +195,14 @@ const disableLoginButton = () => {
 
 const onLoginClick = async () => {
 
-
   try {
     $q.loading.show();
 
-    const request = await axios.get(
-      `/auth/${userName.value}/pass/${password.value}`
-    );
+    const userData = await logUser(userName.value, password.value);
 
-    if (request.status === 200) {
+    if (userData) {
 
-      user.value = request.data;
+      user.value = userData;
       logged.value = 1;
 
       useLocalStorage.save("user", user.value);

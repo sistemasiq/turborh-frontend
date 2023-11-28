@@ -1,6 +1,6 @@
 <template>
    <div class="column">
-    <p class="text-h3" style="color: rgb(83, 83, 83); margin-left: 58px; font-family: 'Arial'; font-size: 40px;">
+    <p class="text-h4 q-ml-xl text-grey-8">
               <strong> {{ getTitleApplications() }} </strong>
               <q-spinner
                 v-if="loadingApplications"
@@ -30,10 +30,10 @@
     <q-card-section>
       <p class="text-h6">{{ item.jobName }}</p>
       <p class="text-body1">
-        Estado: {{ checkStatusApplication(item.active, item.selected) }}
+        Estado: {{ checkStatusApplication[item.status] }}
         <q-icon
           name="circle"
-          :color="checkStatusApplicationColor(item.active, item.selected)"
+          :color="checkStatusApplicationColor[item.status]"
         />
       </p>
     </q-card-section>
@@ -80,6 +80,7 @@ import { getS3FileUrl } from "src/services/profiles.js";
 import { getDefaultJobUUID, getDefaultPath, getJobImagesPath } from "src/utils/folderPaths";
 import axios from "axios";
 import { useLocalStorageStore } from "src/stores/localStorage";
+import { notifyPositive } from "src/utils/notifies";
 
 const $q = useQuasar();
 const useAuth = useAuthStore();
@@ -108,6 +109,7 @@ const loadLocalStorage = () => {
   }
 
   fetchApplications();
+  
 }
 
 
@@ -137,7 +139,7 @@ const fetchApplications = async () => {
     loadingApplications.value = true;
 
     const request = await axios.get(
-      `/candidatos/trabajos/${user.value.id}`
+      `candidatos/trabajos/${user.value.id}`
     );
 
     if (request.status === 200) {
@@ -154,19 +156,18 @@ const fetchApplications = async () => {
   }
 };
 
-const checkStatusApplication = (active, selected) => {
-  if (active === 0) {
-    return "Rechazada";
-  }
-  return selected === 1 ? "Aceptada" : "En revisión";
-};
+const checkStatusApplication = {
+  "P" : "Pendiente",
+  "E" : "Entrevistado",
+  "C" : "Citado"
+}
 
-const checkStatusApplicationColor = (active, selected) => {
-  if (active === 0) {
-    return "red";
-  }
-  return selected === 1 ? "green" : "grey";
-};
+
+const checkStatusApplicationColor = {
+  "P": "grey",
+  "E": "green",
+  "C": "blue"
+}
 
 const disableApplication = async () => {
   try {
@@ -175,14 +176,7 @@ const disableApplication = async () => {
     );
 
     if (request.status === 201) {
-      $q.notify({
-        type: "positive",
-        message:
-          "<p style='font-size:medium;' class='q-mt-md'>Se ha eliminado tu solicitud a esta vacante.</p>",
-        timeout: 2000,
-        progress: true,
-        html: true,
-      });
+      $q.notify(notifyPositive("Se ha eliminado tu solicitud a esta vacante correctamente"));
       currentRequisitionId.value = null;
       fetchApplications();
     } else {

@@ -3,7 +3,15 @@
     <q-page-container>
       <q-page style="position: relative; right: 0px; margin-left: 300px">
         <div class="personaldata-background">
-          <div class="justify-between row" style="margin-top: 20px; margin-bottom: 30px; position: relative; display: inline-block;">
+          <div
+            class="justify-between row"
+            style="
+              margin-top: 20px;
+              margin-bottom: 30px;
+              position: relative;
+              display: inline-block;
+            "
+          >
             <q-img
               :src="getUserImage"
               style="width: 300px; height: 300px; border-radius: 160px"
@@ -52,10 +60,9 @@
               bg-color="white"
               flat 
             >
-            <q-tooltip>Selecciona tu imagen</q-tooltip>
+              <q-tooltip>Selecciona tu imagen</q-tooltip>
 
               <template v-slot:prepend>
-
               </template>
             </q-file>
             <q-btn
@@ -72,28 +79,23 @@
       </q-card>
     </q-dialog>
 
-           
-
-           
           </div>
 
-                <q-card-section class="q-mt-xl q-ml-xl">
-              <p class="text-h4 text-weight-bold">
-                {{
-                  fullName === "undefined undefined undefined"
-                    ? "Nombre completo "
-                    : fullName
-                }}
-              </p>
-              <p class="text-h5 text-weight-regular">{{ userName }}</p>
-              <p class="text-h6">
-                Especialidad: {{ specialization === "" ? "" : specialization }}
-              </p>
-              <p class="text-h6">Edad: {{ age === "" ? "" : age }}</p>
-            </q-card-section>
-
+          <q-card-section class="q-mt-xl q-ml-xl">
+            <p class="text-h4 text-weight-bold">
+              {{
+                fullName === "undefined undefined undefined"
+                  ? "Nombre completo "
+                  : fullName
+              }}
+            </p>
+            <p class="text-h5 text-weight-regular">{{ userName }}</p>
+            <p class="text-h6">
+              Especialidad: {{ specialization === "" ? "" : specialization }}
+            </p>
+            <p class="text-h6">Edad: {{ age === "" ? "" : age }}</p>
+          </q-card-section>
         </div>
-
 
         <div class="row" style="margin-left: 30px; margin-top: 10px">
           <ApplicationsCard></ApplicationsCard>
@@ -113,6 +115,7 @@ import { ref, onMounted, computed, watch, onUnmounted } from "vue";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { getUserImagesPath } from "src/utils/folderPaths";
 import { getAge } from "src/utils/operations";
+import { updateUserImage } from "src/services/user";
 import axios from "axios";
 
 const useLocalStorage = useLocalStorageStore();
@@ -169,7 +172,7 @@ const setUserInfo = () => {
     user.value = userStored;
   }
 
-  if(applicationStored){
+  if (applicationStored) {
     savedApplication.value = applicationStored;
   }
 
@@ -189,11 +192,10 @@ const setUserInfo = () => {
       applicationStored.apellido_materno;
     specialization.value = applicationStored.especialidad;
     age.value = getAge(applicationStored.fecha_nacimiento);
-    if(age.value === NaN){
+    if (age.value === NaN) {
       age.value = 0;
     }
     console.log("Age: " + getAge(applicationStored.fecha_nacimiento));
-
   }
 };
 
@@ -230,7 +232,7 @@ const uploadImage = async () => {
       });
     }
     if (request.status === 200) {
-      updateUserImage(request.data);
+      await updateUserImageInDatabase(request.data);
     }
   } catch (error) {
     console.log(error);
@@ -239,18 +241,14 @@ const uploadImage = async () => {
   }
 };
 
-const updateUserImage = async (imageUUID) => {
-  try {
-    const request = await axios.put(
-      `/auth/update/image/${imageUUID}/user/${user.value.id}`
-    );
+const updateUserImageInDatabase = async (imageUUID) => {
+  const updatedImageCorrectly = await updateUserImage(user.value.id, imageUUID);
 
-    if (request.status === 200) {
-      user.value.photoUUID = imageUUID;
-      useLocalStorage.save("user", user.value);
-      photoUUID.value = imageUUID;
-    }
-  } catch (error) {}
+  if (updatedImageCorrectly) {
+    user.value.photoUUID = imageUUID;
+    useLocalStorage.save("user", user.value);
+    photoUUID.value = imageUUID;
+  }
 };
 </script>
 

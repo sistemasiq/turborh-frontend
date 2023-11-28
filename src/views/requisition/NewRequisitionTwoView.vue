@@ -294,7 +294,7 @@
           label="OK"
           v-close-popup
           class="text-white bg-green-5"
-          @click.prevent="updatingRequisition ? updateRequisition() : saveRequisition()"
+          @click.prevent="updatingRequisition ? updateRequisitionData() : createNewRequisition()"
         />
       </q-card-actions>
     </q-card>
@@ -314,8 +314,9 @@ import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth";
 import NoteRequisitionComponent from "src/components/NoteRequisitionComponent.vue";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
-import axios from "axios";
+import { createRequisition, updateRequisition } from "src/services/requisition";
 import router from "src/router";
+
 
 const useAuth = useAuthStore();
 const useRequisition = useRequisitionStore();
@@ -323,7 +324,6 @@ const useRequisitionDetails = useRequisitionDetailsStore();
 const useJob = useJobStore();
 const $q = useQuasar();
 
-const noRequisition = ref(0);
 const englishLevelRequired = ref("");
 
 const experienceRequired = ref("");
@@ -415,18 +415,18 @@ const setDefaultJobValues = () => {
 
 const disableSaveRequisitionButton = computed(() => {
   return (
-    applicant.value === "Solicitante" ||
     !gender.value ||
     !civilStatus.value ||
     !motiveCreation.value ||
     vacancyNumbers.value <= 0 ||
-    job.value === "Puesto Solicitado" ||
+    !job.value || 
+    !job.value === "" ||
     ageRequired.value < 18 ||
     !ageRequired.value
   );
 })
 
-const saveRequisition = async () => {
+const createNewRequisition = async () => {
   const {
     vacancyNumbers,
     motiveCreation,
@@ -462,12 +462,17 @@ const saveRequisition = async () => {
   try {
     $q.loading.show();
 
-    const request = await axios.post("/requisicion", newRequisition);
-    if (request.status === 201) {
-      await fetchLastNumRequisition();
+    const newRequisitionId = await createRequisition(newRequisition);
 
+    if(newRequisitionId && newRequisitionId > 0) {
+      $q.notify(
+        notifyPositive(
+          `Su requisicion ha sido guardada con el FOLIO: ${newRequisitionId}`,
+          5000
+        )
+      );
       resetRequisitionStoreValues();
-    } else {
+    }else {
       $q.notify(
         notifyNegative(
           "Hubo un error al crear su requisicion. Intente de nuevo."
@@ -478,15 +483,17 @@ const saveRequisition = async () => {
     $q.notify(
       notifyNegative("Hubo un error al crear su requisicion. Intente de nuevo.")
     );
+  }finally{
+    $q.loading.hide();
   }
 };
 
-const updateRequisition = async () => {
+const updateRequisitionData = async () => {
   const { vacancyNumbers, motiveCreation, ageRequired, civilStatus } =
     storeToRefs(useRequisition);
   const { jobId } = storeToRefs(useJob);
 
-  const updatedRequisition = {
+  const updatedRequisitionData = {
     numRequisition: requisitionData.value.numRequisition,
     createdBy: user.value.personalId,
     jobId: jobId.value,
@@ -502,11 +509,9 @@ const updateRequisition = async () => {
   try {
     $q.loading.show();
 
-    const request = await axios.put(
-      "/requisicion/actualizar",
-      updatedRequisition
-    );
-    if (request.status === 200) {
+    const updatedRequisitionCorrectly = await updateRequisition(updatedRequisitionData);
+
+    if (updatedRequisitionCorrectly) {
       router.replace("/home/historial-requisiciones");
       $q.notify(
         notifyPositive("Su requisición ha sido actualizada correctamente.")
@@ -524,26 +529,6 @@ const updateRequisition = async () => {
         "Hubo un error al actualizar su requisicion. Intente de nuevo."
       )
     );
-    console.log(error);
-  } finally {
-    $q.loading.hide();
-  }
-};
-
-const fetchLastNumRequisition = async () => {
-  try {
-    const request = await axios.get("/requisicion/numero");
-
-    if (request.status === 200) {
-      noRequisition.value = request.data;
-      $q.notify(
-        notifyPositive(
-          `Su requisicion ha sido guardada con el FOLIO: ${request.data}`,
-          5000
-        )
-      );
-    }
-  } catch (error) {
     console.log(error);
   } finally {
     $q.loading.hide();

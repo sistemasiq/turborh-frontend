@@ -202,19 +202,19 @@ const dateRule = (value) => {
 
   return true; // La validación pasa
 };
-
 const workPlaceRule = (value) => {
-  const charactersValid = /^[A-Za-z0-9ñ áéíóúÁÉÍÓÚ]*$/.test(value);
+  const charactersValid = /^[A-Za-z0-9ñáéíóúÁÉÍÓÚ., ]*$/.test(value);
   const requiredValid = !!value;
 
   if (!charactersValid) {
-    return "Ingresa solo letras o números";
+    return "Ingresa solo letras, números, puntos y comas";
   } else if (!requiredValid) {
     return "Este campo es requerido";
   }
 
   return true; // La validación pasa
 };
+
 
 const disableAddButton = () => {
   if (familyFathersData.value.length === 0) return false;
