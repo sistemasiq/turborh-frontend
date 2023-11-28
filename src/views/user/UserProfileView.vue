@@ -9,39 +9,72 @@
               style="width: 300px; height: 300px; border-radius: 160px"
             >
             </q-img>
-            <q-file
-              accept=".jpg, image/*"
-              v-model="selectedImage"
-              borderless
-              use-chips
+
+            <q-btn @click="fixed = !fixed"
+            borderless
               rounded
               clearable
               standout
               outlined
+              bg-color="white"
+              icon="add_a_photo"
+            style="background-color: rgb(255, 255, 255); height: 50px; width: 55px; position: absolute; top: 90%; left: 75%; transform: translate(-50%, -50%); justify-content: center;">
+                      </q-btn>
+
+            <q-dialog v-model="fixed">
+      <q-card>
+        <q-card-section>
+          <div class="text-h5">Selección de imagen de perfil</div>
+        </q-card-section>
+
+        <q-separator />
+        <div  class="text text-center">La imagen seleccionada debe ser formal y seria</div>
+
+        <q-card-section style="max-height: 50vh">
+          <q-img
+  :src="selectedImage || getUserImage"
+  style="width: 300px; height: 300px; border-radius: 160px"
+></q-img>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right">
+          <q-file
+              accept=".jpg, image/*"
+              v-model="selectedImage"
+              borderless
+              use-chips
+              label="Seleccionar imagen"
+              clearable
+              standout
               v-if="!selectedImage && !canUpload"
               bg-color="white"
-              style="height: 50px; width: 55px; position: absolute; top: 90%; left: 75%; transform: translate(-50%, -50%); justify-content: center;"
+              flat 
             >
             <q-tooltip>Selecciona tu imagen</q-tooltip>
 
               <template v-slot:prepend>
-                <q-icon name="add_a_photo" color="black" size="25px" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" />
 
               </template>
             </q-file>
-
             <q-btn
-                  v-if="selectedImage"
-                  color="cyan-3"
-                  label="Subir imagen"
-                  icon="cloud_upload"
-                  @click.prevent="uploadImage"
-                  :disable="!canUpload"
-                  :loading="isUploading"
-                  style="height: 40px; width: 170px; position: absolute; top: 107%; left: 52%; transform: translate(-50%, -50%);"
-                >
+  color="blue"
+  label="Subir imagen"
+  @click.prevent="uploadImage"
+  :disable="!selectedImage || !canUpload"
+  :loading="isUploading"
+  flat 
+>
                 <q-tooltip>Da click para subir tu imagen</q-tooltip>
               </q-btn>
+                    </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+           
+
+           
           </div>
 
                 <q-card-section class="q-mt-xl q-ml-xl">
@@ -76,7 +109,7 @@ import { getS3FileUrl } from "src/services/profiles.js";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from "pinia";
 import { useRequestUser } from "src/stores/requestUser";
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch, onUnmounted } from "vue";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { getUserImagesPath } from "src/utils/folderPaths";
 import { getAge } from "src/utils/operations";
@@ -86,10 +119,12 @@ const useLocalStorage = useLocalStorageStore();
 const useRequest = useRequestUser();
 const useAuth = useAuthStore();
 const selectedImage = ref();
+const newImage = ref();
 
 const { user } = storeToRefs(useAuth);
 const { savedApplication } = storeToRefs(useRequest);
 
+const fixed = ref(false)
 const userName = ref("");
 const fullName = ref("Nombre completo");
 const specialization = ref("");
@@ -111,6 +146,19 @@ const getUserImage = computed(() => {
   } else {
     return getS3FileUrl(getUserImagesPath, photoUUID.value);
   }
+});
+
+watch(newImage, (newValue) => {
+  selectedImage.value = newValue;
+});
+
+const stopWatch = watch(newImage, (newValue) => {
+  selectedImage.value = newValue;
+});
+
+// Al finalizar la instancia del componente, detén el watcher
+onUnmounted(() => {
+  stopWatch();
 });
 
 const setUserInfo = () => {

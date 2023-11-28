@@ -11,8 +11,8 @@
     row-key="name"
     :loading="loading"
     :filter="filter"
-    loading-label="Cargando puestos..."
-    rows-per-page-label="Puestos por página"
+    loading-label="Cargando herramientas..."
+    rows-per-page-label="Herramientas por página"
     :table-header-class="{ 'table-header-style': [true] }"
     :table-class="{ 'table-body-style': [true] }"
     class="my-sticky-header-table q-pa-md"
@@ -131,8 +131,8 @@
         <span class="q-ml-sm text-h6 text-weight-regular">
           {{
             isToolActive === 1
-              ? "¿Quieres desactivar este puesto?"
-              : "¿Quieres activar este puesto?"
+              ? "¿Quieres desactivar esta herramienta?"
+              : "¿Quieres activar esta herramienta?"
           }}
         </span>
       </q-card-section>
@@ -236,7 +236,7 @@ const deleteDialog = ref(false);
 const selectedJob = ref();
 const showDeletedJobs = ref(false);
 const filter = ref("");
-const noDataLabel = ref("No hay puestos existentes");
+const noDataLabel = ref("No hay herramiemtas existentes");
 const loading = ref(false);
 const totalTableRows = ref([]);
 const disableCheckbox = ref(false);
@@ -291,8 +291,8 @@ const getDesignStatusJob = (props) => {
     buttonIcon: active === 1 ? "delete" : "restore",
     dialogText:
       active === 1
-        ? "¿Quieres eliminar este puesto?"
-        : "¿Quieres activar este puesto?",
+        ? "¿Quieres eliminar esta herramienta?"
+        : "¿Quieres activar esta herramienta?",
   };
 };
 
@@ -362,8 +362,8 @@ const confirmDeleteTool = async () => {
       $q.notify({
         type: "positive",
         message: selectedTool.value.active
-          ? "El puesto se ha desactivado correctamente"
-          : "El puesto se ha activado correctamente",
+          ? "La herramienta se ha desactivado correctamente"
+          : "La herramienta se ha activado correctamente",
         position: "top",
         timeout: 5000,
         actions: [{ label: "Cerrar", color: "yellow" }],
@@ -382,7 +382,7 @@ const confirmDeleteTool = async () => {
       );
       $q.notify({
         type: "negative",
-        message: "Hubo un problema al desactivar el puesto",
+        message: "Hubo un problema al desactivar la herramienta",
         position: "top",
         timeout: 5000,
         actions: [{ label: "Cerrar", color: "yellow" }],
