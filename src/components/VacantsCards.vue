@@ -147,10 +147,11 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from "pinia";
-import { getImageSource } from "src/services/profiles.js"
 import { getDefaultJobUUID, getDefaultPath, getJobImagesPath } from "src/utils/folderPaths";
 import axios from "axios";
 import { getS3FileUrl } from "src/services/profiles.js";
+import { getRequisitionsByState } from "src/services/requisition";
+import { getJobById } from "src/services/jobs";
 
 const useAuth = useAuthStore();
 const router = useRouter();
@@ -178,25 +179,20 @@ onMounted(() => {
 
 const fetchVacants = async () => {
   try {
-    const notifyRequisitions = $q.notify({
-      type: "ongoing",
-      message: "Cargando vacantes...",
-      position: "bottom",
-    });
+    $q.loading.show({message: "Cargando vacantes..."})
     
-    const request = await axios.get(`/requisicion/estado/P`);
+    const requisitions = await getRequisitionsByState("P");
 
-    if (request.status === 200) {
-      currentVacants.value = request.data;
-      console.log(request.data);
-      notifyRequisitions();
-      if(request.data.length === 0){
+    if (requisitions) {
+      currentVacants.value = requisitions;
+      if(requisitions.length === 0){
         router.replace("/userHome/sin-vacantes")
-        
       }
     } 
   } catch (error) {
     console.log(error);
+  } finally{
+    $q.loading.hide();
   }
 };
 
@@ -206,11 +202,10 @@ const fetchJobDetails = async (jobId, itemId) => {
   jobDetails.value = null;
   try {
 
-    const request = await axios.get(`/puestos/buscar/${jobId}`);
+    const job = await getJobById(jobId);
 
-    if (request.status === 200) {
-      jobDetails.value = request.data;
-      console.log(jobDetails.value)
+    if (job) {
+      jobDetails.value = job;
     }
   } catch (error) {
     console.log(error);

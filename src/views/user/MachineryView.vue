@@ -292,6 +292,7 @@ import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
+import { getAllMachineryActive } from "src/services/machineryTools";
 
 const $q = useQuasar();
 const useRequest = useRequestUser();
@@ -307,27 +308,21 @@ const {
   updatingApplication,
 } = storeToRefs(useRequest);
 
-const machinery = ref([
-  "Rectificadora",
-  "Torno",
-  "Torno CNC",
-  "Centro de maquinado",
-  "Fresadora",
-  "Fresadora CNC",
-  "Mandriladora",
-  "Mandriladora CNC",
-  "Máquina de soldar",
-  "Otro",
-]);
+const machinery = ref([]);
 
-const tools = ref(["Mecánica", "Neumática", "Eléctrica", "Hidráulica"]);
+const tools = ref([]);
 
-const measuringInstruments = ref(["Manuales", "Eléctricos / Electrónicos"]);
+const measuringInstruments = ref([]);
 
-const otherTools = ref(["Computadora", "Copiadora"]);
+const otherTools = ref([]);
 
 onMounted(() => {
-  loadLocalStore();
+  
+  fillCatalog();
+
+  if(!viewingApplication.value && !updatingApplication.value){
+    loadLocalStore();
+  }
 
   if (viewingApplication.value || updatingApplication.value) {
     setSavedStoredValues();
@@ -338,6 +333,42 @@ onMounted(() => {
   sortAlphabetical(measuringInstruments.value);
   sortAlphabetical(tools.value);
 });
+
+const fillCatalog = async () => {
+
+  if(viewingApplication.value)
+  return;
+
+  try {
+    const catalog = await getAllMachineryActive()
+    console.log(catalog);
+
+    if(catalog) {
+      catalog.forEach(element => {
+        switch (element.type) {
+          case "MA":
+            machinery.value.push(element.name); 
+            break;
+          case "HE":
+            tools.value.push(element.name); // Assuming tools is a ref
+            break;
+          case "IN":
+            measuringInstruments.value.push(element.name); // Assuming measuringInstruments is a ref
+            break;
+          case "OT":
+            otherTools.value.push(element.name);
+            break;
+          default:
+            break;
+        }
+      })
+
+    }
+  } catch (error) {
+    
+  }
+
+}
 
 const setSavedStoredValues = () => {
   if (machineryData.value.length === 0) {
@@ -506,14 +537,7 @@ const removeOtherTool = (item) => {
   sortAlphabetical(otherTools.value);
 };
 
-const sortAlphabetical = (array, exclude) => {
-  if (exclude) {
-    const sortedArray = array.filter((item) => item !== "Otro");
-    sortedArray.sort((a, b) => a.localeCompare(b));
-    sortedArray.push("Otro");
-    array.splice(0, array.length, ...sortedArray);
-    return;
-  }
+const sortAlphabetical = (array) => {
   array.sort((a, b) => a.localeCompare(b));
 };
 

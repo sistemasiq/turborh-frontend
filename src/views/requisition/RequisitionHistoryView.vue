@@ -191,7 +191,7 @@
           @click.prevent="
             showDetails(row.numRequisition, row.staffName, row.jobId, true)
           "
-          :style="row.state !== 'DC' ? 'visibility:hidden' : ''"
+          :style="canEditRequisition(row) ? '' : 'visibility:hidden'"
         >
           <Tooltip v-if="row.state !== 'C'" :text="'Editar requisición'" />
         </q-btn>
@@ -337,7 +337,7 @@ import {
   getRequisitionsByPersonalId,
   updateRequisitionStateByAdmin,
   updateRequisitionState,
-  cancelRequisition
+  cancelRequisition,
 } from "src/services/requisition";
 
 const useLocalStorage = useLocalStorageStore();
@@ -460,8 +460,18 @@ const stateChangeNotifyText = {
   P: "Requisición publicada correctamente",
 };
 
+const canEditRequisition = (row) => {
+  if (row.state !== "DC") return false;
+
+  if (isAdmin.value) {
+    return user.value.personalId === row.personalId ? true : false;
+  }
+
+  return true;
+};
 
 const openAuthRequisitionDialogue = (row) => {
+  console.log(row);
   showAuthRequisitionDialogue.value = true;
   selectedRequisition.value = row;
 };
@@ -524,7 +534,10 @@ const updateRequisitionAuthorization = async (requisition) => {
 
   try {
     $q.loading.show();
-    const newState = await updateRequisitionStateByAdmin(requisition.numRequisition, isIngUpdating);
+    const newState = await updateRequisitionStateByAdmin(
+      requisition.numRequisition,
+      isIngUpdating
+    );
 
     console.log(newState);
 
@@ -542,7 +555,10 @@ const updateRequisitionAuthorization = async (requisition) => {
 const updateRequisitionStateTo = async (requisition, newState) => {
   try {
     $q.loading.show();
-    const updatedStateCorrectly = await updateRequisitionState(newState, requisition.numRequisition)
+    const updatedStateCorrectly = await updateRequisitionState(
+      newState,
+      requisition.numRequisition
+    );
 
     if (updatedStateCorrectly) {
       requisition.state = newState;
@@ -558,8 +574,10 @@ const updateRequisitionStateTo = async (requisition, newState) => {
 const disableRequisition = async (requisition) => {
   try {
     $q.loading.show();
-    
-    const requisitionCanceled = await cancelRequisition(requisition.numRequisition);
+
+    const requisitionCanceled = await cancelRequisition(
+      requisition.numRequisition
+    );
 
     if (requisitionCanceled) {
       requisition.state = "C";
@@ -569,7 +587,9 @@ const disableRequisition = async (requisition) => {
         await onCancelSendEmailToCandidates();
       }
 
-      $q.notify(notifyPositive("La requisición ha sido cancelada correctamente"));
+      $q.notify(
+        notifyPositive("La requisición ha sido cancelada correctamente")
+      );
     }
   } catch (error) {
     console.log(error);
@@ -697,8 +717,9 @@ const showDetails = async (
   updatingRequisition.value = isUpdating;
 
   try {
-
-    const requisitionSearched = await getRequisitionByNum(numRequisitionDetails.value);
+    const requisitionSearched = await getRequisitionByNum(
+      numRequisitionDetails.value
+    );
 
     if (requisitionSearched) {
       requisitionData.value = requisitionSearched;
@@ -711,6 +732,12 @@ const showDetails = async (
 };
 
 const fetchRequisitions = async () => {
+  const userStored = useLocalStorage.load("user");
+
+  if (userStored) {
+    user.value = userStored;
+  }
+
   try {
     loading.value = true;
 

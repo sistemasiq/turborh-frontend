@@ -3,7 +3,7 @@ import { requestSuccessfull } from "src/utils/operations";
 
 export const createRequisition = async (requisitionData) => {
   try {
-    const request = await axios.post(`requisicion`, requisitionData);
+    const request = await axios.post(`requisitions`, requisitionData);
 
     if (requestSuccessfull(request.status)) {
       return request.data;
@@ -17,7 +17,7 @@ export const createRequisition = async (requisitionData) => {
 
 export const getAllRequisitions = async () => {
   try {
-    const request = await axios.get(`requisicion`);
+    const request = await axios.get(`requisitions`);
 
     if (requestSuccessfull(request.status)) {
       return request.data;
@@ -31,7 +31,7 @@ export const getAllRequisitions = async () => {
 
 export const getRequisitionByNum = async (numRequisition) => {
   try {
-    const request = await axios.get(`requisicion/${numRequisition}`);
+    const request = await axios.get(`requisitions/${numRequisition}`);
 
     if (requestSuccessfull(request.status)) {
       return request.data;
@@ -45,7 +45,7 @@ export const getRequisitionByNum = async (numRequisition) => {
 
 export const getRequisitionsByPersonalId = async (personalId) => {
   try {
-    const request = await axios.get(`requisicion/personal/${personalId}`);
+    const request = await axios.get(`requisitions/personal/${personalId}`);
 
     if (requestSuccessfull(request.status)) {
       return request.data;
@@ -59,7 +59,7 @@ export const getRequisitionsByPersonalId = async (personalId) => {
 
 export const getRequisitionsByState = async (state) => {
   try {
-    const request = await axios.get(`requisicion/estado/${state}`);
+    const request = await axios.get(`requisitions/state/${state}`);
 
     if (requestSuccessfull(request.status)) {
       return request.data;
@@ -73,7 +73,7 @@ export const getRequisitionsByState = async (state) => {
 
 export const updateRequisition = async (requisitionData) => {
   try {
-    const request = await axios.put(`requisicion`, requisitionData);
+    const request = await axios.put(`requisitions`, requisitionData);
 
     if (requestSuccessfull(request.status)) {
       return true;
@@ -85,9 +85,9 @@ export const updateRequisition = async (requisitionData) => {
   }
 };
 
-export const updateRequisitionStateByAdmin = async (numRequisition, madeByIng) => {
+export const updateRequisitionStateByAdmin = async (numRequisition, updateByIng) => {
     try {
-        const request = await axios.put(`requisicion/estado/${numRequisition}/hecho-por-ing/${madeByIng}`)
+        const request = await axios.put(`requisitions/${numRequisition}/by-ing/${updateByIng}`)
 
         if(requestSuccessfull(request.status)){
             return request.data;
@@ -103,7 +103,7 @@ export const updateRequisitionStateByAdmin = async (numRequisition, madeByIng) =
 export const updateRequisitionState = async (state, numRequisition) => {
     try {
 
-        const request = await axios.put(`requisicion/estado/${state}/num/${numRequisition}`)
+        const request = await axios.put(`requisitions/state/${state}/num/${numRequisition}`)
 
         if(requestSuccessfull(request.status)){
             return true;
@@ -118,7 +118,7 @@ export const updateRequisitionState = async (state, numRequisition) => {
 
 export const updateRequisitionNotes = async (newNote, numRequisition) => {
     try {
-        const request = await axios.put(`requisicion/${numRequisition}/nota/${newNote}`)
+        const request = await axios.put(`requisitions/${numRequisition}/note/${newNote}`)
 
         if(requestSuccessfull(request.status)){
             return true;
@@ -134,7 +134,7 @@ export const updateRequisitionNotes = async (newNote, numRequisition) => {
 export const cancelRequisition = async (numRequisition) => {
 
     try {
-        const request = await axios.delete(`requisicion/${numRequisition}`)
+        const request = await axios.delete(`requisitions/${numRequisition}`)
 
         if(requestSuccessfull(request.status)){
             return true;
