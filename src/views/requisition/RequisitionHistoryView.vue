@@ -329,8 +329,8 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { sendEmail, canceledRequisition } from "src/services/mail";
 import Tooltip from "src/components/Tooltip.vue";
 import { createRequisitionReport } from "src/services/report";
+import { getCandidatesByRequisitionId } from "src/services/candidates";
 
-import axios from "axios";
 import {
   getAllRequisitions,
   getRequisitionByNum,
@@ -369,8 +369,7 @@ const {
   user,
   hasPermitRequisitionAuthorization,
   isIng,
-  isLic,
-  isBoss,
+  isLic
 } = storeToRefs(useAuth);
 
 const {
@@ -678,13 +677,10 @@ const columns = [
 const onCancelFetchApplicants = async () => {
   try {
     isFetchingCandidates.value = true;
-    const request = await axios.get(
-      `candidatos/${selectedRequisition.value.id}`
-    );
+    const candidates = await getCandidatesByRequisitionId(selectedRequisition.value.id);
 
-    if (request.status === 200) {
-      selectedRequisitionCandidates.value = request.data;
-      console.log(selectedRequisitionCandidates.value);
+    if (candidates) {
+      selectedRequisitionCandidates.value = candidates;
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);

@@ -86,7 +86,7 @@ const router = createRouter({
       name: "agenda",
       component: () => import("../views/AgendaView.vue"),
       beforeEnter: authGuard
-      
+
     },
 
     {

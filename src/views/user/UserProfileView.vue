@@ -58,7 +58,7 @@
               standout
               v-if="!selectedImage && !canUpload"
               bg-color="white"
-              flat 
+              flat
             >
               <q-tooltip>Selecciona tu imagen</q-tooltip>
 
@@ -71,7 +71,7 @@
   @click.prevent="uploadImage"
   :disable="!selectedImage || !canUpload"
   :loading="isUploading"
-  flat 
+  flat
 >
                 <q-tooltip>Da click para subir tu imagen</q-tooltip>
               </q-btn>
@@ -116,7 +116,7 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { getUserImagesPath } from "src/utils/folderPaths";
 import { getAge } from "src/utils/operations";
 import { updateUserImage } from "src/services/user";
-import axios from "axios";
+import { uploadFile, updateFile } from "src/services/files";
 
 const useLocalStorage = useLocalStorageStore();
 const useRequest = useRequestUser();
@@ -200,39 +200,21 @@ const setUserInfo = () => {
 };
 
 const uploadImage = async () => {
-  const formData = new FormData();
-
-  formData.append("file", selectedImage.value);
-  formData.append("folderPath", getUserImagesPath);
 
   try {
     isUploading.value = true;
 
-    let request;
+    let newFileName;
     if (user.value.photoUUID) {
-      console.log("updated file");
-      request = await axios.put(
-        `/updateFile/${user.value.photoUUID}`,
-        formData,
-        {
-          headers: {
-            file: "multipart/form-data",
-          },
-        }
-      );
-      if (request.status === 200) {
+      newFileName = await updateFile(user.value.photoUUID, selectedImage.value, getUserImagesPath);
+      if (newFileName) {
         selectedImage.value = "";
       }
     } else {
-      console.log("updated file");
-      request = await axios.post("/upload", formData, {
-        headers: {
-          file: "multipart/form-data",
-        },
-      });
+      newFileName = await uploadFile(selectedImage.value, getUserImagesPath);
     }
-    if (request.status === 200) {
-      await updateUserImageInDatabase(request.data);
+    if (newFileName) {
+      await updateUserImageInDatabase(newFileName);
     }
   } catch (error) {
     console.log(error);

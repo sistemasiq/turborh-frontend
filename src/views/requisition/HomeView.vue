@@ -143,7 +143,8 @@
               <q-item-section>
                 <q-item-label>Maquinaría y herramientas</q-item-label>
                 <q-item-label caption
-                  >Modifica el catalogo de maquinaría y herramientas</q-item-label
+                  >Modifica el catalogo de maquinaría y
+                  herramientas</q-item-label
                 >
               </q-item-section>
             </q-item>
@@ -159,8 +160,7 @@
           </q-item-section>
         </q-item>
       </q-list>
-      
-      
+
       <q-btn class="logout-button" @click="logout" flat>
         <q-icon name="logout" class="logout-icon" />
         <label>Cerrar Sesión</label>
@@ -188,6 +188,8 @@ import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { storeToRefs } from "pinia";
 import { getAdminImagesPath, getAssetsPath } from "src/utils/folderPaths";
 import { useRequisitionStore } from "src/stores/requisition";
+import { uploadFile, updateFile } from "src/services/files";
+import { updateUserImage } from "src/services/user";
 import axios from "axios";
 
 const $q = useQuasar();
@@ -199,7 +201,9 @@ const useLocalStorage = useLocalStorageStore();
 const drawer = ref(false);
 const componentKey = ref(0);
 const userName = ref("");
-const { showingDetails, updatingRequisition } = storeToRefs(useRequisitionDetails);
+const { showingDetails, updatingRequisition } = storeToRefs(
+  useRequisitionDetails
+);
 const { user, logged, isRh, hasPermitRequisitionCreation } =
   storeToRefs(useAuth);
 
@@ -238,7 +242,6 @@ const onNewRequisitionClicked = () => {
   router.push("/home/nueva-requisicion-1");
   showingDetails.value = false;
   updatingRequisition.value = false;
-
 };
 
 const uploadImage = async () => {
@@ -249,44 +252,32 @@ const uploadImage = async () => {
 
   try {
     $q.loading.show();
-    let request;
+    let newFileName;
     if (user.value.photoUUID) {
-      console.log("updated file");
-      request = await axios.put(
-        `/updateFile/${user.value.photoUUID}`,
-        formData,
-        {
-          headers: {
-            file: "multipart/form-data",
-          },
-        }
+      newFileName = await updateFile(
+        user.value.photoUUID,
+        selectedImage.value,
+        getAdminImagesPath
       );
-      if (request.status === 200) {
+      if (newFileName) {
         selectedImage.value = "";
       }
     } else {
-      console.log("updated file");
-      request = await axios.post("/upload", formData, {
-        headers: {
-          file: "multipart/form-data",
-        },
-      });
+      newFileName = await uploadFile(selectedImage.value, getAdminImagesPath);
     }
-    if (request.status === 200) {
-      updateUserImage(request.data);
+    if (newFileName) {
+      updateUserImageInDatabase(newFileName.data);
     }
   } catch (error) {
     console.log(error);
   }
 };
 
-const updateUserImage = async (imageUUID) => {
+const updateUserImageInDatabase = async (imageUUID) => {
   try {
-    const request = await axios.put(
-      `/auth/update/image/${imageUUID}/user/${user.value.id}`
-    );
+    const updatedImage = await updateUserImage(user.value.id, imageUUID);
 
-    if (request.status === 200) {
+    if (updatedImage) {
       user.value.photoUUID = imageUUID;
       useLocalStorage.save("user", user.value);
       photoUUID.value = imageUUID;
