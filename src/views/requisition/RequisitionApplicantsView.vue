@@ -125,9 +125,9 @@ import { useNotesStore } from "src/stores/notes";
 import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
 import { getCandidatesByRequisitionId } from "src/services/candidates";
-import axios from "axios";
 import router from "src/router";
 import { downloadFile } from "src/services/files";
+import { getUserApplicationById, getUserApplicationNotesById } from "src/services/userApplication";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -242,10 +242,10 @@ const addNotes = (applicationId) => {
 const fetchUserApplication = async (applicationId) => {
   try {
     $q.loading.show();
-    const request = await axios.get(`/solicitud/${applicationId}`);
+    const userApplication = await getUserApplicationById(applicationId);
 
-    if (request.status === 200) {
-      savedApplication.value = request.data;
+    if (userApplication) {
+      savedApplication.value = userApplication;
       useLocalStorage.save("savedApplication", savedApplication.value);
 
       await fetchUserApplicationNotes(applicationId);
@@ -261,19 +261,19 @@ const fetchUserApplication = async (applicationId) => {
 
 const fetchUserApplicationNotes = async (applicationId) => {
   try {
-    const request = await axios.get(`/solicitud/notas/${applicationId}`);
-    if (request.status === 200) {
-      notesFrontPage.value = request.data.noteFrontPage;
-      notesPersonalData.value = request.data.notePersonalData;
-      notesPersonalDataTwo.value = request.data.notePersonalDataTwo;
-      notesRecruitingMeans.value = request.data.noteRecruitingMeans;
-      notesDocuments.value = request.data.noteDocuments;
-      notesEducation.value = request.data.noteEducation;
-      notesReferences.value = request.data.noteReferences;
-      notesFamily.value = request.data.noteFamilyData;
-      notesMachinery.value = request.data.noteMachinery;
-      notesOffices.value = request.data.noteSkills;
-      notesLaboralExperience.value = request.data.noteLaboralExperience;
+    const notes = await getUserApplicationNotesById(applicationId);
+    if (notes) {
+      notesFrontPage.value = notes.noteFrontPage;
+      notesPersonalData.value = notes.notePersonalData;
+      notesPersonalDataTwo.value = notes.notePersonalDataTwo;
+      notesRecruitingMeans.value = notes.noteRecruitingMeans;
+      notesDocuments.value = notes.noteDocuments;
+      notesEducation.value = notes.noteEducation;
+      notesReferences.value = notes.noteReferences;
+      notesFamily.value = notes.noteFamilyData;
+      notesMachinery.value = notes.noteMachinery;
+      notesOffices.value = notes.noteSkills;
+      notesLaboralExperience.value = notes.noteLaboralExperience;
     }
   } catch (error) {}
 };

@@ -190,7 +190,6 @@ import { getAdminImagesPath, getAssetsPath } from "src/utils/folderPaths";
 import { useRequisitionStore } from "src/stores/requisition";
 import { uploadFile, updateFile } from "src/services/files";
 import { updateUserImage } from "src/services/user";
-import axios from "axios";
 
 const $q = useQuasar();
 const router = useRouter();

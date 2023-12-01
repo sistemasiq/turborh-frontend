@@ -35,7 +35,7 @@ import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 import { useRequestUser } from "src/stores/requestUser";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
-import axios from "axios";
+import { updateUserApplicationNotes } from "src/services/userApplication";
 
 const $q = useQuasar();
 const useNotes = useNotesStore();
@@ -47,6 +47,7 @@ const previousNote = ref("");
 
 onMounted(() => {
   previousNote.value = note.value;
+  note.value = "null" || null ? "" : note.value;
 });
 
 
@@ -100,10 +101,10 @@ const saveNote = async (currentRoute) => {
 
   if (!noteStore) return;
   noteStore.value = note.value;
-  
+
   if(note.value === previousNote.value)
   return;
-  
+
   try {
     const notes = {
       applicationId: savedApplication.value.solicitud_id,
@@ -120,9 +121,9 @@ const saveNote = async (currentRoute) => {
       noteLaboralExperience: notesLaboralExperience.value,
     };
 
-    const request = await axios.put("/solicitud/notas", notes);
+    const notesUpdated = await updateUserApplicationNotes(notes);
 
-    if (request.status === 201) {
+    if (notesUpdated) {
       $q.notify(notifyPositive("Nota guardada.", 600));
     }
   } catch (error) {

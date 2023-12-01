@@ -423,9 +423,9 @@ import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { getS3UploadUrl } from "src/services/profiles.js";
 import { getJobImagesPath } from "src/utils/folderPaths";
-import axios from "axios";
 import { getAllDepartments, createJob, updateJob, getJobById } from "src/services/jobs";
 import { notifyNegative } from "src/utils/notifies";
+import { updateFile, uploadFile } from "src/services/files";
 
 const router = useRouter();
 const $q = useQuasar();
@@ -481,10 +481,6 @@ const handleSelectedImage = (files) => {
 };
 
 const uploadUserFiles = async () => {
-  const formData = new FormData();
-  formData.append("file", jobImg.value);
-  formData.append("folderPath", getJobImagesPath);
-
   const updateWithoutImage = jobUUID.value === defaultUUID && !jobImg.value;
 
   if(updateWithoutImage){
@@ -501,25 +497,17 @@ const uploadUserFiles = async () => {
 
   try {
     $q.loading.show();
-    let request;
+    let file;
 
     if (jobUUID.value === defaultUUID) {
-      request = await axios.post("/upload", formData, {
-        headers: {
-          file: "multipart/form-data",
-        },
-      });
+      file = await uploadFile(jobImg.value, getJobImagesPath);
     } else{
-      request = await axios.put(`/updateFile/${jobUUID.value}`, formData, {
-        headers: {
-          file: "multipart/form-data",
-        },
-      });
+      file = await updateFile(jobUUID.value, jobImg.value, getJobImagesPath);
     }
 
-    if (request.status === 200) {
-      changeJobState(request.data);
-      jobUUID.value = request.data;
+    if (file) {
+      changeJobState(file);
+      jobUUID.value = file.data;
     }
   } catch (error) {
     console.log(error);

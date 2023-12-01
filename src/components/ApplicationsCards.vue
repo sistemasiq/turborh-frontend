@@ -78,7 +78,6 @@ import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { getDefaultJobUUID, getDefaultPath, getJobImagesPath } from "src/utils/folderPaths";
-import axios from "axios";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { getCandidateJobs, disableCandidate } from "src/services/candidates";

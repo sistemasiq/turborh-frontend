@@ -150,12 +150,12 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
-import axios from "axios";
 import { getAdminRoute, getUserRoute, getS3FileUrl } from "src/services/profiles.js";
 import { notifyPositive, notifyNegative } from "src/utils/notifies.js";
 import { getAssetsPath } from "src/utils/folderPaths";
 import { useRequestUser } from "src/stores/requestUser";
 import { logUser } from "src/services/user";
+import { getUserApplicationById } from "src/services/userApplication";
 
 
 const useAuth = useAuthStore();
@@ -234,10 +234,10 @@ const fetchUserApplication = async() => {
   return;
 
   try {
-    const request = await axios.get(`/solicitud/${user.value.applicationId}`);
+    const userApplication = await getUserApplicationById(user.value.applicationId)
 
-    if (request.status === 200) {
-      savedApplication.value = request.data;
+    if (userApplication) {
+      savedApplication.value = userApplication;
       useLocalStorage.save("savedApplication", savedApplication.value);
       $q.notify(
         notifyPositive(`Bienvenido`));

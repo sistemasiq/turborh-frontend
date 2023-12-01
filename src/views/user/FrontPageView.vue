@@ -107,7 +107,7 @@
                   style="color: white"
                   :disable="viewingApplication"
                 />
-                
+
               </div>
             </q-form>
             <div
@@ -122,7 +122,7 @@
           </div>
         </div>
 
-     
+
         <q-btn
           v-if="!viewingApplication && !updatingApplication"
           class="btn-clean q-mt-xl"
@@ -133,7 +133,7 @@
           icon="cleaning_services"
           @click.prevent="clean"
         />
-        
+
       </q-card-section>
     </q-card>
     <ButtonApplicationStatus v-if="updatingApplication" />
@@ -158,8 +158,6 @@ const useAuth = useAuthStore();
 const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();
 
-const creatingApplication = ref(true);
-
 const priorityOne = ref(false);
 const priorityTwo = ref(false);
 const priorityThree = ref(false);
@@ -176,7 +174,7 @@ const { user, isRh, getUserPhotoUUID } = storeToRefs(useAuth);
 
 
 const getUserImage = computed(() => {
-  
+
   if(!isRh.value){
     photoUUID.value = getUserPhotoUUID.value;
   }
@@ -247,7 +245,7 @@ const setSavedStoredValues = () => {
     console.log("Theres no saved application");
     return;
   }
-  
+
   name.value = savedApplication.value.nombre;
   firstLastName.value = savedApplication.value.apellido_paterno;
   secondLastName.value = savedApplication.value.apellido_materno;
@@ -317,7 +315,7 @@ const setEducationSavedValues = () => {
   educationData.value.secondary = savedApplication.value.secundaria;
   educationData.value.highSchool = savedApplication.value.bachillerato;
   educationData.value.professional = savedApplication.value.profesional;
-  
+
   educationData.value.master = savedApplication.value.maestria;
   educationData.value.other = savedApplication.value.otro;
   educationData.value.speciality = savedApplication.value.especialidad;
