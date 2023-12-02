@@ -229,7 +229,7 @@ const loadLocalStorage = () => {
     user.value = userStored;
     userName.value = user.value.userName;
     photoUUID.value =
-      user.value.photoUUID === null ? photoUUID.value : user.value.photoUUID;
+      user.value.photoUUID === null || user.value.photoUUID === "" ? photoUUID.value : user.value.photoUUID;
   }
 
   console.log(user.value);
@@ -244,10 +244,6 @@ const onNewRequisitionClicked = () => {
 };
 
 const uploadImage = async () => {
-  const formData = new FormData();
-
-  formData.append("file", selectedImage.value);
-  formData.append("folderPath", getAdminImagesPath);
 
   try {
     $q.loading.show();
@@ -264,11 +260,14 @@ const uploadImage = async () => {
     } else {
       newFileName = await uploadFile(selectedImage.value, getAdminImagesPath);
     }
+    console.log("file name: " + newFileName);
     if (newFileName) {
-      updateUserImageInDatabase(newFileName.data);
+      updateUserImageInDatabase(newFileName);
     }
   } catch (error) {
     console.log(error);
+  } finally{
+    $q.loading.hide();
   }
 };
 

@@ -16,7 +16,7 @@
      <p class="q-ml-md q-mt-xs">Num.Vacantes: {{ item.vacancyNumber }}</p>
     </div>
     <img
-      :src="getS3FileUrl(getDefaultPath(item.jobUUID, getJobImagesPath), getDefaultJobUUID(item.jobUUID))"
+      :src="getS3FileUrl(getJobImagesPath, getDefaultJobUUID(item.jobUUID))"
       style="max-width: 100%; max-height: 260px; border-radius: 30px 30px 0 0"
     />
     <q-card-section>
