@@ -267,8 +267,8 @@ import NoteComponent from "src/components/NoteComponent.vue";
 import { getAssetsPath } from "src/utils/folderPaths";
 import { getS3FileUrl } from "src/services/profiles.js";
 import Tooltip from "src/components/Tooltip.vue";
-import axios from "axios";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import { updateUserApplicationState } from "src/services/userApplication";
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
@@ -377,9 +377,9 @@ const onDeleteApplication = async () => {
   };
 
   try {
-    const request = await axios.put("/solicitud/estado", userData);
+    const updatedState = await updateUserApplicationState(userData);
 
-    if (request.status === 200) {
+    if (updatedState) {
       const message = activeApplication.value
         ? "Su solicitud ha sido eliminada correctamente"
         : "Su solicitud ha sido activada correctamente";

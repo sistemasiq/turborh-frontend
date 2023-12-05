@@ -14,8 +14,8 @@ export const getS3UploadUrl = () => {
 
 export const getS3FileUrl = (folderPath, fileName) => {
   return dev
-    ? `http://localhost:5000/get/${folderPath}/file/${fileName}`
-    : `http://192.168.20.59:8181/get/${folderPath}/file/${fileName}`;
+    ? `http://localhost:5000/files/${fileName}/path/${folderPath}`
+    : `http://192.168.20.59:8181/files/${fileName}/path/${folderPath}`;
 };
 
 export const getImageSource = (imgName) => {

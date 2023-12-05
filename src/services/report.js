@@ -5,7 +5,7 @@ import { getAxiosBaseUrl } from "./profiles";
 export const createRequisitionReport = async (numRequisition) => {
   try {
     const request = await axios.get(
-      `reporte/requisicion?numRequisition=${numRequisition}&endpointURL=${getAxiosBaseUrl()}`,
+      `reports/requisition?numRequisition=${numRequisition}&endpointURL=${getAxiosBaseUrl()}`,
       {
         responseType: "arraybuffer",
       }
@@ -29,7 +29,7 @@ export const createUserApplicationReport = async (
 ) => {
   try {
     const request = await axios.get(
-      `reporte/solicitud?id=${applicationId}&addNotes=${createReportWithNotes}&endpointURL=${getAxiosBaseUrl()}`,
+      `reports/user-application?id=${applicationId}&addNotes=${createReportWithNotes}&endpointURL=${getAxiosBaseUrl()}`,
       {
         responseType: "arraybuffer",
       }

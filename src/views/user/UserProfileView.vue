@@ -18,67 +18,77 @@
             >
             </q-img>
 
-            <q-btn @click="fixed = !fixed"
-            borderless
+            <q-btn
+              @click="fixed = !fixed"
+              borderless
               rounded
               clearable
               standout
               outlined
               bg-color="white"
               icon="add_a_photo"
-            style="background-color: rgb(255, 255, 255); height: 50px; width: 55px; position: absolute; top: 90%; left: 75%; transform: translate(-50%, -50%); justify-content: center;">
-                      </q-btn>
+              style="
+                background-color: rgb(255, 255, 255);
+                height: 50px;
+                width: 55px;
+                position: absolute;
+                top: 90%;
+                left: 75%;
+                transform: translate(-50%, -50%);
+                justify-content: center;
+              "
+            >
+            </q-btn>
 
             <q-dialog v-model="fixed">
-      <q-card>
-        <q-card-section>
-          <div class="text-h5">Selección de imagen de perfil</div>
-        </q-card-section>
+              <q-card>
+                <q-card-section>
+                  <div class="text-h5">Selección de imagen de perfil</div>
+                </q-card-section>
 
-        <q-separator />
-        <div  class="text text-center">La imagen seleccionada debe ser formal y seria</div>
+                <q-separator />
+                <div class="text text-center">
+                  La imagen seleccionada debe ser formal y seria
+                </div>
 
-        <q-card-section style="max-height: 50vh">
-          <q-img
-  :src="selectedImage || getUserImage"
-  style="width: 300px; height: 300px; border-radius: 160px"
-></q-img>
-        </q-card-section>
+                <q-card-section style="max-height: 50vh">
+                  <q-img
+                    :src="selectedImageURL"
+                    style="width: 300px; height: 300px; border-radius: 160px"
+                  ></q-img>
+                </q-card-section>
 
-        <q-separator />
+                <q-separator />
 
-        <q-card-actions align="right">
-          <q-file
-              accept=".jpg, image/*"
-              v-model="selectedImage"
-              borderless
-              use-chips
-              label="Seleccionar imagen"
-              clearable
-              standout
-              v-if="!selectedImage && !canUpload"
-              bg-color="white"
-              flat 
-            >
-              <q-tooltip>Selecciona tu imagen</q-tooltip>
+                <q-card-actions align="right">
+                  <q-file
+                    class="q-mr-md"
+                    accept=".jpg, image/*"
+                    v-model="selectedImage"
+                    clearable
+                    borderless
+                    label="Seleccionar imagen"
+                    bg-color="white"
+                    flat
+                    @update:model-value="updateSelectedImageURL()"
+                  >
+                    <q-tooltip>Selecciona tu imagen</q-tooltip>
 
-              <template v-slot:prepend>
-              </template>
-            </q-file>
-            <q-btn
-  color="blue"
-  label="Subir imagen"
-  @click.prevent="uploadImage"
-  :disable="!selectedImage || !canUpload"
-  :loading="isUploading"
-  flat 
->
-                <q-tooltip>Da click para subir tu imagen</q-tooltip>
-              </q-btn>
-                    </q-card-actions>
-      </q-card>
-    </q-dialog>
-
+                    <template v-slot:prepend> </template>
+                  </q-file>
+                  <q-btn
+                    color="blue"
+                    label="Subir imagen"
+                    @click.prevent="uploadImage"
+                    :disable="!selectedImage || !canUpload"
+                    :loading="isUploading"
+                    flat
+                  >
+                    <q-tooltip>Da click para subir tu imagen</q-tooltip>
+                  </q-btn>
+                </q-card-actions>
+              </q-card>
+            </q-dialog>
           </div>
 
           <q-card-section class="q-mt-xl q-ml-xl">
@@ -116,7 +126,7 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { getUserImagesPath } from "src/utils/folderPaths";
 import { getAge } from "src/utils/operations";
 import { updateUserImage } from "src/services/user";
-import axios from "axios";
+import { uploadFile, updateFile } from "src/services/files";
 
 const useLocalStorage = useLocalStorageStore();
 const useRequest = useRequestUser();
@@ -127,7 +137,7 @@ const newImage = ref();
 const { user } = storeToRefs(useAuth);
 const { savedApplication } = storeToRefs(useRequest);
 
-const fixed = ref(false)
+const fixed = ref(false);
 const userName = ref("");
 const fullName = ref("Nombre completo");
 const specialization = ref("");
@@ -137,15 +147,31 @@ const isUploading = ref(false);
 
 const photoUUID = ref("");
 
+const selectedImageURL = ref("");
+
 onMounted(() => {
   setUserInfo();
 });
 
+const updateSelectedImageURL = () => {
+
+  if(!selectedImage.value){
+    selectedImageURL.value = "";
+    return;
+  }
+
+  selectedImageURL.value = URL.createObjectURL(selectedImage.value);
+};
+
 const canUpload = computed(() => selectedImage.value);
 
 const getUserImage = computed(() => {
-  if (photoUUID.value === null || photoUUID.value === undefined) {
-    return getS3FileUrl(getUserImagesPath, "default_user_icon.png");
+  if (
+    photoUUID.value === null ||
+    photoUUID.value === undefined ||
+    photoUUID.value === ""
+  ) {
+    return getS3FileUrl(getUserImagesPath, "default.png");
   } else {
     return getS3FileUrl(getUserImagesPath, photoUUID.value);
   }
@@ -200,39 +226,26 @@ const setUserInfo = () => {
 };
 
 const uploadImage = async () => {
-  const formData = new FormData();
-
-  formData.append("file", selectedImage.value);
-  formData.append("folderPath", getUserImagesPath);
-
   try {
     isUploading.value = true;
 
-    let request;
+    let newFileName;
     if (user.value.photoUUID) {
-      console.log("updated file");
-      request = await axios.put(
-        `/updateFile/${user.value.photoUUID}`,
-        formData,
-        {
-          headers: {
-            file: "multipart/form-data",
-          },
-        }
+      newFileName = await updateFile(
+        user.value.photoUUID,
+        selectedImage.value,
+        getUserImagesPath
       );
-      if (request.status === 200) {
+      if (newFileName) {
         selectedImage.value = "";
       }
     } else {
-      console.log("updated file");
-      request = await axios.post("/upload", formData, {
-        headers: {
-          file: "multipart/form-data",
-        },
-      });
+      newFileName = await uploadFile(selectedImage.value, getUserImagesPath);
     }
-    if (request.status === 200) {
-      await updateUserImageInDatabase(request.data);
+    if (newFileName) {
+      selectedImageURL.value = ""
+      fixed.value = false;
+      await updateUserImageInDatabase(newFileName);
     }
   } catch (error) {
     console.log(error);

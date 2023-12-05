@@ -8,7 +8,7 @@ export const logUser = async (userName, password) => {
   };
 
   try {
-    const request = await axios.post(`usuarios/login`, body);
+    const request = await axios.post(`users/login`, body);
 
     if (requestSuccessfull(request.status)) {
       return request.data;
@@ -24,7 +24,7 @@ export const logUser = async (userName, password) => {
 
 export const getUserByUserName = async (userName) => {
   try {
-    const request = await axios.get(`usuarios/${userName}`);
+    const request = await axios.get(`users/${userName}`);
 
     if (requestSuccessfull(request.status)) {
       return true;
@@ -40,7 +40,7 @@ export const getUserByUserName = async (userName) => {
 
 export const    getUserByCurp = async (curp) => {
   try {
-    const request = await axios.get(`usuarios/curp/${curp}`);
+    const request = await axios.get(`users/curp/${curp}`);
 
     if (requestSuccessfull(request.status)) {
       return true;
@@ -67,7 +67,7 @@ export const createUser = async (userName, email, curp, password) => {
 
   try {
 
-    const request = await axios.post(`usuarios`, newUserData);
+    const request = await axios.post(`users`, newUserData);
 
     if (requestSuccessfull(request.status)) {
       newUserData.id = request.data;
@@ -84,7 +84,7 @@ export const createUser = async (userName, email, curp, password) => {
 
 export const updateUserImage = async (userId, imageUUID) => {
     try {
-        const request = await axios.put(`usuarios/${userId}/imagen/${imageUUID}`);
+        const request = await axios.put(`users/${userId}/imagen/${imageUUID}`);
 
         if(requestSuccessfull(request.status)) {
             return true;
@@ -106,7 +106,7 @@ export const updatePassword = async () => {
   }
 
   try {
-    const request = await axios.put(`usuarios/password`, userCredentials)
+    const request = await axios.put(`users/password`, userCredentials)
 
     if(requestSuccessfull(request.status)){
       return true;
@@ -124,7 +124,7 @@ export const updatePassword = async () => {
 export const getUserEmail = async (userName) => {
 
   try {
-    const request = await axios.get(`usuarios/email/${userName}`);
+    const request = await axios.get(`users/email/${userName}`);
 
     if(requestSuccessfull(request.status)){
 

@@ -48,8 +48,7 @@ const router = createRouter({
         { path: "vacantes", component: () => import('../views/user/VacantsJobsView.vue') },
         { path: "sin-vacantes", component: () => import('../views/NoVacanciesView.vue') }
       ],
-      //TODO: Add authGuard when finished all the routes in user home
-      // beforeEnter: authGuard
+      beforeEnter: authGuard
     },
 
     {
@@ -71,25 +70,30 @@ const router = createRouter({
     {
       path: "/nomatches",
       name: "nomatches",
-      component: () => import("../views/NoMatchesView.vue")
+      component: () => import("../views/NoMatchesView.vue"),
+      beforeEnter: authGuard
     },
 
     {
       path: "/diary",
       name: "diary",
       component: () => import("../views/DiaryView.vue"),
+      beforeEnter: authGuard
     },
 
     {
       path: "/agenda",
       name: "agenda",
       component: () => import("../views/AgendaView.vue"),
+      beforeEnter: authGuard
+
     },
 
     {
       path: "/email",
       name: "email",
       component: () => import("../views/EmailDesign.vue"),
+      beforeEnter: authGuard
     },
 
     {

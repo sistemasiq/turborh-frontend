@@ -78,9 +78,9 @@ import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { getDefaultJobUUID, getDefaultPath, getJobImagesPath } from "src/utils/folderPaths";
-import axios from "axios";
 import { useLocalStorageStore } from "src/stores/localStorage";
-import { notifyPositive } from "src/utils/notifies";
+import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import { getCandidateJobs, disableCandidate } from "src/services/candidates";
 
 const $q = useQuasar();
 const useAuth = useAuthStore();
@@ -109,7 +109,7 @@ const loadLocalStorage = () => {
   }
 
   fetchApplications();
-  
+
 }
 
 
@@ -129,23 +129,21 @@ const openDeleteApplicationDialog = (requisitionId) => {
 }
 
 const fetchApplications = async () => {
-   
+
   if(!user.value)
   return;
-  
+
   currentApplications.value = [];
   try {
 
     loadingApplications.value = true;
 
-    const request = await axios.get(
-      `candidatos/trabajos/${user.value.id}`
-    );
+    const candidateJobs = await getCandidateJobs(user.value.id);
 
-    if (request.status === 200) {
-      for (let i = 0; i < request.data.length; i++) {
-        if (request.data[i].active === 1) {
-          currentApplications.value.push(request.data[i]);
+    if (candidateJobs) {
+      for (let i = 0; i < candidateJobs.length; i++) {
+        if (candidateJobs[i].active === 1) {
+          currentApplications.value.push(candidateJobs[i]);
         }
       }
     }
@@ -171,34 +169,17 @@ const checkStatusApplicationColor = {
 
 const disableApplication = async () => {
   try {
-    const request = await axios.put(
-      `/candidatos/desactivar/usuarioId/${user.value.id}/requisicionId/${currentRequisitionId.value}`
-    );
+    const disabled = await disableCandidate(currentRequisitionId.value, user.value.id);
 
-    if (request.status === 201) {
+    if (disabled) {
       $q.notify(notifyPositive("Se ha eliminado tu solicitud a esta vacante correctamente"));
       currentRequisitionId.value = null;
       fetchApplications();
     } else {
-      $q.notify({
-        type: "negative",
-        message:
-          "<p style='font-size:medium;' class='q-mt-md'>Hubo un error al eliminar tu solicitud a esta vacante.</p>",
-        actions: [{ label: "CERRAR", color: "yellow" }],
-        progress: true,
-        html: true,
-      });
-      console.log(request.status);
+      $q.notify(notifyNegative("Hubo un error al eliminar tu solicitud a esta vacante."));
     }
   } catch (error) {
-    $q.notify({
-      type: "negative",
-      message:
-        "<p style='font-size:medium;' class='q-mt-md'>Hubo un error al eliminar tu solicitud a esta vacante.</p>",
-      actions: [{ label: "CERRAR", color: "yellow" }],
-      progress: true,
-      html: true,
-    });
+    $q.notify(notifyNegative("Hubo un error al eliminar tu solicitud a esta vacante."));
     console.log(error)
   }
 };

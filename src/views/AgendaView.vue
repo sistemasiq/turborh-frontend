@@ -1171,6 +1171,7 @@ import {
   sendEmail,
 } from "src/services/mail.js";
 import { notifyPositive, notifyNegative } from "src/utils/notifies.js";
+import { getAllCandidatesDiary } from "src/services/candidates";
 import { useRouter } from "vue-router";
 /* REF CONSTANTS ---------------------------------------------------------------------------------------------------------------------------------------------------- */
 
@@ -1410,13 +1411,7 @@ const getAppointmentsCatalog = async () => {
       console.log(
         "Error al conectar con el servidor: Tiempo de espera agotado."
       );
-      $q.notify({
-        type: "negative",
-        message: "Hubo un problema al obtener la lista de citas",
-        position: "top",
-        timeout: 5000,
-        actions: [{ label: "Cerrar", color: "yellow" }],
-      });
+      $q.notify(notifyNegative("Hubo un problema al obtener la lista de citas"));
       loading.value = false;
       noDataLabel.value = "Error al obtener la lista de citas";
       disableCheckbox.value = true;
@@ -1428,13 +1423,11 @@ const getCandidatesCatalog = async () => {
   try {
     loading.value = true;
     disableCheckbox.value = true;
-    const request = await axios.get(`/agenda/catalogoCandidatos`, {
-      timeout: 18000,
-    });
+    const candidates = await getAllCandidatesDiary();
 
-    if (request.status === 200) {
-      totalTableRows.value = request.data;
-      console.log("TABLA DE CANDIDATOS: ", request.data);
+    if (candidates) {
+      totalTableRows.value = candidates;
+      console.log("TABLA DE CANDIDATOS: ", candidates);
       loading.value = false;
       disableCheckbox.value = false;
     }
@@ -1446,13 +1439,7 @@ const getCandidatesCatalog = async () => {
       console.log(
         "Error al conectar con el servidor: Tiempo de espera agotado."
       );
-      $q.notify({
-        type: "negative",
-        message: "Hubo un problema al obtener la lista de candidatos",
-        position: "top",
-        timeout: 5000,
-        actions: [{ label: "Cerrar", color: "yellow" }],
-      });
+      $q.notify(notifyNegative("Hubo un problema al obtener la lista de candidatos"));
       loading.value = false;
       noDataLabel.value = "Error al obtener la lista de candidatos";
       disableCheckbox.value = true;

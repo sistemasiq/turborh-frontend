@@ -193,7 +193,7 @@
         <q-btn flat label="Cancelar" color="red" v-close-popup />
 
         <q-btn
-        v-if="operation == 'create'"
+          v-if="operation == 'create'"
           flat
           label="Aceptar"
           color="green"
@@ -201,7 +201,7 @@
           @click="createJob()"
         />
         <q-btn
-        v-if="operation == 'update'"
+          v-if="operation == 'update'"
           flat
           label="Guardar"
           color="blue"
@@ -218,18 +218,16 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import Tooltip from "src/components/Tooltip.vue";
-import axios from "axios";
 import { useQuasar } from "quasar";
-import { useRouter } from "vue-router";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import { getAllMachinery, createNewMachinery, updateMachinery, enableMachinery, disableMachinery } from "src/services/machineryTools";
 
-const router = useRouter();
 const $q = useQuasar();
 
 const createDialog = ref(false);
 const id = ref("");
 const createdBy = ref("101");
-const modifiedBy = ref ("101")
+const modifiedBy = ref("101");
 const name = ref("");
 const selectedType = ref("");
 const deleteDialog = ref(false);
@@ -243,7 +241,6 @@ const disableCheckbox = ref(false);
 const operation = ref("");
 const selectedTool = ref("");
 const isToolActive = ref();
-
 
 const types = [
   "Maquinaria",
@@ -298,25 +295,23 @@ const getDesignStatusJob = (props) => {
 
 const showJobs = async () => {
   try {
-    $q.loading.show("Cargando...");
-    const request = await axios.get(`/machinerytools/catalog`, {
-      timeout: 18000,
-    });
+    loading.value = true;
+    const catalog = await getAllMachinery();
 
-    if (request.status === 200) {
-      totalTableRows.value = request.data;
-      $q.loading.hide();
+    if (catalog) {
+      totalTableRows.value = catalog;
     }
   } catch (error) {
     console.log("Hubo un error al obtener los datos: " + error);
+  } finally{
+    loading.value = false;
   }
 };
 
 const createJob = async () => {
-  const url = `/machinerytools/newmachinerytools`;
   if (selectedType.value != "" && name.value != "") {
     const elementType = selectedType.value.substring(0, 2).toUpperCase();
-    console.log("elementType: ",elementType);
+    console.log("elementType: ", elementType);
 
     const data = {
       createdBy: createdBy.value,
@@ -324,13 +319,11 @@ const createJob = async () => {
       name: name.value,
     };
     try {
-      $q.loading.show("Cargando...");
-      const request = await axios.post(url, data);
+      $q.loading.show();
+      const newMachinery = await createNewMachinery(data);
 
-      if (request.status == 200) {
-        console.log(request.data);
-        totalTableRows.value.push(request.data);
-        $q.loading.hide();
+      if (newMachinery) {
+        totalTableRows.value.push(newMachinery);
         $q.notify(notifyPositive("Registro exitoso"));
       }
     } catch (error) {
@@ -339,6 +332,7 @@ const createJob = async () => {
       createdBy.value = "";
       selectedType.value = "";
       name.value = "";
+      $q.loading.hide();
     }
   } else {
     $q.notify(notifyNegative("Ambos campos deben ser llenados"));
@@ -346,59 +340,34 @@ const createJob = async () => {
 };
 
 const confirmDeleteTool = async () => {
-  console.log("Entró 2");
-  const apiUrl = selectedTool.value.active ? "/machinerytools/offmachinerytools" : "/machinerytools/onmachinerytools";
-  $q.loading.show();
+  
   try {
-    const request = await axios.put(apiUrl, null, {
-      params: {
-        id: id.value,
-      },
-    });
+    $q.loading.show();
+    const updatedState = selectedTool.value.active ? await disableMachinery(id.value) : await enableMachinery(id.value)
 
-    if (request.status === 200) {
-      console.log("Entró 3");
-
-      $q.notify({
-        type: "positive",
-        message: selectedTool.value.active
+    if (updatedState) {
+      const message = selectedTool.value.active
           ? "La herramienta se ha desactivado correctamente"
-          : "La herramienta se ha activado correctamente",
-        position: "top",
-        timeout: 5000,
-        actions: [{ label: "Cerrar", color: "yellow" }],
-      });
-
-       selectedTool.value.active = selectedTool.value.active === 0 ? 1: 0;
-       updateMachinery(selectedTool.value);
+          : "La herramienta se ha activado correctamente"
+      $q.notify(notifyPositive(message));
+      selectedTool.value.active = selectedTool.value.active === 0 ? 1 : 0;
+      updateMachineryData(selectedTool.value);
     }
   } catch (error) {
-    if (axios.isCancel(error)) {
-      console.log("La solicitud fue cancelada.");
-    } else {
-      console.log("Error:", error);
-      console.log(
-        "Error al conectar con el servidor: Tiempo de espera agotado."
-      );
-      $q.notify({
-        type: "negative",
-        message: "Hubo un problema al desactivar la herramienta",
-        position: "top",
-        timeout: 5000,
-        actions: [{ label: "Cerrar", color: "yellow" }],
-      });
-      loading.value = false;
-    }
-}finally{
-  $q.loading.hide();
-}
+    const message = selectedTool.value.active
+          ? "Hubo un problema al desactivar la herramienta"
+          : "Hubo un problema al activar la herramienta"
+    $q.notify(notifyNegative(message))
+  } finally {
+    $q.loading.hide();
+  }
 };
 
 const updateTool = async () => {
   const url = `/machinerytools/editmachinerytools`;
   if (selectedType.value != "" && name.value != "") {
     const elementType = selectedType.value.substring(0, 2).toUpperCase();
-    console.log("elementType: ",elementType);
+    console.log("elementType: ", elementType);
     const data = {
       id: id.value,
       modifiedBy: modifiedBy.value,
@@ -407,12 +376,11 @@ const updateTool = async () => {
     };
     try {
       $q.loading.show("Cargando...");
-      const request = await axios.put(url, data);
-      if (request.status == 200) {
-        console.log(request.data);
-        updateMachinery(request.data)//[].active=0
+      const updatedMachinery = await updateMachinery(data); 
+      if (updatedMachinery) {
+        updateMachineryData(updatedMachinery); //[].active=0
 
-        $q.notify(notifyPositive("Registro exitoso"));
+        $q.notify(notifyPositive("El elemento se ha actualizado correctamente"));
       }
     } catch (error) {
       $q.notify(notifyNegative("Hubo un error al actualizar el elemento"));
@@ -425,48 +393,48 @@ const updateTool = async () => {
     }
   } else {
     $q.notify(notifyNegative("Ambos campos deben ser llenados"));
-  }};
+  }
+};
 
-const deleteTool= (row) => {
-  isToolActive.value = row.active
-  id.value = row.id
+const deleteTool = (row) => {
+  isToolActive.value = row.active;
+  id.value = row.id;
   selectedTool.value = row;
   deleteDialog.value = true;
   console.log("Entró 1: ", row.active);
 };
 
-const updateMachinery =(updatedMachinery) => {
+const updateMachineryData = (updatedMachinery) => {
   totalTableRows.value.forEach((element) => {
-    if(element.id === updatedMachinery.id){
+    if (element.id === updatedMachinery.id) {
       element.name = updatedMachinery.name;
       element.type = updatedMachinery.type;
       element.active = updatedMachinery.active;
     }
-  })
-}
+  });
+};
 
 const cardEdition = (opType, props) => {
   operation.value = opType;
 
-  if(operation.value == 'create') {
+  if (operation.value == "create") {
     createdBy.value = "";
     selectedType.value = "";
     name.value = "";
-  }else if(operation.value == 'update') {
-    id.value = props.id
+  } else if (operation.value == "update") {
+    id.value = props.id;
     modifiedBy.value = props.modifiedBy;
     selectedType.value = props.type;
     name.value = props.name;
   }
   createDialog.value = !createDialog.value;
-}
+};
 
 const filteredRows = computed(() => {
   return totalTableRows.value.filter((job) => {
     return showDeletedJobs.value ? job.active === 0 : job.active === 1;
   });
 });
-
 </script>
 
 /* Style

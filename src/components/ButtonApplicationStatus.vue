@@ -58,11 +58,12 @@ import { useAuthStore } from "src/stores/auth";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
-import axios from "axios";
 import { ref, onMounted } from "vue";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { getUserDocumentsPath } from "src/utils/folderPaths";
 import { useLocalStorageStore } from "src/stores/localStorage";
+import { createUserApplication, updateUserApplication } from "src/services/userApplication";
+import { updateFile, uploadFile } from "src/services/files";
 
 const useLocalStorage = useLocalStorageStore();
 const router = useRouter();
@@ -253,12 +254,12 @@ const createApplication = () => {
 
 const create = async (completeApplication) => {
   try {
-    const request = await axios.post("/solicitud", completeApplication);
+    const newUserApplicationId = await createUserApplication(completeApplication);
 
-    if (request.status === 201) {
+    if (newUserApplicationId) {
       $q.notify(notifyPositive("Tu solicitud ha sido creada correctamente"));
       clearApplicationStoredValues();
-      completeApplication.solicitud_id = request.data;
+      completeApplication.solicitud_id = newUserApplicationId;
       savedApplication.value = completeApplication;
       useLocalStorage.save("savedApplication", completeApplication);
       router.replace("/userHome/perfil");
@@ -277,9 +278,9 @@ const update = async (completeApplication) => {
   try {
     $q.loading.show();
 
-    const request = await axios.put("/solicitud", completeApplication);
+    const updatedUserApplication = await updateUserApplication(completeApplication);
 
-    if (request.status === 201) {
+    if (updatedUserApplication) {
       useLocalStorage.save("savedApplication", completeApplication);
       savedApplication.value = completeApplication;
       $q.notify(
@@ -297,20 +298,13 @@ const update = async (completeApplication) => {
 };
 
 const uploadCurriculum = async (completeApplication) => {
-  const formData = new FormData();
-  formData.append("file", completeApplication.nombre_cv);
-  formData.append("folderPath", getUserDocumentsPath);
 
   try {
     $q.loading.show();
-    const request = await axios.post("/upload", formData, {
-      headers: {
-        file: "multipart/form-data",
-      },
-    });
+    const uploadedCurriculum = await uploadFile(completeApplication.nombre_cv, getUserDocumentsPath);
 
-    if (request.status === 200) {
-      completeApplication.nombre_cv = request.data;
+    if (uploadedCurriculum) {
+      completeApplication.nombre_cv = uploadedCurriculum;
       await create(completeApplication);
     }
   } catch (error) {
@@ -341,24 +335,14 @@ const clearApplicationStoredValues = () => {
 };
 
 const updateCurriculum = async (completeApplication) => {
-  const formData = new FormData();
-  formData.append("file", completeApplication.nombre_cv);
-  formData.append("folderPath", getUserDocumentsPath);
+
 
   try {
     $q.loading.show();
-    const request = await axios.put(
-      `/updateFile/${savedApplication.value.nombre_cv}`,
-      formData,
-      {
-        headers: {
-          file: "multipart/form-data",
-        },
-      }
-    );
+    const updatedCurriculum = await updateFile(savedApplication.value.nombre_cv, completeApplication.nombre_cv, getUserDocumentsPath)
 
-    if (request.status === 200) {
-      completeApplication.nombre_cv = request.data;
+    if (updatedCurriculum) {
+      completeApplication.nombre_cv = updatedCurriculum;
       await update(completeApplication);
     }
   } catch (error) {
