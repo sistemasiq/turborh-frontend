@@ -14,7 +14,8 @@
     v-for="(item, index) in currentApplications"
     :key="index"
     horizontal
-    class="my-card q-ml-lg qmt"
+    class="q-ml-lg bg-dark text-white"
+    style="border-radius: 30px;"
   >
     <q-btn
       class="absolute-top-right bg-red"

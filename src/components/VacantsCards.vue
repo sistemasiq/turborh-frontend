@@ -1,7 +1,8 @@
 <template>
   <q-card
   horizontal
-  class="my-card q-ml-lg"
+  class="q-ml-lg bg-dark text-white"
+  style="border-radius: 30px;"
   v-for="(item, index) in currentVacants"
   >
     <div

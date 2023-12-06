@@ -24,6 +24,7 @@
                 <q-img
                   :src="getLogoImage"
                   style="width: 30%; height: 10%"
+                  spinner-color="cyan-2"
                 />
               </div>
               <div class="column q-ma-auto">
@@ -134,6 +135,7 @@
               <q-img
                 :src="getLoginMainImage"
                 class="login-image"
+                spinner-color="cyan-2"
               />
             </div>
           </div>

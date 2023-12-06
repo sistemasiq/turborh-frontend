@@ -424,7 +424,7 @@ import { useRouter } from "vue-router";
 import { getS3UploadUrl } from "src/services/profiles.js";
 import { getJobImagesPath } from "src/utils/folderPaths";
 import { getAllDepartments, createJob, updateJob, getJobById } from "src/services/jobs";
-import { notifyNegative } from "src/utils/notifies";
+import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { updateFile, uploadFile } from "src/services/files";
 
 const router = useRouter();
@@ -500,14 +500,16 @@ const uploadUserFiles = async () => {
     let file;
 
     if (jobUUID.value === defaultUUID) {
+      console.log("Upload file");
       file = await uploadFile(jobImg.value, getJobImagesPath);
     } else{
+      console.log("Updated file");
       file = await updateFile(jobUUID.value, jobImg.value, getJobImagesPath);
     }
 
     if (file) {
-      changeJobState(file);
       jobUUID.value = file.data;
+      changeJobState(file);
     }
   } catch (error) {
     console.log(error);
@@ -660,13 +662,15 @@ const updateJobData = async (photoName) => {
   try {
     $q.loading.show();
     const updatedJob = await updateJob(updatedJobData)
-
+    console.log(updatedJob);
     if (updatedJob) {
       $q.notify(notifyPositive("El puesto ha sido actualizado correctamente"));
       goToJobsCatalog();
     }
   } catch (error) {
     $q.notify(notifyNegative("Hubo un error al actualizar el puesto, intenta de nuevo"));
+    console.log(error);
+    goToJobsCatalog();
   } finally {
     $q.loading.hide();
   }

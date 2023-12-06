@@ -199,10 +199,10 @@ import { useAuthStore } from "src/stores/auth";
 import { getImageSource } from "src/services/profiles.js";
 import { storeToRefs } from "pinia";
 import { getUserByUserName, getUserByCurp, createUser } from "src/services/user";
-
-import axios from "axios";
+import { useLocalStorageStore } from "src/stores/localStorage";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 
+const useLocalStorage = useLocalStorageStore();
 const $q = useQuasar();
 const router = useRouter();
 const useAuth = useAuthStore();
@@ -252,7 +252,7 @@ const checkIfUserNameAlreadyExists = async () => {
     userNameExistsValidation.value = false;
     return;
   }
- 
+
   const userExists = await getUserByUserName(userName.value);
 
   userNameExistsValidation.value = userExists.value ? false : true;
@@ -302,10 +302,12 @@ const addUser = async () => {
 
     $q.loading.show();
     const newUserData = await createUser(userName.value, email.value, curp.value, password.value)
-    
+
     if (newUserData) {
       logged.value = 1;
       user.value = newUserData;
+      useLocalStorage.save("logged", logged.value)
+      useLocalStorage.save("user", user.value);
       $q.notify(notifyPositive("Te has registrado correctamente"));
       router.replace("/userHome/perfil");
     } else {
