@@ -93,19 +93,31 @@ const router = createRouter({
     },
 
     {
-      path: "/restore-password",
-      name: "restore-password",
-      component: () => import("../views/RestorePassword.vue"),
+      path: "/restore-password/search-account",
+      name: "search-account",
+      component: () => import("../views/SearchAccountView.vue"),
     },
 
     {
-      path: "/change-password",
+      path: "/restore-password/send-verification",
+      name: "send-verification",
+      component: () => import("../views/SendVerificationCodeView.vue"),
+    },
+
+    {
+      path: "/restore-password/verification",
+      name: "verification",
+      component: () => import("../views/VerificationCodeView.vue"),
+    },
+
+    {
+      path: "/restore-password/change-password",
       name: "change-password",
       component: () => import("../views/ChangePasswordView.vue"),
     },
 
     {
-      path: "/password-restored",
+      path: "/restore-password/password-restored",
       name: "password-restored",
       component: () => import("../views/PasswordRestoredView.vue"),
     },

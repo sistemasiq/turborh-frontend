@@ -51,7 +51,7 @@ export const finishedAppointment = {
 export const sendSecurityCode = (to, code) => {
   return {
     to: to,
-    subject: "Código de seguridad",
+    subject: `'${code}' es tu código de seguridad`,
     firstText: `Tu código para restablecer la contraseña es el siguiente:`,
     verificationCode: code,
     lastText: "Copia he ingresa este código en el campo de verificación",
