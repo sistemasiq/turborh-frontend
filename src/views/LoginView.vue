@@ -188,7 +188,7 @@ const onRegisterClick = () => {
 };
 
 const toRestorePassword = () => {
-  router.push("/restore-password");
+  router.replace("/restore-password/search-account");
 }
 
 const disableLoginButton = () => {

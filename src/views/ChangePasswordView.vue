@@ -10,7 +10,6 @@
         Restablecer Contraseña
       </div>
 
-      <!-- Code verification -->
       <q-card
         class="fixed-center q-mt-md "
         style="min-width: fit-content; width: 30%; border-radius: 10px"
@@ -175,10 +174,7 @@
 import { ref, computed } from "vue";
 import axios from "axios";
 import { storeToRefs } from "pinia";
-import { getS3FileUrl } from "src/services/profiles.js";
-import { getUserImagesPath } from "src/utils/folderPaths.js";
 import {
-  sendSecurityCode,
   passwordChange,
   sendEmail,
 } from "src/services/mail.js";
@@ -189,13 +185,12 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 
 const useAuth = useAuthStore();
-const { userEmail } = storeToRefs(useAuth);
+const { userId, userName, userEmail, photoUUID, verificationCode } = storeToRefs(useAuth);
 const $q = useQuasar();
 const router = useRouter();
 const password = ref("");
 const confirmPassword = ref("");
 const isPasswordVisible = ref(true);
-const email = userEmail;
 const securityPasswordLevel = ref("Baja");
 const helpDialog = ref(false);
 
@@ -204,23 +199,30 @@ const toLogin = () => {
 };
 
 const toPasswordRestored = () => {
-  router.replace("/password-restored");
+  router.replace("/restore-password/password-restored");
 };
 
 const changePassword = async () => {
-  const url = "/auth/password";
+  const url = "/users/verify/change-password";
 
   if (password.value == confirmPassword.value) {
     try {
       $q.loading.show({ message: "Cargando..." });
-      let data = userCredentials(email.value, password.value);
+      let data = userCredentials(password.value, userId.value);
 
       const request = await axios.put(url, data);
 
       if (request.status == 200) {
-        const mailData = passwordChange(email.value);
+        const mailData = passwordChange(userEmail.value);
 
         sendEmail("password-changed-confirmation", mailData);
+
+        userId.value = '';
+        userName.value = '';
+        userEmail.value = '';
+        photoUUID.value = '';
+        verificationCode.value = '';
+        password.value = '';
         toPasswordRestored();
         $q.notify(notifyPositive("Contraseña actualizada"));
       }

@@ -16,10 +16,10 @@ export const getAge = (date) => {
 }
 
 //Made to build the object thay will be sended to change the password
-export const userCredentials = (email, password) => {
+export const userCredentials = (password, id) => {
   return {
-    email: email,
-    password: password
+    password: password,
+    id: id
   }
 }
 

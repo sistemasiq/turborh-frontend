@@ -43,7 +43,12 @@ export const useAuthStore = defineStore("auth", () => {
     }
   });
 
+  const userId = ref('');
+  const userName = ref('');
   const userEmail = ref('');
+  const photoUUID = ref('');
+  const verificationCode = ref('');
+
   return {
     user,
     logged,
@@ -56,6 +61,10 @@ export const useAuthStore = defineStore("auth", () => {
     hasPermitRequisitionAuthorization,
     hasPermitRequisitionCreation,
     getUserPhotoUUID,
-    userEmail
+    userId,
+    userName,
+    userEmail,
+    photoUUID,
+    verificationCode
   };
 });
