@@ -65,16 +65,9 @@ export const downloadFile = async (fileName, folderPath) => {
     }
 };
 
-export const getFile = computed(() => {
-    
-})
-
-
 const getFileURL = (fileName, folderPath) => {
   const url = dev ? `http://localhost:5000/` : `http://192.168.20.59:8181/`;
 
   return `${url}/${fileName}/path/${folderPath}`;
 
 };
-
-export const deleteFile = async () => {};

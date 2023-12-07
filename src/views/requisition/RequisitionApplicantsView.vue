@@ -82,6 +82,15 @@
         <q-btn
           class="q-ml-lg"
           rounded
+          icon="mdi-file-upload"
+          label="Prueba psicométrica"
+          @click.prevent=""
+        >
+          <Tooltip :text="'Subir Prueba psicométrica'" />
+        </q-btn>
+        <q-btn
+          class="q-ml-lg"
+          rounded
           icon="edit"
           style="background: rgb(47, 171, 171)"
           text-color="white"
@@ -126,7 +135,7 @@ import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
 import { getCandidatesByRequisitionId } from "src/services/candidates";
 import router from "src/router";
-import { downloadFile } from "src/services/files";
+import { downloadFile, uploadFile } from "src/services/files";
 import { getUserApplicationById, getUserApplicationNotesById } from "src/services/userApplication";
 
 const $q = useQuasar();
@@ -185,7 +194,6 @@ const fetchApplicants = async () => {
 
     if (candidates) {
       currentApplicants.value = candidates;
-      console.log(currentApplicants.value)
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
@@ -209,6 +217,16 @@ const downloadDocument = async (uuid) => {
     $q.loading.hide();
   }
 };
+
+const uploadPsicometricTest = () => {
+  try {
+    $q.loading.show();
+  } catch (error) {
+    $q.notify(notifyNegative("Hubo un error al subir el test psicometrico"));
+  } finally {
+    $q.loading.hide();
+  }
+}
 
 const createReport = async (applicationId) => {
   try {
