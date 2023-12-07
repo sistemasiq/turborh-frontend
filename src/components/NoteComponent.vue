@@ -47,10 +47,8 @@ const previousNote = ref("");
 
 onMounted(() => {
   previousNote.value = note.value;
-  note.value = "null" || null ? "" : note.value;
+  note.value = note.value === ("null" ||  null) ? "" : note.value;
 });
-
-
 
 const {
   notesFrontPage,

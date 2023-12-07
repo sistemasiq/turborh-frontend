@@ -270,6 +270,7 @@ import Tooltip from "src/components/Tooltip.vue";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { updateUserApplicationState } from "src/services/userApplication";
 
+
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
 

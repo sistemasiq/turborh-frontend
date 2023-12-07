@@ -52,6 +52,7 @@
         </q-card-section>
 
         <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="primary" v-close-popup />
           <q-btn
             flat
             label="Eliminar"
@@ -63,7 +64,6 @@
               border-radius: 30px;
             "
           />
-          <q-btn flat label="Cancelar" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>

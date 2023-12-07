@@ -84,7 +84,7 @@ export const createUser = async (userName, email, curp, password) => {
 
 export const updateUserImage = async (userId, imageUUID) => {
     try {
-        const request = await axios.put(`users/${userId}/imagen/${imageUUID}`);
+        const request = await axios.put(`users/${userId}/image/${imageUUID}`);
 
         if(requestSuccessfull(request.status)) {
             return true;
@@ -99,8 +99,25 @@ export const updateUserImage = async (userId, imageUUID) => {
     }
 }
 
+export const updateUserPsychometricTest = async (userId, uuid) => {
+  try {
+      const request = await axios.put(`users/${userId}/psychometric-test/${uuid}`);
+
+      if(requestSuccessfull(request.status)) {
+          return true;
+      }else{
+          console.log("failed with status " + request.status)
+          return false;
+      }
+
+  } catch (error) {
+      console.log(error);
+      return false;
+  }
+}
+
 export const updatePassword = async () => {
-  
+
   const userCredentials = {
 
   }

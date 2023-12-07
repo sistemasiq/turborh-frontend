@@ -125,6 +125,7 @@
       </q-card-section>
 
       <q-card-actions align="center">
+        <q-btn flat label="Cancelar" color="primary" v-close-popup />
         <q-btn
           rounded
           flat
@@ -133,7 +134,6 @@
           class="bg-cyan text-white"
           @click.prevent = "fetchAddCandidate(currentRequisitionId)"
         />
-        <q-btn flat label="Cancelar" color="primary" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>

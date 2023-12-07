@@ -185,6 +185,7 @@ const fetchApplicants = async () => {
 
     if (candidates) {
       currentApplicants.value = candidates;
+      console.log(currentApplicants.value)
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
