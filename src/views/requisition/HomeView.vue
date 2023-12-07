@@ -24,10 +24,11 @@
           <div class="flex">
             <q-file
               use-chips
-              style="width: 100%"
               accept="image/*"
               standout
               v-model="selectedImage"
+              bg-color="white"
+
             >
               <template v-slot:prepend>
                 <div class="q-avatar">
@@ -38,7 +39,7 @@
                   >
                   </q-img>
                 </div>
-                <div class="userData-name q-ml-md q-mt-sm">{{ userName }}</div>
+                <div class="text-dark text-body2 q-ml-md q-mt-sm">{{ userName }}</div>
               </template>
               <q-tooltip>Cambiar foto</q-tooltip>
             </q-file>

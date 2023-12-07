@@ -80,14 +80,16 @@
           <Tooltip :text="'Descargar currículum'" />
         </q-btn>
         <q-btn
+          v-if="row.psychometricTest"
           class="q-ml-lg"
           rounded
-          icon="mdi-file-upload"
-          label="Prueba psicométrica"
-          @click.prevent=""
+          icon="mdi-file-download"
+          label="Prueba psicometríca"
+          @click.prevent="downloadDocument(row.psychometricTest)"
         >
-          <Tooltip :text="'Subir Prueba psicométrica'" />
+          <Tooltip :text="'Descargar prueba psicometríca'" />
         </q-btn>
+
         <q-btn
           class="q-ml-lg"
           rounded
@@ -97,6 +99,34 @@
           label="Añadir notas"
           @click.prevent="addNotes(row.applicationId)"
         />
+
+        <div class="row">
+          <q-file
+            style="max-width: 420px"
+            rounded
+            standout
+            accept=".pdf, pdf/*"
+            class="q-ml-lg q-mt-lg"
+            bg-color="white"
+            v-model="psychometricTest"
+            clearable
+            label="Seleccionar prueba psicometríca"
+
+          >
+            <template v-slot:prepend
+              ><q-icon color="dark" name="folder" />
+            </template>
+          </q-file>
+          <q-btn
+            v-if="psychometricTest"
+            rounded
+            class="q-ml-lg q-mt-lg"
+            icon="upload"
+            label="Subir prueba psicometríca"
+            @click.prevent="uploadPsicometricTest(row)"
+          >
+          </q-btn>
+        </div>
       </q-td>
     </template>
   </q-table>
@@ -135,8 +165,12 @@ import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
 import { getCandidatesByRequisitionId } from "src/services/candidates";
 import router from "src/router";
-import { downloadFile, uploadFile } from "src/services/files";
-import { getUserApplicationById, getUserApplicationNotesById } from "src/services/userApplication";
+import { downloadFile, updateFile, uploadFile } from "src/services/files";
+import {
+  getUserApplicationById,
+  getUserApplicationNotesById,
+} from "src/services/userApplication";
+import { updateUserPsychometricTest } from "src/services/user";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -144,6 +178,8 @@ const useLocalStorage = useLocalStorageStore();
 const useNotes = useNotesStore();
 const useRequest = useRequestUser();
 const filter = ref("");
+
+const psychometricTest = ref();
 
 const currentApplicants = ref([]);
 const { numRequisitionDetails } = storeToRefs(useRequisitionDetails);
@@ -190,10 +226,13 @@ const fetchApplicants = async () => {
 
   try {
     loading.value = true;
-    const candidates = await getCandidatesByRequisitionId(numRequisitionDetails.value)
+    const candidates = await getCandidatesByRequisitionId(
+      numRequisitionDetails.value
+    );
 
     if (candidates) {
       currentApplicants.value = candidates;
+      console.log(currentApplicants.value)
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
@@ -207,26 +246,43 @@ const downloadDocument = async (uuid) => {
     $q.loading.show();
     const fileDownloaded = await downloadFile(uuid, getUserDocumentsPath);
     if (fileDownloaded) {
-      $q.notify(notifyPositive(`Curriculum descargado exitosamente`));
+      $q.notify(notifyPositive(`Archivo descargado exitosamente`));
     } else {
-      $q.notify(notifyNegative("El curriculum solicitado no existe "));
+      $q.notify(notifyNegative("El archivo solicitado no existe "));
     }
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al descargar el curriculum "));
+    $q.notify(notifyNegative("Hubo un error al descargar el archivo "));
   } finally {
     $q.loading.hide();
   }
 };
 
-const uploadPsicometricTest = () => {
+const uploadPsicometricTest = async (row) => {
   try {
     $q.loading.show();
+
+    let newFile;
+
+    if(row.psychometricTest){
+      newFile = await updateFile(row.psychometricTest, psychometricTest.value, getUserDocumentsPath);
+    }else{
+      newFile = await uploadFile(psychometricTest.value, getUserDocumentsPath);
+    }
+
+    if(newFile){
+      const updatedTest = await updateUserPsychometricTest(row.userId, newFile);
+
+      if(updatedTest){
+        $q.notify(notifyPositive("Prueba psicometríca subida correctamente"))
+      }
+    }
+
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al subir el test psicometrico"));
+    $q.notify(notifyNegative("Hubo un error al subir la prueba psicometríca"));
   } finally {
     $q.loading.hide();
   }
-}
+};
 
 const createReport = async (applicationId) => {
   try {
