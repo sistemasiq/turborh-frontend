@@ -41,7 +41,7 @@
             </q-btn>
 
             <q-dialog v-model="fixed">
-              <q-card>
+              <q-card class="q-ml-xl text-center">
                 <q-card-section>
                   <div class="text-h5">Selección de imagen de perfil</div>
                 </q-card-section>
@@ -53,7 +53,7 @@
 
                 <q-card-section style="max-height: 50vh">
                   <q-img
-                    :src="selectedImageURL"
+                    :src="selectedImage ? selectedImageURL : getUserImage"
                     style="width: 300px; height: 300px; border-radius: 160px"
                   ></q-img>
                 </q-card-section>
