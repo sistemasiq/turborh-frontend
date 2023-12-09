@@ -108,7 +108,7 @@
             accept=".pdf, pdf/*"
             class="q-ml-lg q-mt-lg"
             bg-color="white"
-            v-model="psychometricTest"
+            v-model="row.selected"
             clearable
             label="Seleccionar prueba psicometríca"
 
@@ -118,7 +118,7 @@
             </template>
           </q-file>
           <q-btn
-            v-if="psychometricTest"
+            v-if="row.selected"
             rounded
             class="q-ml-lg q-mt-lg"
             icon="upload"
@@ -179,7 +179,6 @@ const useNotes = useNotesStore();
 const useRequest = useRequestUser();
 const filter = ref("");
 
-const psychometricTest = ref();
 
 const currentApplicants = ref([]);
 const { numRequisitionDetails } = storeToRefs(useRequisitionDetails);
@@ -232,6 +231,9 @@ const fetchApplicants = async () => {
 
     if (candidates) {
       currentApplicants.value = candidates;
+      currentApplicants.value.forEach(element => {
+        element.selected = null;
+      })
       console.log(currentApplicants.value)
     }
   } catch (error) {
@@ -264,15 +266,17 @@ const uploadPsicometricTest = async (row) => {
     let newFile;
 
     if(row.psychometricTest){
-      newFile = await updateFile(row.psychometricTest, psychometricTest.value, getUserDocumentsPath);
+      newFile = await updateFile(row.psychometricTest, row.selected, getUserDocumentsPath);
     }else{
-      newFile = await uploadFile(psychometricTest.value, getUserDocumentsPath);
+      newFile = await uploadFile(row.selected, getUserDocumentsPath);
     }
 
     if(newFile){
       const updatedTest = await updateUserPsychometricTest(row.userId, newFile);
 
       if(updatedTest){
+        row.psychometricTest = newFile;
+        updateRow(row);
         $q.notify(notifyPositive("Prueba psicometríca subida correctamente"))
       }
     }
@@ -283,6 +287,14 @@ const uploadPsicometricTest = async (row) => {
     $q.loading.hide();
   }
 };
+
+const updateRow = (row) => {
+  currentApplicants.value.forEach(element => {
+    if(element.userId === row.userId){
+      element = row;
+    }
+  })
+}
 
 const createReport = async (applicationId) => {
   try {
