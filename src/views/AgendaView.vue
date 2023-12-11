@@ -2415,5 +2415,4 @@ const completeAppointment = async () => {
   align-items: center;
   font-size: 10px;
 }
-
 </style>
