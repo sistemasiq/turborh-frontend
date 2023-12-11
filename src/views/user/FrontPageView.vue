@@ -107,7 +107,7 @@
                   style="color: white"
                   :disable="viewingApplication"
                 />
-                
+
               </div>
             </q-form>
             <div
@@ -122,87 +122,7 @@
           </div>
         </div>
 
-        <div
-          v-if="
-            !updatingApplication && !viewingApplication && !creatingApplication
-          "
-          class="motive-content rounded-borders q-mt-xl"
-          style="display: flex; flex-direction: column"
-        >
-          <div class="row items-center">
-            <p class="priority-title">Prioridad</p>
-            <q-checkbox
-              color="cyan"
-              unchecked-icon="radio_button_unchecked"
-              checked-icon="radio_button_checked"
-              size="lg"
-              class="checkbox"
-              v-model="priorityOne"
-              @update:modelValue="handlePriorityCheckboxChange('one')"
-              label="1"
-              style="color: rgb(0, 0, 0)"
-            />
-            <q-checkbox
-              color="cyan"
-              unchecked-icon="radio_button_unchecked"
-              checked-icon="radio_button_checked"
-              size="lg"
-              class="checkbox"
-              v-model="priorityTwo"
-              @update:modelValue="handlePriorityCheckboxChange('two')"
-              label="2"
-              style="color: rgb(0, 0, 0)"
-            />
-            <q-checkbox
-              color="cyan"
-              unchecked-icon="radio_button_unchecked"
-              checked-icon="radio_button_checked"
-              size="lg"
-              class="checkbox"
-              v-model="priorityThree"
-              @update:modelValue="handlePriorityCheckboxChange('three')"
-              label="3"
-              style="color: rgb(0, 0, 0); margin-right: 5%"
-            />
-          </div>
 
-          <div class="row items-center">
-            <q-btn
-              rounded
-              text-color="white"
-              color="red"
-              label="Cancelar"
-              @click=""
-              style="flex: 1; margin: 2px; min-height: 60px; width: auto"
-            />
-
-            <q-file
-              bg-color="cyan-4"
-              label-color="white"
-              class="file-picker"
-              rounded
-              outlined
-              label="Subir video"
-            >
-              <template v-slot:append>
-                <q-icon name="videocam" style="color: white" />
-              </template>
-            </q-file>
-
-            <q-file
-              bg-color="cyan-4"
-              label-color="white"
-              class="file-picker"
-              rounded
-              outlined
-              label="Subir prueba psicométrica"
-            >
-              <template v-slot:append>
-                <q-icon name="description" style="color: white" />
-              </template>
-            </q-file>
-          </div>
-        </div>
         <q-btn
           v-if="!viewingApplication && !updatingApplication"
           class="btn-clean q-mt-xl"
@@ -213,7 +133,7 @@
           icon="cleaning_services"
           @click.prevent="clean"
         />
-        
+
       </q-card-section>
     </q-card>
     <ButtonApplicationStatus v-if="updatingApplication" />
@@ -231,12 +151,12 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 import { getUserImagesPath } from "src/utils/folderPaths";
+import { useAuthStore } from "src/stores/auth";
 
 const $q = useQuasar();
+const useAuth = useAuthStore();
 const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();
-
-const creatingApplication = ref(true);
 
 const priorityOne = ref(false);
 const priorityTwo = ref(false);
@@ -250,10 +170,15 @@ const wantedSalary = ref(0);
 const userName = ref("");
 const photoUUID = ref("");
 
+const { user, isRh, getUserPhotoUUID } = storeToRefs(useAuth);
 
 
 const getUserImage = computed(() => {
-  setUserInfo();
+
+  if(!isRh.value){
+    photoUUID.value = getUserPhotoUUID.value;
+  }
+
   if (photoUUID.value === null || photoUUID.value === undefined) {
     return getS3FileUrl(getUserImagesPath, "default_user_icon.png");
   } else {
@@ -262,13 +187,16 @@ const getUserImage = computed(() => {
 });
 
 const setUserInfo = () => {
+
   const userStored = useLocalStorage.load("user");
 
   if (userStored) {
     console.log("USER STORED "+userStored.photoUUID);
+    user.value = userStored;
     userName.value = userStored.userName;
     photoUUID.value = userStored.photoUUID;
   }
+
 };
 
 
@@ -317,7 +245,7 @@ const setSavedStoredValues = () => {
     console.log("Theres no saved application");
     return;
   }
-  
+
   name.value = savedApplication.value.nombre;
   firstLastName.value = savedApplication.value.apellido_paterno;
   secondLastName.value = savedApplication.value.apellido_materno;
@@ -387,7 +315,7 @@ const setEducationSavedValues = () => {
   educationData.value.secondary = savedApplication.value.secundaria;
   educationData.value.highSchool = savedApplication.value.bachillerato;
   educationData.value.professional = savedApplication.value.profesional;
-  
+
   educationData.value.master = savedApplication.value.maestria;
   educationData.value.other = savedApplication.value.otro;
   educationData.value.speciality = savedApplication.value.especialidad;

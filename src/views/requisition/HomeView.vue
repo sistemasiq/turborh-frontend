@@ -24,10 +24,11 @@
           <div class="flex">
             <q-file
               use-chips
-              style="width: 100%"
               accept="image/*"
               standout
               v-model="selectedImage"
+              bg-color="white"
+
             >
               <template v-slot:prepend>
                 <div class="q-avatar">
@@ -38,7 +39,7 @@
                   >
                   </q-img>
                 </div>
-                <div class="userData-name q-ml-md q-mt-sm">{{ userName }}</div>
+                <div class="text-dark text-body2 q-ml-md q-mt-sm">{{ userName }}</div>
               </template>
               <q-tooltip>Cambiar foto</q-tooltip>
             </q-file>
@@ -63,7 +64,7 @@
           header-class="bg-blue-1"
         >
           <q-item
-          v-if="!isAdmin"
+            v-if="hasPermitRequisitionCreation"
             clickable
             @click.prevent="onNewRequisitionClicked"
             :inset-level="1"
@@ -87,8 +88,8 @@
             </q-item-section>
           </q-item>
         </q-expansion-item>
-
-    <!--     <q-expansion-item
+        <!-- TODO: Remover cuando se verifique que no se ocupa -->
+        <!-- <q-expansion-item
         v-if="isRh"
           icon="description"
           label="Solicitudes de usuarios"
@@ -105,12 +106,12 @@
               </q-item-section>
             </q-item>
           </div>
-        </q-expansion-item>
- -->
+        </q-expansion-item> -->
+
         <q-expansion-item
           v-if="isRh"
           icon="description"
-          label="Catálogo de puestos"
+          label="Catálogos"
           header-class="bg-blue-1"
         >
           <div class="content" ref="contentRef">
@@ -130,17 +131,35 @@
                 >
               </q-item-section>
             </q-item>
+
+            <q-item
+              clickable
+              to="/home/catalogo-maquinaria"
+              :inset-level="1"
+              class="custom-item"
+            >
+              <q-item-section avatar class="items-seleccion-elements">
+                <q-icon name="handyman" class="icon-user" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Maquinaría y herramientas</q-item-label>
+                <q-item-label caption
+                  >Modifica el catalogo de maquinaría y
+                  herramientas</q-item-label
+                >
+              </q-item-section>
+            </q-item>
           </div>
         </q-expansion-item>
 
-        <q-item clickable to="/agenda" class="bg-blue-1">
-            <q-item-section avatar>
-              <q-icon name="calendar_month" />
-            </q-item-section>
-            <q-item-section class="text-left q-pt-md q-pb-md">
-              <q-item-label >Agenda</q-item-label>
-            </q-item-section>
-          </q-item>
+        <q-item v-if="isRh" clickable to="/agenda" class="bg-blue-1">
+          <q-item-section avatar>
+            <q-icon name="calendar_month" />
+          </q-item-section>
+          <q-item-section class="text-left q-pt-md q-pb-md">
+            <q-item-label>Agenda</q-item-label>
+          </q-item-section>
+        </q-item>
       </q-list>
 
       <q-btn class="logout-button" @click="logout" flat>
@@ -170,8 +189,8 @@ import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { storeToRefs } from "pinia";
 import { getAdminImagesPath, getAssetsPath } from "src/utils/folderPaths";
 import { useRequisitionStore } from "src/stores/requisition";
-import { notifyPositive } from "src/utils/notifies.js";
-import axios from "axios";
+import { uploadFile, updateFile } from "src/services/files";
+import { updateUserImage } from "src/services/user";
 
 const $q = useQuasar();
 const router = useRouter();
@@ -182,8 +201,11 @@ const useLocalStorage = useLocalStorageStore();
 const drawer = ref(false);
 const componentKey = ref(0);
 const userName = ref("");
-const { showingDetails } = storeToRefs(useRequisitionDetails);
-const { user, logged, isRh, isAdmin } = storeToRefs(useAuth);
+const { showingDetails, updatingRequisition } = storeToRefs(
+  useRequisitionDetails
+);
+const { user, logged, isRh, hasPermitRequisitionCreation } =
+  storeToRefs(useAuth);
 
 onMounted(() => {
   loadLocalStorage();
@@ -192,6 +214,7 @@ onMounted(() => {
 const selectedImage = ref();
 
 const photoUUID = ref("default.png");
+
 const getUserImage = computed(() =>
   getS3FileUrl(getAdminImagesPath, photoUUID.value)
 );
@@ -206,7 +229,8 @@ const loadLocalStorage = () => {
   if (userStored) {
     user.value = userStored;
     userName.value = user.value.userName;
-    photoUUID.value = user.value.photoUUID === null ? photoUUID.value : user.value.photoUUID;
+    photoUUID.value =
+      user.value.photoUUID === null || user.value.photoUUID === "" ? photoUUID.value : user.value.photoUUID;
   }
 
   console.log(user.value);
@@ -217,54 +241,42 @@ const loadLocalStorage = () => {
 const onNewRequisitionClicked = () => {
   router.push("/home/nueva-requisicion-1");
   showingDetails.value = false;
+  updatingRequisition.value = false;
 };
 
 const uploadImage = async () => {
-  const formData = new FormData();
-
-  formData.append("file", selectedImage.value);
-  formData.append("folderPath", getAdminImagesPath);
 
   try {
     $q.loading.show();
-    let request;
+    let newFileName;
     if (user.value.photoUUID) {
-      console.log("updated file");
-      request = await axios.put(
-        `/updateFile/${user.value.photoUUID}`,
-        formData,
-        {
-          headers: {
-            file: "multipart/form-data",
-          },
-        }
+      newFileName = await updateFile(
+        user.value.photoUUID,
+        selectedImage.value,
+        getAdminImagesPath
       );
-      if(request.status === 200) {
+      if (newFileName) {
         selectedImage.value = "";
       }
     } else {
-      console.log("updated file");
-      request = await axios.post("/upload", formData, {
-        headers: {
-          file: "multipart/form-data",
-        },
-      });
+      newFileName = await uploadFile(selectedImage.value, getAdminImagesPath);
     }
-    if (request.status === 200) {
-      updateUserImage(request.data);
+    console.log("file name: " + newFileName);
+    if (newFileName) {
+      updateUserImageInDatabase(newFileName);
     }
   } catch (error) {
     console.log(error);
+  } finally{
+    $q.loading.hide();
   }
 };
 
-const updateUserImage = async (imageUUID) => {
+const updateUserImageInDatabase = async (imageUUID) => {
   try {
-    const request = await axios.put(
-      `/auth/update/image/${imageUUID}/user/${user.value.id}`
-    );
+    const updatedImage = await updateUserImage(user.value.id, imageUUID);
 
-    if (request.status === 200) {
+    if (updatedImage) {
       user.value.photoUUID = imageUUID;
       useLocalStorage.save("user", user.value);
       photoUUID.value = imageUUID;
@@ -275,11 +287,23 @@ const updateUserImage = async (imageUUID) => {
   }
 };
 
-watch(showingDetails, (newValue) => {
-  if (newValue === false) {
-    componentKey.value += 1;
+watch(
+  showingDetails, // Watch the desired store value
+  (newValue) => {
+    if (!newValue) {
+      componentKey.value += 1;
+    }
   }
-});
+);
+
+watch(
+  updatingRequisition, // Watch the desired store value
+  (newValue) => {
+    if (!newValue) {
+      componentKey.value += 1;
+    }
+  }
+);
 
 const logout = () => {
   useLocalStorage.remove("user");

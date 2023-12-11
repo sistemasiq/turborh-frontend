@@ -68,7 +68,7 @@
           label="Solicitud"
           @click.prevent="createReport(row.applicationId)"
         >
-        <Tooltip :text="'Generar reporte en PDF'" />
+          <Tooltip :text="'Generar reporte en PDF'" />
         </q-btn>
         <q-btn
           class="q-ml-lg"
@@ -77,8 +77,19 @@
           label="Currículum"
           @click.prevent="downloadDocument(row.curriculumUUID)"
         >
-        <Tooltip :text="'Descargar currículum'" />
-      </q-btn>
+          <Tooltip :text="'Descargar currículum'" />
+        </q-btn>
+        <q-btn
+          v-if="row.psychometricTest"
+          class="q-ml-lg"
+          rounded
+          icon="mdi-file-download"
+          label="Prueba psicometríca"
+          @click.prevent="downloadDocument(row.psychometricTest)"
+        >
+          <Tooltip :text="'Descargar prueba psicometríca'" />
+        </q-btn>
+
         <q-btn
           class="q-ml-lg"
           rounded
@@ -88,6 +99,34 @@
           label="Añadir notas"
           @click.prevent="addNotes(row.applicationId)"
         />
+
+        <div class="row">
+          <q-file
+            style="max-width: 420px"
+            rounded
+            standout
+            accept=".pdf, pdf/*"
+            class="q-ml-lg q-mt-lg"
+            bg-color="white"
+            v-model="row.selected"
+            clearable
+            label="Seleccionar prueba psicometríca"
+
+          >
+            <template v-slot:prepend
+              ><q-icon color="dark" name="folder" />
+            </template>
+          </q-file>
+          <q-btn
+            v-if="row.selected"
+            rounded
+            class="q-ml-lg q-mt-lg"
+            icon="upload"
+            label="Subir prueba psicometríca"
+            @click.prevent="uploadPsicometricTest(row)"
+          >
+          </q-btn>
+        </div>
       </q-td>
     </template>
   </q-table>
@@ -117,14 +156,21 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
 import { getAge } from "src/utils/operations";
 import { getUserImagesPath, getUserDocumentsPath } from "src/utils/folderPaths";
-import { getAxiosBaseUrl, getS3FileUrl } from "src/services/profiles.js";
+import { getS3FileUrl } from "src/services/profiles.js";
 import { useQuasar } from "quasar";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { useRequestUser } from "src/stores/requestUser";
 import { useNotesStore } from "src/stores/notes";
 import Tooltip from "src/components/Tooltip.vue";
-import axios from "axios";
+import { createUserApplicationReport } from "src/services/report";
+import { getCandidatesByRequisitionId } from "src/services/candidates";
 import router from "src/router";
+import { downloadFile, updateFile, uploadFile } from "src/services/files";
+import {
+  getUserApplicationById,
+  getUserApplicationNotesById,
+} from "src/services/userApplication";
+import { updateUserPsychometricTest } from "src/services/user";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -132,6 +178,7 @@ const useLocalStorage = useLocalStorageStore();
 const useNotes = useNotesStore();
 const useRequest = useRequestUser();
 const filter = ref("");
+
 
 const currentApplicants = ref([]);
 const { numRequisitionDetails } = storeToRefs(useRequisitionDetails);
@@ -161,21 +208,33 @@ const showReport = ref(false);
 const createReportWithNotes = ref(false);
 
 onMounted(() => {
+  loadLocalStore();
   fetchApplicants();
 });
+
+const loadLocalStore = () => {
+  const numRequisitionStored = useLocalStorage.load("numRequisitionDetails");
+
+  if (numRequisitionStored) {
+    numRequisitionDetails.value = numRequisitionStored;
+  }
+};
 
 const fetchApplicants = async () => {
   if (!numRequisitionDetails.value) return;
 
   try {
     loading.value = true;
-    const request = await axios.get(
-      `/candidatos/${numRequisitionDetails.value}`
+    const candidates = await getCandidatesByRequisitionId(
+      numRequisitionDetails.value
     );
 
-    if (request.status === 200) {
-      currentApplicants.value = request.data;
-      console.log(currentApplicants.value);
+    if (candidates) {
+      currentApplicants.value = candidates;
+      currentApplicants.value.forEach(element => {
+        element.selected = null;
+      })
+      console.log(currentApplicants.value)
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
@@ -187,41 +246,73 @@ const fetchApplicants = async () => {
 const downloadDocument = async (uuid) => {
   try {
     $q.loading.show();
-    const request = await axios.get(
-      `/download/${uuid}/path/${getUserDocumentsPath}`
-    );
-    if (request.status == 200) {
-      console.log(request.data);
-      $q.notify(notifyPositive(`Curriculum descargado exitosamente`));
+    const fileDownloaded = await downloadFile(uuid, getUserDocumentsPath);
+    if (fileDownloaded) {
+      $q.notify(notifyPositive(`Archivo descargado exitosamente`));
     } else {
-      $q.notify(notifyNegative("El curriculum solicitado no existe "));
+      $q.notify(notifyNegative("El archivo solicitado no existe "));
     }
-  } catch (e) {
-    $q.notify(notifyNegative("Hubo un error al descargar el curriculum "));
+  } catch (error) {
+    $q.notify(notifyNegative("Hubo un error al descargar el archivo "));
   } finally {
     $q.loading.hide();
   }
 };
 
+const uploadPsicometricTest = async (row) => {
+  try {
+    $q.loading.show();
+
+    let newFile;
+
+    if(row.psychometricTest){
+      newFile = await updateFile(row.psychometricTest, row.selected, getUserDocumentsPath);
+    }else{
+      newFile = await uploadFile(row.selected, getUserDocumentsPath);
+    }
+
+    if(newFile){
+      const updatedTest = await updateUserPsychometricTest(row.userId, newFile);
+
+      if(updatedTest){
+        row.psychometricTest = newFile;
+        updateRow(row);
+        $q.notify(notifyPositive("Prueba psicometríca subida correctamente"))
+      }
+    }
+
+  } catch (error) {
+    $q.notify(notifyNegative("Hubo un error al subir la prueba psicometríca"));
+  } finally {
+    $q.loading.hide();
+  }
+};
+
+const updateRow = (row) => {
+  currentApplicants.value.forEach(element => {
+    if(element.userId === row.userId){
+      element = row;
+    }
+  })
+}
+
 const createReport = async (applicationId) => {
   try {
     $q.loading.show({ message: "Generando reporte..." });
-    const request = await axios.get(
-      `solicitud/reporte?id=${applicationId}&addNotes=${
-        createReportWithNotes.value
-      }&endpointURL=${getAxiosBaseUrl()}`,
-      {
-        responseType: "arraybuffer",
-      }
+
+    const report = await createUserApplicationReport(
+      applicationId,
+      createReportWithNotes.value
     );
 
-    if (request.status === 200) {
-      const blob = new Blob([request.data], { type: "application/pdf" });
-      reportSrc.value = URL.createObjectURL(blob);
+    if (report) {
+      reportSrc.value = report;
       showReport.value = true;
     }
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al crear el reporte. Intenta de nuevo"))
+    $q.notify(
+      notifyNegative("Hubo un error al crear el reporte. Intenta de nuevo")
+    );
     console.log(error);
   } finally {
     $q.loading.hide();
@@ -229,6 +320,8 @@ const createReport = async (applicationId) => {
 };
 
 const addNotes = (applicationId) => {
+  console.log("Add notes to application " + applicationId);
+
   fetchUserApplication(applicationId);
   viewingApplication.value = true;
 };
@@ -236,14 +329,15 @@ const addNotes = (applicationId) => {
 const fetchUserApplication = async (applicationId) => {
   try {
     $q.loading.show();
-    const request = await axios.get(`/solicitud/${applicationId}`);
+    const userApplication = await getUserApplicationById(applicationId);
 
-    if (request.status === 200) {
-      savedApplication.value = request.data;
+    if (userApplication) {
+      savedApplication.value = userApplication;
       useLocalStorage.save("savedApplication", savedApplication.value);
 
       await fetchUserApplicationNotes(applicationId);
-
+      useLocalStorage.save("addingNotesApplicationId", applicationId);
+      useLocalStorage.save("viewingApplication", viewingApplication.value);
       router.push("/userHome/solicitud-1");
     }
   } catch (error) {
@@ -254,19 +348,19 @@ const fetchUserApplication = async (applicationId) => {
 
 const fetchUserApplicationNotes = async (applicationId) => {
   try {
-    const request = await axios.get(`/solicitud/notas/${applicationId}`);
-    if (request.status === 200) {
-      notesFrontPage.value = request.data.noteFrontPage;
-      notesPersonalData.value = request.data.notePersonalData;
-      notesPersonalDataTwo.value = request.data.notePersonalDataTwo;
-      notesRecruitingMeans.value = request.data.noteRecruitingMeans;
-      notesDocuments.value = request.data.noteDocuments;
-      notesEducation.value = request.data.noteEducation;
-      notesReferences.value = request.data.noteReferences;
-      notesFamily.value = request.data.noteFamilyData;
-      notesMachinery.value = request.data.noteMachinery;
-      notesOffices.value = request.data.noteSkills;
-      notesLaboralExperience.value = request.data.noteLaboralExperience;
+    const notes = await getUserApplicationNotesById(applicationId);
+    if (notes) {
+      notesFrontPage.value = notes.noteFrontPage;
+      notesPersonalData.value = notes.notePersonalData;
+      notesPersonalDataTwo.value = notes.notePersonalDataTwo;
+      notesRecruitingMeans.value = notes.noteRecruitingMeans;
+      notesDocuments.value = notes.noteDocuments;
+      notesEducation.value = notes.noteEducation;
+      notesReferences.value = notes.noteReferences;
+      notesFamily.value = notes.noteFamilyData;
+      notesMachinery.value = notes.noteMachinery;
+      notesOffices.value = notes.noteSkills;
+      notesLaboralExperience.value = notes.noteLaboralExperience;
     }
   } catch (error) {}
 };

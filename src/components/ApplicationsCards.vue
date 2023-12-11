@@ -1,6 +1,6 @@
 <template>
    <div class="column">
-    <p class="text-h3" style="color: rgb(83, 83, 83); margin-left: 58px; font-family: 'Arial'; font-size: 40px;">
+    <p class="text-h4 q-ml-xl text-grey-8">
               <strong> {{ getTitleApplications() }} </strong>
               <q-spinner
                 v-if="loadingApplications"
@@ -14,7 +14,8 @@
     v-for="(item, index) in currentApplications"
     :key="index"
     horizontal
-    class="my-card q-ml-lg qmt"
+    class="q-ml-lg bg-dark text-white"
+    style="border-radius: 30px;"
   >
     <q-btn
       class="absolute-top-right bg-red"
@@ -30,10 +31,10 @@
     <q-card-section>
       <p class="text-h6">{{ item.jobName }}</p>
       <p class="text-body1">
-        Estado: {{ checkStatusApplication(item.active, item.selected) }}
+        Estado: {{ checkStatusApplication[item.status] }}
         <q-icon
           name="circle"
-          :color="checkStatusApplicationColor(item.active, item.selected)"
+          :color="checkStatusApplicationColor[item.status]"
         />
       </p>
     </q-card-section>
@@ -51,6 +52,7 @@
         </q-card-section>
 
         <q-card-actions align="right">
+          <q-btn flat label="Cancelar" color="primary" v-close-popup />
           <q-btn
             flat
             label="Eliminar"
@@ -62,7 +64,6 @@
               border-radius: 30px;
             "
           />
-          <q-btn flat label="Cancelar" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -78,8 +79,9 @@ import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { getDefaultJobUUID, getDefaultPath, getJobImagesPath } from "src/utils/folderPaths";
-import axios from "axios";
 import { useLocalStorageStore } from "src/stores/localStorage";
+import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import { getCandidateJobs, disableCandidate } from "src/services/candidates";
 
 const $q = useQuasar();
 const useAuth = useAuthStore();
@@ -108,6 +110,7 @@ const loadLocalStorage = () => {
   }
 
   fetchApplications();
+
 }
 
 
@@ -127,23 +130,21 @@ const openDeleteApplicationDialog = (requisitionId) => {
 }
 
 const fetchApplications = async () => {
-   
+
   if(!user.value)
   return;
-  
+
   currentApplications.value = [];
   try {
 
     loadingApplications.value = true;
 
-    const request = await axios.get(
-      `/candidatos/trabajos/${user.value.id}`
-    );
+    const candidateJobs = await getCandidateJobs(user.value.id);
 
-    if (request.status === 200) {
-      for (let i = 0; i < request.data.length; i++) {
-        if (request.data[i].active === 1) {
-          currentApplications.value.push(request.data[i]);
+    if (candidateJobs) {
+      for (let i = 0; i < candidateJobs.length; i++) {
+        if (candidateJobs[i].active === 1) {
+          currentApplications.value.push(candidateJobs[i]);
         }
       }
     }
@@ -154,57 +155,32 @@ const fetchApplications = async () => {
   }
 };
 
-const checkStatusApplication = (active, selected) => {
-  if (active === 0) {
-    return "Rechazada";
-  }
-  return selected === 1 ? "Aceptada" : "En revisión";
-};
+const checkStatusApplication = {
+  "P" : "Pendiente",
+  "E" : "Entrevistado",
+  "C" : "Citado"
+}
 
-const checkStatusApplicationColor = (active, selected) => {
-  if (active === 0) {
-    return "red";
-  }
-  return selected === 1 ? "green" : "grey";
-};
+
+const checkStatusApplicationColor = {
+  "P": "grey",
+  "E": "green",
+  "C": "blue"
+}
 
 const disableApplication = async () => {
   try {
-    const request = await axios.put(
-      `/candidatos/desactivar/usuarioId/${user.value.id}/requisicionId/${currentRequisitionId.value}`
-    );
+    const disabled = await disableCandidate(currentRequisitionId.value, user.value.id);
 
-    if (request.status === 201) {
-      $q.notify({
-        type: "positive",
-        message:
-          "<p style='font-size:medium;' class='q-mt-md'>Se ha eliminado tu solicitud a esta vacante.</p>",
-        timeout: 2000,
-        progress: true,
-        html: true,
-      });
+    if (disabled) {
+      $q.notify(notifyPositive("Se ha eliminado tu solicitud a esta vacante correctamente"));
       currentRequisitionId.value = null;
       fetchApplications();
     } else {
-      $q.notify({
-        type: "negative",
-        message:
-          "<p style='font-size:medium;' class='q-mt-md'>Hubo un error al eliminar tu solicitud a esta vacante.</p>",
-        actions: [{ label: "CERRAR", color: "yellow" }],
-        progress: true,
-        html: true,
-      });
-      console.log(request.status);
+      $q.notify(notifyNegative("Hubo un error al eliminar tu solicitud a esta vacante."));
     }
   } catch (error) {
-    $q.notify({
-      type: "negative",
-      message:
-        "<p style='font-size:medium;' class='q-mt-md'>Hubo un error al eliminar tu solicitud a esta vacante.</p>",
-      actions: [{ label: "CERRAR", color: "yellow" }],
-      progress: true,
-      html: true,
-    });
+    $q.notify(notifyNegative("Hubo un error al eliminar tu solicitud a esta vacante."));
     console.log(error)
   }
 };

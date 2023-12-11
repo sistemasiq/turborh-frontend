@@ -1,7 +1,10 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
+import { useLocalStorageStore } from "./localStorage";
 
 export const useRequestUser = defineStore("requestUser", () => {
+  const useLocalStorage = useLocalStorageStore();
+
   const frontPageData = ref({
     name: "",
     firstLastName: "",
@@ -156,7 +159,6 @@ export const useRequestUser = defineStore("requestUser", () => {
   
   const userHasApplication = computed(() => {
     if(savedApplication.value){
-      console.log("User new id application: " + savedApplication.value.solicitud_id)
       return savedApplication.value.solicitud_id !== 0 && savedApplication.value.solicitud_id !== undefined;
     }else{
       return false;
@@ -169,7 +171,7 @@ export const useRequestUser = defineStore("requestUser", () => {
 
   const viewingApplication = ref(false);
   const updatingApplication = ref(false);
-
+  
 
 
   return {

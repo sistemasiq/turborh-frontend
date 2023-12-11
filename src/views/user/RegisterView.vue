@@ -11,9 +11,9 @@
       content-class="bg-grey-1"
     >
       <div class="q-mt-sm">
-          <q-img
+        <q-img
           :src="getImageSource('logo-turbomaquinas.png')"
-          style="width: 30%; height: 10%; margin-left: 33%;"
+          style="width: 30%; height: 10%; margin-left: 33%"
         />
         <p class="turbo q-ml-xl">Turbomáquinas</p>
       </div>
@@ -192,16 +192,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount} from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "src/stores/auth";
 import { getImageSource } from "src/services/profiles.js";
 import { storeToRefs } from "pinia";
+import { getUserByUserName, getUserByCurp, createUser } from "src/services/user";
+import { useLocalStorageStore } from "src/stores/localStorage";
+import { notifyNegative, notifyPositive } from "src/utils/notifies";
 
-import axios from "axios";
-import { notifyNegative } from "src/utils/notifies";
-
+const useLocalStorage = useLocalStorageStore();
 const $q = useQuasar();
 const router = useRouter();
 const useAuth = useAuthStore();
@@ -218,6 +219,8 @@ const isConfirmPasswordVisible = ref(false);
 const curpRegex = new RegExp("^[A-Z]{4}[0-9]{6}(H|M)[A-Z]{5}[A-Z0-9][0-9]$");
 let curpExistsValidation = ref(false);
 const userNameExistsValidation = ref(false);
+
+const { logged, user } = storeToRefs(useAuth);
 
 const disableRegisterButton = () => {
   return (
@@ -250,19 +253,13 @@ const checkIfUserNameAlreadyExists = async () => {
     return;
   }
 
-  try {
+  const userExists = await getUserByUserName(userName.value);
 
-    const request = await axios.get(
-      `/auth/register/userName/${userName.value}`
-    );
+  userNameExistsValidation.value = userExists.value ? false : true;
 
-    if (request.status === 200) {
-      $q.notify(notifyNegative("Este nombre de usuario ya esta registrado"));
-      userNameExistsValidation.value = false;
-    } else {
-      userNameExistsValidation.value = true;
-    }
-  } catch (error) {}
+  if (userExists) {
+    $q.notify(notifyNegative("Este nombre de usuario ya esta registrado"));
+  }
 };
 
 const checkIfCurpAlreadyExists = async () => {
@@ -273,90 +270,52 @@ const checkIfCurpAlreadyExists = async () => {
     curpExistsValidation.value = false;
     return;
   }
+  const curpExists = await getUserByCurp(curp.value);
 
-  try {
-    const request = await axios.get(`/auth/register/${curp.value}`);
-    if (request.status === 200) {
-      $q.notify(notifyNegative("La clave CURP ya está registrada"));
-      curpExistsValidation.value = false;
-    } else {
-      curpExistsValidation.value = true;
-    }
-  } catch (error) {
-    console.log(error);
+  curpExistsValidation.value = curpExists ? false : true;
+
+  if (curpExists) {
+    $q.notify(notifyNegative("La clave CURP ya está registrada"));
   }
+
 };
 
 /* PASSWORD MATCHING ---------------------------------------------------------------------------------------------------*/
 const passwordMatching = () => {
   if (password.value != confirmPassword.value) {
-    $q.notify({
-      type: "negative",
-      message: "Las contraseñas no coinciden",
-      position: "top",
-      timeout: 2000,
-      actions: [{ label: "Cerrar", color: "yellow" }],
-    });
+    $q.notify(notifyNegative("Las contraseñas no coinciden"));
   }
 };
 
 const registerUser = async () => {
-
   await checkIfCurpAlreadyExists();
 
   await checkIfUserNameAlreadyExists();
 
-  if(userNameExistsValidation.value && curpExistsValidation.value){
+  if (userNameExistsValidation.value && curpExistsValidation.value) {
     addUser();
   }
 };
 
 const addUser = async () => {
   try {
-    const newUserData = {
-      applicationId: 0,
-      id: 0,
-      userName: userName.value,
-      email: email.value,
-      curp: curp.value,
-      password: password.value,
-      role: "u"
-    };
 
     $q.loading.show();
-    const request = await axios.post(`/auth/register`, newUserData);
+    const newUserData = await createUser(userName.value, email.value, curp.value, password.value)
 
-    if (request.status === 200) {
-      const { logged, user } = storeToRefs(useAuth);
+    if (newUserData) {
       logged.value = 1;
-      console.log(request.data);
-      newUserData.id = request.data;
       user.value = newUserData;
-      $q.notify({
-        type: "positive",
-        message: "Te has registrado correctamente",
-        position: "top",
-        timeout: 1000,
-      });
-      $q.loading.hide();
+      useLocalStorage.save("logged", logged.value)
+      useLocalStorage.save("user", user.value);
+      $q.notify(notifyPositive("Te has registrado correctamente"));
       router.replace("/userHome/perfil");
-
     } else {
-      $q.notify({
-        type: "negative",
-        message: "Hubo un error en el registro. Intenta de nuevo",
-        position: "top",
-        timeout: 1000,
-      });
-      $q.loading.hide();
+      $q.notify(notifyNegative("Hubo un error en el registro. Intenta de nuevo"));
     }
   } catch (error) {
-    $q.notify({
-      type: "negative",
-      message: "Hubo un error en el registro. Intenta de nuevo",
-      position: "top",
-      timeout: 1000,
-    });
+    $q.notify(notifyNegative("Hubo un error en el registro. Intenta de nuevo"));
+  }finally{
     $q.loading.hide();
   }
 };
@@ -409,7 +368,6 @@ onBeforeUnmount(() => {
   margin-top: 15%;
   margin-left: 20%;
 }
-
 
 .turbo {
   color: rgb(255, 255, 255);

@@ -48,8 +48,7 @@ const router = createRouter({
         { path: "vacantes", component: () => import('../views/user/VacantsJobsView.vue') },
         { path: "sin-vacantes", component: () => import('../views/NoVacanciesView.vue') }
       ],
-      //TODO: Add authGuard when finished all the routes in user home
-      // beforeEnter: authGuard
+      beforeEnter: authGuard
     },
 
     {
@@ -62,33 +61,70 @@ const router = createRouter({
         { path: "historial-requisiciones", component: () => import('../views/requisition/RequisitionHistoryView.vue') },
         { path: "historial-requisiciones-solicitudes", component: () => import('../views/requisition/RequisitionApplicantsView.vue') },
         { path: "catalogo-puestos", component: () => import('../views/requisition/JobCatalog.vue') },
-        { path: "edicion-puesto", component: () => import('../views/requisition/JobEditionView.vue') }
+        { path: "edicion-puesto", component: () => import('../views/requisition/JobEditionView.vue') },
+        { path: "catalogo-maquinaria", component: () => import('../views/requisition/MachineryCatalogView.vue') },
+
       ],
       beforeEnter: authGuard
     },
     {
       path: "/nomatches",
       name: "nomatches",
-      component: () => import("../views/NoMatchesView.vue")
+      component: () => import("../views/NoMatchesView.vue"),
+      beforeEnter: authGuard
     },
 
     {
       path: "/diary",
       name: "diary",
       component: () => import("../views/DiaryView.vue"),
+      beforeEnter: authGuard
     },
 
     {
       path: "/agenda",
       name: "agenda",
       component: () => import("../views/AgendaView.vue"),
+      beforeEnter: authGuard
+
     },
 
     {
       path: "/email",
       name: "email",
       component: () => import("../views/EmailDesign.vue"),
-    }
+      beforeEnter: authGuard
+    },
+
+    {
+      path: "/restore-password/search-account",
+      name: "search-account",
+      component: () => import("../views/SearchAccountView.vue"),
+    },
+
+    {
+      path: "/restore-password/send-verification",
+      name: "send-verification",
+      component: () => import("../views/SendVerificationCodeView.vue"),
+    },
+
+    {
+      path: "/restore-password/verification",
+      name: "verification",
+      component: () => import("../views/VerificationCodeView.vue"),
+    },
+
+    {
+      path: "/restore-password/change-password",
+      name: "change-password",
+      component: () => import("../views/ChangePasswordView.vue"),
+    },
+
+    {
+      path: "/restore-password/password-restored",
+      name: "password-restored",
+      component: () => import("../views/PasswordRestoredView.vue"),
+    },
   ]
 })
 

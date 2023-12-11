@@ -183,7 +183,7 @@ const requiredFieldsOnThisPage = computed(() => [medium.value])
 onMounted(() => {
   loadLocalStore();
 
-  if (viewingApplication.value) {
+  if (viewingApplication.value || updatingApplication.value) {
     setSavedStoredValues();
   } else {
     setStoredValues();

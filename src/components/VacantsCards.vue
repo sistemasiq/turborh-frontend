@@ -1,7 +1,8 @@
 <template>
   <q-card
   horizontal
-  class="my-card q-ml-lg"
+  class="q-ml-lg bg-dark text-white"
+  style="border-radius: 30px;"
   v-for="(item, index) in currentVacants"
   >
     <div
@@ -16,7 +17,7 @@
      <p class="q-ml-md q-mt-xs">Num.Vacantes: {{ item.vacancyNumber }}</p>
     </div>
     <img
-      :src="getS3FileUrl(getDefaultPath(item.jobUUID, getJobImagesPath), getDefaultJobUUID(item.jobUUID))"
+      :src="getS3FileUrl(getJobImagesPath, getDefaultJobUUID(item.jobUUID))"
       style="max-width: 100%; max-height: 260px; border-radius: 30px 30px 0 0"
     />
     <q-card-section>
@@ -124,6 +125,7 @@
       </q-card-section>
 
       <q-card-actions align="center">
+        <q-btn flat label="Cancelar" color="primary" v-close-popup />
         <q-btn
           rounded
           flat
@@ -132,7 +134,6 @@
           class="bg-cyan text-white"
           @click.prevent = "fetchAddCandidate(currentRequisitionId)"
         />
-        <q-btn flat label="Cancelar" color="primary" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -147,10 +148,12 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from "pinia";
-import { getImageSource } from "src/services/profiles.js"
 import { getDefaultJobUUID, getDefaultPath, getJobImagesPath } from "src/utils/folderPaths";
-import axios from "axios";
 import { getS3FileUrl } from "src/services/profiles.js";
+import { getRequisitionsByState } from "src/services/requisition";
+import { getJobById } from "src/services/jobs";
+import { createCandidate, candidateExists } from "src/services/candidates";
+import { notifyNegative, notifyPositive } from "src/utils/notifies";
 
 const useAuth = useAuthStore();
 const router = useRouter();
@@ -178,38 +181,33 @@ onMounted(() => {
 
 const fetchVacants = async () => {
   try {
-    const notifyRequisitions = $q.notify({
-      type: "ongoing",
-      message: "Cargando vacantes...",
-      position: "bottom",
-    });
+    $q.loading.show({message: "Cargando vacantes..."})
 
-    const request = await axios.get(`/requisicion/autorizada`);
+    const requisitions = await getRequisitionsByState("P");
 
-    if (request.status === 200) {
-      currentVacants.value = request.data;
-      notifyRequisitions();
-      if(!request.data){
+    if (requisitions) {
+      currentVacants.value = requisitions;
+      if(requisitions.length === 0){
         router.replace("/userHome/sin-vacantes")
       }
-    } 
+    }
   } catch (error) {
     console.log(error);
+  } finally{
+    $q.loading.hide();
   }
 };
 
 const fetchJobDetails = async (jobId, itemId) => {
-  console.log("OBTENIENDO DATOS EL PUESTO CON ID: "+jobId);
   showJobDetails.value = true;
   currentRequisitionId.value = itemId;
   jobDetails.value = null;
   try {
 
-    const request = await axios.get(`/puestos/buscar/${jobId}`);
+    const job = await getJobById(jobId);
 
-    if (request.status === 200) {
-      jobDetails.value = request.data;
-      console.log(jobDetails.value)
+    if (job) {
+      jobDetails.value = job;
     }
   } catch (error) {
     console.log(error);
@@ -228,30 +226,16 @@ const fetchAddCandidate = async (requisitionId) => {
 
 
   try {
-    const request = await axios.post("/candidatos", candidate)
+    const candidateCreated = await createCandidate(candidate);
 
-    if(request.status === 201){
+    if(candidateCreated){
       showJobDetails.value = false;
-  $q.notify({
-        type: "positive",
-        message:
-        "<p style='font-size:medium;' class='q-mt-md'>Has aplicado a este puesto correctamente.</p>",
-        timeout: 2000,
-        progress: true,
-        html: true,
-      });
+  $q.notify(notifyPositive("Has aplicado a este puesto correctamente."));
     }
 
   } catch (error) {
     console.log("Error adding candidate "+error);
-    $q.notify({
-        type: "negative",
-        message:
-        "<p style='font-size:medium;' class='q-mt-md'>Hubo un error al aplicar a este puesto, intenta de nuevo.</p>",
-        timeout: 2000,
-        progress: true,
-        html: true,
-      });
+    $q.notify(notifyNegative("Hubo un error al aplicar a este puesto, intenta de nuevo."));
     }
   }
 
@@ -260,16 +244,16 @@ const fetchAddCandidate = async (requisitionId) => {
 
 
 try {
-  const request = await axios.get(`/candidatos/existe/${requisitionId}/${user.value.id}`)
-
-  if(request.status === 200){
+  const candidate = await candidateExists(requisitionId, user.value.id)
+  console.log(candidate);
+  if(candidate){
     isCandidate.value = true;
   }else{
     isCandidate.value = false;
   }
 
 } catch (error) {
-  console.log("Error adding candidate "+error);
+  console.log("Error fetching candidate "+error);
 }
   }
 

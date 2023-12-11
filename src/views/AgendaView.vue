@@ -547,7 +547,7 @@
                 icon="assignment_ind"
               />
               <span v-if="updateSelection">Modificar Cita</span>
-                    <span v-else>Agendar Cita</span>
+              <span v-else>Agendar Cita</span>
             </q-toolbar-title>
             <q-space />
             <q-btn
@@ -1170,7 +1170,15 @@ import {
   finishedAppointment,
   sendEmail,
 } from "src/services/mail.js";
+import {
+  sendWhatsAppMessage,
+  presentialAppointmentData,
+  virtualAppointmentData,
+  canceledAppointmentData,
+  finishedAppointmentData,
+} from "src/services/whatsApp";
 import { notifyPositive, notifyNegative } from "src/utils/notifies.js";
+import { getAllCandidatesDiary } from "src/services/candidates";
 import { useRouter } from "vue-router";
 /* REF CONSTANTS ---------------------------------------------------------------------------------------------------------------------------------------------------- */
 
@@ -1196,6 +1204,7 @@ const active = ref();
 const color = ref("");
 const selectedDate = ref(today());
 const email = ref("");
+const phoneNumber = ref("");
 const locale = ref(""); // Puedes establecer el valor de la localización según tus necesidades
 const selectedMonth = ref(new Date().getMonth());
 const confirm = ref(false); //show the qdialog
@@ -1289,8 +1298,8 @@ const windowKeydownListener = (event) => {
 };
 
 const toHome = () => {
-  router.push("/home")
-}
+  router.push("/home");
+};
 
 const filteredSearchedAppointments = computed(() => {
   return searchedAppointments.value.filter((item) => {
@@ -1311,7 +1320,6 @@ const filterAppointment = (item) => {
 };
 
 /* Functions ---------------------------------------------------------------------------------------------------------------------------------------------------- */
-
 
 const filterHistory = computed(() => {
   return events.value.filter((data) => {
@@ -1398,7 +1406,7 @@ const getAppointmentsCatalog = async () => {
 
     if (request.status === 200) {
       events.value = request.data;
-      console.log("LISTA DE CITAS: ", request.data);
+      console.log("TABLA DE CITAS: ", request.data);
       loading.value = false;
       disableCheckbox.value = false;
     }
@@ -1410,13 +1418,7 @@ const getAppointmentsCatalog = async () => {
       console.log(
         "Error al conectar con el servidor: Tiempo de espera agotado."
       );
-      $q.notify({
-        type: "negative",
-        message: "Hubo un problema al obtener la lista de citas",
-        position: "top",
-        timeout: 5000,
-        actions: [{ label: "Cerrar", color: "yellow" }],
-      });
+      $q.notify(notifyNegative("Hubo un problema al obtener la lista de citas"));
       loading.value = false;
       noDataLabel.value = "Error al obtener la lista de citas";
       disableCheckbox.value = true;
@@ -1428,13 +1430,11 @@ const getCandidatesCatalog = async () => {
   try {
     loading.value = true;
     disableCheckbox.value = true;
-    const request = await axios.get(`/agenda/catalogoCandidatos`, {
-      timeout: 18000,
-    });
+    const candidates = await getAllCandidatesDiary();
 
-    if (request.status === 200) {
-      totalTableRows.value = request.data;
-      console.log("TABLA DE CANDIDATOS: ", request.data);
+    if (candidates) {
+      totalTableRows.value = candidates;
+      console.log("TABLA DE CANDIDATOS: ", candidates);
       loading.value = false;
       disableCheckbox.value = false;
     }
@@ -1446,13 +1446,7 @@ const getCandidatesCatalog = async () => {
       console.log(
         "Error al conectar con el servidor: Tiempo de espera agotado."
       );
-      $q.notify({
-        type: "negative",
-        message: "Hubo un problema al obtener la lista de candidatos",
-        position: "top",
-        timeout: 5000,
-        actions: [{ label: "Cerrar", color: "yellow" }],
-      });
+      $q.notify(notifyNegative("Hubo un problema al obtener la lista de candidatos"));
       loading.value = false;
       noDataLabel.value = "Error al obtener la lista de candidatos";
       disableCheckbox.value = true;
@@ -1546,6 +1540,7 @@ const showEventData = (event) => {
   photoUUID.value = event.photoUUID;
   selectedPlatform.value = event.platformName;
   email.value = event.email;
+  phoneNumber.value = event.phoneNumber;
   console.log("DATOS OBTENIDOS");
   console.log(candidateSelection);
   console.log(
@@ -1565,8 +1560,10 @@ const showEventData = (event) => {
     motherLastName.value,
     name.value,
     photoUUID.value,
+    "SELECTED PLATFORM:  ",
     selectedPlatform.value,
     "siu,",
+    phoneNumber.value,
     email.value,
     linkData.value
   );
@@ -1664,8 +1661,10 @@ const newAppointment = async () => {
     selectedHour.value != ""
   ) {
     try {
+      //The platform selected is inicializated in 0 because of the id of every platform in the database. 0 isn´t a platform in the database and 4 is Presential mode
       if (platformSelectedID.value === 0 || platformSelectedID.value === 4) {
-        platformSelectedID.value = 3;
+        platformSelectedID.value = 3; //Default platform "Zoom" if a platform is not selected
+        selectedPlatform.value = "Zoom" //Default platform name if a platform is not selected
       }
       let modalityValue = "V";
       const appointment = {
@@ -1702,6 +1701,20 @@ const newAppointment = async () => {
         $q.loading.hide();
         confirm.value = false;
 
+        /*Send a WhatsApp Message */
+        const type = "virtual";
+        const data = {
+          phoneNumber: phoneNumber.value,
+          name: name.value,
+          date: selectDay.value,
+          hour: selectedHour.value,
+          platformName: selectedPlatform.value,
+          link: getInsertedAppointment.link,
+          supportEmail: "reclutamiento@turbomaquinas.com",
+        };
+        console.log("MENSAJE DE WHATS: ", JSON.stringify(data.platformName));
+        sendWhatsAppMessage(type, data);
+
         /*CORREO*/
         const mailData = {
           to: email.value,
@@ -1728,21 +1741,15 @@ const newAppointment = async () => {
         }
 
         candidateSelection.value = "";
+        selectedPlatform.value = ""
         userID.value = "";
         selectedHour.value = "";
         selectedModality.value = "";
         linkData.value = "";
         color.value = "";
-      } else {
-        $q.notify({
-          type: "negative",
-          message: "Hubo un error en el registro. Intenta de nuevo",
-          position: "top",
-          timeout: 1000,
-        });
-        $q.loading.hide();
       }
     } catch (error) {
+      console.log("BRO:", error);
       $q.notify({
         type: "negative",
         message: "Hubo un error en el registro. Intenta de nuevo",
@@ -1760,10 +1767,6 @@ const newAppointment = async () => {
     selectedHour.value != ""
   ) {
     try {
-      console.log(
-        "registro PLATFORM ID presencial: ",
-        platformSelectedID.value
-      );
       let modalityValue = "P";
       const appointment = {
         userID: userID.value,
@@ -1780,7 +1783,8 @@ const newAppointment = async () => {
       $q.loading.show();
       const request = await axios.post(`/appointment/create`, appointment);
       console.log(
-        "datos enviados al back correctamente" + JSON.stringify(appointment)
+        "datos enviados al back correctamente de PRESENCIAL" +
+          JSON.stringify(appointment)
       );
       if (request.status === 200) {
         let getInsertedAppointment = request.data;
@@ -1798,7 +1802,20 @@ const newAppointment = async () => {
         events.value.push(getInsertedAppointment);
         $q.loading.hide();
         confirm.value = false;
-        /*CORREO*/
+
+        /*Send a WhatsApp Message */
+        const type = "presential";
+        const data = {
+          phoneNumber: phoneNumber.value,
+          name: name.value,
+          date: selectDay.value,
+          hour: selectedHour.value,
+          supportEmail: "reclutamiento@turbomaquinas.com",
+        };
+
+        sendWhatsAppMessage(type, data);
+
+        /*Send an Email */
         const mailData = {
           to: email.value,
           subject: scheduledAppointment.subject,
@@ -1806,10 +1823,8 @@ const newAppointment = async () => {
           firstText: scheduledAppointment.firstText,
           date: selectDay.value,
           hour: selectedHour.value,
-          modality: "Virtual",
-          platformName: selectedPlatform.value,
+          modality: "Presencial",
           lastText: scheduledAppointment.lastText,
-          link: getInsertedAppointment.link,
           emailType: scheduledAppointment.emailType,
         };
 
@@ -1881,6 +1896,7 @@ const updateAppointment = async () => {
     try {
       if (platformSelectedID.value === 0 || platformSelectedID.value === 4) {
         platformSelectedID.value = 3;
+        selectedPlatform.value = "Zoom"
       }
       let modalityValue = "V";
       const appointment = {
@@ -1933,6 +1949,22 @@ const updateAppointment = async () => {
               " " +
               comparativeAppointment.hour
           );
+
+          /*Send a WhatsApp Message */
+          const type = "virtual/change";
+          const data = {
+            phoneNumber: phoneNumber.value,
+            name: name.value,
+            date: selectDay.value,
+            hour: selectedHour.value,
+            platformName: selectedPlatform.value,
+            link: updatedAppointment.link,
+            supportEmail: "reclutamiento@turbomaquinas.com",
+          };
+
+          sendWhatsAppMessage(type, data);
+
+          /*Send an Email message */
           const mailData = {
             to: email.value,
             subject: modifiedAppointment.subject,
@@ -1958,6 +1990,7 @@ const updateAppointment = async () => {
         candidateSelection.value = "";
         userID.value = "";
         platformSelectedID.value = 0;
+        selectedPlatform.value = ""
         //createdBy.value = "";
         selectedHour.value = "";
         selectedModality.value = "";
@@ -2034,6 +2067,19 @@ const updateAppointment = async () => {
               " " +
               comparativeAppointment.hour
           );
+
+          /*Send a WhatsApp Message */
+          const type = "presential/change";
+          const data = {
+            phoneNumber: phoneNumber.value,
+            name: name.value,
+            date: selectDay.value,
+            hour: selectedHour.value,
+            supportEmail: "reclutamiento@turbomaquinas.com",
+          };
+
+          sendWhatsAppMessage(type, data);
+
           const mailData = {
             to: email.value,
             subject: modifiedAppointment.subject,
@@ -2125,6 +2171,7 @@ const onCandidateSelection = (data) => {
   motherLastName.value = data.motherLastName;
   photoUUID.value = data.photoUUID;
   email.value = data.email;
+  phoneNumber.value = data.celphone;
 };
 
 const onModalitySelection = (data) => {
@@ -2133,7 +2180,7 @@ const onModalitySelection = (data) => {
   selectedModality.value = "Virtual";
   console.log(selectedModality.value);
   console.log(platformSelectedID.value);
-  console.log(selectedPlatform.value);
+  console.log("PLATFORM NAME: IN MODALITY SELECTION ",selectedPlatform.value);
 };
 
 const onClickDay = (data) => {
@@ -2155,6 +2202,7 @@ const onClickDay = (data) => {
       selectDay.value = timestampDate.value.date;
     }
     email.value = "";
+    phoneNumber.value = "";
     console.log("DATE 1: ", timestampDate.value);
   }
 };
@@ -2201,6 +2249,17 @@ const deactivateAppointment = async () => {
       });
       $q.loading.hide();
 
+      /*Send a WhatsApp Message */
+      const type = "canceled";
+      const data = {
+        phoneNumber: phoneNumber.value,
+        name: name.value,
+        supportEmail: "reclutamiento@turbomaquinas.com",
+      };
+
+      sendWhatsAppMessage(type, data);
+
+      /*Send an Email message */
       const mailData = {
         to: email.value,
         subject: canceledAppointment.subject,
@@ -2264,6 +2323,17 @@ const completeAppointment = async () => {
       });
       $q.loading.hide();
 
+      /*Send a WhatsApp Message */
+      const type = "finished";
+      const data = {
+        phoneNumber: phoneNumber.value,
+        name: name.value,
+        supportEmail: "reclutamiento@turbomaquinas.com",
+      };
+
+      sendWhatsAppMessage(type, data);
+
+      /*Send an Email message */
       const mailData = {
         to: email.value,
         subject: finishedAppointment.subject,

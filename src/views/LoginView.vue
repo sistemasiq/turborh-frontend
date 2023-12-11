@@ -24,6 +24,7 @@
                 <q-img
                   :src="getLogoImage"
                   style="width: 30%; height: 10%"
+                  spinner-color="cyan-2"
                 />
               </div>
               <div class="column q-ma-auto">
@@ -44,6 +45,7 @@
                         type="text"
                         label="Nombre de usuario"
                         label-color="white"
+                        lazy-rules
                         :rules="[
                           (value) =>
                             !!value || 'Este campo no puede estar vacío.',
@@ -95,25 +97,24 @@
                     </q-form>
                   </q-card-section>
                   <q-card-actions
-                    class="row q-ma-auto"
+                    class="q-ma-auto"
+                    vertical
                     style="
                       justify-content: center;
                       align-items: center;
-                      padding-top: 5%;
+                      padding-top: 2%;
                     "
                   >
-                    <div class="column">
+                    <div class="row justify-between">
                       <q-btn
                         unelevated
                         rounded
-                        class="btn-brand text-capitalize"
+                        class="btn-brand q-mr-lg text-capitalize"
                         @click.prevent="onLoginClick"
                         :disabled="disableLoginButton()"
                       >
                         Ingresar
                       </q-btn>
-                    </div>
-                    <div class="column" style="padding-left: 3%">
                       <q-btn
                         class="btn-text text-capitalize"
                         flat
@@ -121,6 +122,9 @@
                       >
                         Registrate
                       </q-btn>
+                    </div>
+                    <div class="q-mt-lg">
+                      <q-btn flat class="text-white" @click="toRestorePassword()">¿Has olvidado tu contraseña?</q-btn>
                     </div>
                   </q-card-actions>
                 </q-card>
@@ -131,6 +135,7 @@
               <q-img
                 :src="getLoginMainImage"
                 class="login-image"
+                spinner-color="cyan-2"
               />
             </div>
           </div>
@@ -147,12 +152,12 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
-import axios from "axios";
-import { getAdminRoute, getUserRoute } from "src/services/profiles.js";
+import { getAdminRoute, getUserRoute, getS3FileUrl } from "src/services/profiles.js";
 import { notifyPositive, notifyNegative } from "src/utils/notifies.js";
-import { getS3FileUrl } from "src/services/profiles.js";
 import { getAssetsPath } from "src/utils/folderPaths";
 import { useRequestUser } from "src/stores/requestUser";
+import { logUser } from "src/services/user";
+import { getUserApplicationById } from "src/services/userApplication";
 
 
 const useAuth = useAuthStore();
@@ -182,23 +187,24 @@ const onRegisterClick = () => {
   router.push("/register");
 };
 
+const toRestorePassword = () => {
+  router.replace("/restore-password/search-account");
+}
+
 const disableLoginButton = () => {
   return !userName.value || !password.value;
 };
 
 const onLoginClick = async () => {
 
-
   try {
     $q.loading.show();
 
-    const request = await axios.get(
-      `/auth/${userName.value}/pass/${password.value}`
-    );
+    const userData = await logUser(userName.value, password.value);
 
-    if (request.status === 200) {
+    if (userData) {
 
-      user.value = request.data;
+      user.value = userData;
       logged.value = 1;
 
       useLocalStorage.save("user", user.value);
@@ -230,10 +236,10 @@ const fetchUserApplication = async() => {
   return;
 
   try {
-    const request = await axios.get(`/solicitud/${user.value.applicationId}`);
+    const userApplication = await getUserApplicationById(user.value.applicationId)
 
-    if (request.status === 200) {
-      savedApplication.value = request.data;
+    if (userApplication) {
+      savedApplication.value = userApplication;
       useLocalStorage.save("savedApplication", savedApplication.value);
       $q.notify(
         notifyPositive(`Bienvenido`));
@@ -268,14 +274,14 @@ onBeforeUnmount(() => {
 <style scoped>
 .btn-brand {
   color: black;
-  width: 250px;
+  width: 200px;
   height: 60px;
   font-size: larger;
-  background-color: #99c5cc !important;
+  background-color: #81d7e4 !important;
 }
 
 .btn-brand:hover {
-  background-color: #d4f9ff !important;
+  background-color: #b6f5ff !important;
 }
 
 .btn-brand span {

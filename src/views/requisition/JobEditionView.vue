@@ -423,7 +423,9 @@ import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { getS3UploadUrl } from "src/services/profiles.js";
 import { getJobImagesPath } from "src/utils/folderPaths";
-import axios from "axios";
+import { getAllDepartments, createJob, updateJob, getJobById } from "src/services/jobs";
+import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import { updateFile, uploadFile } from "src/services/files";
 
 const router = useRouter();
 const $q = useQuasar();
@@ -479,10 +481,6 @@ const handleSelectedImage = (files) => {
 };
 
 const uploadUserFiles = async () => {
-  const formData = new FormData();
-  formData.append("file", jobImg.value);
-  formData.append("folderPath", getJobImagesPath);
-
   const updateWithoutImage = jobUUID.value === defaultUUID && !jobImg.value;
 
   if(updateWithoutImage){
@@ -499,25 +497,19 @@ const uploadUserFiles = async () => {
 
   try {
     $q.loading.show();
-    let request;
+    let file;
 
     if (jobUUID.value === defaultUUID) {
-      request = await axios.post("/upload", formData, {
-        headers: {
-          file: "multipart/form-data",
-        },
-      });
+      console.log("Upload file");
+      file = await uploadFile(jobImg.value, getJobImagesPath);
     } else{
-      request = await axios.put(`/updateFile/${jobUUID.value}`, formData, {
-        headers: {
-          file: "multipart/form-data",
-        },
-      });
+      console.log("Updated file");
+      file = await updateFile(jobUUID.value, jobImg.value, getJobImagesPath);
     }
 
-    if (request.status === 200) {
-      changeJobState(request.data);
-      jobUUID.value = request.data;
+    if (file) {
+      jobUUID.value = file.data;
+      changeJobState(file);
     }
   } catch (error) {
     console.log(error);
@@ -563,39 +555,37 @@ const goToJobsCatalog = () => {
 const getJobData = async (id) => {
   try {
     $q.loading.show();
-    const request = await axios.get(`/puestos/buscar/${id}`);
-    if (request.status === 200) {
-      request.data.departmentsId.forEach((element) => {
+    const jobData = await getJobById(id);
+    if (jobData) {
+      jobData.departmentsId.forEach((element) => {
         if (element != null) {
           selectedDepartmentsId.value.push(element);
         }
       });
 
-      console.log(request.data);
-
-      name.value = request.data.name;
-      key.value = request.data.key;
-      mainFunction.value = request.data.mainFunction;
-      englishLevel.value = request.data.englishLevel;
-      description.value = request.data.mainFunction;
-      experience.value = request.data.experience;
-      functions.value = request.data.functions;
-      skills.value = request.data.skills;
-      age.value = request.data.age;
+      name.value = jobData.name;
+      key.value = jobData.key;
+      mainFunction.value = jobData.mainFunction;
+      englishLevel.value = jobData.englishLevel;
+      description.value = jobData.mainFunction;
+      experience.value = jobData.experience;
+      functions.value = jobData.functions;
+      skills.value = jobData.skills;
+      age.value = jobData.age;
       conditions.value =
-        request.data.conditions === "null" ? "" : request.data.conditions;
+        jobData.conditions === "null" ? "" : jobData.conditions;
       observations.value =
-        request.data.observations === "null" ? "" : request.data.observations;
-      extraHours.value = request.data.extraHours === 1 ? true : false;
+        jobData.observations === "null" ? "" : jobData.observations;
+      extraHours.value = jobData.extraHours === 1 ? true : false;
       travelAvailability.value =
-        request.data.travelAvailability === 1 ? true : false;
-      gender.value = request.data.gender;
-      civilStatus.value = request.data.civilStatus;
-      education.value = request.data.education;
+        jobData.travelAvailability === 1 ? true : false;
+      gender.value = jobData.gender;
+      civilStatus.value = jobData.civilStatus;
+      education.value = jobData.education;
       jobUUID.value =
-        request.data.photo_uuid === null || request.data.photo_uuid === "" || request.data.photo_uuid === "no_image"
+        jobData.photo_uuid === null || jobData.photo_uuid === "" || jobData.photo_uuid === "no_image"
           ? defaultUUID
-          : request.data.photo_uuid;
+          : jobData.photo_uuid;
       console.log("JOB UUID "+jobUUID.value);
     }
   } catch (error) {
@@ -618,10 +608,10 @@ const departments = ref([]);
 const fetchDepartments = async () => {
   try {
     departmentsFetched.value = false;
-    const request = await axios.get("/puestos/departamentos");
+    const totalDepartments = await getAllDepartments();
 
-    if (request.status === 200) {
-      request.data.forEach((element) => {
+    if (totalDepartments) {
+      totalDepartments.forEach((element) => {
         const newDepartment = {
           value: element.id,
           name: element.name,
@@ -639,14 +629,14 @@ const fetchDepartments = async () => {
 
 const changeJobState = (photoName) => {
   if (updatingJob.value) {
-    updateJob(photoName);
+    updateJobData(photoName);
     return;
   }
 
   createNewJob(photoName);
 };
 
-const updateJob = async (photoName) => {
+const updateJobData = async (photoName) => {
   const updatedJobData = {
     createdBy: 1,
     id: jobId.value,
@@ -671,24 +661,16 @@ const updateJob = async (photoName) => {
 
   try {
     $q.loading.show();
-    const request = await axios.put("/puestos", updatedJobData);
-
-    if (request.status === 201) {
-      $q.notify({
-        type: "positive",
-        message: `<p style='font-size:medium;' class='q-mt-md'>El puesto ha sido actualizado correctamente</p>`,
-        timeout: 2000,
-        progress: true,
-        html: true,
-      });
+    const updatedJob = await updateJob(updatedJobData)
+    console.log(updatedJob);
+    if (updatedJob) {
+      $q.notify(notifyPositive("El puesto ha sido actualizado correctamente"));
       goToJobsCatalog();
     }
   } catch (error) {
-    $q.notify({
-      type: "negative",
-      message: "Hubo un error al actualizar el puesto, intenta de nuevo",
-      actions: [{ label: "CERRAR", color: "yellow" }],
-    });
+    $q.notify(notifyNegative("Hubo un error al actualizar el puesto, intenta de nuevo"));
+    console.log(error);
+    goToJobsCatalog();
   } finally {
     $q.loading.hide();
   }
@@ -720,25 +702,14 @@ const createNewJob = async (photoName) => {
 
   try {
     $q.loading.show();
-    console.log(newJobData);
-    const request = await axios.post("/puestos", newJobData);
+    const jobCreated = await createJob(newJobData);
 
-    if (request.status === 201) {
-      $q.notify({
-        type: "positive",
-        message: `<p style='font-size:medium;' class='q-mt-md'>El puesto ha sido creado correctamente</p>`,
-        timeout: 2000,
-        progress: true,
-        html: true,
-      });
+    if (jobCreated) {
+      $q.notify(notifyPositive("El puesto ha sido creado correctamente"));
       goToJobsCatalog();
     }
   } catch (error) {
-    $q.notify({
-      type: "negative",
-      message: "Hubo un error al crear el puesto, intenta de nuevo",
-      actions: [{ label: "CERRAR", color: "yellow" }],
-    });
+    $q.notify(notifyNegative("Hubo un error al crear el puesto, intenta de nuevo"));
   } finally {
     $q.loading.hide();
   }

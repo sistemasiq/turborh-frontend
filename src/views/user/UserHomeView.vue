@@ -196,7 +196,7 @@
         dense
         icon="arrow_back"
         class="logout-btn z-top"
-        :class="isRh ? 'q-ml-md' : 'q-ml-xs'"
+        :class="isRh ? 'q-ml-md absolute-bottom q-mb-xl' : 'q-ml-xs'"
         label="Regresar"
         @click.prevent="goToRequisitionApplicants"
         v-if="isRh"
@@ -267,8 +267,9 @@ import NoteComponent from "src/components/NoteComponent.vue";
 import { getAssetsPath } from "src/utils/folderPaths";
 import { getS3FileUrl } from "src/services/profiles.js";
 import Tooltip from "src/components/Tooltip.vue";
-import axios from "axios";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import { updateUserApplicationState } from "src/services/userApplication";
+
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
@@ -308,19 +309,11 @@ onMounted(() => {
   loadLocalStorage();
 });
 
-const getTooltipText = computed(() => {
-  console.log("Active application: " + activeApplication)
-  return activeApplication ? 'Elimina tu solicitud de trabajo' : 'Activa tu solicitud de trabajo';
-})
-
 const loadLocalStorage = () => {
   const userStored = useLocalStorage.load("user");
   const loggedStored = useLocalStorage.load("logged");
-  const savedApplicationStored = useLocalStorage.load("savedApplication");
-
-  if (savedApplicationStored) {
-    savedApplication.value = savedApplicationStored;
-  }
+  const isViewingApplication = useLocalStorage.load("viewingApplication");
+  const isUpdatingApplication = useLocalStorage.load("updatingApplication");
 
   if (userStored) {
     user.value = userStored;
@@ -328,6 +321,14 @@ const loadLocalStorage = () => {
   }
 
   if (loggedStored) logged.value = loggedStored;
+
+  if(isViewingApplication){
+    viewingApplication.value = isViewingApplication;
+  }
+  if(isUpdatingApplication){
+    updatingApplication.value = isUpdatingApplication;
+  }
+
 };
 
 const goToRequisitionApplicants = () => {
@@ -377,9 +378,9 @@ const onDeleteApplication = async () => {
   };
 
   try {
-    const request = await axios.put("/solicitud/estado", userData);
+    const updatedState = await updateUserApplicationState(userData);
 
-    if (request.status === 200) {
+    if (updatedState) {
       const message = activeApplication.value
         ? "Su solicitud ha sido eliminada correctamente"
         : "Su solicitud ha sido activada correctamente";
@@ -412,6 +413,8 @@ const onUpdateApplication = () => {
 
   updatingApplication.value = true;
   viewingApplication.value = false;
+  useLocalStorage.save("updatingApplication", updatingApplication.value);
+  useLocalStorage.save("viewingApplication", viewingApplication.value);
 };
 
 const onViewApplication = () => {
@@ -419,6 +422,9 @@ const onViewApplication = () => {
 
   viewingApplication.value = true;
   updatingApplication.value = false;
+
+  useLocalStorage.save("updatingApplication", updatingApplication.value);
+  useLocalStorage.save("viewingApplication", viewingApplication.value);
 };
 
 const pathMapping = {

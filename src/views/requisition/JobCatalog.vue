@@ -70,23 +70,25 @@
     </template>
 
     <template v-slot:body-cell-jobKey="{ row }">
-      <q-td>
+      <q-td class="text-center">
         <div>{{ row.jobKey }}</div>
       </q-td>
     </template>
     <template v-slot:body-cell-departmentName="{ row }">
-      <q-td class="row">
-        <p
-          class="q-pa-sm"
-          v-for="(item, index) in row.departments"
-          :key="item.id"
-        >
-          {{ row.departments[index].key }}
-        </p>
+      <q-td class="text-center">
+        <div class="row">
+          <p
+            class="q-pa-sm"
+            v-for="(item, index) in row.departments"
+            :key="item.id"
+          >
+            {{ row.departments[index].key }}
+          </p>
+        </div>
       </q-td>
     </template>
     <template v-slot:body-cell-edicionPuestos="props">
-      <q-td class="row" style="position: absolute; right: 0%; height: 48px">
+      <q-td class="text-right">
         <q-btn
           class="q-ml-sm"
           style="background: rgb(47, 171, 171); width: 70px; height: 16px"
@@ -96,21 +98,18 @@
           icon="edit"
           @click.prevent="updateJob(props)"
         >
-        <Tooltip :text="'Modificar'"/>
+          <Tooltip :text="'Modificar'" />
         </q-btn>
 
         <q-btn
           class="q-ml-sm bg-blue-grey-2 text-grey-10"
-          style="
-            width: 70px;
-            height: 16px;
-          "
+          style="width: 70px; height: 16px"
           rounded
           flat
           icon="visibility"
           @click.prevent="seeJob(props.row.id)"
         >
-        <Tooltip :text="'Ver'"/>
+          <Tooltip :text="'Ver'" />
         </q-btn>
 
         <q-btn
@@ -123,8 +122,8 @@
           :icon="getDesignStatusJob(props).buttonIcon"
           @click.prevent="deleteJob(props)"
         >
-        <!-- TODO: No se porque este no se actualiza correctamente con el componente -->
-        <q-tooltip
+          <!-- TODO: No se porque este no se actualiza correctamente con el componente ToolTip -->
+          <q-tooltip
             class="bg-dark text-white text-body2"
             anchor="top middle"
             self="center middle"
@@ -134,9 +133,8 @@
             transition-duration="300"
             :offset="[10, 25]"
           >
-          {{ getDesignStatusJob(props).tooltipText }}
+            {{ getDesignStatusJob(props).tooltipText }}
           </q-tooltip>
-
         </q-btn>
       </q-td>
     </template>
@@ -158,7 +156,7 @@
         <q-btn
           rounded
           flat
-          :label="selectedJob.active ? 'Desactivar' : 'Activar'"
+          label="OK"
           v-close-popup
           :class="selectedJob.active ? 'bg-red-5' : 'bg-orange-5'"
           class="text-white"
@@ -174,11 +172,12 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import Tooltip from "src/components/Tooltip.vue";
-import axios from "axios";
 import { useQuasar } from "quasar";
 import { useJobCatalogStore } from "src/stores/jobCatalog";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
+import { getAllJobs, updateJobState } from "src/services/jobs";
+import { notifyPositive } from "src/utils/notifies";
 
 const router = useRouter();
 const useJobCatalog = useJobCatalogStore();
@@ -195,13 +194,10 @@ const loading = ref(false);
 const totalTableRows = ref([]);
 const disableCheckbox = ref(false);
 
-
 onMounted(() => {
   readOnly.value = false;
   showJobs();
 });
-
-
 
 const getDesignStatusJob = (props) => {
   const active = props.row.active;
@@ -221,33 +217,17 @@ const showJobs = async () => {
   try {
     loading.value = true;
     disableCheckbox.value = true;
-    const request = await axios.get(`/puestos/catalogo`, { timeout: 18000 });
+    const jobs = await getAllJobs();
 
-    if (request.status === 200) {
-      totalTableRows.value = request.data;
-      console.log(request.data);
+    if (jobs) {
+      totalTableRows.value = jobs;
       loading.value = false;
       disableCheckbox.value = false;
     }
   } catch (error) {
-    if (axios.isCancel(error)) {
-      console.log("La solicitud fue cancelada.");
-    } else {
-      console.log("Error:", error);
-      console.log(
-        "Error al conectar con el servidor: Tiempo de espera agotado."
-      );
-      $q.notify({
-        type: "negative",
-        message: "Hubo un problema al obtener la lista de puestos",
-        position: "top",
-        timeout: 5000,
-        actions: [{ label: "Cerrar", color: "yellow" }],
-      });
-      loading.value = false;
-      noDataLabel.value = "Error al obtener la lista de puestos";
-      disableCheckbox.value = true;
-    }
+    loading.value = false;
+    noDataLabel.value = "Error al obtener la lista de puestos";
+    disableCheckbox.value = true;
   }
 };
 
@@ -278,49 +258,27 @@ const updateJob = async (props) => {
 
 const confirmDeleteJob = async () => {
   try {
-    const newJobStatus = {
+    const newJobState = {
       active: selectedJob.value.active === 1 ? 0 : 1,
       id: selectedJob.value.id,
     };
 
     loading.value = true;
-    const request = await axios.put(`/puestos/estado`, newJobStatus, {
-      timeout: 15000,
-    });
+    const job = await updateJobState(newJobState);
 
-    if (request.status === 200) {
-      $q.notify({
-        type: "positive",
-        message: selectedJob.value.active
-          ? "El puesto se ha desactivado correctamente"
-          : "El puesto se ha activado correctamente",
-        position: "top",
-        timeout: 5000,
-        actions: [{ label: "Cerrar", color: "yellow" }],
-      });
+    if (job) {
+      const message = selectedJob.value.active
+        ? "El puesto se ha desactivado correctamente"
+        : "El puesto se ha activado correctamente";
+      $q.notify(notifyPositive(message));
+
       loading.value = false;
-      changeJobStatus(newJobStatus);
+      changeJobStatus(newJobState);
     }
   } catch (error) {
-    if (axios.isCancel(error)) {
-      console.log("La solicitud fue cancelada.");
-    } else {
-      console.log("Error:", error);
-      console.log(
-        "Error al conectar con el servidor: Tiempo de espera agotado."
-      );
-      $q.notify({
-        type: "negative",
-        message: "Hubo un problema al desactivar el puesto",
-        position: "top",
-        timeout: 5000,
-        actions: [{ label: "Cerrar", color: "yellow" }],
-      });
-      loading.value = false;
-    }
-  }
-  // Cerrar el diálogo de confirmación de eliminación
+    loading.value = false;
   deleteDialog.value = false;
+}
 };
 
 const deleteJob = (props) => {
@@ -347,7 +305,7 @@ const columns = [
     name: "departmentName",
     label: "Departamento",
     required: true,
-    align: "left",
+    align: "center",
     field: (row) => row.departmentName,
     sortable: true,
   },
@@ -355,7 +313,7 @@ const columns = [
     name: "jobKey",
     label: "Clave",
     required: true,
-    align: "left",
+    align: "center",
     sortable: true,
     field: (row) => row.jobKey,
   },
@@ -363,7 +321,7 @@ const columns = [
     name: "edicionPuestos",
     label: "Opciones de edición",
     required: true,
-    align: "center",
+    align: "right",
     field: "edicionPuestos",
   },
 ];
