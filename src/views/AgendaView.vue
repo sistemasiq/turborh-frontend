@@ -1560,8 +1560,10 @@ const showEventData = (event) => {
     motherLastName.value,
     name.value,
     photoUUID.value,
+    "SELECTED PLATFORM:  ",
     selectedPlatform.value,
     "siu,",
+    phoneNumber.value,
     email.value,
     linkData.value
   );
@@ -1659,8 +1661,10 @@ const newAppointment = async () => {
     selectedHour.value != ""
   ) {
     try {
+      //The platform selected is inicializated in 0 because of the id of every platform in the database. 0 isn´t a platform in the database and 4 is Presential mode
       if (platformSelectedID.value === 0 || platformSelectedID.value === 4) {
-        platformSelectedID.value = 3;
+        platformSelectedID.value = 3; //Default platform "Zoom" if a platform is not selected
+        selectedPlatform.value = "Zoom" //Default platform name if a platform is not selected
       }
       let modalityValue = "V";
       const appointment = {
@@ -1708,7 +1712,7 @@ const newAppointment = async () => {
           link: getInsertedAppointment.link,
           supportEmail: "reclutamiento@turbomaquinas.com",
         };
-
+        console.log("MENSAJE DE WHATS: ", JSON.stringify(data.platformName));
         sendWhatsAppMessage(type, data);
 
         /*CORREO*/
@@ -1737,6 +1741,7 @@ const newAppointment = async () => {
         }
 
         candidateSelection.value = "";
+        selectedPlatform.value = ""
         userID.value = "";
         selectedHour.value = "";
         selectedModality.value = "";
@@ -1762,10 +1767,6 @@ const newAppointment = async () => {
     selectedHour.value != ""
   ) {
     try {
-      console.log(
-        "registro PLATFORM ID presencial: ",
-        platformSelectedID.value
-      );
       let modalityValue = "P";
       const appointment = {
         userID: userID.value,
@@ -1895,6 +1896,7 @@ const updateAppointment = async () => {
     try {
       if (platformSelectedID.value === 0 || platformSelectedID.value === 4) {
         platformSelectedID.value = 3;
+        selectedPlatform.value = "Zoom"
       }
       let modalityValue = "V";
       const appointment = {
@@ -1988,6 +1990,7 @@ const updateAppointment = async () => {
         candidateSelection.value = "";
         userID.value = "";
         platformSelectedID.value = 0;
+        selectedPlatform.value = ""
         //createdBy.value = "";
         selectedHour.value = "";
         selectedModality.value = "";
@@ -2177,7 +2180,7 @@ const onModalitySelection = (data) => {
   selectedModality.value = "Virtual";
   console.log(selectedModality.value);
   console.log(platformSelectedID.value);
-  console.log(selectedPlatform.value);
+  console.log("PLATFORM NAME: IN MODALITY SELECTION ",selectedPlatform.value);
 };
 
 const onClickDay = (data) => {
