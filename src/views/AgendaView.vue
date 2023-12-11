@@ -2395,14 +2395,8 @@ const completeAppointment = async () => {
 }
 
 .q-calendar-month__head {
-  /*
-  border-bottom: var(--calendar-border);
-  color: var(--calendar-color); */
   background: rgb(22, 48, 70);
   color: rgb(255, 255, 255);
-  /*   display: flex;
-  align-items: center;
-  justify-content: center; */
 }
 
 .custom-calendar {
@@ -2422,7 +2416,4 @@ const completeAppointment = async () => {
   font-size: 10px;
 }
 
-/* @media screen and (max-width: 1000px) {
-
-} */
 </style>
