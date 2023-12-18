@@ -62,7 +62,7 @@
             :disable="firstDateRange && secondDateRange"
             icon="search"
             style="width: fit-content; height: fit-content"
-            @click="getSearchedAppointments()"
+            @click="getHistory()"
           >
             <q-tooltip class="bg-white text-primary">Búsqueda</q-tooltip>
           </q-btn>
@@ -173,7 +173,7 @@
                   dense
                   color="blue-5"
                   label="Buscar"
-                  @click.prevent="getSearchedAppointments()"
+                  @click.prevent="getHistory()"
                   class="q-pa-sm"
                 />
               </div>
@@ -902,7 +902,7 @@
                       flat
                       label="Agendar"
                       icon="add"
-                      @click="newAppointment"
+                      @click="createAppointment()"
                       class="bg-cyan-4 text-white q-mr-xs"
                       style="border-radius: 20px"
                     />
@@ -1158,10 +1158,17 @@ import "@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass";
 import prev from "../components/Prev.vue";
 import next from "../components/Next.vue";
 import todayComponent from "../components/Today.vue";
+import axios from "axios";
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useQuasar } from "quasar";
 import { getS3FileUrl } from "src/services/profiles.js";
-import axios from "axios";
+import {
+  getLinksList,
+  getAppointmentsCatalog,
+  getAppointmentsHistory,
+  postAppointment,
+  putAppointment
+} from "src/services/administrators/Agenda.js";
 import { getUserImagesPath } from "src/utils/folderPaths.js";
 import {
   scheduledAppointment,
@@ -1211,7 +1218,6 @@ const confirm = ref(false); //show the qdialog
 const small = ref(false); //show the qdialog
 const openDialog2 = ref(false);
 const dropdownContentClass = "flexible-width";
-const mostrarDialog = ref(false);
 const hoverable = ref(true);
 const focusable = ref(true);
 const focusType = ref(["day", "date"]);
@@ -1234,6 +1240,11 @@ const disableCheckbox = ref(false);
 const firstDateRange = ref("");
 const secondDateRange = ref("");
 const selectedPlatform = ref("");
+const modifiedBy = ref("");
+const appointmentStatus = ref("");
+const candidateStatus = ref("");
+const appointmentDaysList = ref([]);
+const events = ref([]);
 let comparativeAppointment;
 /*filters*/
 const filterSearchedAppointments = ref("filterAll");
@@ -1277,8 +1288,8 @@ const colorPalette = [
 
 onMounted(() => {
   getCandidatesCatalog();
-  getAppointmentsCatalog();
-  getLinksList();
+  getAppointments();
+  getPlatforms();
   window.addEventListener("keydown", windowKeydownListener);
 });
 
@@ -1293,7 +1304,7 @@ const windowKeydownListener = (event) => {
     firstDateRange.value != "" &&
     secondDateRange.value != ""
   ) {
-    getSearchedAppointments();
+    getHistory();
   }
 };
 
@@ -1366,113 +1377,74 @@ const filteredMeetingPlatform = computed(() => {
   });
 });
 
-const getLinksList = async () => {
-  try {
-    const request = await axios.get(`/links/list`, {
-      timeout: 18000,
+const getPlatforms = async () => {
+  const request = await getLinksList();
+  if (request != null) {
+    meetingPlatform.value = request;
+  }
+  if (meetingPlatform.value == null) {
+    console.log("meeting platform: ", meetingPlatform.value);
+    $q.notify({
+      type: "negative",
+      message: "Hubo un problema al obtener la lista de plataformas virtuales",
+      position: "top",
+      timeout: 5000,
+      actions: [{ label: "Cerrar", color: "yellow" }],
     });
-
-    if (request.status === 200) {
-      meetingPlatform.value = request.data;
-      console.log(meetingPlatform.value);
-    }
-  } catch (error) {
-    if (axios.isCancel(error)) {
-      console.log("La solicitud fue cancelada.");
-    } else {
-      console.log("Error:", error);
-      console.log(
-        "Error al conectar con el servidor: Tiempo de espera agotado."
-      );
-      $q.notify({
-        type: "negative",
-        message:
-          "Hubo un problema al obtener la lista de plataformas virtuales",
-        position: "top",
-        timeout: 5000,
-        actions: [{ label: "Cerrar", color: "yellow" }],
-      });
-    }
   }
 };
 
-const getAppointmentsCatalog = async () => {
-  try {
-    loading.value = true;
+const getAppointments = async () => {
+  loading.value = true;
+  disableCheckbox.value = true;
+  const request = await getAppointmentsCatalog();
+  if (request != null) {
+    loading.value = false;
+    disableCheckbox.value = false;
+    events.value = request;
+  } else {
+    $q.notify(notifyNegative("Hubo un problema al obtener la lista de citas"));
+    loading.value = false;
+    noDataLabel.value = "Error al obtener la lista de citas";
     disableCheckbox.value = true;
-    const request = await axios.get(`/appointment/list`, {
-      timeout: 18000,
-    });
-
-    if (request.status === 200) {
-      events.value = request.data;
-      console.log("TABLA DE CITAS: ", request.data);
-      loading.value = false;
-      disableCheckbox.value = false;
-    }
-  } catch (error) {
-    if (axios.isCancel(error)) {
-      console.log("La solicitud fue cancelada.");
-    } else {
-      console.log("Error:", error);
-      console.log(
-        "Error al conectar con el servidor: Tiempo de espera agotado."
-      );
-      $q.notify(notifyNegative("Hubo un problema al obtener la lista de citas"));
-      loading.value = false;
-      noDataLabel.value = "Error al obtener la lista de citas";
-      disableCheckbox.value = true;
-    }
   }
 };
 
 const getCandidatesCatalog = async () => {
-  try {
-    loading.value = true;
+  loading.value = true;
+  disableCheckbox.value = true;
+  const request = await getAllCandidatesDiary();
+  if (request != null) {
+    loading.value = false;
+    disableCheckbox.value = false;
+    totalTableRows.value = request;
+  } else {
+    $q.notify(
+      notifyNegative("Hubo un problema al obtener la lista de candidatos")
+    );
+    loading.value = false;
+    noDataLabel.value = "Error al obtener la lista de candidatos";
     disableCheckbox.value = true;
-    const candidates = await getAllCandidatesDiary();
-
-    if (candidates) {
-      totalTableRows.value = candidates;
-      console.log("TABLA DE CANDIDATOS: ", candidates);
-      loading.value = false;
-      disableCheckbox.value = false;
-    }
-  } catch (error) {
-    if (axios.isCancel(error)) {
-      console.log("La solicitud fue cancelada.");
-    } else {
-      console.log("Error:", error);
-      console.log(
-        "Error al conectar con el servidor: Tiempo de espera agotado."
-      );
-      $q.notify(notifyNegative("Hubo un problema al obtener la lista de candidatos"));
-      loading.value = false;
-      noDataLabel.value = "Error al obtener la lista de candidatos";
-      disableCheckbox.value = true;
-    }
   }
 };
 
-const getSearchedAppointments = async () => {
-  const apiUrl = `/appointment/filter/date?firstDate=${firstDateRange.value}&lastDate=${secondDateRange.value}`;
-  try {
-    $q.loading.show();
-    const request = await axios.get(apiUrl);
-
-    if (request.status === 200) {
-      $q.loading.hide();
-      $q.notify({
-        type: "positive",
-        message: "Historial obtenido correctamente",
-        position: "bottom",
-        timeout: 1000,
-      });
-      searchedAppointments.value = request.data;
-      showSearchResults.value = true;
-      console.log("TABLA DE DATOS BUSCADOS: ", request.data);
-    }
-  } catch (error) {
+const getHistory = async () => {
+  $q.loading.show();
+  const request = await getAppointmentsHistory(
+    firstDateRange.value,
+    secondDateRange.value
+  );
+  if (request != null) {
+    searchedAppointments.value = request;
+    showSearchResults.value = true;
+    $q.loading.hide();
+    $q.notify({
+      type: "positive",
+      message: "Historial obtenido correctamente",
+      position: "bottom",
+      timeout: 1000,
+    });
+  } else {
     $q.loading.hide();
     $q.notify({
       type: "negative",
@@ -1480,7 +1452,6 @@ const getSearchedAppointments = async () => {
       position: "bottom",
       timeout: 1000,
     });
-    console.log("ERROR: ", error);
   }
 };
 
@@ -1491,22 +1462,12 @@ const closeSearch = () => {
   searchInput.value = "";
 };
 
-const mostrarDialogo = () => {
-  mostrarDialog.value = true;
-};
-
-const modifiedBy = ref("");
-const appointmentStatus = ref("");
-const candidateStatus = ref("");
-const appointmentDaysList = ref([]);
-
 const showDaysAppointmentList = (data) => {
   dayAppointmentsDialog.value = true;
   openDialog2.value = false;
   confirm.value = false;
   appointmentDaysList.value = data;
-  console.log("DATA", data);
-  console.log("ARREGLO", data);
+  console.log("Day´s appointments ", data);
 };
 
 const showEventData = (event) => {
@@ -1648,126 +1609,109 @@ const checkSelection = (candidate) => {
   return check;
 };
 /*ADD EVENTS ===================================================================================================================================== */
-
-const events = ref([]);
-
-const newAppointment = async () => {
-  if (
-    selectedModality.value === "Virtual" &&
+const checkVariablesToCreateMethod = () => {
+  return !!(
     candidateSelection.value != "" &&
     userID.value != "" &&
     createdBy.value != "" &&
     selectDay.value != "" &&
     selectedHour.value != ""
-  ) {
-    try {
-      //The platform selected is inicializated in 0 because of the id of every platform in the database. 0 isn´t a platform in the database and 4 is Presential mode
-      if (platformSelectedID.value === 0 || platformSelectedID.value === 4) {
-        platformSelectedID.value = 3; //Default platform "Zoom" if a platform is not selected
-        selectedPlatform.value = "Zoom" //Default platform name if a platform is not selected
-      }
-      let modalityValue = "V";
-      const appointment = {
-        linkID: platformSelectedID.value,
-        userID: userID.value,
-        active: 1,
-        createdBy: createdBy.value,
+  );
+};
+
+const checkVariablesToUpdateMethod = () => {
+  return !!(
+    appointmentId.value != "" &&
+    candidateSelection.value != "" &&
+    userID.value != "" &&
+    selectDay.value != "" &&
+    selectedHour.value != ""
+  );
+};
+
+const asignDefaultPlatform = () => {
+  //The platform selected is inicializated in 0 because of the id of every platform in the database. 0 isn´t a platform in the database and 4 is Presential mode
+  if (platformSelectedID.value === 0 || platformSelectedID.value === 4) {
+    platformSelectedID.value = 3; //Default platform "Zoom" if a platform is not selected
+    selectedPlatform.value = "Zoom"; //Default platform name if a platform is not selected
+  }
+};
+
+const postVirtualAppointment = async () => {
+  $q.loading.show();
+    asignDefaultPlatform();
+
+    /* Object creation and insertion */
+    const appointment = {
+      linkID: platformSelectedID.value,
+      userID: userID.value,
+      active: 1,
+      createdBy: createdBy.value,
+      date: selectDay.value,
+      hour: selectedHour.value,
+      modality: "V",
+      color: hex.value,
+      appointmentStatus: "P",
+      candidateStatus: "C",
+    };
+    const request = await postAppointment("create", appointment);
+
+    if (request != null) {
+      let getInsertedAppointment = request;
+      const candidateIndex = totalTableRows.value.findIndex(
+        (candidate) => candidate.userID === request.userID
+      );
+      totalTableRows.value[candidateIndex].status = "C";
+      events.value.push(getInsertedAppointment);
+
+      $q.notify(notifyPositive("Cita registrada exitosamente!"));
+      $q.loading.hide();
+      confirm.value = false; //close the dialog
+
+      /* Send a WhatsApp Message */
+      const data = {
+        phoneNumber: phoneNumber.value,
+        name: name.value,
         date: selectDay.value,
         hour: selectedHour.value,
-        modality: modalityValue,
-        color: hex.value,
-        appointmentStatus: "P",
-        candidateStatus: "C",
+        platformName: selectedPlatform.value,
+        link: getInsertedAppointment.link,
+        supportEmail: "reclutamiento@turbomaquinas.com",
       };
-      $q.loading.show();
-      const request = await axios.post(`/appointment/create`, appointment);
+      sendWhatsAppMessage("virtual", data);
 
-      if (request.status === 200) {
-        let getInsertedAppointment = request.data;
-        const candidateIndex = totalTableRows.value.findIndex(
-          (candidate) => candidate.userID === request.data.userID
-        );
-        totalTableRows.value[candidateIndex].status = "C";
-        $q.notify({
-          type: "positive",
-          message: "La cita fue registrada correctamente",
-          position: "top",
-          timeout: 1000,
-        });
-        console.log(
-          "Object from back value Virtual: " + getInsertedAppointment.link
-        );
-        events.value.push(getInsertedAppointment);
-        $q.loading.hide();
-        confirm.value = false;
+      /* Send an Email*/
+      const mailData = {
+        to: email.value,
+        subject: scheduledAppointment.subject,
+        name: name.value,
+        firstText: scheduledAppointment.firstText,
+        date: selectDay.value,
+        hour: selectedHour.value,
+        modality: "Virtual",
+        platformName: selectedPlatform.value,
+        lastText: scheduledAppointment.lastText,
+        link: getInsertedAppointment.link,
+        emailType: scheduledAppointment.emailType,
+      };
+      sendEmail("scheduled-appointment", mailData);
 
-        /*Send a WhatsApp Message */
-        const type = "virtual";
-        const data = {
-          phoneNumber: phoneNumber.value,
-          name: name.value,
-          date: selectDay.value,
-          hour: selectedHour.value,
-          platformName: selectedPlatform.value,
-          link: getInsertedAppointment.link,
-          supportEmail: "reclutamiento@turbomaquinas.com",
-        };
-        console.log("MENSAJE DE WHATS: ", JSON.stringify(data.platformName));
-        sendWhatsAppMessage(type, data);
-
-        /*CORREO*/
-        const mailData = {
-          to: email.value,
-          subject: scheduledAppointment.subject,
-          name: name.value,
-          firstText: scheduledAppointment.firstText,
-          date: selectDay.value,
-          hour: selectedHour.value,
-          modality: "Virtual",
-          platformName: selectedPlatform.value,
-          lastText: scheduledAppointment.lastText,
-          link: getInsertedAppointment.link,
-          emailType: scheduledAppointment.emailType,
-        };
-
-        sendEmail("scheduled-appointment", mailData);
-        if (sendEmail === true) {
-          notifyPositive(
-            "Correo enviado a: " + data.name + "exitosamente",
-            3000
-          );
-        } else {
-          notifyNegative("Hubo un error al enviar el correo");
-        }
-
-        candidateSelection.value = "";
-        selectedPlatform.value = ""
-        userID.value = "";
-        selectedHour.value = "";
-        selectedModality.value = "";
-        linkData.value = "";
-        color.value = "";
-      }
-    } catch (error) {
-      console.log("BRO:", error);
-      $q.notify({
-        type: "negative",
-        message: "Hubo un error en el registro. Intenta de nuevo",
-        position: "top",
-        timeout: 1000,
-      });
+      candidateSelection.value = "";
+      selectedPlatform.value = "";
+      userID.value = "";
+      selectedHour.value = "";
+      selectedModality.value = "";
+      linkData.value = "";
+      color.value = "";
+    } else {
+      $q.notify(notifyNegative("Hubo un error al registrar la cita"));
       $q.loading.hide();
     }
-  } else if (
-    selectedModality.value === "Presencial" &&
-    candidateSelection.value != "" &&
-    userID.value != "" &&
-    createdBy.value != "" &&
-    selectDay.value != "" &&
-    selectedHour.value != ""
-  ) {
-    try {
-      let modalityValue = "P";
+}
+
+const postPresentialAppointment = async () => {
+  $q.loading.show();
+    /* Object creation and insertion */
       const appointment = {
         userID: userID.value,
         linkID: 4,
@@ -1775,36 +1719,27 @@ const newAppointment = async () => {
         createdBy: createdBy.value,
         date: selectDay.value,
         hour: selectedHour.value,
-        modality: modalityValue,
+        modality: "P",
         color: hex.value,
         appointmentStatus: "P",
         candidateStatus: "C",
       };
-      $q.loading.show();
-      const request = await axios.post(`/appointment/create`, appointment);
-      console.log(
-        "datos enviados al back correctamente de PRESENCIAL" +
-          JSON.stringify(appointment)
-      );
-      if (request.status === 200) {
-        let getInsertedAppointment = request.data;
+      const request = await postAppointment("create", appointment);
+
+      if (request != null) {
+        let getInsertedAppointment = request;
         console.log(getInsertedAppointment);
         const candidateIndex = totalTableRows.value.findIndex(
-          (candidate) => candidate.userID === request.data.userID
+          (candidate) => candidate.userID === request.userID
         );
         totalTableRows.value[candidateIndex].status = "C";
-        $q.notify({
-          type: "positive",
-          message: "La cita fue registrada correctamente",
-          position: "top",
-          timeout: 1000,
-        });
         events.value.push(getInsertedAppointment);
+
+        $q.notify(notifyPositive("Cita registrada exitosamente!"));
         $q.loading.hide();
         confirm.value = false;
 
         /*Send a WhatsApp Message */
-        const type = "presential";
         const data = {
           phoneNumber: phoneNumber.value,
           name: name.value,
@@ -1812,8 +1747,7 @@ const newAppointment = async () => {
           hour: selectedHour.value,
           supportEmail: "reclutamiento@turbomaquinas.com",
         };
-
-        sendWhatsAppMessage(type, data);
+        sendWhatsAppMessage("presential", data);
 
         /*Send an Email */
         const mailData = {
@@ -1827,197 +1761,116 @@ const newAppointment = async () => {
           lastText: scheduledAppointment.lastText,
           emailType: scheduledAppointment.emailType,
         };
-
         sendEmail("scheduled-appointment", mailData);
 
         candidateSelection.value = "";
         userID.value = "";
         platformSelectedID.value = 0;
-        //createdBy.value = "";
         selectedHour.value = "";
         selectedModality.value = "";
         linkData.value = "";
         color.value = "";
       } else {
-        console.log("why?" + JSON.stringify(appointment));
-        $q.notify({
-          type: "negative",
-          message: "Hubo un error en el registro. Intenta de nuevo",
-          position: "top",
-          timeout: 1000,
-        });
+        $q.notify(notifyNegative("Hubo un error al registrar la cita"));
         $q.loading.hide();
       }
-    } catch (error) {
-      $q.notify({
-        type: "negative",
-        message: "Hubo un error en el registro. Intenta de nuevo",
-        position: "top",
-        timeout: 1000,
-      });
-      $q.loading.hide();
-    }
+}
+
+const createAppointment = () => {
+  if (selectedModality.value === "Virtual" && checkVariablesToCreateMethod()) {
+    postVirtualAppointment();
+  } else if (
+    selectedModality.value === "Presencial" && checkVariablesToCreateMethod()) {
+    postPresentialAppointment();
+
+  /* Fields exceptions */
   } else if (candidateSelection.value == "") {
-    $q.notify({
-      type: "negative",
-      message: "Debe seleccionar un candidato",
-      position: "top",
-      timeout: 1000,
-    });
-    $q.loading.hide();
+    $q.notify(notifyNegative("Seleccione un candidato"));
   } else if (selectedHour.value == "") {
-    $q.notify({
-      type: "negative",
-      message: "Debe seleccionar una hora",
-      position: "top",
-      timeout: 1000,
-    });
-    $q.loading.hide();
+    $q.notify(notifyNegative("Seleccione una hora"));
   } else if (selectedModality.value == "") {
-    $q.notify({
-      type: "negative",
-      message: "Debe seleccionar una modalidad",
-      position: "top",
-      timeout: 1000,
-    });
-    $q.loading.hide();
+    $q.notify(notifyNegative("Seleccione una modalidad"));
   }
 };
 
-const updateAppointment = async () => {
-  if (
-    selectedModality.value === "Virtual" &&
-    appointmentId.value != "" &&
-    candidateSelection.value != "" &&
-    userID.value != "" &&
-    selectDay.value != "" &&
-    selectedHour.value != ""
-  ) {
-    try {
-      if (platformSelectedID.value === 0 || platformSelectedID.value === 4) {
-        platformSelectedID.value = 3;
-        selectedPlatform.value = "Zoom"
-      }
-      let modalityValue = "V";
-      const appointment = {
-        appointmentId: appointmentId.value,
-        userID: userID.value,
-        linkID: platformSelectedID.value,
-        modifiedBy: createdBy.value,
-        date: selectDay.value,
-        hour: selectedHour.value,
-        modality: modalityValue,
-        color: hex.value,
-      };
-      $q.loading.show();
-      const request = await axios.put(`/appointment/update`, appointment);
+const putVirtualApppointment = async () => {
+  $q.loading.show();
+    asignDefaultPlatform();
+    const appointment = {
+      appointmentId: appointmentId.value,
+      userID: userID.value,
+      linkID: platformSelectedID.value,
+      modifiedBy: createdBy.value,
+      date: selectDay.value,
+      hour: selectedHour.value,
+      modality: "V",
+      color: hex.value,
+    };
+    const request = await putAppointment("update", appointment);
 
-      if (request.status === 200) {
-        let updatedAppointment = request.data;
-        const appointmentIndex = events.value
-          .map((event) => {
-            return event.appointmentId;
-          })
-          .indexOf(appointment.appointmentId);
-        events.value[appointmentIndex] = updatedAppointment;
-        $q.notify({
-          type: "positive",
-          message: "La cita fue actualizada correctamente",
-          position: "top",
-          timeout: 1000,
-        });
-
-        $q.loading.hide();
-        confirm.value = false;
-
-        if (
-          updatedAppointment.linkID != comparativeAppointment.linkID ||
-          updatedAppointment.date != comparativeAppointment.date ||
-          updatedAppointment.hour != comparativeAppointment.hour
-        ) {
-          console.log(
-            "DATOS DE LA ACTUALIZACIÓN: ",
-            updatedAppointment.linkID +
-              " " +
-              comparativeAppointment.linkID +
-              " " +
-              updatedAppointment.date +
-              " " +
-              comparativeAppointment.date +
-              " " +
-              updatedAppointment.hour +
-              " " +
-              comparativeAppointment.hour
-          );
-
-          /*Send a WhatsApp Message */
-          const type = "virtual/change";
-          const data = {
-            phoneNumber: phoneNumber.value,
-            name: name.value,
-            date: selectDay.value,
-            hour: selectedHour.value,
-            platformName: selectedPlatform.value,
-            link: updatedAppointment.link,
-            supportEmail: "reclutamiento@turbomaquinas.com",
-          };
-
-          sendWhatsAppMessage(type, data);
-
-          /*Send an Email message */
-          const mailData = {
-            to: email.value,
-            subject: modifiedAppointment.subject,
-            name: name.value,
-            firstText: modifiedAppointment.firstText,
-            date: selectDay.value,
-            hour: selectedHour.value,
-            modality: "Virtual",
-            platformName: selectedPlatform.value,
-            lastText: modifiedAppointment.lastText,
-            link: updatedAppointment.link,
-            emailType: modifiedAppointment.emailType,
-          };
-
-          sendEmail("modified-appointment", mailData);
-          if (sendEmail === true) {
-            notifyPositive("Se a notificado al candidato", 1000);
-          } else {
-            notifyNegative("Hubo un error al enviar el correo");
-          }
-        }
-
-        candidateSelection.value = "";
-        userID.value = "";
-        platformSelectedID.value = 0;
-        selectedPlatform.value = ""
-        //createdBy.value = "";
-        selectedHour.value = "";
-        selectedModality.value = "";
-        linkData.value = "";
-        color.value = "";
-      }
-    } catch (error) {
-      $q.notify({
-        type: "negative",
-        message: "Hubo un error en el registro. Intenta de nuevo",
-        position: "top",
-        timeout: 1000,
-      });
+    if (request != null) {
+      let updatedAppointment = request;
+      const appointmentIndex = events.value
+        .map((event) => {
+          return event.appointmentId;
+        })
+        .indexOf(appointment.appointmentId);
+      events.value[appointmentIndex] = updatedAppointment;
+      $q.notify(notifyPositive("Cita actualizada exitosamente!"));
       $q.loading.hide();
-      console.log(error);
+      confirm.value = false;
+
+      /* Comparative values to check if the appointment has change is some value, if any of the values has not changed, then the email and whatsApp will not be sended to the users */
+      if (
+        updatedAppointment.linkID != comparativeAppointment.linkID ||
+        updatedAppointment.date != comparativeAppointment.date ||
+        updatedAppointment.hour != comparativeAppointment.hour
+      ) {
+        /*Send a WhatsApp Message */
+        const data = {
+          phoneNumber: phoneNumber.value,
+          name: name.value,
+          date: selectDay.value,
+          hour: selectedHour.value,
+          platformName: selectedPlatform.value,
+          link: updatedAppointment.link,
+          supportEmail: "reclutamiento@turbomaquinas.com",
+        };
+        sendWhatsAppMessage("virtual/change", data);
+
+        /*Send an Email message */
+        const mailData = {
+          to: email.value,
+          subject: modifiedAppointment.subject,
+          name: name.value,
+          firstText: modifiedAppointment.firstText,
+          date: selectDay.value,
+          hour: selectedHour.value,
+          modality: "Virtual",
+          platformName: selectedPlatform.value,
+          lastText: modifiedAppointment.lastText,
+          link: updatedAppointment.link,
+          emailType: modifiedAppointment.emailType,
+        };
+        sendEmail("modified-appointment", mailData);
+      }
+
+      candidateSelection.value = "";
+      userID.value = "";
+      platformSelectedID.value = 0;
+      selectedPlatform.value = "";
+      selectedHour.value = "";
+      selectedModality.value = "";
+      linkData.value = "";
+      color.value = "";
+    } else {
+      $q.notify(notifyNegative("Hubo un error al actualizar la cita"));
+      $q.loading.hide();
     }
-  } else if (
-    selectedModality.value === "Presencial" &&
-    appointmentId.value != "" &&
-    candidateSelection.value != "" &&
-    userID.value != "" &&
-    selectDay.value != "" &&
-    selectedHour.value != ""
-  ) {
-    try {
-      console.log("UPDATE-Presencial id platform: ", platformSelectedID.value);
-      let modalityValue = "P";
+}
+
+const putPresentialAppointment = async () => {
+  $q.loading.show();
       const appointment = {
         appointmentId: appointmentId.value,
         userID: userID.value,
@@ -2025,26 +1878,20 @@ const updateAppointment = async () => {
         modifiedBy: createdBy.value,
         date: selectDay.value,
         hour: selectedHour.value,
-        modality: modalityValue,
+        modality: "P",
         color: hex.value,
       };
-      $q.loading.show();
-      const request = await axios.put(`/appointment/update`, appointment);
+      const request = await putAppointment("update", appointment);
 
-      if (request.status === 200) {
-        let updatedAppointment = request.data;
+    if (request != null) {
+        let updatedAppointment = request;
         const appointmentIndex = events.value
           .map((event) => {
             return event.appointmentId;
           })
           .indexOf(appointment.appointmentId);
         events.value[appointmentIndex] = updatedAppointment;
-        $q.notify({
-          type: "positive",
-          message: "La cita fue actualizada correctamente",
-          position: "top",
-          timeout: 1000,
-        });
+        $q.notify(notifyPositive("Cita actualizada exitosamente!"));
         $q.loading.hide();
         confirm.value = false;
 
@@ -2069,7 +1916,6 @@ const updateAppointment = async () => {
           );
 
           /*Send a WhatsApp Message */
-          const type = "presential/change";
           const data = {
             phoneNumber: phoneNumber.value,
             name: name.value,
@@ -2077,8 +1923,7 @@ const updateAppointment = async () => {
             hour: selectedHour.value,
             supportEmail: "reclutamiento@turbomaquinas.com",
           };
-
-          sendWhatsAppMessage(type, data);
+          sendWhatsAppMessage("presential/change", data);
 
           const mailData = {
             to: email.value,
@@ -2093,16 +1938,7 @@ const updateAppointment = async () => {
             link: updatedAppointment.link,
             emailType: modifiedAppointment.emailType,
           };
-
           sendEmail("modified-appointment", mailData);
-          if (sendEmail === true) {
-            notifyPositive(
-              "Correo enviado a: " + data.name + "exitosamente",
-              3000
-            );
-          } else {
-            notifyNegative("Hubo un error al enviar el correo");
-          }
         }
         candidateSelection.value = "";
         userID.value = "";
@@ -2111,43 +1947,29 @@ const updateAppointment = async () => {
         selectedModality.value = "";
         linkData.value = "";
         color.value = "";
-      }
-    } catch (error) {
-      $q.notify({
-        type: "negative",
-        message: "Hubo un error en el registro. Intenta de nuevo",
-        position: "top",
-        timeout: 1000,
-      });
+      }else {
+      $q.notify(notifyNegative("Hubo un error al actualizar la cita"));
       $q.loading.hide();
       console.log("error: " + error);
-    }
-  } else if (candidateSelection.value == "") {
-    $q.notify({
-      type: "negative",
-      message: "Debe seleccionar un candidato",
-      position: "top",
-      timeout: 1000,
-    });
-    $q.loading.hide();
-  } else if (selectedHour.value == "") {
-    $q.notify({
-      type: "negative",
-      message: "Debe seleccionar una hora",
-      position: "top",
-      timeout: 1000,
-    });
-    $q.loading.hide();
-  } else if (selectedModality.value == "") {
-    $q.notify({
-      type: "negative",
-      message: "Debe seleccionar una modalidad",
-      position: "top",
-      timeout: 1000,
-    });
-    $q.loading.hide();
   }
-};
+}
+
+const updateAppointment = async () => {
+  if (selectedModality.value === "Virtual" && checkVariablesToUpdateMethod()) {
+    putVirtualApppointment();
+  } else if (
+    selectedModality.value === "Presencial" && checkVariablesToUpdateMethod()) {
+    putPresentialAppointment();
+
+  /* Fields exceptions */
+  } else if (candidateSelection.value == "") {
+    $q.notify(notifyNegative("Seleccione un candidato"));
+  } else if (selectedHour.value == "") {
+    $q.notify(notifyNegative("Seleccione una hora"));
+  } else if (selectedModality.value == "") {
+    $q.notify(notifyNegative("Seleccione una modalidad"));
+  }
+  };
 
 const eventsMap = computed(() => {
   console.log("si lo detecta el cambio");
@@ -2180,7 +2002,7 @@ const onModalitySelection = (data) => {
   selectedModality.value = "Virtual";
   console.log(selectedModality.value);
   console.log(platformSelectedID.value);
-  console.log("PLATFORM NAME: IN MODALITY SELECTION ",selectedPlatform.value);
+  console.log("PLATFORM NAME: IN MODALITY SELECTION ", selectedPlatform.value);
 };
 
 const onClickDay = (data) => {
@@ -2216,18 +2038,10 @@ const closeShowAppointmentDialog = () => {
 };
 
 const deactivateAppointment = async () => {
-  const apiUrl = "/appointment/deactivate";
+  const apiUrl = `/appointment/deactivate?candidateStatus=P&userID=${userID.value}&appointmentStatus=C&appointmentId=${appointmentId.value}`;
   $q.loading.show();
   try {
-    const request = await axios.put(apiUrl, null, {
-      params: {
-        appointmentStatus: "C",
-        appointmentId: appointmentId.value,
-        candidateStatus: "P",
-        userID: userID.value,
-      },
-    });
-
+    const request = await axios.delete(apiUrl);
     if (request.status === 200) {
       openDialog2.value = false;
 
@@ -2295,10 +2109,10 @@ const completeAppointment = async () => {
   try {
     const request = await axios.put(apiUrl, null, {
       params: {
-        appointmentStatus: "F",
-        appointmentId: appointmentId.value,
         candidateStatus: "E",
         userID: userID.value,
+        appointmentStatus: "F",
+        appointmentId: appointmentId.value,
       },
     });
 
