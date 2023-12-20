@@ -1244,7 +1244,7 @@ const modifiedBy = ref("");
 const appointmentStatus = ref("");
 const candidateStatus = ref("");
 const appointmentDaysList = ref([]);
-const events = ref([]);
+const events = ref([]); //this is the array where the appointments are
 let comparativeAppointment;
 /*filters*/
 const filterSearchedAppointments = ref("filterAll");
