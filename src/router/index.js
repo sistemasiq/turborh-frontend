@@ -19,34 +19,39 @@ const router = createRouter({
       redirect: "/login"
     },
     {
+      path: '/:pathMatch(.*)*',
+      name: 'notFound',
+      component: () => import ('/src/views/NotFoundView.vue')
+    },
+    {
       path: "/login",
       name: "login",
-      component: () => import("../views/LoginView.vue")
+      component: () => import('/src/views/LoginView.vue')
     },
     {
       path: "/register",
       name: "register",
-      component: () => import("../views/user/RegisterView.vue")
+      component: () => import("/src/views/user/RegisterView.vue")
     },
     {
       path: "/userHome",
       name: "userHome",
-      component: () => import("../views/user/UserHomeView.vue"),
+      component: () => import("/src/views/user/UserHomeView.vue"),
       children: [
-        { path: "perfil", component: () => import('../views/user/UserProfileView.vue') },
-        { path: "solicitud-1", component: () => import('../views/user/FrontPageView.vue') },
-        { path: "solicitud-2", component: () => import('../views/user/PersonalDataView.vue') },
-        { path: "solicitud-3", component: () => import('../views/user/PersonalDataTwoView.vue') },
-        { path: "solicitud-4", component: () => import('../views/user/DocumentsView.vue') },
-        { path: "solicitud-5", component: () => import('../views/user/RecruitingMeansView.vue') },
-        { path: "solicitud-6", component: () => import('../views/user/FamilyDataView.vue') },
-        { path: "solicitud-7", component: () => import('../views/user/EducationView.vue') },
-        { path: "solicitud-8", component: () => import('../views/user/MachineryView.vue') },
-        { path: "solicitud-9", component: () => import('../views/user/SkillsView.vue') },
-        { path: "solicitud-10", component: () => import('../views/user/LaboralExperienceView.vue') },
-        { path: "solicitud-11", component: () => import('../views/user/FamilyReferencesView.vue') },
-        { path: "vacantes", component: () => import('../views/user/VacantsJobsView.vue') },
-        { path: "sin-vacantes", component: () => import('../views/NoVacanciesView.vue') }
+        { path: "perfil", component: () => import('/src/views/user/UserProfileView.vue') },
+        { path: "solicitud-1", component: () => import('/src/views/user/FrontPageView.vue') },
+        { path: "solicitud-2", component: () => import('/src/views/user/PersonalDataView.vue') },
+        { path: "solicitud-3", component: () => import('/src/views/user/PersonalDataTwoView.vue') },
+        { path: "solicitud-4", component: () => import('/src/views/user/DocumentsView.vue') },
+        { path: "solicitud-5", component: () => import('/src/views/user/RecruitingMeansView.vue') },
+        { path: "solicitud-6", component: () => import('/src/views/user/FamilyDataView.vue') },
+        { path: "solicitud-7", component: () => import('/src/views/user/EducationView.vue') },
+        { path: "solicitud-8", component: () => import('/src/views/user/MachineryView.vue') },
+        { path: "solicitud-9", component: () => import('/src/views/user/SkillsView.vue') },
+        { path: "solicitud-10", component: () => import('/src/views/user/LaboralExperienceView.vue') },
+        { path: "solicitud-11", component: () => import('/src/views/user/FamilyReferencesView.vue') },
+        { path: "vacantes", component: () => import('/src/views/user/VacantsJobsView.vue') },
+        { path: "sin-vacantes", component: () => import('/src/views/NoVacanciesView.vue') }
       ],
       beforeEnter: authGuard
     },
@@ -54,15 +59,15 @@ const router = createRouter({
     {
       path: "/home",
       name: "home",
-      component: () => import("../views/requisition/HomeView.vue"),
+      component: () => import("/src/views/requisition/HomeView.vue"),
       children: [
-        { path: "nueva-requisicion-1", component: () => import('../views/requisition/NewRequisitionView.vue') },
-        { path: "nueva-requisicion-2", component: () => import('../views/requisition/NewRequisitionTwoView.vue') },
-        { path: "historial-requisiciones", component: () => import('../views/requisition/RequisitionHistoryView.vue') },
-        { path: "historial-requisiciones-solicitudes", component: () => import('../views/requisition/RequisitionApplicantsView.vue') },
-        { path: "catalogo-puestos", component: () => import('../views/requisition/JobCatalog.vue') },
-        { path: "edicion-puesto", component: () => import('../views/requisition/JobEditionView.vue') },
-        { path: "catalogo-maquinaria", component: () => import('../views/requisition/MachineryCatalogView.vue') },
+        { path: "nueva-requisicion-1", component: () => import('/src/views/requisition/NewRequisitionView.vue') },
+        { path: "nueva-requisicion-2", component: () => import('/src/views/requisition/NewRequisitionTwoView.vue') },
+        { path: "historial-requisiciones", component: () => import('/src/views/requisition/RequisitionHistoryView.vue') },
+        { path: "historial-requisiciones-solicitudes", component: () => import('/src/views/requisition/RequisitionApplicantsView.vue') },
+        { path: "catalogo-puestos", component: () => import('/src/views/requisition/JobCatalog.vue') },
+        { path: "edicion-puesto", component: () => import('/src/views/requisition/JobEditionView.vue') },
+        { path: "catalogo-maquinaria", component: () => import('/src/views/requisition/MachineryCatalogView.vue') },
 
       ],
       beforeEnter: authGuard
@@ -70,21 +75,21 @@ const router = createRouter({
     {
       path: "/nomatches",
       name: "nomatches",
-      component: () => import("../views/NoMatchesView.vue"),
+      component: () => import("/src/views/NoMatchesView.vue"),
       beforeEnter: authGuard
     },
 
     {
       path: "/diary",
       name: "diary",
-      component: () => import("../views/DiaryView.vue"),
+      component: () => import("/src/views/DiaryView.vue"),
       beforeEnter: authGuard
     },
 
     {
       path: "/agenda",
       name: "agenda",
-      component: () => import("../views/AgendaView.vue"),
+      component: () => import("/src/views/AgendaView.vue"),
       beforeEnter: authGuard
 
     },
@@ -92,38 +97,38 @@ const router = createRouter({
     {
       path: "/email",
       name: "email",
-      component: () => import("../views/EmailDesign.vue"),
+      component: () => import("/src/views/EmailDesign.vue"),
       beforeEnter: authGuard
     },
 
     {
       path: "/restore-password/search-account",
       name: "search-account",
-      component: () => import("../views/SearchAccountView.vue"),
+      component: () => import("/src/views/SearchAccountView.vue"),
     },
 
     {
       path: "/restore-password/send-verification",
       name: "send-verification",
-      component: () => import("../views/SendVerificationCodeView.vue"),
+      component: () => import("/src/views/SendVerificationCodeView.vue"),
     },
 
     {
       path: "/restore-password/verification",
       name: "verification",
-      component: () => import("../views/VerificationCodeView.vue"),
+      component: () => import("/src/views/VerificationCodeView.vue"),
     },
 
     {
       path: "/restore-password/change-password",
       name: "change-password",
-      component: () => import("../views/ChangePasswordView.vue"),
+      component: () => import("/src/views/ChangePasswordView.vue"),
     },
 
     {
       path: "/restore-password/password-restored",
       name: "password-restored",
-      component: () => import("../views/PasswordRestoredView.vue"),
+      component: () => import("/src/views/PasswordRestoredView.vue"),
     },
   ]
 })
