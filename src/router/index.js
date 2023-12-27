@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useLocalStorageStore } from 'src/stores/localStorage'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import { useLocalStorageStore } from '/src/stores/localStorage'
 
 const authGuard = (to, from, next) => {
   const useLocalStorage = useLocalStorageStore();
@@ -12,7 +12,7 @@ const authGuard = (to, from, next) => {
 
 const router = createRouter({
   mode: 'history',
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/",

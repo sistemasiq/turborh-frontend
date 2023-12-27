@@ -1,6 +1,6 @@
 //true = dev mode
 //false = production mode
-const dev = false;
+const dev = true;
 
 export const getAxiosBaseUrl = () => {
   return dev ? "http://localhost:5000" : "http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com";
@@ -16,6 +16,10 @@ export const getS3FileUrl = (folderPath, fileName) => {
   return dev
     ? `http://localhost:5000/files/${fileName}/path/${folderPath}`
     : `http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com/files/${fileName}/path/${folderPath}`;
+};
+
+export const getImageSource = (imgName) => {
+  return dev ? `/src/assets/img/${imgName}` : `~/assets/${imgName}`;
 };
 
 export const getUserRoleRoute = (userRole) => {
