@@ -21,7 +21,7 @@ export const getLinksList = async () => {
 
 export const getAppointmentsCatalog = async () => {
   try {
-    const request = await axios.get(`/appointment/list`, {
+    const request = await axios.get(`/api/agenda/appointments`, {
       timeout: 18000,
     });
     if(requestSuccessfull(request.status)){
@@ -39,7 +39,7 @@ export const getAppointmentsCatalog = async () => {
 
 export const getAppointmentsHistory = async (firstDateRange, secondDateRange) => {
   try {
-    const request = await axios.get(`/appointment/filter/date?firstDate=${firstDateRange}&lastDate=${secondDateRange}`, {
+    const request = await axios.get(`/api/agenda/appointments/history?firstDate=${firstDateRange}&lastDate=${secondDateRange}`, {
       timeout: 18000,
     });
     if(requestSuccessfull(request.status)){
@@ -55,9 +55,9 @@ export const getAppointmentsHistory = async (firstDateRange, secondDateRange) =>
   }
 };
 
-export const postAppointment = async (type, data) => {
+export const postAppointment = async (data) => {
   try {
-    const request = await axios.post(`/appointment/${type}`, data);
+    const request = await axios.post(`/api/agenda/appointments`, data);
     if(requestSuccessfull(request.status)){
       console.log("post Appointment data: ", request.data);
       return request.data;
@@ -71,9 +71,9 @@ export const postAppointment = async (type, data) => {
   }
 };
 
-export const putAppointment = async (type, data) => {
+export const putAppointment = async (data) => {
   try {
-    const request = await axios.put(`/appointment/${type}`, data);
+    const request = await axios.put(`/api/agenda/appointments`, data);
     if(requestSuccessfull(request.status)){
       console.log("put Appointment data: ", request.data);
       return request.data;
@@ -83,6 +83,22 @@ export const putAppointment = async (type, data) => {
     }
   } catch (error) {
     console.log("putAppointment ERROR: ", error);
+    return null;
+  }
+};
+
+export const deleteAppointment = async (candidateStatus, userId, appointmentStatus, appointmentId) => {
+  try {
+    const request = await axios.delete(`/api/agenda/appointments?candidateStatus=${candidateStatus}&userID=${userId}&appointmentStatus=${appointmentStatus}&appointmentId=${appointmentId}`);
+    if(requestSuccessfull(request.status)){
+      console.log("Delete Appointment data: ", request.status);
+      return true;
+    } else {
+      console.log("Delete Request Status: ", request.status);
+      return null;
+    }
+  } catch (error) {
+    console.log("deleteAppointment ERROR: ", error);
     return null;
   }
 };

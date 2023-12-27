@@ -53,7 +53,7 @@
           <div>
             <p
               class="text-subtitle2 text-white text-weight-regular"
-              :class="!userHasApplication ? 'text-white' : 'text-grey'"
+              :style="!userHasApplication ? '' : 'visibility:hidden'"
             >
               Crear
             </p>
@@ -63,12 +63,7 @@
               @click.prevent="onCreateApplication"
               class="q-mb-lg drawer-button"
               icon="description"
-              :style="{
-                color:
-                  hoverNewApplication && !userHasApplication
-                    ? '#1CABC1'
-                    : 'darkslategrey',
-              }"
+              :style="!userHasApplication ? '' : 'visibility:hidden'"
               :disable="userHasApplication"
             >
               <Tooltip
@@ -128,7 +123,7 @@
             >
               <Tooltip
                 v-if="activeApplication"
-                :text="'Modifica tu solicitud de trabajo'"
+                :text="'Aplica a un puesto de trabajo'"
               />
             </q-btn>
           </div>
@@ -156,10 +151,19 @@
               }"
               :disable="!userHasApplication"
             >
-              <Tooltip
-                v-if="userHasApplication"
-                :text="activeApplication ? 'Elimina tu solicitud de trabajo' : 'Activa tu solicitud de trabajo'"
-            /></q-btn>
+            <q-tooltip
+      v-if="userHasApplication"
+      class="bg-dark text-white text-body2"
+      anchor="top middle"
+      self="center middle"
+      transition-show="slide-up"
+      transition-hide="fade"
+      :delay="300"
+      transition-duration="300"
+      :offset="[10, 25]"
+    >
+      {{ toolTipActiveApplicationText }}
+    </q-tooltip></q-btn>
           </div>
           <div>
             <p
@@ -305,6 +309,11 @@ const openNote = ref(false);
 
 const activeApplication = ref(false);
 
+const toolTipActiveApplicationText = computed(() => {
+  return activeApplication.value ? 'Elimina tu solicitud de trabajo' : 'Activa tu solicitud de trabajo'
+})
+
+
 onMounted(() => {
   loadLocalStorage();
 });
@@ -388,9 +397,7 @@ const onDeleteApplication = async () => {
 
       savedApplication.value.activo = userData.activo;
       useLocalStorage.save("savedApplication", savedApplication.value);
-      router.replace("/userHome/perfil");
-      //NOTE: Esto es para sincronizar correctamente la interfaz con el estado de la solicitud
-      router.go();
+      activeApplication.value = userData.activo === 1 ? true : false;
       router.replace("/userHome/perfil");
     }
   } catch (error) {

@@ -120,7 +120,7 @@ const getTitleApplications = () => {
     return 'Cargando aplicaciones'
   }
 
-  return currentApplications.value.length > 0 ? 'Mis solicitudes' : 'Sin solicitudes'
+  return currentApplications.value.length > 0 ? 'Mis aplicaciones de trabajo' : 'Sin aplicaciones de trabajo'
 
 }
 

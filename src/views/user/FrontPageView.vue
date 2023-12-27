@@ -89,7 +89,7 @@
                   checked-icon="radio_button_checked"
                   size="lg"
                   class="checkbox"
-                  v-model="frontPageData.gender"
+                  v-model="genderChoosed"
                   val="M"
                   label="Masculino"
                   style="color: white"
@@ -101,7 +101,7 @@
                   checked-icon="radio_button_checked"
                   size="lg"
                   class="checkbox"
-                  v-model="frontPageData.gender"
+                  v-model="genderChoosed"
                   val="F"
                   label="Femenino"
                   style="color: white"
@@ -166,7 +166,7 @@ const name = ref("");
 const firstLastName = ref("");
 const secondLastName = ref("");
 const wantedSalary = ref(0);
-
+const genderChoosed = ref();
 const userName = ref("");
 const photoUUID = ref("");
 
@@ -250,6 +250,7 @@ const setSavedStoredValues = () => {
   firstLastName.value = savedApplication.value.apellido_paterno;
   secondLastName.value = savedApplication.value.apellido_materno;
   wantedSalary.value = savedApplication.value.sueldo_deseado;
+  genderChoosed.value = savedApplication.value.sexo;
   photoUUID.value = savedApplication.value.foto_uuid;
 };
 
@@ -468,6 +469,7 @@ const setStoredValues = () => {
   firstLastName.value = frontPageData.value.firstLastName;
   secondLastName.value = frontPageData.value.secondLastName;
   wantedSalary.value = frontPageData.value.wantedSalary;
+  genderChoosed.value = frontPageData.value.gender;
   //TODO: Añadir foto
 };
 

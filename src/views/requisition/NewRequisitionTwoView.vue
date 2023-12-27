@@ -419,7 +419,7 @@ const disableSaveRequisitionButton = computed(() => {
     !civilStatus.value ||
     !motiveCreation.value ||
     vacancyNumbers.value <= 0 ||
-    !job.value || 
+    !job.value ||
     !job.value === "" ||
     ageRequired.value < 18 ||
     !ageRequired.value
@@ -472,6 +472,8 @@ const createNewRequisition = async () => {
         )
       );
       resetRequisitionStoreValues();
+
+      router.replace("/home/nueva-requisicion-1");
     }else {
       $q.notify(
         notifyNegative(

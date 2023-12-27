@@ -12,7 +12,6 @@
 const { configure } = require('quasar/wrappers');
 const { createPinia } = require('pinia')
 
-
 module.exports = configure(function (/* ctx */) {
   return {
 
@@ -211,6 +210,6 @@ module.exports = configure(function (/* ctx */) {
       // extendBexScriptsConf (esbuildConf) {}
       // extendBexManifestJson (json) {}
     }
-    
+
   }
 });

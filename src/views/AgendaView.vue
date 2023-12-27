@@ -1167,7 +1167,8 @@ import {
   getAppointmentsCatalog,
   getAppointmentsHistory,
   postAppointment,
-  putAppointment
+  putAppointment,
+  deleteAppointment
 } from "src/services/administrators/Agenda.js";
 import { getUserImagesPath } from "src/utils/folderPaths.js";
 import {
@@ -1348,7 +1349,7 @@ const getUserImage = computed(() => {
     photoUUID.value === undefined ||
     photoUUID.value === ""
   ) {
-    return getS3FileUrl(getUserImagesPath, "default_user_icon.png");
+    return getS3FileUrl(getUserImagesPath, "default.png");
   } else {
     return getS3FileUrl(getUserImagesPath, photoUUID.value);
   }
@@ -1429,7 +1430,11 @@ const getCandidatesCatalog = async () => {
 };
 
 const getHistory = async () => {
-  $q.loading.show();
+  const firstDate = parseDates(firstDateRange.value);
+  const secondDate = parseDates(secondDateRange.value);
+
+  if(firstDate <= secondDate){
+    $q.loading.show();
   const request = await getAppointmentsHistory(
     firstDateRange.value,
     secondDateRange.value
@@ -1438,21 +1443,14 @@ const getHistory = async () => {
     searchedAppointments.value = request;
     showSearchResults.value = true;
     $q.loading.hide();
-    $q.notify({
-      type: "positive",
-      message: "Historial obtenido correctamente",
-      position: "bottom",
-      timeout: 1000,
-    });
   } else {
     $q.loading.hide();
-    $q.notify({
-      type: "negative",
-      message: "Error al obtener el historial",
-      position: "bottom",
-      timeout: 1000,
-    });
+    $q.notify(notifyNegative("Hubo un problema al obtener el historial"));
   }
+  } else {
+    $q.notify(notifyNegative("Selecciona una fecha inicial inferior a la fecha final"));
+  }
+
 };
 
 const closeSearch = () => {
@@ -1608,6 +1606,15 @@ const checkSelection = (candidate) => {
 
   return check;
 };
+
+// Función para convertir la cadena de fecha en un objeto Date
+const parseDates = (dateStr) => {
+  const [year, month, day] = dateStr.split('/').map(Number);
+  return new Date(year, month - 1, day);
+};
+
+
+
 /*ADD EVENTS ===================================================================================================================================== */
 const checkVariablesToCreateMethod = () => {
   return !!(
@@ -1654,7 +1661,7 @@ const postVirtualAppointment = async () => {
       appointmentStatus: "P",
       candidateStatus: "C",
     };
-    const request = await postAppointment("create", appointment);
+    const request = await postAppointment(appointment);
 
     if (request != null) {
       let getInsertedAppointment = request;
@@ -1724,7 +1731,7 @@ const postPresentialAppointment = async () => {
         appointmentStatus: "P",
         candidateStatus: "C",
       };
-      const request = await postAppointment("create", appointment);
+      const request = await postAppointment(appointment);
 
       if (request != null) {
         let getInsertedAppointment = request;
@@ -1806,7 +1813,7 @@ const putVirtualApppointment = async () => {
       modality: "V",
       color: hex.value,
     };
-    const request = await putAppointment("update", appointment);
+    const request = await putAppointment(appointment);
 
     if (request != null) {
       let updatedAppointment = request;
@@ -1881,7 +1888,7 @@ const putPresentialAppointment = async () => {
         modality: "P",
         color: hex.value,
       };
-      const request = await putAppointment("update", appointment);
+      const request = await putAppointment(appointment);
 
     if (request != null) {
         let updatedAppointment = request;
@@ -2038,13 +2045,14 @@ const closeShowAppointmentDialog = () => {
 };
 
 const deactivateAppointment = async () => {
-  const apiUrl = `/appointment/deactivate?candidateStatus=P&userID=${userID.value}&appointmentStatus=C&appointmentId=${appointmentId.value}`;
   $q.loading.show();
   try {
-    const request = await axios.delete(apiUrl);
-    if (request.status === 200) {
-      openDialog2.value = false;
+    //this both const declarations are used in the database to change the status of the appointment and the status of the candidate
+    const candidateStatus = "P";
+    const appointmentStatus = "C";
+    const request = await deleteAppointment(candidateStatus, userID.value, appointmentStatus, appointmentId.value);
 
+    if (request === true) {
       const candidateIndex = totalTableRows.value.findIndex(
         (candidate) => candidate.userID === userID.value
       );
@@ -2055,12 +2063,9 @@ const deactivateAppointment = async () => {
         (appointment) => appointment.appointmentId === appointmentId.value
       );
       events.value.splice(appointmentIndex, 1);
-      $q.notify({
-        type: "positive",
-        message: "Cita eliminada",
-        position: "top",
-        timeout: 1000,
-      });
+
+      $q.notify(notifyPositive("Cita eliminada exitosamente"));
+      openDialog2.value = false;
       $q.loading.hide();
 
       /*Send a WhatsApp Message */
@@ -2070,7 +2075,6 @@ const deactivateAppointment = async () => {
         name: name.value,
         supportEmail: "reclutamiento@turbomaquinas.com",
       };
-
       sendWhatsAppMessage(type, data);
 
       /*Send an Email message */
@@ -2082,21 +2086,10 @@ const deactivateAppointment = async () => {
         lastText: canceledAppointment.lastText,
         emailType: canceledAppointment.emailType,
       };
-
       sendEmail("canceled-appointment", mailData);
-      if (sendEmail === true) {
-        notifyPositive("Se a notificado al candidato", 1000);
-      } else {
-        notifyNegative("Hubo un error al enviar el correo");
-      }
     }
   } catch (error) {
-    $q.notify({
-      type: "negative",
-      message: "Hubo un error al eliminar la cita. Intenta de nuevo",
-      position: "top",
-      timeout: 1000,
-    });
+    $q.notify(notifyNegative("Hubo un error al eliminar la cita. Intenta de nuevo"));
     $q.loading.hide();
     openDialog2.value = false;
     console.log("error in deactivation: " + error);
@@ -2104,19 +2097,13 @@ const deactivateAppointment = async () => {
 };
 
 const completeAppointment = async () => {
-  const apiUrl = "/appointment/deactivate";
   $q.loading.show();
   try {
-    const request = await axios.put(apiUrl, null, {
-      params: {
-        candidateStatus: "E",
-        userID: userID.value,
-        appointmentStatus: "F",
-        appointmentId: appointmentId.value,
-      },
-    });
+    const candidateStatus = "E";
+    const appointmentStatus = "F";
+    const request = await deleteAppointment(candidateStatus, userID.value, appointmentStatus, appointmentId.value);
 
-    if (request.status === 200) {
+    if (request === true) {
       openDialog2.value = false;
 
       const candidateIndex = totalTableRows.value.findIndex(
@@ -2129,12 +2116,7 @@ const completeAppointment = async () => {
         (appointment) => appointment.appointmentId === appointmentId.value
       );
       events.value.splice(appointmentIndex, 1);
-      $q.notify({
-        type: "positive",
-        message: "Cita completada",
-        position: "top",
-        timeout: 1000,
-      });
+      $q.notify(notifyPositive("Cita completada!"));
       $q.loading.hide();
 
       /*Send a WhatsApp Message */
@@ -2144,7 +2126,6 @@ const completeAppointment = async () => {
         name: name.value,
         supportEmail: "reclutamiento@turbomaquinas.com",
       };
-
       sendWhatsAppMessage(type, data);
 
       /*Send an Email message */
@@ -2156,24 +2137,13 @@ const completeAppointment = async () => {
         lastText: finishedAppointment.lastText,
         emailType: finishedAppointment.emailType,
       };
-
       sendEmail("finished-appointment", mailData);
-      if (sendEmail === true) {
-        notifyPositive("Se a notificado al candidato", 1000);
-      } else {
-        notifyNegative("Hubo un error al enviar el correo");
-      }
     }
   } catch (error) {
-    $q.notify({
-      type: "negative",
-      message: "Hubo un error al eliminar la cita. Intenta de nuevo",
-      position: "top",
-      timeout: 1000,
-    });
+    $q.notify(notifyNegative("Hubo un error al completar la cita. Intenta nuevamente"));
     $q.loading.hide();
     openDialog2.value = false;
-    console.log("error in deactivation: " + error);
+    console.log("error in complete appointmente: " + error);
   }
 };
 </script>
