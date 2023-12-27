@@ -18,6 +18,10 @@ export const getS3FileUrl = (folderPath, fileName) => {
     : `http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com/files/${fileName}/path/${folderPath}`;
 };
 
+export const getImageSource = (imgName) => {
+  return dev ? `/src/assets/img/${imgName}` : `~/assets/${imgName}`;
+};
+
 export const getUserRoleRoute = (userRole) => {
   return userRole === "u" ? "/userHome/perfil" : "/home";
 };
