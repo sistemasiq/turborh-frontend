@@ -1607,7 +1607,7 @@ const checkSelection = (candidate) => {
   return check;
 };
 
-// Función para convertir la cadena de fecha en un objeto Date
+//Function to convert the date string to a date object
 const parseDates = (dateStr) => {
   const [year, month, day] = dateStr.split('/').map(Number);
   return new Date(year, month - 1, day);
