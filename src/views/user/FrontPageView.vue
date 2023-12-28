@@ -94,6 +94,7 @@
                   label="Masculino"
                   style="color: white"
                   :disable="viewingApplication"
+                  @update:modelValue="updateStore()"
                 />
                 <q-radio
                   color="cyan"
@@ -106,6 +107,7 @@
                   label="Femenino"
                   style="color: white"
                   :disable="viewingApplication"
+                  @update:modelValue="updateStore()"
                 />
 
               </div>
@@ -480,6 +482,7 @@ const updateStore = () => {
   frontPageData.value.firstLastName = firstLastName.value;
   frontPageData.value.secondLastName = secondLastName.value;
   frontPageData.value.wantedSalary = wantedSalary.value;
+  frontPageData.value.gender = genderChoosed.value;
 };
 
 const clean = () => {
