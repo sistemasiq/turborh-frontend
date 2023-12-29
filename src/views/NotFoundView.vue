@@ -16,6 +16,6 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 const toHome = () => {
-  router.push("/home");
+  router.replace("/login");
 }
 </script>

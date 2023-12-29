@@ -10,7 +10,6 @@ export const createRequisitionReport = async (numRequisition) => {
         responseType: "arraybuffer",
       }
     );
-
     if (requestSuccessfull(request.status)) {
       const blob = new Blob([request.data], { type: "application/pdf" });
       return URL.createObjectURL(blob);
@@ -27,9 +26,10 @@ export const createUserApplicationReport = async (
   applicationId,
   createReportWithNotes
 ) => {
+
   try {
     const request = await axios.get(
-      `reports/user-application?id=${applicationId}&addNotes=${createReportWithNotes}&endpointURL=${getAxiosBaseUrl()}`,
+      `reports/user-application?id=${applicationId}&addNotes=${createReportWithNotes}`,
       {
         responseType: "arraybuffer",
       }

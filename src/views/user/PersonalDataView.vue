@@ -4,9 +4,14 @@
     v-on:vnode-unmounted="saveLocalStore()"
   >
     <q-card>
-      <q-card-section class="title"> Datos Personales y Aspiraciones </q-card-section>
+      <q-card-section class="title">
+        Datos Personales y Aspiraciones
+      </q-card-section>
       <q-card-section>
-        <pagination-application :page="2" :required-fields="requiredFieldsOnThisPage"></pagination-application>
+        <pagination-application
+          :page="2"
+          :required-fields="requiredFieldsOnThisPage"
+        ></pagination-application>
         <div style="margin-top: 6%">
           <q-form class="q-gutter-md">
             <q-input
@@ -70,7 +75,7 @@
               </q-input>
 
               <q-input
-              class="full-width q-pl-md"
+                class="full-width q-pl-md"
                 hint="AAAA/MM/DD"
                 hide-hint
                 label="Fecha de nacimiento *"
@@ -90,6 +95,7 @@
                       transition-hide="scale"
                     >
                       <q-date
+                      locale="es"
                         :readonly="viewingApplication"
                         color="cyan"
                         v-model="birthDate"
@@ -189,6 +195,7 @@
 
             <div style="display: flex; flex-grow: 1" class="q-ml-md">
               <q-select
+                :readonly="viewingApplication"
                 v-model="currentCivilStatus"
                 :options="civilStatus"
                 label="Estado civil *"
@@ -201,61 +208,62 @@
               />
 
               <q-input
-                  dark
-                  outlined
-                  color="cyan-1"
-                  v-model="roomie"
-                  label="¿Con quién vive? *"
-                  label-color="white"
-                  lazy-rules
-                  :rules="[
-                    (value) => !!value || 'Este campo no puede estar vacío.',
-                  ]"
-                  :readonly="viewingApplication"
-                  class="full-width q-pl-md"
-                  @update:model-value="updateStore()"
-                >
-                </q-input>
+                dark
+                outlined
+                color="cyan-1"
+                v-model="roomie"
+                label="¿Con quién vive? *"
+                label-color="white"
+                lazy-rules
+                :rules="[
+                  (value) => !!value || 'Este campo no puede estar vacío.',
+                ]"
+                :readonly="viewingApplication"
+                class="full-width q-pl-md"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
 
-                <q-input
-                  dark
-                  outlined
-                  color="cyan-1"
-                  v-model="dependents"
-                  label="No. Dependientes"
-                  hint="Cuantas personas dependen de usted"
-                  hide-hint
-                  label-color="white"
-                  mask="##"
-                  :readonly="viewingApplication"
-                  class="full-width q-pl-md"
-                  @update:model-value="updateStore()"
-                >
-                </q-input>
+              <q-input
+                dark
+                outlined
+                color="cyan-1"
+                v-model="dependents"
+                label="No. Dependientes"
+                hint="Cuantas personas dependen de usted"
+                hide-hint
+                label-color="white"
+                mask="##"
+                :readonly="viewingApplication"
+                class="full-width q-pl-md"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
 
-                <q-input
-                 v-if="dependents && dependents > 0"
-                  hint="Parentesco de las personas de dependen de usted. Ej: Hijos, Padres, etc."
-                  hide-hint
-                  dark
-                  outlined
-                  color="cyan-1"
-                  v-model="kinship"
-                  label="Parentesco"
-                  label-color="white"
-                  lazy-rules
-                  :rules="[
-                    (value) => !!value || 'Este campo no puede estar vacío.',
-                  ]"
-                  :readonly="viewingApplication"
-                  class="full-width q-pl-md"
-                  @update:model-value="updateStore()"
-                >
-                </q-input>
+              <q-input
+                v-if="dependents && dependents > 0"
+                hint="Parentesco de las personas de dependen de usted. Ej: Hijos, Padres, etc."
+                hide-hint
+                dark
+                outlined
+                color="cyan-1"
+                v-model="kinship"
+                label="Parentesco"
+                label-color="white"
+                lazy-rules
+                :rules="[
+                  (value) => !!value || 'Este campo no puede estar vacío.',
+                ]"
+                :readonly="viewingApplication"
+                class="full-width q-pl-md"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
             </div>
 
             <div style="display: flex; flex-grow: 1" class="q-ml-md">
               <q-select
+                :readonly="viewingApplication"
                 v-model="currentHomeStatus"
                 :options="homeStatus"
                 label="La casa que habita es: *"
@@ -263,44 +271,48 @@
                 color="cyan-1"
                 label-color="white"
                 dark
-                style="width: 37%;"
-                :style="currentHomeStatus === 'Paga renta' ? 'width: 37%' : 'width: 32%'"
+                style="width: 37%"
+                :style="
+                  currentHomeStatus === 'Paga renta'
+                    ? 'width: 37%'
+                    : 'width: 32%'
+                "
                 @update:model-value="updateStore()"
               />
 
               <q-input
-                  v-if="currentHomeStatus === 'Paga renta'"
-                  dark
-                  outlined
-                  color="cyan-1"
-                  v-model="amount"
-                  label="Monto  *"
-                  label-color="white"
-                  lazy-rules
-                  mask="######"
-                  prefix="$ MXN"
-                  :rules="[
-                    (value) => !!value || 'Este campo no puede estar vacío.',
-                  ]"
-                  :readonly="viewingApplication"
-                  class="q-pl-md"
-                  style="width: 15%;"
-                  @update:model-value="updateStore()"
-                >
-                </q-input>
+                v-if="currentHomeStatus === 'Paga renta'"
+                dark
+                outlined
+                color="cyan-1"
+                v-model="amount"
+                label="Monto  *"
+                label-color="white"
+                lazy-rules
+                mask="######"
+                prefix="$ MXN"
+                :rules="[
+                  (value) => !!value || 'Este campo no puede estar vacío.',
+                ]"
+                :readonly="viewingApplication"
+                class="q-pl-md"
+                style="width: 15%"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
 
-                <q-input
-                  dark
-                  outlined
-                  color="cyan-1"
-                  v-model="clubs"
-                  label="Clubes sociales, deportivos, culturales o políticos a los que pertenece"
-                  label-color="white"
-                  class="full-width q-pl-md"
-                  :readonly="viewingApplication"
-                  @update:model-value="updateStore()"
-                >
-                </q-input>
+              <q-input
+                dark
+                outlined
+                color="cyan-1"
+                v-model="clubs"
+                label="Clubes sociales, deportivos, culturales o políticos a los que pertenece"
+                label-color="white"
+                class="full-width q-pl-md"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
             </div>
 
             <q-input
@@ -324,15 +336,15 @@
         <br />
         <div class="column q-mt-xl">
           <q-btn
-          v-if="!viewingApplication && !updatingApplication"
-          class="btn-clean q-mt-xl"
-          rounded
-          text-color="white"
-          color="red-5"
-          label="Limpiar"
-          icon="cleaning_services"
-          @click.prevent="clean"
-        />
+            v-if="!viewingApplication && !updatingApplication"
+            class="btn-clean q-mt-xl"
+            rounded
+            text-color="white"
+            color="red-5"
+            label="Limpiar"
+            icon="cleaning_services"
+            @click.prevent="clean"
+          />
         </div>
       </q-card-section>
     </q-card>
@@ -384,10 +396,21 @@ const {
   updatingApplication,
 } = storeToRefs(useRequest);
 
-const requiredFieldsOnThisPage = computed(() => [homeAddress.value, state.value, city.value, birthPlace.value, birthDate.value,
-phone.value, height.value, weight.value, bloodType.value, currentCivilStatus.value, roomie.value,
-currentHomeStatus.value, goalInLife.value])
-
+const requiredFieldsOnThisPage = computed(() => [
+  homeAddress.value,
+  state.value,
+  city.value,
+  birthPlace.value,
+  birthDate.value,
+  phone.value,
+  height.value,
+  weight.value,
+  bloodType.value,
+  currentCivilStatus.value,
+  roomie.value,
+  currentHomeStatus.value,
+  goalInLife.value,
+]);
 
 onMounted(() => {
   loadLocalStore();
@@ -451,8 +474,7 @@ const setStoredValues = () => {
 };
 
 const updateStore = () => {
-  if (viewingApplication.value)
-  return;
+  if (viewingApplication.value) return;
 
   personalData.value.civilStatus = currentCivilStatus.value.charAt(0);
 
@@ -498,9 +520,9 @@ const clean = () => {
 
 const saveLocalStore = () => {
   useLocalStorage.save("personalData", personalData.value);
-  
-  if(!viewingApplication.value && !updatingApplication.value){
-    $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
+
+  if (!viewingApplication.value && !updatingApplication.value) {
+    $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
   }
 };
 
