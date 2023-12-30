@@ -100,10 +100,10 @@
               }}
             </p>
             <p class="text-h5 text-weight-regular">{{ userName }}</p>
-            <p class="text-h6">
-              Especialidad: {{ specialization === "" ? "" : specialization }}
+            <p v-if="specialization !== ''" class="text-h6">
+              Especialidad: {{ specialization }}
             </p>
-            <p class="text-h6">Edad: {{ age === "" ? "" : age }}</p>
+            <p v-if="age !== '' && age !== 0" class="text-h6">Edad: {{ age }}</p>
           </q-card-section>
         </div>
 
