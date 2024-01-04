@@ -273,10 +273,12 @@ import { getS3FileUrl } from "src/services/profiles.js";
 import Tooltip from "src/components/Tooltip.vue";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { updateUserApplicationState } from "src/services/userApplication";
+import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
+const useRequisitionDetails = useRequisitionDetailsStore();
 
 const openStatusApplicationDialog = ref(false);
 
@@ -295,7 +297,7 @@ const hoverSeeApplication = ref(false);
 const hoverUpdateApplication = ref(false);
 const hoverDeleteApplication = ref(false);
 const useLocalStorage = useLocalStorageStore();
-
+const { viewAllRequisitions } = storeToRefs(useRequisitionDetails);
 const { user, isRh, logged } = storeToRefs(useAuth);
 const {
   savedApplication,
@@ -341,6 +343,10 @@ const loadLocalStorage = () => {
 };
 
 const goToRequisitionApplicants = () => {
+  if(viewAllRequisitions.value){
+    router.replace("/home/historial-solicitudes");
+    return;
+  }
   router.replace("/home/historial-requisiciones-solicitudes");
 };
 

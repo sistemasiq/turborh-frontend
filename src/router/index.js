@@ -63,6 +63,8 @@ const router = createRouter({
       children: [
         { path: "nueva-requisicion-1", component: () => import('/src/views/requisition/NewRequisitionView.vue') },
         { path: "nueva-requisicion-2", component: () => import('/src/views/requisition/NewRequisitionTwoView.vue') },
+        { path: "catalogo-maquinaria", component: () => import('/src/views/requisition/MachineryCatalogView.vue') },
+        { path: "historial-solicitudes", component: () => import('/src/views/UserApplicationsHistoryView.vue') },
         { path: "historial-requisiciones", component: () => import('/src/views/requisition/RequisitionHistoryView.vue') },
         { path: "historial-requisiciones-solicitudes", component: () => import('/src/views/requisition/RequisitionApplicantsView.vue') },
         { path: "catalogo-puestos", component: () => import('/src/views/requisition/JobCatalog.vue') },

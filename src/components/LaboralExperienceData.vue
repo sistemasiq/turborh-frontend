@@ -277,7 +277,11 @@
         </q-input>
       </q-card>
     </q-expansion-item>
-    <div v-if="!viewingApplication" style="margin-left: 92%;" class="row items-center">
+    <div
+      v-if="!viewingApplication"
+      style="margin-left: 92%"
+      class="row items-center"
+    >
       <q-btn
         v-if="!viewingApplication"
         flat
@@ -299,9 +303,8 @@
         :class="currentIndex <= 0 ? 'bg-grey' : 'bg-red'"
         :disable="currentIndex <= 0"
       />
-
     </div>
-    <ButtonApplicationStatus v-if="updatingApplication"/>
+    <ButtonApplicationStatus v-if="updatingApplication" />
   </q-layout>
 </template>
 
