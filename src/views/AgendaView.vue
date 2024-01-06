@@ -415,7 +415,7 @@
               >
                 {{
                   event.appointmentStatus === "P"
-                    ? "Virtual"
+                    ? "Activa"
                     : event.appointmentStatus === "C"
                     ? "Cancelada"
                     : event.appointmentStatus === "F"

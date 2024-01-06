@@ -76,6 +76,21 @@ export const getUserApplicationById = async (id) => {
   }
 }
 
+export const getAllUserApplications = async () => {
+  try {
+    const request = await axios.get(`user-applications`);
+
+    if(requestSuccessfull(request.status)){
+      return request.data;
+    }else{
+      return null;
+    }
+
+  } catch (error) {
+    return null;
+  }
+}
+
 export const getUserApplicationNotesById = async (id) => {
   try {
     const request = await axios.get(`user-applications/notes/${id}`);

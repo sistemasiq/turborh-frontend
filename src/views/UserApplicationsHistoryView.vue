@@ -4,7 +4,7 @@
     flat
     bordered
     style="background: rgb(234, 237, 249)"
-    title="Solicitudes para el puesto"
+    title="Historial de solicitudes"
     :columns="columns"
     :rows="currentApplicants"
     :loading="loading"
@@ -52,8 +52,8 @@
     <template v-slot:body-cell-applicantPhoto="{ row }">
       <q-td>
         <q-img
-          v-if="row.photoUUID"
-          :src="getS3FileUrl(getUserImagesPath, row.photoUUID)"
+          v-if="row.foto_uuid"
+          :src="getS3FileUrl(getUserImagesPath, row.foto_uuid)"
           spinner-color="primary"
         />
       </q-td>
@@ -66,7 +66,7 @@
           rounded
           icon="description"
           label="Solicitud"
-          @click.prevent="createReport(row.applicationId)"
+          @click.prevent="createReport(row.solicitud_id)"
         >
           <Tooltip :text="'Generar reporte en PDF'" />
         </q-btn>
@@ -75,17 +75,17 @@
           rounded
           icon="mdi-file-download"
           label="Currículum"
-          @click.prevent="downloadDocument(row.curriculumUUID)"
+          @click.prevent="downloadDocument(row.nombre_cv)"
         >
           <Tooltip :text="'Descargar currículum'" />
         </q-btn>
         <q-btn
-          v-if="row.psychometricTest"
+          v-if="row.prueba_psicometrica"
           class="q-ml-lg"
           rounded
           icon="mdi-file-download"
           label="Prueba psicometríca"
-          @click.prevent="downloadDocument(row.psychometricTest)"
+          @click.prevent="downloadDocument(row.prueba_psicometrica)"
         >
           <Tooltip :text="'Descargar prueba psicometríca'" />
         </q-btn>
@@ -97,36 +97,8 @@
           style="background: rgb(47, 171, 171)"
           text-color="white"
           label="Añadir notas"
-          @click.prevent="addNotes(row.applicationId)"
+          @click.prevent="addNotes(row.solicitud_id)"
         />
-
-        <div class="row">
-          <q-file
-            style="max-width: 420px"
-            rounded
-            standout
-            accept=".pdf, pdf/*"
-            class="q-ml-lg q-mt-lg"
-            bg-color="white"
-            v-model="row.selected"
-            clearable
-            label="Seleccionar prueba psicometríca"
-
-          >
-            <template v-slot:prepend
-              ><q-icon color="dark" name="folder" />
-            </template>
-          </q-file>
-          <q-btn
-            v-if="row.selected"
-            rounded
-            class="q-ml-lg q-mt-lg"
-            icon="upload"
-            label="Subir prueba psicometríca"
-            @click.prevent="uploadPsicometricTest(row)"
-          >
-          </q-btn>
-        </div>
       </q-td>
     </template>
   </q-table>
@@ -163,14 +135,14 @@ import { useRequestUser } from "src/stores/requestUser";
 import { useNotesStore } from "src/stores/notes";
 import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
-import { getCandidatesByRequisitionId } from "src/services/candidates";
 import router from "src/router";
-import { downloadFile, updateFile, uploadFile } from "src/services/files";
+import { downloadFile } from "src/services/files";
 import {
   getUserApplicationById,
   getUserApplicationNotesById,
+  getAllUserApplications
 } from "src/services/userApplication";
-import { updateUserPsychometricTest } from "src/services/user";
+
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -181,7 +153,7 @@ const filter = ref("");
 
 
 const currentApplicants = ref([]);
-const { numRequisitionDetails, viewAllRequisitions } = storeToRefs(useRequisitionDetails);
+const { viewAllRequisitions } = storeToRefs(useRequisitionDetails);
 
 const noDataLabel = ref("No hay solicitantes para este puesto...");
 const loading = ref(false);
@@ -208,33 +180,18 @@ const showReport = ref(false);
 const createReportWithNotes = ref(false);
 
 onMounted(() => {
-  viewAllRequisitions.value = false;
-  loadLocalStore();
+  viewAllRequisitions.value = true;
   fetchApplicants();
 });
 
-const loadLocalStore = () => {
-  const numRequisitionStored = useLocalStorage.load("numRequisitionDetails");
-
-  if (numRequisitionStored) {
-    numRequisitionDetails.value = numRequisitionStored;
-  }
-};
 
 const fetchApplicants = async () => {
-  if (!numRequisitionDetails.value) return;
-
   try {
     loading.value = true;
-    const candidates = await getCandidatesByRequisitionId(
-      numRequisitionDetails.value
-    );
+    const candidates = await getAllUserApplications();
 
     if (candidates) {
       currentApplicants.value = candidates;
-      currentApplicants.value.forEach(element => {
-        element.selected = null;
-      })
       console.log(currentApplicants.value)
     }
   } catch (error) {
@@ -259,43 +216,6 @@ const downloadDocument = async (uuid) => {
     $q.loading.hide();
   }
 };
-
-const uploadPsicometricTest = async (row) => {
-  try {
-    $q.loading.show();
-
-    let newFile;
-
-    if(row.psychometricTest){
-      newFile = await updateFile(row.psychometricTest, row.selected, getUserDocumentsPath);
-    }else{
-      newFile = await uploadFile(row.selected, getUserDocumentsPath);
-    }
-
-    if(newFile){
-      const updatedTest = await updateUserPsychometricTest(row.userId, newFile);
-
-      if(updatedTest){
-        row.psychometricTest = newFile;
-        updateRow(row);
-        $q.notify(notifyPositive("Prueba psicometríca subida correctamente"))
-      }
-    }
-
-  } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al subir la prueba psicometríca"));
-  } finally {
-    $q.loading.hide();
-  }
-};
-
-const updateRow = (row) => {
-  currentApplicants.value.forEach(element => {
-    if(element.userId === row.userId){
-      element = row;
-    }
-  })
-}
 
 const createReport = async (applicationId) => {
   try {
@@ -336,6 +256,7 @@ const fetchUserApplication = async (applicationId) => {
       savedApplication.value = userApplication;
       useLocalStorage.save("savedApplication", savedApplication.value);
 
+
       await fetchUserApplicationNotes(applicationId);
       useLocalStorage.save("addingNotesApplicationId", applicationId);
       useLocalStorage.save("viewingApplication", viewingApplication.value);
@@ -371,7 +292,7 @@ const columns = [
     name: "applicantPhoto",
     label: "Foto",
     required: true,
-    field: (row) => row.photoUUID,
+    field: (row) => row.foto_uuid,
     align: "left",
   },
   {
@@ -380,35 +301,35 @@ const columns = [
     required: true,
     align: "left",
     field: (row) =>
-      row.name + " " + row.firstLastName + " " + row.secondLastName,
+      row.nombre + " " + row.apellido_paterno + " " + row.apellido_materno,
+  },
+  {
+    name: "applicantGender",
+    label: "Sexo",
+    required: true,
+    align: "left",
+    field: (row) => row.sexo === "F" ? "Femenino" : "Masculino",
   },
   {
     name: "applicantAge",
     label: "Edad",
     required: true,
     align: "left",
-    field: (row) => getAge(row.birthDate) + " años",
+    field: (row) => getAge(row.fecha_nacimiento) + " años",
   },
   {
     name: "wishedSalary",
     label: "Salario deseado",
     required: true,
     align: "left",
-    field: (row) => row.wishedSalary + " MXN",
-  },
-  {
-    name: "jobName",
-    label: "Puesto solicitado",
-    required: true,
-    align: "left",
-    field: (row) => row.jobName,
+    field: (row) => row.sueldo_deseado + " MXN",
   },
   {
     name: "dateCreated",
-    label: "Fecha de solicitud",
+    label: "Fecha de creación",
     required: true,
     align: "left",
-    field: (row) => row.dateCreated,
+    field: (row) => row.creado,
     sortable: true,
   },
   {

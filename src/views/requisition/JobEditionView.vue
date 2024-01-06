@@ -11,7 +11,7 @@
         />
         <div style="padding-left: 45%">
           <q-img
-            :src="getImageSource('logo-turbomaquinas.png')"
+            :src="getS3FileUrl('Assets', 'logo-turbomaquinas.png')"
             style="width: 45px; height: 45px"
           />
         </div>

@@ -87,6 +87,15 @@
               <q-item-label caption>Historial de requisiciones</q-item-label>
             </q-item-section>
           </q-item>
+          <q-item v-if="isRh" clickable to="/home/historial-solicitudes" :inset-level="1">
+            <q-item-section avatar>
+              <q-icon name="search" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Ver Solicitudes</q-item-label>
+              <q-item-label caption>Historial de Solicitudes</q-item-label>
+            </q-item-section>
+          </q-item>
         </q-expansion-item>
         <!-- TODO: Remover cuando se verifique que no se ocupa -->
         <!-- <q-expansion-item
@@ -243,6 +252,7 @@ const onNewRequisitionClicked = () => {
   showingDetails.value = false;
   updatingRequisition.value = false;
 };
+
 
 const uploadImage = async () => {
 

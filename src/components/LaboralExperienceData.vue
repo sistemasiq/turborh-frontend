@@ -220,6 +220,7 @@
             :rules="[salaryRule]"
             :readonly="viewingApplication"
             type="number"
+            min="0"
             label="Sueldo mensual inicial"
             label-color="white"
           >
@@ -232,6 +233,7 @@
             color="cyan-1"
             style="width: 18%"
             inline
+            min="0"
             lazy-rules
             :rules="[salaryRule]"
             :readonly="viewingApplication"
@@ -275,7 +277,11 @@
         </q-input>
       </q-card>
     </q-expansion-item>
-    <div v-if="!viewingApplication" style="margin-left: 92%;" class="row items-center">
+    <div
+      v-if="!viewingApplication"
+      style="margin-left: 92%"
+      class="row items-center"
+    >
       <q-btn
         v-if="!viewingApplication"
         flat
@@ -297,9 +303,8 @@
         :class="currentIndex <= 0 ? 'bg-grey' : 'bg-red'"
         :disable="currentIndex <= 0"
       />
-      
     </div>
-    <ButtonApplicationStatus v-if="updatingApplication"/>  
+    <ButtonApplicationStatus v-if="updatingApplication" />
   </q-layout>
 </template>
 

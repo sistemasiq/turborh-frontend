@@ -317,7 +317,7 @@ const measuringInstruments = ref([]);
 const otherTools = ref([]);
 
 onMounted(() => {
-  
+
   fillCatalog();
 
   if(!viewingApplication.value && !updatingApplication.value){
@@ -347,7 +347,8 @@ const fillCatalog = async () => {
       catalog.forEach(element => {
         switch (element.type) {
           case "MA":
-            machinery.value.push(element.name); 
+
+            machinery.value.push(element.name);
             break;
           case "HE":
             tools.value.push(element.name); // Assuming tools is a ref
@@ -356,7 +357,8 @@ const fillCatalog = async () => {
             measuringInstruments.value.push(element.name); // Assuming measuringInstruments is a ref
             break;
           case "OT":
-            otherTools.value.push(element.name);
+
+          otherTools.value.push(element.name);
             break;
           default:
             break;
@@ -365,7 +367,7 @@ const fillCatalog = async () => {
 
     }
   } catch (error) {
-    
+
   }
 
 }
@@ -415,7 +417,7 @@ const setStoredValues = () => {
     removeRepeatedMeasuringInstrument(element.measuringInstrumentName);
   });
   otherToolsData.value.forEach((element) => {
-    
+
     removeRepeatedOtherTool(element.otherToolName);
   });
 };
@@ -542,6 +544,10 @@ const sortAlphabetical = (array) => {
 };
 
 const saveLocalStore = () => {
+
+  if(viewingApplication.value || updatingApplication.value)
+  return;
+
   useLocalStorage.save("machineryData", machineryData.value);
   useLocalStorage.save("toolsData", toolsData.value);
   useLocalStorage.save("otherToolsData", otherToolsData.value);
