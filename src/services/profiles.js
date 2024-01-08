@@ -3,19 +3,19 @@
 const dev = false;
 
 export const getAxiosBaseUrl = () => {
-  return dev ? "http://localhost:5000" : "http://192.168.90.157";
+  return dev ? "http://localhost:5000" : "http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com";
 };
 
 export const getS3UploadUrl = () => {
   return dev
     ? "http://localhost:5000/upload"
-    : "http://192.168.90.157/upload";
+    : "http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com/upload";
 };
 
 export const getS3FileUrl = (folderPath, fileName) => {
   return dev
     ? `http://localhost:5000/files/${fileName}/path/${folderPath}`
-    : `http://192.168.90.157/files/${fileName}/path/${folderPath}`;
+    : `http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com/files/${fileName}/path/${folderPath}`;
 };
 
 export const getImageSource = (imgName) => {
