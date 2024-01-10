@@ -15,6 +15,20 @@ export const getAllJobs = async () => {
   }
 };
 
+export const getAllActiveJobs = async () => {
+  try {
+    const request = await axios.get(`jobs/active`);
+
+    if (requestSuccessfull(request.status)) {
+      return request.data;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    return null;
+  }
+};
+
 export const getJobById = async (id) => {
   try {
     const request = await axios.get(`jobs/${id}`);
