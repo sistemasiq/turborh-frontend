@@ -36,7 +36,7 @@
                             <router-link :to="{ path: '/home/nueva-requisicion-' + currentPage }">
                                 <q-pagination v-model="currentPage" color="cyan" :max="2" :max-pages="2" boundary-numbers />
                             </router-link>
-                            
+
                         </div>
                         <div class="requisition-dropdown row items-center">
                             <q-input v-if="showingDetails" v-model="numRequisitionDetails" dark outlined color="cyan-1" label="No Requisición" label-color="white"
@@ -152,7 +152,7 @@ import { useJobStore } from 'src/stores/job';
 import { storeToRefs } from 'pinia';
 import NoteRequisitionComponent from 'src/components/NoteRequisitionComponent.vue';
 import { getPersonalByName, getPersonalById, getAllPersonal } from 'src/services/personal';
-import { getJobById, getJobsByPersonalId } from 'src/services/jobs';
+import { getJobById, getJobsByPersonalId, getAllActiveJobs } from 'src/services/jobs';
 const useRequisition = useRequisitionStore();
 const useRequisitionDetails = useRequisitionDetailsStore();
 const useAuth = useAuthStore();
@@ -190,11 +190,11 @@ onMounted(() => {
     }else{
         showRequisitionDetails();
     }
-    
+
 })
 
-const showRequisitionDetails = () => {  
-    
+const showRequisitionDetails = () => {
+
     if(updatingRequisition.value){
         fetchJobs();
         fetchJobData(requisitionData.value.jobId);
@@ -228,7 +228,7 @@ const fetchDefaultApplicant = async () => {
         const personalData = await getPersonalById(user.value.personalId)
 
         if (personalData) {
-            applicantId.value = personalData.id; 
+            applicantId.value = personalData.id;
             selectedApplicant.value = personalData.name;
             applicant.value = selectedApplicant.value;
         }
@@ -254,9 +254,10 @@ const fetchJobs = async () => {
 
     try {
         isFetchingJobs.value = true;
-        const jobsByPersonalId = await getJobsByPersonalId(personalId);
-        if (jobsByPersonalId) {
-            jobs.value = jobsByPersonalId;
+        const jobsFetched = isRh.value ? await getAllActiveJobs() : await getJobsByPersonalId(personalId);
+        if (jobsFetched) {
+          console.log(jobsFetched)
+            jobs.value = jobsFetched;
         }
     } catch (error) {
         console.error('Error fetching applicants: ', error)
@@ -309,10 +310,10 @@ const resetJobData = () => {
     englishLevel.value = "";
     educationRequired.value = "";
     experience.value = "";
-    selectedJob.value = "Puesto Solicitado"; 
+    selectedJob.value = "Puesto Solicitado";
     extraHours.value = 0;
     travelAvailability.value = 0;
-    
+
     jobSkillsRequired.value = "";
     jobFunctionsRequired.value = "";
 }
@@ -344,7 +345,7 @@ const handleSelectedApplicant = async (selectedItem) => {
             applicant.value = selectedApplicant.value;
             applicantId.value = personalData.id
             resetJobData();
-            fetchJobs();   
+            fetchJobs();
         }
 
     } catch (error) {
@@ -365,7 +366,7 @@ const handleSelectedJob = (selectedItem) => {
 
 
 </script>
-  
+
 <style scoped>
     .pagination {
     padding-left: 92%;
@@ -441,4 +442,3 @@ const handleSelectedJob = (selectedItem) => {
     overflow-y: scroll;
 }
 </style>
-  
