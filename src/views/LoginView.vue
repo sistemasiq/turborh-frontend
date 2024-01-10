@@ -33,6 +33,8 @@
                   style="justify-content: center; align-items: center"
                 >
                   <h5 class="text-h5 text-white q-my-md">Iniciar Sesión</h5>
+                  <q-btn color="primary" icon="check" label="OK" @click="checkToBack()" />
+                  <q-btn color="primary" icon="user" label="check database" @click="checkToDataBase()"/>
                 </div>
                 <q-card class="q-pa-lg card-transparent">
                   <q-card-section>
@@ -176,8 +178,36 @@ const getLogoImage = computed(() => getS3FileUrl(getAssetsPath, "logo-turbomaqui
 const { savedApplication } = storeToRefs(useRequest);
 const { user, logged } = storeToRefs(useAuth);
 
+/* TEST BLOCK BEGIN */
+const checkToBack = async () => {
+  try {
+    const response = await axios.get(`/`);
+  if (response.status == 200) {
+    console.log("STATUS from backend",response.status);
+    console.log(response.data)
+  } else {
+    console.log("Backend status code: ", response.status);
+  }
+  } catch (error) {
+    console.log("Backend not reached");
+  }
+}
 
+const checkToDataBase = async () => {
+  try {
+    const response = await axios.get(`/users`);
+  if (response.status == 200) {
+    console.log("STATUS from Database",response.status);
+    console.log(response.data)
+  } else {
+    console.log("database reponse status: ", response.status);
+  }
+  } catch (error) {
+    console.log("database not reached");
+  }
+}
 
+/* TEST BLOCK END */
 const changePasswordVisibility = () => {
   if (password.value) {
     isPasswordVisible.value = !isPasswordVisible.value;
