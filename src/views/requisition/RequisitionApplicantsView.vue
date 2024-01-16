@@ -221,6 +221,12 @@ const loadLocalStore = () => {
   }
 };
 
+const gendersParsed = {
+  F:"Femenino",
+  M:"Masculino",
+  O:"Otro"
+}
+
 const fetchApplicants = async () => {
   if (!numRequisitionDetails.value) return;
 
@@ -381,6 +387,13 @@ const columns = [
     align: "left",
     field: (row) =>
       row.name + " " + row.firstLastName + " " + row.secondLastName,
+  },
+  {
+    name: "applicantGender",
+    label: "Sexo",
+    required: true,
+    align: "left",
+    field: (row) => gendersParsed[row.gender],
   },
   {
     name: "applicantAge",

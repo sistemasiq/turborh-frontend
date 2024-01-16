@@ -53,7 +53,7 @@
           <div>
             <p
               class="text-subtitle2 text-white text-weight-regular"
-              :style="!userHasApplication ? '' : 'visibility:hidden'"
+              :style="!userHasApplication  ? '' : 'visibility:hidden'"
             >
               Crear
             </p>
@@ -64,7 +64,7 @@
               class="q-mb-lg drawer-button"
               icon="description"
               :style="!userHasApplication ? '' : 'visibility:hidden'"
-              :disable="userHasApplication"
+              :disable="userHasApplication || !user.photoUUID || user.photoUUID == ''"
             >
               <Tooltip
                 v-if="!userHasApplication"

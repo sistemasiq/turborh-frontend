@@ -108,7 +108,8 @@
         </div>
 
         <div class="row" style="margin-left: 30px; margin-top: 10px">
-          <ApplicationsCard></ApplicationsCard>
+          <p v-if="user.applicationId === 0" class="text-h4 q-ml-xl text-grey-8 text-weight-bold"> Sube tu foto para poder crear tu solicitud de trabajo.</p>
+          <ApplicationsCard v-if="user.applicationId != 0"/>
         </div>
       </q-page>
     </q-page-container>
