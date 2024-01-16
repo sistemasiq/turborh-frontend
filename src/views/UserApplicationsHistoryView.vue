@@ -184,6 +184,11 @@ onMounted(() => {
   fetchApplicants();
 });
 
+const gendersParsed = {
+  F:"Femenino",
+  M:"Masculino",
+  O:"Otro"
+}
 
 const fetchApplicants = async () => {
   try {
@@ -308,7 +313,7 @@ const columns = [
     label: "Sexo",
     required: true,
     align: "left",
-    field: (row) => row.sexo === "F" ? "Femenino" : "Masculino",
+    field: (row) => gendersParsed[row.sexo],
   },
   {
     name: "applicantAge",

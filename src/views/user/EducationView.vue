@@ -986,13 +986,14 @@ const careers = [
   "Ingeniería Química",
   "Mercadotecnia",
   "Relaciones Internacionales",
+  "Carreras afines u otras"
 ];
 
 const requiredFieldsOnThisPage = computed(() => [secondary.value, secondarySpeciality.value, dateStartSecondary.value, dateEndSecondary.value])
 
 onMounted(() => {
   loadLocalStore();
-  
+
   if (viewingApplication.value || updatingApplication.value) {
     setSavedStoredValues();
   } else {
@@ -1325,7 +1326,7 @@ const saveLocalStore = () => {
 
 const loadLocalStore = () => {
   const localStoreData = useLocalStorage.load("educationData");
-  
+
   if(localStoreData)
   educationData.value = localStoreData;
 };

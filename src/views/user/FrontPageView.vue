@@ -109,6 +109,19 @@
                   :disable="viewingApplication"
                   @update:modelValue="updateStore()"
                 />
+                <q-radio
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="genderChoosed"
+                  val="O"
+                  label="Otro"
+                  style="color: white"
+                  :disable="viewingApplication"
+                  @update:modelValue="updateStore()"
+                />
 
               </div>
             </q-form>

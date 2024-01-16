@@ -61,7 +61,7 @@
               color="cyan-1"
               v-model="afore"
               type="text"
-              label="AFORE *"
+              label="AFORE"
               label-color="white"
               mask="###########"
               lazy-rules
@@ -159,7 +159,7 @@ const imss = ref("");
 const afore = ref("");
 const fm2 = ref("");
 
-const requiredFieldsOnThisPage = computed(() => [rfc.value, imss.value, afore.value, curriculumStored.value])
+const requiredFieldsOnThisPage = computed(() => [rfc.value, imss.value, curriculumStored.value])
 
 
 const {
@@ -200,7 +200,7 @@ const updateStore = () => {
   documentsData.value.imss = imss.value;
   documentsData.value.afore = afore.value;
   documentsData.value.fm2 = fm2.value;
-  
+
 };
 
 
