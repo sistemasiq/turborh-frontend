@@ -1,6 +1,6 @@
 //true = dev mode
 //false = production mode
-const dev = false;
+const dev = true;
 
 export const getAxiosBaseUrl = () => {
   return dev ? "http://localhost:5000" : "http://192.168.90.157";

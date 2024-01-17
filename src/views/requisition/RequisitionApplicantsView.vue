@@ -52,6 +52,8 @@
     <template v-slot:body-cell-applicantPhoto="{ row }">
       <q-td>
         <q-img
+          width="100px"
+          height="100px"
           v-if="row.photoUUID"
           :src="getS3FileUrl(getUserImagesPath, row.photoUUID)"
           spinner-color="primary"
@@ -99,7 +101,16 @@
           label="Añadir notas"
           @click.prevent="addNotes(row.applicationId)"
         />
-
+        <q-btn
+          class="q-ml-lg bg-green"
+          rounded
+          icon="done"
+          text-color="white"
+          label="Seleccionar"
+          @click.prevent="openSelectCandidateDialog = true"
+        />
+        <!-- Aqui esta la variable del backend que sirve como vmodel
+        Si se encuentra una mejor manera adelante xd -->
         <div class="row">
           <q-file
             style="max-width: 420px"
@@ -108,7 +119,7 @@
             accept=".pdf, pdf/*"
             class="q-ml-lg q-mt-lg"
             bg-color="white"
-            v-model="row.selected"
+            v-model="row.psychometricTestSelected"
             clearable
             label="Seleccionar prueba psicometríca"
 
@@ -118,7 +129,7 @@
             </template>
           </q-file>
           <q-btn
-            v-if="row.selected"
+            v-if="row.psychometricTestSelected"
             rounded
             class="q-ml-lg q-mt-lg"
             icon="upload"
@@ -130,6 +141,27 @@
       </q-td>
     </template>
   </q-table>
+
+  <q-dialog v-model="openSelectCandidateDialog" persistent>
+    <q-card rounded style="border-radius: 30px">
+      <q-card-section class="row items-center">
+        <span class="q-ml-sm text-h6 text-weight-regular">
+          Quieres seleccionar a este candidato?
+        </span>
+      </q-card-section>
+
+      <q-card-actions align="center">
+        <q-btn flat label="Cancelar" color="primary" v-close-popup />
+        <q-btn
+          rounded
+          flat
+          label="OK"
+          v-close-popup
+          class="text-white bg-green"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 
   <q-dialog maximized v-model="showReport">
     <q-card class="no-scroll">
@@ -178,6 +210,8 @@ const useLocalStorage = useLocalStorageStore();
 const useNotes = useNotesStore();
 const useRequest = useRequestUser();
 const filter = ref("");
+
+const openSelectCandidateDialog = ref(false);
 
 
 const currentApplicants = ref([]);
@@ -238,10 +272,6 @@ const fetchApplicants = async () => {
 
     if (candidates) {
       currentApplicants.value = candidates;
-      currentApplicants.value.forEach(element => {
-        element.selected = null;
-      })
-      console.log(currentApplicants.value)
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
@@ -273,9 +303,9 @@ const uploadPsicometricTest = async (row) => {
     let newFile;
 
     if(row.psychometricTest){
-      newFile = await updateFile(row.psychometricTest, row.selected, getUserDocumentsPath);
+      newFile = await updateFile(row.psychometricTest, row.psychometricTestSelected, getUserDocumentsPath);
     }else{
-      newFile = await uploadFile(row.selected, getUserDocumentsPath);
+      newFile = await uploadFile(row.psychometricTestSelected, getUserDocumentsPath);
     }
 
     if(newFile){

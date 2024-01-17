@@ -208,7 +208,7 @@
           <Tooltip :text="'Ver detalles'" />
         </q-btn>
         <q-btn
-          @click.prevent="createReport(row.numRequisition)"
+          @click.prevent="createReport(row.numRequisition, addSignsToReport(row))"
           unelevated
           rounded
           class="text-capitalize bg-grey-4"
@@ -458,6 +458,12 @@ const stateChangeNotifyText = {
   AC: "Requisición autorizada correctamente",
   P: "Requisición publicada correctamente",
 };
+
+const addSignsToReport = (row) => {
+
+  return row.state === 'AC' || row.state === 'P'
+
+}
 
 const canEditRequisition = (row) => {
   if (row.state !== "DC") return false;
@@ -762,11 +768,11 @@ const updateSelectedRequisition = (updatedRequisition) => {
   });
 };
 
-const createReport = async (numRequisition) => {
+const createReport = async (numRequisition, authorized) => {
   try {
     $q.loading.show({ message: "Generando reporte..." });
 
-    const report = await createRequisitionReport(numRequisition);
+    const report = await createRequisitionReport(numRequisition, authorized);
     if (report) {
       reportSrc.value = report;
       showReport.value = true;
