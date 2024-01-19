@@ -26,7 +26,6 @@
         <q-td>
           <q-input
             v-model="row.number"
-            mask="A############"
             :readonly="viewingApplication"
           />
         </q-td>
