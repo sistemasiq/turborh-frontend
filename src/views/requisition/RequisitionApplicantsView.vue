@@ -147,6 +147,23 @@
       </object>
     </q-card>
   </q-dialog>
+
+  <q-dialog maximized v-model="showResume">
+    <q-card class="no-scroll">
+      <q-card-actions align="right">
+        <q-btn flat label="Cerrar" color="red" v-close-popup />
+      </q-card-actions>
+      <object
+        height="100%"
+        width="100%"
+        v-if="resumeSrc.length > 0"
+        :data="resumeSrc"
+        type="application/pdf"
+      >
+        <iframe :src="resumeViewLink"></iframe>
+      </object>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
@@ -207,6 +224,11 @@ const reportViewLink = ref(reportSrc.value);
 const showReport = ref(false);
 const createReportWithNotes = ref(false);
 
+const resumeSrc = ref("");
+const resumeViewLink = ref(resumeSrc.value);
+const showResume = ref(false);
+
+
 onMounted(() => {
   viewAllRequisitions.value = false;
   loadLocalStore();
@@ -220,6 +242,12 @@ const loadLocalStore = () => {
     numRequisitionDetails.value = numRequisitionStored;
   }
 };
+
+const gendersParsed = {
+  F:"Femenino",
+  M:"Masculino",
+  O:"Otro"
+}
 
 const fetchApplicants = async () => {
   if (!numRequisitionDetails.value) return;
@@ -249,6 +277,8 @@ const downloadDocument = async (uuid) => {
     $q.loading.show();
     const fileDownloaded = await downloadFile(uuid, getUserDocumentsPath);
     if (fileDownloaded) {
+      resumeSrc.value = fileDownloaded;
+      showResume.value = true;
       $q.notify(notifyPositive(`Archivo descargado exitosamente`));
     } else {
       $q.notify(notifyNegative("El archivo solicitado no existe "));
@@ -381,6 +411,13 @@ const columns = [
     align: "left",
     field: (row) =>
       row.name + " " + row.firstLastName + " " + row.secondLastName,
+  },
+  {
+    name: "applicantGender",
+    label: "Sexo",
+    required: true,
+    align: "left",
+    field: (row) => gendersParsed[row.gender],
   },
   {
     name: "applicantAge",

@@ -102,6 +102,18 @@
                     label="Femenino"
                     :disable="showingDetails"
                   />
+                  <q-radio
+                    val="O"
+                    color="cyan"
+                    unchecked-icon="radio_button_unchecked"
+                    checked-icon="radio_button_checked"
+                    size="lg"
+                    class="text-white"
+                    v-model="gender"
+                    dark
+                    label="Otro"
+                    :disable="showingDetails"
+                  />
                 </div>
               </div>
               <div class="column q-ml-xl">

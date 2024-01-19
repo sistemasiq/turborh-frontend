@@ -51,23 +51,42 @@ export const updateFile = async (oldFileName, newFileName, folderPath) => {
 };
 
 export const downloadFile = async (fileName, folderPath) => {
-    try {
-        const request = await axios.get(`files/download/${fileName}/path/${folderPath}`)
+  try {
+    const request = await axios.get(
+      `files/download/${fileName}/path/${folderPath}`,
+      {
+        responseType: "arraybuffer",
+      }
+    );
 
-        if(requestSuccessfull(request.status)){
-            return true;
-        }else{
-            return false;
-        }
-
-    } catch (error) {
-        return false;
+    if (requestSuccessfull(request.status)) {
+      const blob = new Blob([request.data], { type: "application/pdf" });
+      return URL.createObjectURL(blob);
+    } else {
+      return false;
     }
+  } catch (error) {
+    return false;
+  }
 };
+
+/* export const downloadFile = async (fileName, folderPath) => {
+  try {
+      const request = await axios.get(`files/download/${fileName}/path/${folderPath}`)
+
+      if(requestSuccessfull(request.status)){
+          return request;
+      }else{
+          return false;
+      }
+
+  } catch (error) {
+      return false;
+  }
+}; */
 
 const getFileURL = (fileName, folderPath) => {
   const url = dev ? `http://localhost:5000/` : `http://192.168.20.59:8181/`;
 
   return `${url}/${fileName}/path/${folderPath}`;
-
 };

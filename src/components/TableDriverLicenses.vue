@@ -26,9 +26,7 @@
         <q-td>
           <q-input
             v-model="row.number"
-            mask="A#########"
             :readonly="viewingApplication"
-            :rules="[licenseNumberRule]"
           />
         </q-td>
       </template>
@@ -36,6 +34,7 @@
       <template v-slot:body-cell-expirationDate="{ row }">
         <q-td style="color: rgb(0, 0, 0)">
           <q-input
+            v-if="!isLicencePermanent"
             label="AAAA/MM/DD"
             v-model="row.expirationDate"
             :readonly="viewingApplication"
@@ -62,6 +61,13 @@
               </q-icon>
             </template>
           </q-input>
+          <q-checkbox
+            checked-icon="radio_button_checked"
+            unchecked-icon="radio_button_unchecked"
+            v-model="isLicencePermanent"
+            label="Permanente"
+            @update:model-value="onPermanentCheck(row)"
+          />
         </q-td>
       </template>
     </q-table>
@@ -69,7 +75,9 @@
       v-if="!viewingApplication"
       rounded
       style="position: relative; bottom: 2%; left: 2%"
-      :style="{ background: disableAddButton() ? 'grey' : 'rgb(104, 192, 197)' }"
+      :style="{
+        background: disableAddButton() ? 'grey' : 'rgb(104, 192, 197)',
+      }"
       icon="add"
       label="Agregar licencia"
       @click.prevent="addNewDriverLicense"
@@ -100,6 +108,10 @@ const useLocalStorage = useLocalStorageStore();
 const useRequest = useRequestUser();
 
 const currentIndex = ref(0);
+
+const isLicencePermanent = ref(false);
+
+
 
 const {
   drivingLicenceData,
@@ -139,6 +151,9 @@ onMounted(() => {
     drivingLicenceData.value.length === 0 ? true : false;
 });
 
+const onPermanentCheck = (row) =>{
+  row.expirationDate === ""
+}
 
 const disableAddButton = () => {
   if (drivingLicenceData.value.length === 0) return false;
@@ -146,7 +161,6 @@ const disableAddButton = () => {
   if (
     drivingLicenceData.value[currentIndex.value].number === "" ||
     drivingLicenceData.value[currentIndex.value].type === "" ||
-    drivingLicenceData.value[currentIndex.value].expirationDate === "" ||
     drivingLicenceData.value.length === 0
   ) {
     return true;
@@ -156,22 +170,6 @@ const disableAddButton = () => {
 
 const setSavedStoredValues = () => {
   drivingLicenceData.value = savedApplication.value.licencias_manejo;
-};
-
-const lettersRule = (value) =>
-  /^[A-Za-zñ áéíóúÁÉÍÓÚ]+$/.test(value) || "Ingresa solo letras";
-
-const licenseNumberRule = (value) => {
-  const charactersValid = /^[A-Z]{1}\d{9}$/.test(value);
-  const requiredValid = !!value;
-
-  if (!charactersValid) {
-    return "Ingresa un número de licencia válido";
-  } else if (!requiredValid) {
-    return "Este campo es requerido";
-  }
-
-  return true; // La validación pasa
 };
 
 const dateRule = (value) => {

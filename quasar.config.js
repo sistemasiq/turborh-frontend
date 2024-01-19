@@ -108,7 +108,9 @@ module.exports = configure(function (/* ctx */) {
       plugins: [
         'Notify',
         'Loading'
-      ]
+      ],
+
+      lang: 'es'
     },
 
     // animations: 'all', // --- includes all animations
