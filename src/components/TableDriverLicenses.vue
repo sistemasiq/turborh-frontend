@@ -34,7 +34,7 @@
       <template v-slot:body-cell-expirationDate="{ row }">
         <q-td style="color: rgb(0, 0, 0)">
           <q-input
-            v-if="!isLicencePermanent"
+            v-if="!row.isLicencePermanent"
             label="AAAA/MM/DD"
             v-model="row.expirationDate"
             :readonly="viewingApplication"
@@ -61,14 +61,18 @@
               </q-icon>
             </template>
           </q-input>
-          <q-checkbox
-            checked-icon="radio_button_checked"
-            unchecked-icon="radio_button_unchecked"
-            v-model="isLicencePermanent"
-            label="Permanente"
-            @update:model-value="onPermanentCheck(row)"
-          />
         </q-td>
+      </template>
+
+      <template v-slot:body-cell-isLicencePermanent="{ row }">
+        <q-checkbox
+          class="q-mt-md"
+          checked-icon="radio_button_checked"
+          unchecked-icon="radio_button_unchecked"
+          v-model="row.isLicencePermanent"
+          label="Es permanente"
+          @update:model-value="onPermanentCheck(row)"
+        />
       </template>
     </q-table>
     <q-btn
@@ -109,10 +113,6 @@ const useRequest = useRequestUser();
 
 const currentIndex = ref(0);
 
-const isLicencePermanent = ref(false);
-
-
-
 const {
   drivingLicenceData,
   savedApplication,
@@ -134,6 +134,12 @@ const columns = [
     label: "Fecha de vencimiento",
     field: "expirationDate",
   },
+  {
+    name: "isLicencePermanent",
+    align: "left",
+    label: "Sin fecha de vencimiento",
+    field: "isLicencePermanent",
+  },
 ];
 
 const licensesTypes = ["Automovil", "Chofer", "Moto", "Otro"];
@@ -151,9 +157,9 @@ onMounted(() => {
     drivingLicenceData.value.length === 0 ? true : false;
 });
 
-const onPermanentCheck = (row) =>{
-  row.expirationDate === ""
-}
+const onPermanentCheck = (row) => {
+  row.expirationDate = "";
+};
 
 const disableAddButton = () => {
   if (drivingLicenceData.value.length === 0) return false;

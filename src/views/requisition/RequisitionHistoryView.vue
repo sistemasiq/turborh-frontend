@@ -122,7 +122,7 @@
           :disable="row.candidatesNumber === 0"
           color="white"
           rounded
-          @click.prevent="showApplicants(row.id)"
+          @click.prevent="showApplicants(row)"
         >
           <q-badge v-if="row.candidatesNumber > 0" color="red" floating>{{
             row.candidatesNumber
@@ -208,7 +208,7 @@
           <Tooltip :text="'Ver detalles'" />
         </q-btn>
         <q-btn
-          @click.prevent="createReport(row.numRequisition)"
+          @click.prevent="createReport(row.numRequisition, addSignsToReport(row))"
           unelevated
           rounded
           class="text-capitalize bg-grey-4"
@@ -223,7 +223,7 @@
           icon="delete"
           color="white"
           @click.prevent="openCancelRequisitionDialogue(row)"
-          :style="row.state === 'C' || !isRh ? 'visibility:hidden' : ''"
+          :style="row.state === 'C' || row.state === 'PC' || !isRh ? 'visibility:hidden' : ''"
           :class="row.state === 'C' ? 'bg-grey' : 'bg-red-5'"
         >
           <Tooltip :text="'Cancelar requisición'" />
@@ -376,6 +376,7 @@ const {
   requisitionData,
   showingDetails,
   numRequisitionDetails,
+  idRequisitionDetails,
   applicantDetails,
   jobDetails,
   updatingRequisition,
@@ -390,6 +391,7 @@ const stateRowLabels = {
   APL: "Autorizada por: Lic. Ramiro Mata",
   AC: "Autorizada completamente",
   P: "Publicada",
+  PC: "COMPLETADA",
 };
 
 const stateRowLabelsColors = {
@@ -399,6 +401,7 @@ const stateRowLabelsColors = {
   APL: "text-green-10",
   AC: "text-green-5",
   P: "text-cyan-5",
+  PC: "text-green"
 };
 
 const stateButtonColors = {
@@ -458,6 +461,12 @@ const stateChangeNotifyText = {
   AC: "Requisición autorizada correctamente",
   P: "Requisición publicada correctamente",
 };
+
+const addSignsToReport = (row) => {
+
+  return row.state === 'AC' || row.state === 'P'
+
+}
 
 const canEditRequisition = (row) => {
   if (row.state !== "DC") return false;
@@ -625,7 +634,7 @@ const columns = [
     name: "numRequisition",
     label: "No. Requisicion",
     required: true,
-    align: "left",
+    align: "center",
     field: (row) => row.numRequisition,
     sortable: true,
   },
@@ -649,6 +658,13 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => row.jobName,
+  },
+  {
+    name: "vacancyNumber",
+    label: "Vacantes",
+    required: true,
+    align: "center",
+    field: (row) => row.vacancyNumber,
   },
   {
     name: "authorized",
@@ -689,12 +705,14 @@ const onCancelFetchApplicants = async () => {
   }
 };
 
-const showApplicants = (requisitionId) => {
-  numRequisitionDetails.value = requisitionId;
-  if (!numRequisitionDetails.value) {
+const showApplicants = (row) => {
+  numRequisitionDetails.value = row.numRequisition;
+  idRequisitionDetails.value = row.id;
+  if (!numRequisitionDetails.value || !idRequisitionDetails.value) {
     return;
   }
 
+  useLocalStorage.save("idRequisitionDetails", idRequisitionDetails.value);
   useLocalStorage.save("numRequisitionDetails", numRequisitionDetails.value);
   router.push("historial-requisiciones-solicitudes");
 };
@@ -762,11 +780,11 @@ const updateSelectedRequisition = (updatedRequisition) => {
   });
 };
 
-const createReport = async (numRequisition) => {
+const createReport = async (numRequisition, authorized) => {
   try {
     $q.loading.show({ message: "Generando reporte..." });
 
-    const report = await createRequisitionReport(numRequisition);
+    const report = await createRequisitionReport(numRequisition, authorized);
     if (report) {
       reportSrc.value = report;
       showReport.value = true;

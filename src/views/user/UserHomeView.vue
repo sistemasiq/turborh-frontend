@@ -64,7 +64,7 @@
               class="q-mb-lg drawer-button"
               icon="description"
               :style="!userHasApplication ? '' : 'visibility:hidden'"
-              :disable="userHasApplication || !user.photoUUID || user.photoUUID == ''"
+              :disable="userHasApplication || !userPhotoUUID || userPhotoUUID == ''"
             >
               <Tooltip
                 v-if="!userHasApplication"
@@ -310,6 +310,7 @@ const {
 const openNote = ref(false);
 
 const activeApplication = ref(false);
+const userPhotoUUID = ref("");
 
 const toolTipActiveApplicationText = computed(() => {
   return activeApplication.value ? 'Elimina tu solicitud de trabajo' : 'Activa tu solicitud de trabajo'
@@ -328,9 +329,9 @@ const loadLocalStorage = () => {
 
   if (userStored) {
     user.value = userStored;
+    userPhotoUUID.value = user.value.photoUUID
     checkUserApplication(false);
   }
-
   if (loggedStored) logged.value = loggedStored;
 
   if(isViewingApplication){

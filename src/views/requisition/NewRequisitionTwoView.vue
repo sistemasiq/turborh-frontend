@@ -103,7 +103,7 @@
                     :disable="showingDetails"
                   />
                   <q-radio
-                    val="O"
+                    val="I"
                     color="cyan"
                     unchecked-icon="radio_button_unchecked"
                     checked-icon="radio_button_checked"
@@ -111,7 +111,7 @@
                     class="text-white"
                     v-model="gender"
                     dark
-                    label="Otro"
+                    label="Indistinto"
                     :disable="showingDetails"
                   />
                 </div>
@@ -143,6 +143,18 @@
                     dark
                     v-model="civilStatus"
                     label="Soltero"
+                    :disable="showingDetails"
+                  />
+                  <q-radio
+                    val="I"
+                    color="cyan"
+                    unchecked-icon="radio_button_unchecked"
+                    checked-icon="radio_button_checked"
+                    size="lg"
+                    class="text-white"
+                    v-model="civilStatus"
+                    dark
+                    label="Indistinto"
                     :disable="showingDetails"
                   />
                 </div>
