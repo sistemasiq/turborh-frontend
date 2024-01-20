@@ -70,21 +70,6 @@ export const downloadFile = async (fileName, folderPath) => {
   }
 };
 
-/* export const downloadFile = async (fileName, folderPath) => {
-  try {
-      const request = await axios.get(`files/download/${fileName}/path/${folderPath}`)
-
-      if(requestSuccessfull(request.status)){
-          return request;
-      }else{
-          return false;
-      }
-
-  } catch (error) {
-      return false;
-  }
-}; */
-
 const getFileURL = (fileName, folderPath) => {
   const url = dev ? `http://localhost:5000/` : `http://192.168.20.59:8181/`;
 
