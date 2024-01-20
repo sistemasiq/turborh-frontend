@@ -18,6 +18,7 @@
     style="border-radius: 30px;"
   >
     <q-btn
+      v-if="item.status != 'S'"
       class="absolute-top-right bg-red"
       flat
       style="border-radius: 0 30px 0 30px"
@@ -151,6 +152,8 @@ const fetchApplications = async () => {
   } catch (error) {
     console.log(error);
   } finally{
+    console.log(
+    currentApplications.value);
     loadingApplications.value = false;
   }
 };
@@ -158,14 +161,18 @@ const fetchApplications = async () => {
 const checkStatusApplication = {
   "P" : "Pendiente",
   "E" : "Entrevistado",
-  "C" : "Citado"
+  "C" : "Citado",
+  "S" : "Seleccionado",
+  "R" : "Rechazado"
 }
 
 
 const checkStatusApplicationColor = {
-  "P": "grey",
-  "E": "green",
-  "C": "blue"
+  "P": "yellow",
+  "E": "blue",
+  "C": "blue-2",
+  "S": "green",
+  "R": "red"
 }
 
 const disableApplication = async () => {

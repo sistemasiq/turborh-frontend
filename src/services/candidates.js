@@ -89,6 +89,21 @@ export const enableCandidate = async (requisitionId, userId) => {
   }
 };
 
+export const selectCandidate = async (candidateId) => {
+  try {
+    const request = await axios.put(`candidates/select/${candidateId}`);
+
+    if(requestSuccessfull(request.status)){
+      return true;
+    }else{
+      return false;
+    }
+
+  } catch (error) {
+    return false;
+  }
+}
+
 export const getAllCandidatesDiary = async () => {
   try {
     const request = await axios.get(`candidates/diary`);

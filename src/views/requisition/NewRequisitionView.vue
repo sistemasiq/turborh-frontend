@@ -254,7 +254,7 @@ const fetchJobs = async () => {
 
     try {
         isFetchingJobs.value = true;
-        const jobsFetched = isRh.value ? await getAllActiveJobs() : await getJobsByPersonalId(personalId);
+        const jobsFetched = isRh.value || isAdmin.value ? await getAllActiveJobs() : await getJobsByPersonalId(personalId);
         if (jobsFetched) {
           console.log(jobsFetched)
             jobs.value = jobsFetched;
