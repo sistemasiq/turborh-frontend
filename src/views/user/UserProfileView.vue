@@ -108,8 +108,8 @@
         </div>
 
         <div class="row" style="margin-left: 30px; margin-top: 10px">
-          <p v-if="user.applicationId === 0" class="text-h4 q-ml-xl text-grey-8 text-weight-bold"> Sube tu foto para poder crear tu solicitud de trabajo.</p>
-          <ApplicationsCard v-if="user.applicationId != 0"/>
+          <p v-if="userApplicationId === 0" class="text-h4 q-ml-xl text-grey-8 text-weight-bold"> Sube tu foto para poder crear tu solicitud de trabajo.</p>
+          <ApplicationsCard v-if="userApplicationId != 0"/>
         </div>
       </q-page>
     </q-page-container>
@@ -140,6 +140,7 @@ const { savedApplication } = storeToRefs(useRequest);
 
 const fixed = ref(false);
 const userName = ref("");
+const userApplicationId = ref(0);
 const fullName = ref("Nombre completo");
 const specialization = ref("");
 const age = ref(0);
@@ -205,6 +206,7 @@ const setUserInfo = () => {
 
   userName.value = user.value.userName;
   photoUUID.value = user.value.photoUUID;
+  userApplicationId.value = user.value.applicationId;
 
   applicationStored = applicationStored
     ? applicationStored

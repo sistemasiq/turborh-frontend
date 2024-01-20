@@ -50,8 +50,10 @@
     </template>
 
     <template v-slot:body-cell-applicantPhoto="{ row }">
-      <q-td>
+      <q-td :class="row.selected === 1 ? 'bg-green-3' : ''">
         <q-img
+          width="100px"
+          height="100px"
           v-if="row.photoUUID"
           :src="getS3FileUrl(getUserImagesPath, row.photoUUID)"
           spinner-color="primary"
@@ -99,7 +101,17 @@
           label="Añadir notas"
           @click.prevent="addNotes(row.applicationId)"
         />
-
+        <q-btn
+          v-if="row.selected === 0 && row.requisitionState === 'P'"
+          class="q-ml-lg bg-green"
+          rounded
+          icon="done"
+          text-color="white"
+          label="Seleccionar"
+          @click.prevent="setSelectedCandidateId(row)"
+        />
+        <!-- Aqui esta la variable del backend que sirve como vmodel
+        Si se encuentra una mejor manera adelante xd -->
         <div class="row">
           <q-file
             style="max-width: 420px"
@@ -108,17 +120,16 @@
             accept=".pdf, pdf/*"
             class="q-ml-lg q-mt-lg"
             bg-color="white"
-            v-model="row.selected"
+            v-model="row.psychometricTestSelected"
             clearable
             label="Seleccionar prueba psicometríca"
-
           >
             <template v-slot:prepend
               ><q-icon color="dark" name="folder" />
             </template>
           </q-file>
           <q-btn
-            v-if="row.selected"
+            v-if="row.psychometricTestSelected"
             rounded
             class="q-ml-lg q-mt-lg"
             icon="upload"
@@ -130,6 +141,28 @@
       </q-td>
     </template>
   </q-table>
+
+  <q-dialog v-model="openSelectCandidateDialog" persistent>
+    <q-card rounded style="border-radius: 30px">
+      <q-card-section class="row items-center">
+        <span class="q-ml-sm text-h6 text-weight-regular">
+          ¿Quieres seleccionar a este candidato?
+        </span>
+      </q-card-section>
+
+      <q-card-actions align="center">
+        <q-btn flat label="Cancelar" color="primary" v-close-popup />
+        <q-btn
+          rounded
+          flat
+          label="OK"
+          v-close-popup
+          class="text-white bg-green"
+          @click.prevent="selectCandidateById()"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 
   <q-dialog maximized v-model="showReport">
     <q-card class="no-scroll">
@@ -180,7 +213,10 @@ import { useRequestUser } from "src/stores/requestUser";
 import { useNotesStore } from "src/stores/notes";
 import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
-import { getCandidatesByRequisitionId } from "src/services/candidates";
+import {
+  getCandidatesByRequisitionId,
+  selectCandidate,
+} from "src/services/candidates";
 import router from "src/router";
 import { downloadFile, updateFile, uploadFile } from "src/services/files";
 import {
@@ -188,6 +224,7 @@ import {
   getUserApplicationNotesById,
 } from "src/services/userApplication";
 import { updateUserPsychometricTest } from "src/services/user";
+import { completeRequisition } from "src/services/requisition";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -196,9 +233,14 @@ const useNotes = useNotesStore();
 const useRequest = useRequestUser();
 const filter = ref("");
 
+const openSelectCandidateDialog = ref(false);
+
+const selectedCandidate = ref(0);
 
 const currentApplicants = ref([]);
-const { numRequisitionDetails, viewAllRequisitions } = storeToRefs(useRequisitionDetails);
+const { numRequisitionDetails, viewAllRequisitions, idRequisitionDetails } = storeToRefs(
+  useRequisitionDetails
+);
 
 const noDataLabel = ref("No hay solicitantes para este puesto...");
 const loading = ref(false);
@@ -237,33 +279,64 @@ onMounted(() => {
 
 const loadLocalStore = () => {
   const numRequisitionStored = useLocalStorage.load("numRequisitionDetails");
-
+  const idRequisitionStored = useLocalStorage.load("idRequisitionDetails");
   if (numRequisitionStored) {
     numRequisitionDetails.value = numRequisitionStored;
+  }
+
+  if(idRequisitionStored){
+    idRequisitionDetails.value = idRequisitionStored;
+  }
+};
+
+const setSelectedCandidateId = (row) => {
+  selectedCandidate.value = row;
+  console.log(selectedCandidate.value);
+  openSelectCandidateDialog.value = true;
+};
+
+const selectCandidateById = async () => {
+  try {
+    $q.loading.show();
+
+    const candidateSelectedCorrectly = await selectCandidate(
+      selectedCandidate.value.id
+    );
+
+    if (candidateSelectedCorrectly) {
+      selectedCandidate.value.selected = 1;
+      updateRow(selectedCandidate.value);
+      const completed = await completeRequisition(numRequisitionDetails.value);
+      console.log("Is requisition completed "+completed);
+      if(completed){
+        $q.notify(notifyPositive("Se han llenado las vacantes para este puesto"));
+      }
+      console.log("CANDIDATE HAS BEEN SELECTED");
+    }
+  } catch (error) {
+  } finally {
+    $q.loading.hide();
   }
 };
 
 const gendersParsed = {
-  F:"Femenino",
-  M:"Masculino",
-  O:"Otro"
-}
+  F: "Femenino",
+  M: "Masculino",
+  O: "Otro",
+};
 
 const fetchApplicants = async () => {
-  if (!numRequisitionDetails.value) return;
+  if (!idRequisitionDetails.value) return;
 
   try {
     loading.value = true;
     const candidates = await getCandidatesByRequisitionId(
-      numRequisitionDetails.value
+      idRequisitionDetails.value
     );
 
     if (candidates) {
       currentApplicants.value = candidates;
-      currentApplicants.value.forEach(element => {
-        element.selected = null;
-      })
-      console.log(currentApplicants.value)
+      console.log(currentApplicants.value);
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
@@ -296,22 +369,28 @@ const uploadPsicometricTest = async (row) => {
 
     let newFile;
 
-    if(row.psychometricTest){
-      newFile = await updateFile(row.psychometricTest, row.selected, getUserDocumentsPath);
-    }else{
-      newFile = await uploadFile(row.selected, getUserDocumentsPath);
+    if (row.psychometricTest) {
+      newFile = await updateFile(
+        row.psychometricTest,
+        row.psychometricTestSelected,
+        getUserDocumentsPath
+      );
+    } else {
+      newFile = await uploadFile(
+        row.psychometricTestSelected,
+        getUserDocumentsPath
+      );
     }
 
-    if(newFile){
+    if (newFile) {
       const updatedTest = await updateUserPsychometricTest(row.userId, newFile);
 
-      if(updatedTest){
+      if (updatedTest) {
         row.psychometricTest = newFile;
         updateRow(row);
-        $q.notify(notifyPositive("Prueba psicometríca subida correctamente"))
+        $q.notify(notifyPositive("Prueba psicometríca subida correctamente"));
       }
     }
-
   } catch (error) {
     $q.notify(notifyNegative("Hubo un error al subir la prueba psicometríca"));
   } finally {
@@ -320,12 +399,13 @@ const uploadPsicometricTest = async (row) => {
 };
 
 const updateRow = (row) => {
-  currentApplicants.value.forEach(element => {
-    if(element.userId === row.userId){
+  currentApplicants.value.forEach((element) => {
+    if (element.userId === row.userId) {
       element = row;
     }
-  })
-}
+  });
+};
+
 
 const createReport = async (applicationId) => {
   try {
@@ -398,6 +478,15 @@ const fetchUserApplicationNotes = async (applicationId) => {
 
 const columns = [
   {
+    name: "selected",
+    label: "Seleccion",
+    required: true,
+    field: (row) => (row.selected === 1 ? "Candidato Seleccionado" : ""),
+    align: "left",
+    classes: (row) =>
+      row.selected === 1 ? "bg-green-3" : "",
+  },
+  {
     name: "applicantPhoto",
     label: "Foto",
     required: true,
@@ -411,6 +500,8 @@ const columns = [
     align: "left",
     field: (row) =>
       row.name + " " + row.firstLastName + " " + row.secondLastName,
+    classes: (row) =>
+      row.selected === 1 ? "bg-green-3" : "",
   },
   {
     name: "applicantGender",
@@ -418,6 +509,8 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => gendersParsed[row.gender],
+    classes: (row) =>
+      row.selected === 1 ? "bg-green-3" : "",
   },
   {
     name: "applicantAge",
@@ -425,6 +518,8 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => getAge(row.birthDate) + " años",
+    classes: (row) =>
+      row.selected === 1 ? "bg-green-3" : "",
   },
   {
     name: "wishedSalary",
@@ -432,6 +527,8 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => row.wishedSalary + " MXN",
+    classes: (row) =>
+      row.selected === 1 ? "bg-green-3" : "",
   },
   {
     name: "jobName",
@@ -439,6 +536,8 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => row.jobName,
+    classes: (row) =>
+      row.selected === 1 ? "bg-green-3" : "",
   },
   {
     name: "dateCreated",
@@ -447,6 +546,8 @@ const columns = [
     align: "left",
     field: (row) => row.dateCreated,
     sortable: true,
+    classes: (row) =>
+      row.selected === 1 ? "bg-green-3" : "",
   },
   {
     name: "options",
@@ -454,6 +555,7 @@ const columns = [
     required: true,
     align: "center",
     field: "options",
+
   },
 ];
 </script>

@@ -50,6 +50,7 @@ const router = createRouter({
         { path: "solicitud-9", component: () => import('/src/views/user/SkillsView.vue') },
         { path: "solicitud-10", component: () => import('/src/views/user/LaboralExperienceView.vue') },
         { path: "solicitud-11", component: () => import('/src/views/user/FamilyReferencesView.vue') },
+       // { path: "solicitud-12", component: () => import('/src/views/user/PrivacyAdviceView.vue') },
         { path: "vacantes", component: () => import('/src/views/user/VacantsJobsView.vue') },
         { path: "sin-vacantes", component: () => import('/src/views/NoVacanciesView.vue') }
       ],
@@ -131,6 +132,12 @@ const router = createRouter({
       path: "/restore-password/password-restored",
       name: "password-restored",
       component: () => import("/src/views/PasswordRestoredView.vue"),
+    },
+
+    {
+      path: "/privacy-advice",
+      name: "privacy-advice",
+      component: () => import("/src/views/user/PrivacyAdviceView.vue"),
     },
   ]
 })

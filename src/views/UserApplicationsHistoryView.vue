@@ -52,6 +52,8 @@
     <template v-slot:body-cell-applicantPhoto="{ row }">
       <q-td>
         <q-img
+          width="100px"
+          height="100px"
           v-if="row.foto_uuid"
           :src="getS3FileUrl(getUserImagesPath, row.foto_uuid)"
           spinner-color="primary"

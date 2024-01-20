@@ -7,6 +7,7 @@ export const useRequisitionDetailsStore = defineStore(
     const requisitionData = ref({});
     const showingDetails = ref(false);
     const numRequisitionDetails = ref(0);
+    const idRequisitionDetails = ref(0);
     const applicantDetails = ref("");
     const jobDetails = ref("");
     const updatingRequisition = ref(false);
@@ -15,6 +16,7 @@ export const useRequisitionDetailsStore = defineStore(
     return {
       requisitionData,
       numRequisitionDetails,
+      idRequisitionDetails,
       applicantDetails,
       jobDetails,
       showingDetails,

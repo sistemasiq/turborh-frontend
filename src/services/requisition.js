@@ -147,3 +147,18 @@ export const cancelRequisition = async (numRequisition) => {
     }
 
 }
+
+export const completeRequisition = async (numRequisition) => {
+  try {
+    const request = await axios.put(`requisitions/complete/${numRequisition}`)
+
+    if(requestSuccessfull(request.status)){
+      return request.data;
+    }else{
+      return false;
+  }
+
+} catch (error) {
+  return false;
+}
+}

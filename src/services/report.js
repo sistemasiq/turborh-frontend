@@ -2,10 +2,10 @@ import axios from "axios";
 import { requestSuccessfull } from "src/utils/operations";
 import { getAxiosBaseUrl } from "./profiles";
 
-export const createRequisitionReport = async (numRequisition) => {
+export const createRequisitionReport = async (numRequisition, authorized) => {
   try {
     const request = await axios.get(
-      `reports/requisition?numRequisition=${numRequisition}&endpointURL=${getAxiosBaseUrl()}`,
+      `reports/requisition?numRequisition=${numRequisition}&authorized=${authorized}`,
       {
         responseType: "arraybuffer",
       }

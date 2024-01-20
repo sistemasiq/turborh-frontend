@@ -3,7 +3,7 @@
     <q-pagination
       v-model="currentPage"
       color="cyan"
-      :max="11"
+      :max="12"
       :max-pages="3"
       boundary-numbers
       disable
@@ -22,28 +22,28 @@
               transition-show="scale"
               transition-hide="scale" anchor="top middle"  self="bottom middle" :offset="[10, 10]">
           Anterior
-        </q-tooltip>  
+        </q-tooltip>
     </q-btn>
-    <q-btn :disable="disableNextButton" v-if="currentPage < 11" class="q-mr-sm" color="cyan" round icon="navigate_next" @click.prevent="nextPage">
+    <q-btn :disable="disableNextButton" v-if="currentPage < 12" class="q-mr-sm" color="cyan" round icon="navigate_next" @click.prevent="nextPage">
       <q-tooltip class="text-body2"
               transition-show="scale"
               transition-hide="scale" anchor="top middle"  self="bottom middle" :offset="[10, 10]">
           {{ disableNextButton ? 'Llena primero los campos necesarios' : 'Siguiente' }}
-        </q-tooltip>  
+        </q-tooltip>
     </q-btn>
     <q-btn v-if="currentPage < 11 && (viewingApplication || updatingApplication)" color="cyan" round icon="done" @click.prevent="goToLaboralExperience">
       <q-tooltip class="text-body2"
               transition-show="scale"
               transition-hide="scale" anchor="top middle"  self="bottom middle" :offset="[10, 10]">
           Ir a final
-        </q-tooltip>  
+        </q-tooltip>
     </q-btn>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { useRouter } from "vue-router"; 
+import { useRouter } from "vue-router";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
 
