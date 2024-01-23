@@ -64,7 +64,7 @@
               class="q-mb-lg drawer-button"
               icon="description"
               :style="!userHasApplication ? '' : 'visibility:hidden'"
-              :disable="userHasApplication || !userPhotoUUID || userPhotoUUID == ''"
+              :disable="userHasApplication || !getUserPhotoUUID"
             >
               <Tooltip
                 v-if="!userHasApplication"
@@ -298,7 +298,7 @@ const hoverUpdateApplication = ref(false);
 const hoverDeleteApplication = ref(false);
 const useLocalStorage = useLocalStorageStore();
 const { viewAllRequisitions } = storeToRefs(useRequisitionDetails);
-const { user, isRh, logged } = storeToRefs(useAuth);
+const { user, isRh, logged, getUserPhotoUUID } = storeToRefs(useAuth);
 const {
   savedApplication,
   viewingApplication,

@@ -3,7 +3,7 @@
     <q-pagination
       v-model="currentPage"
       color="cyan"
-      :max="12"
+      :max="maxPages"
       :max-pages="3"
       boundary-numbers
       disable
@@ -24,7 +24,7 @@
           Anterior
         </q-tooltip>
     </q-btn>
-    <q-btn :disable="disableNextButton" v-if="currentPage < 12" class="q-mr-sm" color="cyan" round icon="navigate_next" @click.prevent="nextPage">
+    <q-btn :disable="disableNextButton" v-if="currentPage < maxPages" class="q-mr-sm" color="cyan" round icon="navigate_next" @click.prevent="nextPage">
       <q-tooltip class="text-body2"
               transition-show="scale"
               transition-hide="scale" anchor="top middle"  self="bottom middle" :offset="[10, 10]">
@@ -47,6 +47,7 @@ import { useRouter } from "vue-router";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
 
+
 const useRequest = useRequestUser();
 const router = useRouter();
 const props = defineProps(["page", "requiredFields"]);
@@ -54,6 +55,10 @@ const props = defineProps(["page", "requiredFields"]);
 const currentPage = ref(0);
 
 const currentRequiredFields = ref([])
+
+const maxPages = computed(() => {
+  return viewingApplication.value || updatingApplication.value ? 11 : 12;
+})
 
 onMounted(() => {
   setProps()
