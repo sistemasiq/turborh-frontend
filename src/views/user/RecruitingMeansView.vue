@@ -10,23 +10,23 @@
 
         <div style="margin-top: 6%">
 
-          <q-card
-            bordered
-            class="bg-yellow-2 q-mb-lg"
-            style="margin-left: 0%"
-            v-if="!viewingApplication"
-          >
-            <q-card-section>
-              <div class="text-body1 text-weight-medium row">
-                <q-icon name="warning" class="q-mr-md q-mt-xs" />
-                Nota
-              </div>
-              <p class="text-body2">
-                Solo seleccione unicamente si necesita alguna de las siguientes
-                opciones.
-              </p>
-            </q-card-section>
-          </q-card>
+          <q-card flat bordered text-color="white"
+  class="q-mb-lg"
+  style="margin-left: 0%; border-color: green; 
+  background-color: transparent; color: white; width: 980px;"
+  v-if="!viewingApplication"
+>
+  <q-card-section>
+    <div class="text-body1 text-weight-medium row">
+      <q-icon name="warning" class="q-mr-md q-mt-xs" />
+      Nota
+    </div>
+    <p class="text-body2">
+     Debe ingresar al menos 2 familiares para poder avanzar a la siguiente pantalla
+    </p>
+  </q-card-section>
+</q-card>
+
 
           <q-form class="q-gutter-md">
             <q-input
