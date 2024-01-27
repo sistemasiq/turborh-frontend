@@ -921,6 +921,109 @@
             </q-card>
           </div>
         </q-page-container>
+
+        <!--User Information-->
+        <!--REFACTOR REQUIRED. The distribution of the elements in the div is not a good practice-->
+
+        <div class="col">
+          <q-card class="col-auto" style="height: 100%">
+            <q-expansion-item
+              expand-separator
+              icon="perm_identity"
+              label="Información Personal"
+              :caption="candidateSelection != '' ? candidateSelection : ''"
+            >
+              <q-card-section horizontal style="height: 100%">
+                <div class="q-ma-md" v-if="!updateSelection">
+                  <q-img
+                      style="width: 130px; height: 130px; border-radius: 20%"
+                      :src="getUserImage"
+                    />
+                </div>
+                <q-card-actions vertical style="width:100%">
+                  <div class="row justify-between q-ma-md">
+                    <q-input
+                      v-model="candidateSelection"
+                      label="Nombre del candidato"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="birthday"
+                      label="Fecha de nacimiento"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="sex"
+                      label="Sexo"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                  </div>
+                  <div class="row justify-between q-ma-md">
+                    <q-input
+                      v-model="wishedSalary"
+                      label="Sueldo Deseado"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="phoneNumber"
+                      label="Número de teléfono"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="civilStatus"
+                      label="Estado Civil"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                  </div>
+                  <div class="row justify-between q-ma-md">
+                    <q-input
+                      v-model="state"
+                      label="Estado"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="city"
+                      label="Ciudad"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="languages"
+                      label="Idiomas dominados"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                  </div>
+                </q-card-actions>
+              </q-card-section>
+            </q-expansion-item>
+          </q-card>
+        </div>
       </q-layout>
     </q-dialog>
 
@@ -928,10 +1031,10 @@
       <q-layout
         view="hHh lpr fff"
         container
-        style="min-width: 800px; max-height: 400px"
+        style="min-width: 800px; max-height: 450px"
         class="shadow-24"
       >
-        <q-header reveal bordered class="bg-white text-black">
+        <q-header bordered class="bg-white text-black">
           <q-toolbar>
             <q-toolbar-title>
               <q-avatar
@@ -1092,8 +1195,113 @@
             </q-card-actions>
           </q-card>
         </q-page-container>
+        <!--paste here the user information section-->
+         <!--User Information-->
+        <!--REFACTOR REQUIRED. The distribution of the elements in the div is not a good practice-->
+
+        <div class="col">
+          <q-card class="col-auto" style="height: 100%">
+            <q-expansion-item
+              expand-separator
+              icon="perm_identity"
+              label="Información Personal"
+              :caption="candidateSelection != '' ? candidateSelection : ''"
+            >
+              <q-card-section horizontal style="height: 100%">
+                <div class="q-ma-md">
+                  <q-img
+                      style="width: 130px; height: 130px; border-radius: 20%"
+                      :src="getUserImage"
+                    />
+                </div>
+                <q-card-actions vertical style="width:100%">
+                  <div class="row justify-between q-ma-md">
+                    <q-input
+                      v-model="candidateSelection"
+                      label="Nombre del candidato"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="birthday"
+                      label="Fecha de nacimiento"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="sex"
+                      label="Sexo"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                  </div>
+                  <div class="row justify-between q-ma-md">
+                    <q-input
+                      v-model="wishedSalary"
+                      label="Sueldo Deseado"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="phoneNumber"
+                      label="Número de teléfono"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="civilStatus"
+                      label="Estado Civil"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                  </div>
+                  <div class="row justify-between q-ma-md">
+                    <q-input
+                      v-model="state"
+                      label="Estado"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="city"
+                      label="Ciudad"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                    <q-input
+                      v-model="languages"
+                      label="Idiomas dominados"
+                      filled
+                      readonly
+                      disable
+                      class="col-3"
+                    />
+                  </div>
+                </q-card-actions>
+              </q-card-section>
+            </q-expansion-item>
+          </q-card>
+        </div>
       </q-layout>
     </q-dialog>
+
+    <!--DIALOG TO SHOW MORE APPOINTMENTS WHEN A DAY HAS MORE OF 3-->
     <q-dialog auto-close seamless v-model="dayAppointmentsDialog">
       <q-card-section class="bg-white shadow-24">
         <div class="row items-center justify-between" style="width: 100%">
@@ -1168,7 +1376,7 @@ import {
   getAppointmentsHistory,
   postAppointment,
   putAppointment,
-  deleteAppointment
+  deleteAppointment,
 } from "src/services/administrators/Agenda.js";
 import { getUserImagesPath } from "src/utils/folderPaths.js";
 import {
@@ -1246,6 +1454,16 @@ const appointmentStatus = ref("");
 const candidateStatus = ref("");
 const appointmentDaysList = ref([]);
 const events = ref([]); //this is the array where the appointments are
+
+//USER INFORMATION
+const birthday = ref("");
+const sex = ref("");
+const wishedSalary = ref("");
+const civilStatus = ref("");
+const city = ref("");
+const state = ref("");
+const languages = ref("");
+
 let comparativeAppointment;
 /*filters*/
 const filterSearchedAppointments = ref("filterAll");
@@ -1419,6 +1637,7 @@ const getCandidatesCatalog = async () => {
     loading.value = false;
     disableCheckbox.value = false;
     totalTableRows.value = request;
+    console.log("CANDIDATES", totalTableRows.value);
   } else {
     $q.notify(
       notifyNegative("Hubo un problema al obtener la lista de candidatos")
@@ -1433,24 +1652,25 @@ const getHistory = async () => {
   const firstDate = parseDates(firstDateRange.value);
   const secondDate = parseDates(secondDateRange.value);
 
-  if(firstDate <= secondDate){
+  if (firstDate <= secondDate) {
     $q.loading.show();
-  const request = await getAppointmentsHistory(
-    firstDateRange.value,
-    secondDateRange.value
-  );
-  if (request != null) {
-    searchedAppointments.value = request;
-    showSearchResults.value = true;
-    $q.loading.hide();
+    const request = await getAppointmentsHistory(
+      firstDateRange.value,
+      secondDateRange.value
+    );
+    if (request != null) {
+      searchedAppointments.value = request;
+      showSearchResults.value = true;
+      $q.loading.hide();
+    } else {
+      $q.loading.hide();
+      $q.notify(notifyNegative("Hubo un problema al obtener el historial"));
+    }
   } else {
-    $q.loading.hide();
-    $q.notify(notifyNegative("Hubo un problema al obtener el historial"));
+    $q.notify(
+      notifyNegative("Selecciona una fecha inicial inferior a la fecha final")
+    );
   }
-  } else {
-    $q.notify(notifyNegative("Selecciona una fecha inicial inferior a la fecha final"));
-  }
-
 };
 
 const closeSearch = () => {
@@ -1500,6 +1720,13 @@ const showEventData = (event) => {
   selectedPlatform.value = event.platformName;
   email.value = event.email;
   phoneNumber.value = event.phoneNumber;
+  birthday.value = event.birthday;
+  sex.value = event.sex;
+  wishedSalary.value = event.wishedSalary;
+  civilStatus.value = event.civilStatus;
+  city.value = event.city;
+  state.value = event.state;
+  languages.value = event.languages;
   console.log("DATOS OBTENIDOS");
   console.log(candidateSelection);
   console.log(
@@ -1609,11 +1836,9 @@ const checkSelection = (candidate) => {
 
 //Function to convert the date string to a date object
 const parseDates = (dateStr) => {
-  const [year, month, day] = dateStr.split('/').map(Number);
+  const [year, month, day] = dateStr.split("/").map(Number);
   return new Date(year, month - 1, day);
 };
-
-
 
 /*ADD EVENTS ===================================================================================================================================== */
 const checkVariablesToCreateMethod = () => {
@@ -1646,151 +1871,153 @@ const asignDefaultPlatform = () => {
 
 const postVirtualAppointment = async () => {
   $q.loading.show();
-    asignDefaultPlatform();
+  asignDefaultPlatform();
 
-    /* Object creation and insertion */
-    const appointment = {
-      linkID: platformSelectedID.value,
-      userID: userID.value,
-      active: 1,
-      createdBy: createdBy.value,
+  /* Object creation and insertion */
+  const appointment = {
+    linkID: platformSelectedID.value,
+    userID: userID.value,
+    active: 1,
+    createdBy: createdBy.value,
+    date: selectDay.value,
+    hour: selectedHour.value,
+    modality: "V",
+    color: hex.value,
+    appointmentStatus: "P",
+    candidateStatus: "C",
+  };
+  const request = await postAppointment(appointment);
+
+  if (request != null) {
+    let getInsertedAppointment = request;
+    const candidateIndex = totalTableRows.value.findIndex(
+      (candidate) => candidate.userID === request.userID
+    );
+    totalTableRows.value[candidateIndex].status = "C";
+    events.value.push(getInsertedAppointment);
+
+    $q.notify(notifyPositive("Cita registrada exitosamente!"));
+    $q.loading.hide();
+    confirm.value = false; //close the dialog
+
+    /* Send a WhatsApp Message */
+    const data = {
+      phoneNumber: phoneNumber.value,
+      name: name.value,
       date: selectDay.value,
       hour: selectedHour.value,
-      modality: "V",
-      color: hex.value,
-      appointmentStatus: "P",
-      candidateStatus: "C",
+      platformName: selectedPlatform.value,
+      link: getInsertedAppointment.link,
+      supportEmail: "reclutamiento@turbomaquinas.com",
     };
-    const request = await postAppointment(appointment);
+    sendWhatsAppMessage("virtual", data);
 
-    if (request != null) {
-      let getInsertedAppointment = request;
-      const candidateIndex = totalTableRows.value.findIndex(
-        (candidate) => candidate.userID === request.userID
-      );
-      totalTableRows.value[candidateIndex].status = "C";
-      events.value.push(getInsertedAppointment);
+    /* Send an Email*/
+    const mailData = {
+      to: email.value,
+      subject: scheduledAppointment.subject,
+      name: name.value,
+      firstText: scheduledAppointment.firstText,
+      date: selectDay.value,
+      hour: selectedHour.value,
+      modality: "Virtual",
+      platformName: selectedPlatform.value,
+      lastText: scheduledAppointment.lastText,
+      link: getInsertedAppointment.link,
+      emailType: scheduledAppointment.emailType,
+    };
+    sendEmail("scheduled-appointment", mailData);
 
-      $q.notify(notifyPositive("Cita registrada exitosamente!"));
-      $q.loading.hide();
-      confirm.value = false; //close the dialog
-
-      /* Send a WhatsApp Message */
-      const data = {
-        phoneNumber: phoneNumber.value,
-        name: name.value,
-        date: selectDay.value,
-        hour: selectedHour.value,
-        platformName: selectedPlatform.value,
-        link: getInsertedAppointment.link,
-        supportEmail: "reclutamiento@turbomaquinas.com",
-      };
-      sendWhatsAppMessage("virtual", data);
-
-      /* Send an Email*/
-      const mailData = {
-        to: email.value,
-        subject: scheduledAppointment.subject,
-        name: name.value,
-        firstText: scheduledAppointment.firstText,
-        date: selectDay.value,
-        hour: selectedHour.value,
-        modality: "Virtual",
-        platformName: selectedPlatform.value,
-        lastText: scheduledAppointment.lastText,
-        link: getInsertedAppointment.link,
-        emailType: scheduledAppointment.emailType,
-      };
-      sendEmail("scheduled-appointment", mailData);
-
-      candidateSelection.value = "";
-      selectedPlatform.value = "";
-      userID.value = "";
-      selectedHour.value = "";
-      selectedModality.value = "";
-      linkData.value = "";
-      color.value = "";
-    } else {
-      $q.notify(notifyNegative("Hubo un error al registrar la cita"));
-      $q.loading.hide();
-    }
-}
+    candidateSelection.value = "";
+    selectedPlatform.value = "";
+    userID.value = "";
+    selectedHour.value = "";
+    selectedModality.value = "";
+    linkData.value = "";
+    color.value = "";
+  } else {
+    $q.notify(notifyNegative("Hubo un error al registrar la cita"));
+    $q.loading.hide();
+  }
+};
 
 const postPresentialAppointment = async () => {
   $q.loading.show();
-    /* Object creation and insertion */
-      const appointment = {
-        userID: userID.value,
-        linkID: 4,
-        active: 1,
-        createdBy: createdBy.value,
-        date: selectDay.value,
-        hour: selectedHour.value,
-        modality: "P",
-        color: hex.value,
-        appointmentStatus: "P",
-        candidateStatus: "C",
-      };
-      const request = await postAppointment(appointment);
+  /* Object creation and insertion */
+  const appointment = {
+    userID: userID.value,
+    linkID: 4,
+    active: 1,
+    createdBy: createdBy.value,
+    date: selectDay.value,
+    hour: selectedHour.value,
+    modality: "P",
+    color: hex.value,
+    appointmentStatus: "P",
+    candidateStatus: "C",
+  };
+  const request = await postAppointment(appointment);
 
-      if (request != null) {
-        let getInsertedAppointment = request;
-        console.log(getInsertedAppointment);
-        const candidateIndex = totalTableRows.value.findIndex(
-          (candidate) => candidate.userID === request.userID
-        );
-        totalTableRows.value[candidateIndex].status = "C";
-        events.value.push(getInsertedAppointment);
+  if (request != null) {
+    let getInsertedAppointment = request;
+    console.log(getInsertedAppointment);
+    const candidateIndex = totalTableRows.value.findIndex(
+      (candidate) => candidate.userID === request.userID
+    );
+    totalTableRows.value[candidateIndex].status = "C";
+    events.value.push(getInsertedAppointment);
 
-        $q.notify(notifyPositive("Cita registrada exitosamente!"));
-        $q.loading.hide();
-        confirm.value = false;
+    $q.notify(notifyPositive("Cita registrada exitosamente!"));
+    $q.loading.hide();
+    confirm.value = false;
 
-        /*Send a WhatsApp Message */
-        const data = {
-          phoneNumber: phoneNumber.value,
-          name: name.value,
-          date: selectDay.value,
-          hour: selectedHour.value,
-          supportEmail: "reclutamiento@turbomaquinas.com",
-        };
-        sendWhatsAppMessage("presential", data);
+    /*Send a WhatsApp Message */
+    const data = {
+      phoneNumber: phoneNumber.value,
+      name: name.value,
+      date: selectDay.value,
+      hour: selectedHour.value,
+      supportEmail: "reclutamiento@turbomaquinas.com",
+    };
+    sendWhatsAppMessage("presential", data);
 
-        /*Send an Email */
-        const mailData = {
-          to: email.value,
-          subject: scheduledAppointment.subject,
-          name: name.value,
-          firstText: scheduledAppointment.firstText,
-          date: selectDay.value,
-          hour: selectedHour.value,
-          modality: "Presencial",
-          lastText: scheduledAppointment.lastText,
-          emailType: scheduledAppointment.emailType,
-        };
-        sendEmail("scheduled-appointment", mailData);
+    /*Send an Email */
+    const mailData = {
+      to: email.value,
+      subject: scheduledAppointment.subject,
+      name: name.value,
+      firstText: scheduledAppointment.firstText,
+      date: selectDay.value,
+      hour: selectedHour.value,
+      modality: "Presencial",
+      lastText: scheduledAppointment.lastText,
+      emailType: scheduledAppointment.emailType,
+    };
+    sendEmail("scheduled-appointment", mailData);
 
-        candidateSelection.value = "";
-        userID.value = "";
-        platformSelectedID.value = 0;
-        selectedHour.value = "";
-        selectedModality.value = "";
-        linkData.value = "";
-        color.value = "";
-      } else {
-        $q.notify(notifyNegative("Hubo un error al registrar la cita"));
-        $q.loading.hide();
-      }
-}
+    candidateSelection.value = "";
+    userID.value = "";
+    platformSelectedID.value = 0;
+    selectedHour.value = "";
+    selectedModality.value = "";
+    linkData.value = "";
+    color.value = "";
+  } else {
+    $q.notify(notifyNegative("Hubo un error al registrar la cita"));
+    $q.loading.hide();
+  }
+};
 
 const createAppointment = () => {
   if (selectedModality.value === "Virtual" && checkVariablesToCreateMethod()) {
     postVirtualAppointment();
   } else if (
-    selectedModality.value === "Presencial" && checkVariablesToCreateMethod()) {
+    selectedModality.value === "Presencial" &&
+    checkVariablesToCreateMethod()
+  ) {
     postPresentialAppointment();
 
-  /* Fields exceptions */
+    /* Fields exceptions */
   } else if (candidateSelection.value == "") {
     $q.notify(notifyNegative("Seleccione un candidato"));
   } else if (selectedHour.value == "") {
@@ -1802,173 +2029,175 @@ const createAppointment = () => {
 
 const putVirtualApppointment = async () => {
   $q.loading.show();
-    asignDefaultPlatform();
-    const appointment = {
-      appointmentId: appointmentId.value,
-      userID: userID.value,
-      linkID: platformSelectedID.value,
-      modifiedBy: createdBy.value,
-      date: selectDay.value,
-      hour: selectedHour.value,
-      modality: "V",
-      color: hex.value,
-    };
-    const request = await putAppointment(appointment);
+  asignDefaultPlatform();
+  const appointment = {
+    appointmentId: appointmentId.value,
+    userID: userID.value,
+    linkID: platformSelectedID.value,
+    modifiedBy: createdBy.value,
+    date: selectDay.value,
+    hour: selectedHour.value,
+    modality: "V",
+    color: hex.value,
+  };
+  const request = await putAppointment(appointment);
 
-    if (request != null) {
-      let updatedAppointment = request;
-      const appointmentIndex = events.value
-        .map((event) => {
-          return event.appointmentId;
-        })
-        .indexOf(appointment.appointmentId);
-      events.value[appointmentIndex] = updatedAppointment;
-      $q.notify(notifyPositive("Cita actualizada exitosamente!"));
-      $q.loading.hide();
-      confirm.value = false;
+  if (request != null) {
+    let updatedAppointment = request;
+    const appointmentIndex = events.value
+      .map((event) => {
+        return event.appointmentId;
+      })
+      .indexOf(appointment.appointmentId);
+    events.value[appointmentIndex] = updatedAppointment;
+    $q.notify(notifyPositive("Cita actualizada exitosamente!"));
+    $q.loading.hide();
+    confirm.value = false;
 
-      /* Comparative values to check if the appointment has change is some value, if any of the values has not changed, then the email and whatsApp will not be sended to the users */
-      if (
-        updatedAppointment.linkID != comparativeAppointment.linkID ||
-        updatedAppointment.date != comparativeAppointment.date ||
-        updatedAppointment.hour != comparativeAppointment.hour
-      ) {
-        /*Send a WhatsApp Message */
-        const data = {
-          phoneNumber: phoneNumber.value,
-          name: name.value,
-          date: selectDay.value,
-          hour: selectedHour.value,
-          platformName: selectedPlatform.value,
-          link: updatedAppointment.link,
-          supportEmail: "reclutamiento@turbomaquinas.com",
-        };
-        sendWhatsAppMessage("virtual/change", data);
+    /* Comparative values to check if the appointment has change is some value, if any of the values has not changed, then the email and whatsApp will not be sended to the users */
+    if (
+      updatedAppointment.linkID != comparativeAppointment.linkID ||
+      updatedAppointment.date != comparativeAppointment.date ||
+      updatedAppointment.hour != comparativeAppointment.hour
+    ) {
+      /*Send a WhatsApp Message */
+      const data = {
+        phoneNumber: phoneNumber.value,
+        name: name.value,
+        date: selectDay.value,
+        hour: selectedHour.value,
+        platformName: selectedPlatform.value,
+        link: updatedAppointment.link,
+        supportEmail: "reclutamiento@turbomaquinas.com",
+      };
+      sendWhatsAppMessage("virtual/change", data);
 
-        /*Send an Email message */
-        const mailData = {
-          to: email.value,
-          subject: modifiedAppointment.subject,
-          name: name.value,
-          firstText: modifiedAppointment.firstText,
-          date: selectDay.value,
-          hour: selectedHour.value,
-          modality: "Virtual",
-          platformName: selectedPlatform.value,
-          lastText: modifiedAppointment.lastText,
-          link: updatedAppointment.link,
-          emailType: modifiedAppointment.emailType,
-        };
-        sendEmail("modified-appointment", mailData);
-      }
-
-      candidateSelection.value = "";
-      userID.value = "";
-      platformSelectedID.value = 0;
-      selectedPlatform.value = "";
-      selectedHour.value = "";
-      selectedModality.value = "";
-      linkData.value = "";
-      color.value = "";
-    } else {
-      $q.notify(notifyNegative("Hubo un error al actualizar la cita"));
-      $q.loading.hide();
+      /*Send an Email message */
+      const mailData = {
+        to: email.value,
+        subject: modifiedAppointment.subject,
+        name: name.value,
+        firstText: modifiedAppointment.firstText,
+        date: selectDay.value,
+        hour: selectedHour.value,
+        modality: "Virtual",
+        platformName: selectedPlatform.value,
+        lastText: modifiedAppointment.lastText,
+        link: updatedAppointment.link,
+        emailType: modifiedAppointment.emailType,
+      };
+      sendEmail("modified-appointment", mailData);
     }
-}
+
+    candidateSelection.value = "";
+    userID.value = "";
+    platformSelectedID.value = 0;
+    selectedPlatform.value = "";
+    selectedHour.value = "";
+    selectedModality.value = "";
+    linkData.value = "";
+    color.value = "";
+  } else {
+    $q.notify(notifyNegative("Hubo un error al actualizar la cita"));
+    $q.loading.hide();
+  }
+};
 
 const putPresentialAppointment = async () => {
   $q.loading.show();
-      const appointment = {
-        appointmentId: appointmentId.value,
-        userID: userID.value,
-        linkID: 4,
-        modifiedBy: createdBy.value,
+  const appointment = {
+    appointmentId: appointmentId.value,
+    userID: userID.value,
+    linkID: 4,
+    modifiedBy: createdBy.value,
+    date: selectDay.value,
+    hour: selectedHour.value,
+    modality: "P",
+    color: hex.value,
+  };
+  const request = await putAppointment(appointment);
+
+  if (request != null) {
+    let updatedAppointment = request;
+    const appointmentIndex = events.value
+      .map((event) => {
+        return event.appointmentId;
+      })
+      .indexOf(appointment.appointmentId);
+    events.value[appointmentIndex] = updatedAppointment;
+    $q.notify(notifyPositive("Cita actualizada exitosamente!"));
+    $q.loading.hide();
+    confirm.value = false;
+
+    if (
+      updatedAppointment.linkID != comparativeAppointment.linkID ||
+      updatedAppointment.date != comparativeAppointment.date ||
+      updatedAppointment.hour != comparativeAppointment.hour
+    ) {
+      console.log(
+        "DATOS DE LA ACTUALIZACIÓN: ",
+        updatedAppointment.linkID +
+          " " +
+          comparativeAppointment.linkID +
+          " " +
+          updatedAppointment.date +
+          " " +
+          comparativeAppointment.date +
+          " " +
+          updatedAppointment.hour +
+          " " +
+          comparativeAppointment.hour
+      );
+
+      /*Send a WhatsApp Message */
+      const data = {
+        phoneNumber: phoneNumber.value,
+        name: name.value,
         date: selectDay.value,
         hour: selectedHour.value,
-        modality: "P",
-        color: hex.value,
+        supportEmail: "reclutamiento@turbomaquinas.com",
       };
-      const request = await putAppointment(appointment);
+      sendWhatsAppMessage("presential/change", data);
 
-    if (request != null) {
-        let updatedAppointment = request;
-        const appointmentIndex = events.value
-          .map((event) => {
-            return event.appointmentId;
-          })
-          .indexOf(appointment.appointmentId);
-        events.value[appointmentIndex] = updatedAppointment;
-        $q.notify(notifyPositive("Cita actualizada exitosamente!"));
-        $q.loading.hide();
-        confirm.value = false;
-
-        if (
-          updatedAppointment.linkID != comparativeAppointment.linkID ||
-          updatedAppointment.date != comparativeAppointment.date ||
-          updatedAppointment.hour != comparativeAppointment.hour
-        ) {
-          console.log(
-            "DATOS DE LA ACTUALIZACIÓN: ",
-            updatedAppointment.linkID +
-              " " +
-              comparativeAppointment.linkID +
-              " " +
-              updatedAppointment.date +
-              " " +
-              comparativeAppointment.date +
-              " " +
-              updatedAppointment.hour +
-              " " +
-              comparativeAppointment.hour
-          );
-
-          /*Send a WhatsApp Message */
-          const data = {
-            phoneNumber: phoneNumber.value,
-            name: name.value,
-            date: selectDay.value,
-            hour: selectedHour.value,
-            supportEmail: "reclutamiento@turbomaquinas.com",
-          };
-          sendWhatsAppMessage("presential/change", data);
-
-          const mailData = {
-            to: email.value,
-            subject: modifiedAppointment.subject,
-            name: name.value,
-            firstText: modifiedAppointment.firstText,
-            date: selectDay.value,
-            hour: selectedHour.value,
-            modality: "Presencial",
-            platformName: selectedPlatform.value,
-            lastText: modifiedAppointment.lastText,
-            link: updatedAppointment.link,
-            emailType: modifiedAppointment.emailType,
-          };
-          sendEmail("modified-appointment", mailData);
-        }
-        candidateSelection.value = "";
-        userID.value = "";
-        platformSelectedID.value = 0;
-        selectedHour.value = "";
-        selectedModality.value = "";
-        linkData.value = "";
-        color.value = "";
-      }else {
-      $q.notify(notifyNegative("Hubo un error al actualizar la cita"));
-      $q.loading.hide();
-      console.log("error: " + error);
+      const mailData = {
+        to: email.value,
+        subject: modifiedAppointment.subject,
+        name: name.value,
+        firstText: modifiedAppointment.firstText,
+        date: selectDay.value,
+        hour: selectedHour.value,
+        modality: "Presencial",
+        platformName: selectedPlatform.value,
+        lastText: modifiedAppointment.lastText,
+        link: updatedAppointment.link,
+        emailType: modifiedAppointment.emailType,
+      };
+      sendEmail("modified-appointment", mailData);
+    }
+    candidateSelection.value = "";
+    userID.value = "";
+    platformSelectedID.value = 0;
+    selectedHour.value = "";
+    selectedModality.value = "";
+    linkData.value = "";
+    color.value = "";
+  } else {
+    $q.notify(notifyNegative("Hubo un error al actualizar la cita"));
+    $q.loading.hide();
+    console.log("error: " + error);
   }
-}
+};
 
 const updateAppointment = async () => {
   if (selectedModality.value === "Virtual" && checkVariablesToUpdateMethod()) {
     putVirtualApppointment();
   } else if (
-    selectedModality.value === "Presencial" && checkVariablesToUpdateMethod()) {
+    selectedModality.value === "Presencial" &&
+    checkVariablesToUpdateMethod()
+  ) {
     putPresentialAppointment();
 
-  /* Fields exceptions */
+    /* Fields exceptions */
   } else if (candidateSelection.value == "") {
     $q.notify(notifyNegative("Seleccione un candidato"));
   } else if (selectedHour.value == "") {
@@ -1976,7 +2205,7 @@ const updateAppointment = async () => {
   } else if (selectedModality.value == "") {
     $q.notify(notifyNegative("Seleccione una modalidad"));
   }
-  };
+};
 
 const eventsMap = computed(() => {
   console.log("si lo detecta el cambio");
@@ -2001,6 +2230,13 @@ const onCandidateSelection = (data) => {
   photoUUID.value = data.photoUUID;
   email.value = data.email;
   phoneNumber.value = data.celphone;
+  birthday.value = data.birthday;
+  sex.value = data.sex;
+  wishedSalary.value = data.wishedSalary;
+  civilStatus.value = data.civilStatus;
+  city.value = data.city;
+  state.value = data.state;
+  languages.value = data.languages;
 };
 
 const onModalitySelection = (data) => {
@@ -2033,6 +2269,13 @@ const onClickDay = (data) => {
     email.value = "";
     phoneNumber.value = "";
     console.log("DATE 1: ", timestampDate.value);
+    birthday.value = "";
+    sex.value = "";
+    wishedSalary.value = "";
+    civilStatus.value = "";
+    city.value = "";
+    state.value = "";
+    languages.value = "";
   }
 };
 
@@ -2042,6 +2285,7 @@ const closeAppointmentDialog = () => {
 
 const closeShowAppointmentDialog = () => {
   openDialog2.value = false;
+  //in this function we also can clean the variables insted of doing it in the onCLickDay function
 };
 
 const deactivateAppointment = async () => {
@@ -2050,7 +2294,12 @@ const deactivateAppointment = async () => {
     //this both const declarations are used in the database to change the status of the appointment and the status of the candidate
     const candidateStatus = "P";
     const appointmentStatus = "C";
-    const request = await deleteAppointment(candidateStatus, userID.value, appointmentStatus, appointmentId.value);
+    const request = await deleteAppointment(
+      candidateStatus,
+      userID.value,
+      appointmentStatus,
+      appointmentId.value
+    );
 
     if (request === true) {
       const candidateIndex = totalTableRows.value.findIndex(
@@ -2089,7 +2338,9 @@ const deactivateAppointment = async () => {
       sendEmail("canceled-appointment", mailData);
     }
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al eliminar la cita. Intenta de nuevo"));
+    $q.notify(
+      notifyNegative("Hubo un error al eliminar la cita. Intenta de nuevo")
+    );
     $q.loading.hide();
     openDialog2.value = false;
     console.log("error in deactivation: " + error);
@@ -2101,7 +2352,12 @@ const completeAppointment = async () => {
   try {
     const candidateStatus = "E";
     const appointmentStatus = "F";
-    const request = await deleteAppointment(candidateStatus, userID.value, appointmentStatus, appointmentId.value);
+    const request = await deleteAppointment(
+      candidateStatus,
+      userID.value,
+      appointmentStatus,
+      appointmentId.value
+    );
 
     if (request === true) {
       openDialog2.value = false;
@@ -2140,7 +2396,9 @@ const completeAppointment = async () => {
       sendEmail("finished-appointment", mailData);
     }
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al completar la cita. Intenta nuevamente"));
+    $q.notify(
+      notifyNegative("Hubo un error al completar la cita. Intenta nuevamente")
+    );
     $q.loading.hide();
     openDialog2.value = false;
     console.log("error in complete appointmente: " + error);
