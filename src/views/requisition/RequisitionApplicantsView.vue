@@ -109,7 +109,7 @@
           icon="done"
           text-color="white"
           label="Seleccionar"
-          @click.prevent="setSelectedCandidateId(row)"
+          @click.prevent="setSelectedCandidate(row, true)"
         />
         <!-- Aqui esta la variable del backend que sirve como vmodel
         Si se encuentra una mejor manera, adelante -->
@@ -140,20 +140,12 @@
           </q-btn>
 
           <q-btn
-            :class="
-              row.selected === 1
-                ? 'q-ma-lg q-pa-md text-green'
-                : 'q-ma-lg q-pa-md text-black'
-            "
+            class="q-ma-lg q-pa-md text-black"
             style="height: fit-content"
             rounded
-            :icon="row.selected === 1 ? 'done' : 'description'"
-            :label="
-              row.selected === 1
-                ? 'Test Psicometrico enviado'
-                : 'Enviar test psicométrico'
-            "
-            @click.prevent="openPsychTestDataDialog(row)"
+            icon="link"
+            label="Enviar test psicométrico"
+            @click.prevent="setSelectedCandidate(row, false, true)"
           />
         </div>
       </q-td>
@@ -231,56 +223,54 @@
       >
         <q-card-section style="width: 50%">
           <q-btn-dropdown
-                        flat
-                        auto-close
-                        color="white"
-                        text-color="grey-9"
-                        :icon="
-                          selectedPsychTestPlatform === ''
-                            ? 'list'
-                            : selectedPsychTestPlatform === 'Grupo Arhca'
-                            ? 'group'
-                            : 'list'
-                        "
-                        :label="
-                            selectedPsychTestPlatform != ''
-                            ? selectedPsychTestPlatform
-                            : 'plataforma'
-                        "
-                        class="text-weight-regular"
-                        :dropdown-content-class="dropdownContentClass"
-                      >
-                        <q-list>
-                          <q-item
-                            v-for="(item, index) in psychTestPlatforms"
-                            :key="index"
-                            clickable
-                            v-close-popup
-                            @click="selectPsychPlatform(item)"
-                          >
-                            <q-item-section avatar>
-                              <q-avatar
-                                :icon="
-                                  item.psychPlatformName != 'Grupo Arhca'
-                                    ? 'list'
-                                    : 'Google Meet'
-                                "
-                                :color="
-                                  item.psychPlatformName == 'Grupo Arhca'
-                                    ? 'purple-4'
-                                    : 'grey-4'
-                                "
-                                text-color="white"
-                              />
-                            </q-item-section>
-                            <q-item-section>
-                              <q-item-label>{{
-                                item.psychPlatformName
-                              }}</q-item-label>
-                            </q-item-section>
-                          </q-item>
-                        </q-list>
-                      </q-btn-dropdown>
+            flat
+            auto-close
+            color="white"
+            text-color="grey-9"
+            :icon="
+              selectedPsychTestPlatform === ''
+                ? 'list'
+                : selectedPsychTestPlatform === 'Grupo Arhca'
+                ? 'group'
+                : 'list'
+            "
+            :label="
+              selectedPsychTestPlatform != ''
+                ? selectedPsychTestPlatform
+                : 'plataforma'
+            "
+            class="text-weight-regular"
+            :dropdown-content-class="dropdownContentClass"
+          >
+            <q-list>
+              <q-item
+                v-for="(item, index) in psychTestPlatforms"
+                :key="index"
+                clickable
+                v-close-popup
+                @click.prevent="selectPsychPlatform(item)"
+              >
+                <q-item-section avatar>
+                  <q-avatar
+                    :icon="
+                      item.psychPlatformName != 'Grupo Arhca'
+                        ? 'list'
+                        : 'Google Meet'
+                    "
+                    :color="
+                      item.psychPlatformName === 'Grupo Arhca'
+                        ? 'purple-4'
+                        : 'grey-4'
+                    "
+                    text-color="white"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ item.psychPlatformName }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
         </q-card-section>
 
         <q-card-section style="width: 50%">
@@ -318,14 +308,17 @@
           v-close-popup
           class="text-red-8 q-mr-sm"
           style="border-radius: 8px"
+          @click.prevent="resetPsychTestInformation()"
         />
         <q-btn
           flat
           icon="send"
           label="Enviar"
-          class="bg-green-13 text-white"
+          class="text-white"
+          :class="disableSendPsychTestButton ? 'bg-grey-5' : 'bg-green-13'"
           style="border-radius: 8px"
-          @click="sendPsychTestInformation()"
+          @click.prevent="sendPsychTestInformation()"
+          :disable="disableSendPsychTestButton"
         />
       </q-card-actions>
     </q-card>
@@ -333,7 +326,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
@@ -344,6 +337,7 @@ import { useQuasar } from "quasar";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { useRequestUser } from "src/stores/requestUser";
 import { useNotesStore } from "src/stores/notes";
+import { useAuthStore } from "src/stores/auth";
 import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
 import {
@@ -361,11 +355,15 @@ import {
   getPsychometricPlatforms,
 } from "src/services/user";
 import { completeRequisition } from "src/services/requisition";
+import { sendPsychometricTestEmail } from "src/services/mail";
+import { sendPsychTestMessage } from "src/services/whatsApp";
+import { updatePsychTestCredentials } from "src/services/user";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
 const useLocalStorage = useLocalStorageStore();
 const useNotes = useNotesStore();
+const useAuth = useAuthStore();
 const useRequest = useRequestUser();
 const filter = ref("");
 
@@ -376,6 +374,8 @@ const selectedCandidate = ref(0);
 const currentApplicants = ref([]);
 const { numRequisitionDetails, viewAllRequisitions, idRequisitionDetails } =
   storeToRefs(useRequisitionDetails);
+
+const { user } = storeToRefs(useAuth);
 
 const noDataLabel = ref("No hay solicitantes para este puesto...");
 const loading = ref(false);
@@ -414,14 +414,59 @@ const psychTestPlatformId = ref("");
 const psychTestPlatforms = ref([]);
 const psychTestStatus = ref(false);
 
-const sendPsychTestInformation = () => {
-  psychTestStatus.value = !psychTestStatus.value;
+const sendPsychTestInformation = async () => {
+  try {
+    $q.loading.show();
+
+    const updatedPsychCredentials = await updatePsychTestCredentials(
+      userNameForPsychTests.value,
+      passwordForPsychTest.value,
+      psychTestPlatformId.value,
+      selectedCandidate.value.userId
+    );
+
+    if (updatedPsychCredentials) {
+      $q.notify(notifyPositive("Actualizadas credenciales"));
+      const sendedEmail = await sendPsychometricTestEmail(
+        selectedCandidate.value.email,
+        selectedCandidate.value.name,
+        userNameForPsychTests.value,
+        passwordForPsychTest.value
+      );
+
+      if (sendedEmail) {
+        $q.notify(notifyPositive("Enviado correo"));
+        const sendedMessage = await sendPsychTestMessage(
+          selectedCandidate.value.phoneNumber,
+          selectedCandidate.value.name,
+          userNameForPsychTests.value,
+          passwordForPsychTest.value
+        );
+        if (sendedMessage) {
+          $q.notify(notifyPositive("Enviado mensaje"));
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    $q.loading.hide();
+  }
 };
 
-const openPsychTestDataDialog = (row) => {
-  openPsicometricTestDialog.value = !openPsicometricTestDialog.value;
-  console.log("This guy number", row.phoneNumber);
+const resetPsychTestInformation = () => {
+  selectedPsychTestPlatform.value = "";
+  userNameForPsychTests.value = "";
+  passwordForPsychTest.value = "";
 };
+
+const disableSendPsychTestButton = computed(() => {
+  return selectedPsychTestPlatform.value === "" ||
+    userNameForPsychTests.value === "" ||
+    passwordForPsychTest.value === ""
+    ? true
+    : false;
+});
 
 onMounted(() => {
   viewAllRequisitions.value = false;
@@ -433,6 +478,7 @@ onMounted(() => {
 const loadLocalStore = () => {
   const numRequisitionStored = useLocalStorage.load("numRequisitionDetails");
   const idRequisitionStored = useLocalStorage.load("idRequisitionDetails");
+
   if (numRequisitionStored) {
     numRequisitionDetails.value = numRequisitionStored;
   }
@@ -452,29 +498,21 @@ const getPyschPlatformsData = async () => {
   } catch (error) {}
 };
 
-const selectPsychPlatform = (data) =>{
+const selectPsychPlatform = (data) => {
   console.log("PLATFORM: " + data.id);
   selectedPsychTestPlatform.value = data.psychPlatformName;
   psychTestPlatformId.value = data.id;
-}
-
-const updatePyschTestCredentials = async () => {
-  if(selectedPsychTestPlatform.value == '' || userNameForPsychTestPlatform.value == '' || passwordForPsychTest.value == '') {
-    $q.notify(notifyNegative("Debes llenar todos los campos"));
-  }
-  const data = {
-    psychTestStatus: "E", //this E means that the status of the psych test data has been sended to the user
-    userNameForPsychPlatform: userNameForPsychTests.value,
-    userPasswordForPsychPlatform: passwordForPsychTest.value,
-    psychPlatformID: psychTestPlatformId.value,
-    userId: 147,
-  };
 };
 
-const setSelectedCandidateId = (row) => {
+const setSelectedCandidate = (
+  row,
+  openSelectDialog = false,
+  openSendPsychTestDialog = false
+) => {
   selectedCandidate.value = row;
   console.log(selectedCandidate.value);
-  openSelectCandidateDialog.value = true;
+  openSelectCandidateDialog.value = openSelectDialog;
+  openPsicometricTestDialog.value = openSendPsychTestDialog;
 };
 
 const selectCandidateById = async () => {

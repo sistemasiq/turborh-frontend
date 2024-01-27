@@ -1,4 +1,5 @@
 import axios from "axios";
+import { requestSuccessfull } from "src/utils/operations";
 
 export const scheduledAppointment = {
   subject: "Entrevista agendada!",
@@ -72,11 +73,49 @@ export const passwordChange = (to, userName) => {
 
 export const sendEmail = async (type, data) => {
   try {
+
     const mailResponse = await axios.post(`/mail/send/${type}`, data);
-    if (mailResponse.status === 200) {
+    if (requestSuccessfull(mailResponse.status)) {
       return true;
     }
   } catch (error) {
     return false;
   }
 };
+
+export const sendPsychometricTestEmail = async (email, userName, platformUserName, userPassword) => {
+  const data = psychTestSendedTemplate(email, userName, platformUserName, userPassword);
+  try {
+    const request = await axios.post("/mail/send/psychometric-test-data", data)
+
+    if(requestSuccessfull(request.status)){
+      return true;
+    }else{
+      return false;
+    }
+
+  } catch (error) {
+
+  }
+}
+
+const psychTestSendedTemplate = (email, userName, platformUserName, userPassword) => {
+  return {
+    "to": email,
+    "subject": "Realización de la Prueba Psicométrica",
+    "userName": userName,
+    "firstText": "Como acordamos en la entrevista. Aquí tienes la información para realizar tu prueba psicométrica, solo necesitaras el siguiente usuario y contraseña:",
+    "platformUserName": platformUserName,
+    "userPassword": userPassword,
+    "secondText": "Para acceder la plataforma donde realizarás tu prueba psicométrica, solo sigue los siguientes pasos:",
+    "stepOne":"1.- Ingresa a la plataforma dando clic en el botón de ",
+    "stepTwo": "2.- Copia y pega el usuario y contraseña en la pantalla principal dentro de las casillas asignadas.",
+    "stepThree": "3.- Realiza tu registro con los datos personales solicitados.",
+    "complementText": "Y LISTO! Contesta tu evaluación psicométrica siguiendo las instrucciones.",
+    "lastText": "Si tienes alguna duda o algun problema para acceder a tu prueba, escribenos al correo reclutamiento@turbomaquinas.com y con gusto te ayudaremos.",
+    "link": "http://201.161.74.228/sidesiseph",
+    "btnText": "Comenzar prueba",
+    "emailSupport": "reclutamiento@turbomaquinas.com"
+
+  }
+}
