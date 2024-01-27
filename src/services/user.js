@@ -156,3 +156,17 @@ export const getUserEmail = async (userName) => {
   }
 
 }
+
+export const getPsychometricPlatforms = async () => {
+  try {
+    const request = await axios.get(`api/pysch-platforms`);
+
+    if(requestSuccessfull(request.status)){
+      console.log("request psych platform data: ",request.data)
+      return request.data;
+    }
+  } catch (error) {
+    console.log("Something went wrong while getting the psychometric platforms data: " + error)
+    return null;
+  }
+}

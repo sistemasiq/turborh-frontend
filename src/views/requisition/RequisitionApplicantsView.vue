@@ -81,6 +81,7 @@
         >
           <Tooltip :text="'Descargar currículum'" />
         </q-btn>
+
         <q-btn
           v-if="row.psychometricTest"
           class="q-ml-lg"
@@ -111,7 +112,7 @@
           @click.prevent="setSelectedCandidateId(row)"
         />
         <!-- Aqui esta la variable del backend que sirve como vmodel
-        Si se encuentra una mejor manera adelante xd -->
+        Si se encuentra una mejor manera, adelante -->
         <div class="row">
           <q-file
             style="max-width: 420px"
@@ -131,12 +132,29 @@
           <q-btn
             v-if="row.psychometricTestSelected"
             rounded
-            class="q-ml-lg q-mt-lg"
+            class="q-ma-sm"
             icon="upload"
             label="Subir prueba psicometríca"
             @click.prevent="uploadPsicometricTest(row)"
           >
           </q-btn>
+
+          <q-btn
+            :class="
+              row.selected === 1
+                ? 'q-ma-lg q-pa-md text-green'
+                : 'q-ma-lg q-pa-md text-black'
+            "
+            style="height: fit-content"
+            rounded
+            :icon="row.selected === 1 ? 'done' : 'description'"
+            :label="
+              row.selected === 1
+                ? 'Test Psicometrico enviado'
+                : 'Enviar test psicométrico'
+            "
+            @click.prevent="openPsychTestDataDialog(row)"
+          />
         </div>
       </q-td>
     </template>
@@ -197,6 +215,121 @@
       </object>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="openPsicometricTestDialog">
+    <q-card>
+      <q-card-section>
+        <div class="text-h6">Enviar test psicometrico</div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section
+        style="width: 550px; max-width: 90vw; max-height: 50vh"
+        class="justify-between"
+        horizontal
+      >
+        <q-card-section style="width: 50%">
+          <q-btn-dropdown
+                        flat
+                        auto-close
+                        color="white"
+                        text-color="grey-9"
+                        :icon="
+                          selectedPsychTestPlatform === ''
+                            ? 'list'
+                            : selectedPsychTestPlatform === 'Grupo Arhca'
+                            ? 'group'
+                            : 'list'
+                        "
+                        :label="
+                            selectedPsychTestPlatform != ''
+                            ? selectedPsychTestPlatform
+                            : 'plataforma'
+                        "
+                        class="text-weight-regular"
+                        :dropdown-content-class="dropdownContentClass"
+                      >
+                        <q-list>
+                          <q-item
+                            v-for="(item, index) in psychTestPlatforms"
+                            :key="index"
+                            clickable
+                            v-close-popup
+                            @click="selectPsychPlatform(item)"
+                          >
+                            <q-item-section avatar>
+                              <q-avatar
+                                :icon="
+                                  item.psychPlatformName != 'Grupo Arhca'
+                                    ? 'list'
+                                    : 'Google Meet'
+                                "
+                                :color="
+                                  item.psychPlatformName == 'Grupo Arhca'
+                                    ? 'purple-4'
+                                    : 'grey-4'
+                                "
+                                text-color="white"
+                              />
+                            </q-item-section>
+                            <q-item-section>
+                              <q-item-label>{{
+                                item.psychPlatformName
+                              }}</q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </q-list>
+                      </q-btn-dropdown>
+        </q-card-section>
+
+        <q-card-section style="width: 50%">
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="userNameForPsychTests"
+            label="Nombre"
+            label-color="black"
+            lazy-rules
+            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
+            style="width: 100%"
+          />
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="passwordForPsychTest"
+            label="Contraseña"
+            label-color="black"
+            lazy-rules
+            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
+            style="width: 100%"
+          />
+        </q-card-section>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-actions class="justify-end q-pa-md">
+        <q-btn
+          flat
+          label="Cancelar"
+          v-close-popup
+          class="text-red-8 q-mr-sm"
+          style="border-radius: 8px"
+        />
+        <q-btn
+          flat
+          icon="send"
+          label="Enviar"
+          class="bg-green-13 text-white"
+          style="border-radius: 8px"
+          @click="sendPsychTestInformation()"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
@@ -223,7 +356,10 @@ import {
   getUserApplicationById,
   getUserApplicationNotesById,
 } from "src/services/userApplication";
-import { updateUserPsychometricTest } from "src/services/user";
+import {
+  updateUserPsychometricTest,
+  getPsychometricPlatforms,
+} from "src/services/user";
 import { completeRequisition } from "src/services/requisition";
 
 const $q = useQuasar();
@@ -238,9 +374,8 @@ const openSelectCandidateDialog = ref(false);
 const selectedCandidate = ref(0);
 
 const currentApplicants = ref([]);
-const { numRequisitionDetails, viewAllRequisitions, idRequisitionDetails } = storeToRefs(
-  useRequisitionDetails
-);
+const { numRequisitionDetails, viewAllRequisitions, idRequisitionDetails } =
+  storeToRefs(useRequisitionDetails);
 
 const noDataLabel = ref("No hay solicitantes para este puesto...");
 const loading = ref(false);
@@ -270,11 +405,29 @@ const resumeSrc = ref("");
 const resumeViewLink = ref(resumeSrc.value);
 const showResume = ref(false);
 
+const dropdownContentClass = "flexible-width";
+const openPsicometricTestDialog = ref(false);
+const userNameForPsychTests = ref("");
+const passwordForPsychTest = ref("");
+const selectedPsychTestPlatform = ref("");
+const psychTestPlatformId = ref("");
+const psychTestPlatforms = ref([]);
+const psychTestStatus = ref(false);
+
+const sendPsychTestInformation = () => {
+  psychTestStatus.value = !psychTestStatus.value;
+};
+
+const openPsychTestDataDialog = (row) => {
+  openPsicometricTestDialog.value = !openPsicometricTestDialog.value;
+  console.log("This guy number", row.phoneNumber);
+};
 
 onMounted(() => {
   viewAllRequisitions.value = false;
   loadLocalStore();
   fetchApplicants();
+  getPyschPlatformsData();
 });
 
 const loadLocalStore = () => {
@@ -284,9 +437,38 @@ const loadLocalStore = () => {
     numRequisitionDetails.value = numRequisitionStored;
   }
 
-  if(idRequisitionStored){
+  if (idRequisitionStored) {
     idRequisitionDetails.value = idRequisitionStored;
   }
+};
+
+const getPyschPlatformsData = async () => {
+  try {
+    const request = await getPsychometricPlatforms();
+    if (request) {
+      psychTestPlatforms.value = request;
+      console.log("Psychometric platforms data", psychTestPlatforms.value);
+    }
+  } catch (error) {}
+};
+
+const selectPsychPlatform = (data) =>{
+  console.log("PLATFORM: " + data.id);
+  selectedPsychTestPlatform.value = data.psychPlatformName;
+  psychTestPlatformId.value = data.id;
+}
+
+const updatePyschTestCredentials = async () => {
+  if(selectedPsychTestPlatform.value == '' || userNameForPsychTestPlatform.value == '' || passwordForPsychTest.value == '') {
+    $q.notify(notifyNegative("Debes llenar todos los campos"));
+  }
+  const data = {
+    psychTestStatus: "E", //this E means that the status of the psych test data has been sended to the user
+    userNameForPsychPlatform: userNameForPsychTests.value,
+    userPasswordForPsychPlatform: passwordForPsychTest.value,
+    psychPlatformID: psychTestPlatformId.value,
+    userId: 147,
+  };
 };
 
 const setSelectedCandidateId = (row) => {
@@ -307,9 +489,11 @@ const selectCandidateById = async () => {
       selectedCandidate.value.selected = 1;
       updateRow(selectedCandidate.value);
       const completed = await completeRequisition(numRequisitionDetails.value);
-      console.log("Is requisition completed "+completed);
-      if(completed){
-        $q.notify(notifyPositive("Se han llenado las vacantes para este puesto"));
+      console.log("Is requisition completed " + completed);
+      if (completed) {
+        $q.notify(
+          notifyPositive("Se han llenado las vacantes para este puesto")
+        );
       }
       console.log("CANDIDATE HAS BEEN SELECTED");
     }
@@ -352,12 +536,11 @@ const downloadDocument = async (uuid) => {
     if (fileDownloaded) {
       resumeSrc.value = fileDownloaded;
       showResume.value = true;
-      $q.notify(notifyPositive(`Archivo descargado exitosamente`));
     } else {
       $q.notify(notifyNegative("El archivo solicitado no existe "));
     }
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al descargar el archivo "));
+    $q.notify(notifyNegative("Hubo un error al obtener el archivo "));
   } finally {
     $q.loading.hide();
   }
@@ -405,7 +588,6 @@ const updateRow = (row) => {
     }
   });
 };
-
 
 const createReport = async (applicationId) => {
   try {
@@ -483,8 +665,7 @@ const columns = [
     required: true,
     field: (row) => (row.selected === 1 ? "Candidato Seleccionado" : ""),
     align: "left",
-    classes: (row) =>
-      row.selected === 1 ? "bg-green-3" : "",
+    classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
   {
     name: "applicantPhoto",
@@ -500,8 +681,7 @@ const columns = [
     align: "left",
     field: (row) =>
       row.name + " " + row.firstLastName + " " + row.secondLastName,
-    classes: (row) =>
-      row.selected === 1 ? "bg-green-3" : "",
+    classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
   {
     name: "applicantGender",
@@ -509,8 +689,7 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => gendersParsed[row.gender],
-    classes: (row) =>
-      row.selected === 1 ? "bg-green-3" : "",
+    classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
   {
     name: "applicantAge",
@@ -518,8 +697,7 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => getAge(row.birthDate) + " años",
-    classes: (row) =>
-      row.selected === 1 ? "bg-green-3" : "",
+    classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
   {
     name: "wishedSalary",
@@ -527,8 +705,7 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => row.wishedSalary + " MXN",
-    classes: (row) =>
-      row.selected === 1 ? "bg-green-3" : "",
+    classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
   {
     name: "jobName",
@@ -536,8 +713,7 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => row.jobName,
-    classes: (row) =>
-      row.selected === 1 ? "bg-green-3" : "",
+    classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
   {
     name: "dateCreated",
@@ -546,8 +722,7 @@ const columns = [
     align: "left",
     field: (row) => row.dateCreated,
     sortable: true,
-    classes: (row) =>
-      row.selected === 1 ? "bg-green-3" : "",
+    classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
   {
     name: "options",
@@ -555,7 +730,6 @@ const columns = [
     required: true,
     align: "center",
     field: "options",
-
   },
 ];
 </script>
