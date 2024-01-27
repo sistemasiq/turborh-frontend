@@ -426,7 +426,7 @@ const sendPsychTestInformation = async () => {
     );
 
     if (updatedPsychCredentials) {
-      $q.notify(notifyPositive("Actualizadas credenciales"));
+      $q.loading.hide();
       const sendedEmail = await sendPsychometricTestEmail(
         selectedCandidate.value.email,
         selectedCandidate.value.name,
@@ -435,7 +435,6 @@ const sendPsychTestInformation = async () => {
       );
 
       if (sendedEmail) {
-        $q.notify(notifyPositive("Enviado correo"));
         const sendedMessage = await sendPsychTestMessage(
           selectedCandidate.value.phoneNumber,
           selectedCandidate.value.name,
@@ -443,15 +442,13 @@ const sendPsychTestInformation = async () => {
           passwordForPsychTest.value
         );
         if (sendedMessage) {
-          $q.notify(notifyPositive("Enviado mensaje"));
+          $q.notify(notifyPositive("Enviada prueba psicométrica correctamente"));
         }
       }
     }
   } catch (error) {
     console.log(error);
-  } finally {
-    $q.loading.hide();
-  }
+  } 
 };
 
 const resetPsychTestInformation = () => {
