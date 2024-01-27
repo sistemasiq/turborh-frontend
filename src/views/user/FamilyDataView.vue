@@ -9,8 +9,8 @@
 
           <q-card flat bordered text-color="white"
   class="q-mb-lg"
-  style="margin-left: 0%; border-color: green; 
-  background-color: transparent; color: white; width: 975px;"
+  style="margin-left: 0%; border-color: rgb(255, 248, 43);
+  background-color: transparent; color: white; width: 100%;"
   v-if="!viewingApplication"
 >
   <q-card-section>

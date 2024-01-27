@@ -427,6 +427,7 @@ const sendPsychTestInformation = async () => {
 
     if (updatedPsychCredentials) {
       $q.loading.hide();
+      openPsicometricTestDialog.value = !openPsicometricTestDialog.value
       const sendedEmail = await sendPsychometricTestEmail(
         selectedCandidate.value.email,
         selectedCandidate.value.name,
@@ -448,7 +449,7 @@ const sendPsychTestInformation = async () => {
     }
   } catch (error) {
     console.log(error);
-  } 
+  }
 };
 
 const resetPsychTestInformation = () => {
