@@ -1,31 +1,87 @@
 <template>
   <q-layout style="background-color: rgb(30, 61, 88)">
     <q-card flat bordered class="rounded-borders">
-      <q-card-section class="title"> Experiencia Laboral </q-card-section>
+      <q-card-section class="title"> Términos y condiciones </q-card-section>
 
       <q-card-section>
         <PaginationApplication :page="12"></PaginationApplication>
-        <div style="margin-top: 6%">
-          hi
-        </div>
       </q-card-section>
-      <q-card-section
-        :style="{ 'margin-right': !updatingApplication ? '40%' : '0%' }"
-      >
+      <q-card-section class="q-ma-xl center">
+        <q-btn
+          color="cyan-5"
+          icon="policy"
+          label="VER LOS TERMINOS Y CONDICIONES"
+          @click.prevent="createReport()"
+        />
+        <q-card-actions>
+          <q-checkbox
+            class="text-white q-mt-xl"
+            keep-color
+            color="cyan"
+            :disable="!seeOnce"
+            v-model="accept"
+            label="Estoy de acuerdo con los términos y condiciones."
+          >
+          <Tooltip v-if="!seeOnce" :text="'Debes ver primero los términos y condiciones.'" />
+        </q-checkbox>
+        </q-card-actions>
       </q-card-section>
     </q-card>
 
+    <ButtonApplicationStatus v-if="accept" />
+    <q-dialog maximized v-model="showReport">
+      <q-card class="no-scroll">
+        <q-card-actions class="bg-white" align="right">
+          <q-btn flat icon="close" label="Cerrar" color="red" v-close-popup />
+        </q-card-actions>
+        <object
+          height="100%v"
+          width="100%"
+          v-if="reportSrc.length > 0"
+          :data="reportSrc"
+          type="application/pdf"
+        >
+          <iframe :src="reportViewLink"></iframe>
+        </object>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
 <script setup>
-import LaboralExperienceData from "src/components/LaboralExperienceData.vue";
+import { ref } from "vue";
+import Tooltip from "src/components/Tooltip.vue";
+import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
 import PaginationApplication from "src/components/PaginationApplication.vue";
-import { useRequestUser } from "src/stores/requestUser";
-import { storeToRefs } from "pinia";
+import { useQuasar } from "quasar";
+import { createLegalTermsReport } from "src/services/report";
 
-const useApplication = useRequestUser();
-const { updatingApplication } = storeToRefs(useApplication);
+const accept = ref(false);
+const $q = useQuasar();
+
+const showReport = ref(false);
+const reportSrc = ref("");
+const reportViewLink = ref(reportSrc.value);
+
+const seeOnce = ref(false);
+
+
+const createReport = async () => {
+  try {
+    $q.loading.show({ message: "Abriendo los términos y condiciones..." });
+
+    const report = await createLegalTermsReport();
+    if (report) {
+      reportSrc.value = report;
+      showReport.value = true;
+      seeOnce.value = true;
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    $q.loading.hide();
+  }
+};
 </script>
 
 <style scoped>

@@ -29,7 +29,7 @@
             <CommercialReferences class="table-position" />
           </q-card-section>
         </q-card>
-        <ButtonApplicationStatus/>   
+        <ButtonApplicationStatus v-if="updatingApplication"/>
   </q-layout>
 </template>
 

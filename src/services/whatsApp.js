@@ -1,4 +1,5 @@
 import axios from "axios";
+import { requestSuccessfull } from "src/utils/operations";
 
 export const presentialAppointmentData = (phoneNumber, name, date, hour) => {
   const data = {
@@ -56,6 +57,30 @@ export const sendWhatsAppMessage = async (type, data) => {
     return false;
   }
 };
+
+export const sendPsychTestMessage= async (phoneNumber, userName, platformUserName, userPassword) => {
+
+  const data = psychTestSendedTemplate(phoneNumber, userName, platformUserName, userPassword);
+  try {
+    const request = await axios.post(`/api/whatsapp/sender/psych-test-data`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+};
+
+const psychTestSendedTemplate = (phoneNumber, userName, platformUserName, userPassword) => {
+  return {
+    "phoneNumber": phoneNumber,
+    "userName": userName,
+    "platformUserName": platformUserName,
+    "userPassword": userPassword,
+    "emailSupport": "reclutamiento@turbomaquinas.com"
+
+  }
+}
 
 /*
 export const sendMessage = async (data) => {

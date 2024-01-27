@@ -39,7 +39,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const getUserPhotoUUID = computed(() => {
     if (user.value) {
-      return user.value.photoUUID;
+      return user.value.photoUUID === '' || user.value.photoUUID === null || user.value.photoUUID === undefined ? 'default.png' : user.value.photoUUID;
     }
   });
 

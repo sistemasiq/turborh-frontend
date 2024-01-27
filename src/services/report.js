@@ -46,3 +46,25 @@ export const createUserApplicationReport = async (
     return null;
   }
 };
+
+export const createLegalTermsReport = async () => {
+
+  try {
+    const request = await axios.get(
+      `reports/legal-terms`,
+      {
+        responseType: "arraybuffer",
+      }
+    );
+
+    if (requestSuccessfull(request.status)) {
+      const blob = new Blob([request.data], { type: "application/pdf" });
+      return URL.createObjectURL(blob);
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+};

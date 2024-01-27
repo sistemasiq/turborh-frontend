@@ -464,7 +464,7 @@ const stateChangeNotifyText = {
 
 const addSignsToReport = (row) => {
 
-  return row.state === 'AC' || row.state === 'P'
+  return row.state === 'AC' || row.state === 'P' || row.state === 'PC'
 
 }
 

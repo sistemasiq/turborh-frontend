@@ -40,7 +40,7 @@
             >
             </q-btn>
 
-            <q-dialog v-model="fixed">
+            <q-dialog v-model="fixed" class="z-max">
               <q-card class="q-ml-xl text-center">
                 <q-card-section>
                   <div class="text-h5">Selección de imagen de perfil</div>
@@ -103,13 +103,22 @@
             <p v-if="specialization !== ''" class="text-h6">
               Especialidad: {{ specialization }}
             </p>
-            <p v-if="age !== '' && age !== 0" class="text-h6">Edad: {{ age }}</p>
+            <p v-if="age !== '' && age !== 0" class="text-h6">
+              Edad: {{ age }}
+            </p>
           </q-card-section>
         </div>
 
         <div class="row" style="margin-left: 30px; margin-top: 10px">
-          <p v-if="userApplicationId === 0" class="text-h4 q-ml-xl text-grey-8 text-weight-bold"> Sube tu foto para poder crear tu solicitud de trabajo.</p>
-          <ApplicationsCard v-if="userApplicationId != 0"/>
+          <p
+            v-if="
+              photoUUID === null || photoUUID === undefined || photoUUID === ''
+            "
+            class="text-h4 q-ml-xl text-grey-8 text-weight-bold"
+          >
+            Sube tu foto para poder crear tu solicitud de trabajo.
+          </p>
+          <ApplicationsCard v-if="userApplicationId != 0" />
         </div>
       </q-page>
     </q-page-container>
@@ -135,7 +144,7 @@ const useAuth = useAuthStore();
 const selectedImage = ref();
 const newImage = ref();
 
-const { user } = storeToRefs(useAuth);
+const { user, getUserPhotoUUID } = storeToRefs(useAuth);
 const { savedApplication } = storeToRefs(useRequest);
 
 const fixed = ref(false);
@@ -156,8 +165,7 @@ onMounted(() => {
 });
 
 const updateSelectedImageURL = () => {
-
-  if(!selectedImage.value){
+  if (!selectedImage.value) {
     selectedImageURL.value = "";
     return;
   }
@@ -175,7 +183,7 @@ const getUserImage = computed(() => {
   ) {
     return getS3FileUrl(getUserImagesPath, "default.png");
   } else {
-    return getS3FileUrl(getUserImagesPath, photoUUID.value);
+    return getS3FileUrl(getUserImagesPath, getUserPhotoUUID.value);
   }
 });
 
@@ -246,7 +254,7 @@ const uploadImage = async () => {
       newFileName = await uploadFile(selectedImage.value, getUserImagesPath);
     }
     if (newFileName) {
-      selectedImageURL.value = ""
+      selectedImageURL.value = "";
       fixed.value = false;
       await updateUserImageInDatabase(newFileName);
     }

@@ -121,6 +121,23 @@
       </object>
     </q-card>
   </q-dialog>
+
+  <q-dialog maximized v-model="showResume">
+    <q-card class="no-scroll">
+      <q-card-actions align="right">
+        <q-btn flat label="Cerrar" color="red" v-close-popup />
+      </q-card-actions>
+      <object
+        height="100%"
+        width="100%"
+        v-if="resumeSrc.length > 0"
+        :data="resumeSrc"
+        type="application/pdf"
+      >
+        <iframe :src="resumeViewLink"></iframe>
+      </object>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
@@ -181,6 +198,11 @@ const reportViewLink = ref(reportSrc.value);
 const showReport = ref(false);
 const createReportWithNotes = ref(false);
 
+const resumeSrc = ref("");
+const resumeViewLink = ref(resumeSrc.value);
+const showResume = ref(false);
+
+
 onMounted(() => {
   viewAllRequisitions.value = true;
   fetchApplicants();
@@ -213,12 +235,13 @@ const downloadDocument = async (uuid) => {
     $q.loading.show();
     const fileDownloaded = await downloadFile(uuid, getUserDocumentsPath);
     if (fileDownloaded) {
-      $q.notify(notifyPositive(`Archivo descargado exitosamente`));
+      resumeSrc.value = fileDownloaded;
+      showResume.value = true;
     } else {
       $q.notify(notifyNegative("El archivo solicitado no existe "));
     }
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al descargar el archivo "));
+    $q.notify(notifyNegative("Hubo un error al obtener el archivo "));
   } finally {
     $q.loading.hide();
   }
