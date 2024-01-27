@@ -4,13 +4,33 @@
       <q-card-section class="title"> Datos familiares </q-card-section>
       <q-card-section>
         <PaginationApplication :page="6" :required-fields="requiredFieldsOnThisPage"></PaginationApplication>
+
+        <div style="margin-top: 6%">
+
+          <q-card flat bordered text-color="white"
+  class="q-mb-lg"
+  style="margin-left: 0%; border-color: green; 
+  background-color: transparent; color: white; width: 975px;"
+  v-if="!viewingApplication"
+>
+  <q-card-section>
+    <div class="text-body1 text-weight-medium row">
+      <q-icon name="warning" class="q-mr-md q-mt-xs" />
+      Nota
+    </div>
+    <p class="text-body2">
+     Debe ingresar al menos 2 familiares para poder avanzar a la siguiente pantalla
+    </p>
+  </q-card-section>
+</q-card>
+
+</div>
         <p
           style="
             font-size: 130%;
             color: rgb(255, 255, 255);
             padding-left: 4%;
             padding-top: 2%;
-            margin-top: 2%;
           "
         >
           Datos de Padres y Esposa(o)
