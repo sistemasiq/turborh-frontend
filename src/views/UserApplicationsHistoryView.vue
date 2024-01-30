@@ -91,6 +91,14 @@
         >
           <Tooltip :text="'Descargar prueba psicometríca'" />
         </q-btn>
+        <q-btn
+            class="q-ma-lg q-pa-md text-black"
+            style="height: fit-content"
+            rounded
+            icon="link"
+            label="Enviar test psicométrico"
+            @click.prevent="setSelectedUser(row, false, true)"
+          />
 
         <q-btn
           class="q-ml-lg"
@@ -101,6 +109,7 @@
           label="Añadir notas"
           @click.prevent="addNotes(row.solicitud_id)"
         />
+
       </q-td>
     </template>
   </q-table>
@@ -138,10 +147,126 @@
       </object>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="openPsicometricTestDialog">
+    <q-card>
+      <q-card-section>
+        <div class="text-h6">Enviar test psicometrico</div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section
+        style="width: 550px; max-width: 90vw; max-height: 50vh"
+        class="justify-between"
+        horizontal
+      >
+        <q-card-section style="width: 50%">
+          <q-btn-dropdown
+            flat
+            auto-close
+            color="white"
+            text-color="grey-9"
+            :icon="
+              selectedPsychTestPlatform === ''
+                ? 'list'
+                : selectedPsychTestPlatform === 'Grupo Arhca'
+                ? 'group'
+                : 'list'
+            "
+            :label="
+              selectedPsychTestPlatform != ''
+                ? selectedPsychTestPlatform
+                : 'plataforma'
+            "
+            class="text-weight-regular"
+            :dropdown-content-class="dropdownContentClass"
+          >
+            <q-list>
+              <q-item
+                v-for="(item, index) in psychTestPlatforms"
+                :key="index"
+                clickable
+                v-close-popup
+                @click.prevent="selectPsychPlatform(item)"
+              >
+                <q-item-section avatar>
+                  <q-avatar
+                    :icon="
+                      item.psychPlatformName != 'Grupo Arhca'
+                        ? 'list'
+                        : 'Google Meet'
+                    "
+                    :color="
+                      item.psychPlatformName === 'Grupo Arhca'
+                        ? 'purple-4'
+                        : 'grey-4'
+                    "
+                    text-color="white"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ item.psychPlatformName }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+        </q-card-section>
+
+        <q-card-section style="width: 50%">
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="userNameForPsychTests"
+            label="Nombre"
+            label-color="black"
+            lazy-rules
+            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
+            style="width: 100%"
+          />
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="passwordForPsychTest"
+            label="Contraseña"
+            label-color="black"
+            lazy-rules
+            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
+            style="width: 100%"
+          />
+        </q-card-section>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-actions class="justify-end q-pa-md">
+        <q-btn
+          flat
+          label="Cancelar"
+          v-close-popup
+          class="text-red-8 q-mr-sm"
+          style="border-radius: 8px"
+          @click.prevent="resetPsychTestInformation()"
+        />
+        <q-btn
+          flat
+          icon="send"
+          label="Enviar"
+          class="text-white"
+          :class="disableSendPsychTestButton ? 'bg-grey-5' : 'bg-green-13'"
+          style="border-radius: 8px"
+          @click.prevent="sendPsychTestInformation()"
+          :disable="disableSendPsychTestButton"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
@@ -161,7 +286,9 @@ import {
   getUserApplicationNotesById,
   getAllUserApplications
 } from "src/services/userApplication";
-
+import { sendPsychTestMessage } from "src/services/whatsApp";
+import { sendPsychometricTestEmail } from "src/services/mail";
+import { updatePsychTestCredentials, getPsychometricPlatforms } from "src/services/user";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -202,17 +329,102 @@ const resumeSrc = ref("");
 const resumeViewLink = ref(resumeSrc.value);
 const showResume = ref(false);
 
+const selectedUser = ref();
+const openPsicometricTestDialog = ref(false)
+const dropdownContentClass = "flexible-width";
+const selectedPsychTestPlatform = ref("");
+const userNameForPsychTests = ref("")
+const passwordForPsychTest = ref("")
+const psychTestPlatforms = ref([]);
+const psychTestPlatformId = ref(0)
 
 onMounted(() => {
   viewAllRequisitions.value = true;
   fetchApplicants();
+  getPsychometricPlatformsData();
 });
+
+const getPsychometricPlatformsData = async () => {
+  try {
+    const request = await getPsychometricPlatforms();
+    if (request) {
+      psychTestPlatforms.value = request;
+    }
+  } catch (error) {}
+};
 
 const gendersParsed = {
   F:"Femenino",
   M:"Masculino",
   O:"Otro"
 }
+
+const selectPsychPlatform = (data) => {
+  console.log("PLATFORM: " + data.id);
+  selectedPsychTestPlatform.value = data.psychPlatformName;
+  psychTestPlatformId.value = data.id;
+};
+
+const setSelectedUser = (
+  row
+) => {
+  selectedUser.value = row;
+  console.log(selectedUser.value)
+  openPsicometricTestDialog.value = true;
+};
+
+const resetPsychTestInformation = () => {
+  selectedPsychTestPlatform.value = "";
+  userNameForPsychTests.value = "";
+  passwordForPsychTest.value = "";
+};
+
+const disableSendPsychTestButton = computed(() => {
+  return selectedPsychTestPlatform.value === "" ||
+    userNameForPsychTests.value === "" ||
+    passwordForPsychTest.value === ""
+    ? true
+    : false;
+});
+
+const sendPsychTestInformation = async () => {
+  try {
+    $q.loading.show();
+
+    const updatedPsychCredentials = await updatePsychTestCredentials(
+      userNameForPsychTests.value,
+      passwordForPsychTest.value,
+      psychTestPlatformId.value,
+      selectedUser.value.userId
+    );
+
+    if (updatedPsychCredentials) {
+      const sendedEmail = await sendPsychometricTestEmail(
+        selectedUser.value.email,
+        selectedUser.value.nombre,
+        userNameForPsychTests.value,
+        passwordForPsychTest.value
+      );
+
+      if (sendedEmail) {
+        const sendedMessage = await sendPsychTestMessage(
+          selectedUser.value.telefono,
+          selectedUser.value.nombre,
+          userNameForPsychTests.value,
+          passwordForPsychTest.value
+        );
+        if (sendedMessage) {
+          $q.notify(notifyPositive("Enviada prueba psicométrica correctamente"));
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    openPsicometricTestDialog.value = false;
+    $q.loading.hide();
+  }
+};
 
 const fetchApplicants = async () => {
   try {
