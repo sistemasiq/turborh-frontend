@@ -412,7 +412,7 @@ const passwordForPsychTest = ref("");
 const selectedPsychTestPlatform = ref("");
 const psychTestPlatformId = ref("");
 const psychTestPlatforms = ref([]);
-const psychTestStatus = ref(false);
+
 
 const sendPsychTestInformation = async () => {
   try {
@@ -426,8 +426,6 @@ const sendPsychTestInformation = async () => {
     );
 
     if (updatedPsychCredentials) {
-      $q.loading.hide();
-      openPsicometricTestDialog.value = !openPsicometricTestDialog.value
       const sendedEmail = await sendPsychometricTestEmail(
         selectedCandidate.value.email,
         selectedCandidate.value.name,
@@ -449,6 +447,9 @@ const sendPsychTestInformation = async () => {
     }
   } catch (error) {
     console.log(error);
+  } finally {
+    openPsicometricTestDialog.value = false;
+    $q.loading.hide();
   }
 };
 

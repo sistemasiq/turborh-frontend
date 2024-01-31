@@ -64,7 +64,7 @@
               class="q-mb-lg drawer-button"
               icon="description"
               :style="!userHasApplication ? '' : 'visibility:hidden'"
-              :disable="userHasApplication || !getUserPhotoUUID"
+              :disable="userHasApplication || getUserPhotoUUID === 'default.png'"
             >
               <Tooltip
                 v-if="!userHasApplication"

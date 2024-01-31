@@ -1,7 +1,7 @@
 <template>
   <q-layout style="background-color: rgb(30, 61, 88)">
     <q-card flat bordered class="rounded-borders">
-      <q-card-section class="title"> Términos y condiciones </q-card-section>
+      <q-card-section class="title"> Aviso de privacidad </q-card-section>
 
       <q-card-section>
         <PaginationApplication :page="12"></PaginationApplication>
@@ -10,7 +10,7 @@
         <q-btn
           color="cyan-5"
           icon="policy"
-          label="VER LOS TERMINOS Y CONDICIONES"
+          label="VER EL AVISO DE PRIVACIDAD"
           @click.prevent="createReport()"
         />
         <q-card-actions>
@@ -20,9 +20,9 @@
             color="cyan"
             :disable="!seeOnce"
             v-model="accept"
-            label="Estoy de acuerdo con los términos y condiciones."
+            label="Estoy de acuerdo con el aviso de privacidad."
           >
-          <Tooltip v-if="!seeOnce" :text="'Debes ver primero los términos y condiciones.'" />
+          <Tooltip v-if="!seeOnce" :text="'Debes ver primero el aviso de privacidad.'" />
         </q-checkbox>
         </q-card-actions>
       </q-card-section>

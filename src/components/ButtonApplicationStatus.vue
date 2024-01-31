@@ -69,7 +69,6 @@ const router = useRouter();
 const useAuth = useAuthStore();
 const useApplication = useRequestUser();
 const $q = useQuasar();
-const disable = ref(false);
 
 const props = defineProps(["disable"])
 

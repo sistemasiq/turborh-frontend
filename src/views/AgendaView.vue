@@ -936,88 +936,248 @@
               <q-card-section horizontal style="height: 100%">
                 <div class="q-ma-md" v-if="!updateSelection">
                   <q-img
-                      style="width: 130px; height: 130px; border-radius: 20%"
-                      :src="getUserImage"
-                    />
+                    style="width: 150px; height: 150px; border-radius: 10%"
+                    :src="getUserImage"
+                  />
                 </div>
-                <q-card-actions vertical style="width:100%">
+                <q-card-actions vertical style="width: 100%">
+                  <div
+                    class="q-mt-sm q-mb-sm self-center text-blue-grey-8 text-body1"
+                  >
+                    Profesional
+                    <q-separator color="blue-5" />
+                  </div>
                   <div class="row justify-between q-ma-md">
+                    <q-btn-dropdown
+                      flat
+                      auto-close
+                      color="white"
+                      :text-color="studyLevel != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6'
+                        "
+                      :icon="updateSelection != true
+                      ? 'visibility'
+                      : 'false'
+                      "
+                      :label="updateSelection != true
+                      ? 'Ver candidaturas'
+                      : 'Candidaturas'
+                      "
+                      class="text-weight-regular col-3"
+                      :dropdown-content-class="dropdownContentClass"
+                    >
+                      <q-list>
+                        <q-item
+                          v-for="(item, index) in jobsApplications"
+                          :key="index"
+                          v-close-popup
+                          @click="onModalitySelection(item)"
+                        >
+                          <q-item-section avatar>
+                            <q-avatar
+                              icon="mdi-briefcase"
+                              color="blue-grey-8"
+                              text-color="white"
+                            />
+                          </q-item-section>
+                          <q-item-section>
+                            <q-item-label>{{ item }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-btn-dropdown>
                     <q-input
-                      v-model="candidateSelection"
-                      label="Nombre del candidato"
-                      filled
+                      v-model="studyLevel"
+                      label="Grado Estudios"
+                      borderless
+                      readonly
+                      disable
+                      class="col-3 text-blue-grey-8"
+                    >
+                      <template v-slot:before>
+                        <q-icon name="school" :color="studyLevel != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "/>
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="speciality"
+                      label="Especialidad"
+                      autogrow
+                      borderless
                       readonly
                       disable
                       class="col-3"
-                    />
-                    <q-input
-                      v-model="birthday"
-                      label="Fecha de nacimiento"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
-                    <q-input
-                      v-model="sex"
-                      label="Sexo"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
+                      >
+                      <template v-slot:before>
+                        <q-icon name="school" :color="speciality != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "/>
+                      </template>
+                    </q-input>
                   </div>
                   <div class="row justify-between q-ma-md">
                     <q-input
                       v-model="wishedSalary"
                       label="Sueldo Deseado"
-                      filled
+                      borderless
                       readonly
                       disable
                       class="col-3"
-                    />
-                    <q-input
-                      v-model="phoneNumber"
-                      label="Número de teléfono"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
-                    <q-input
-                      v-model="civilStatus"
-                      label="Estado Civil"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
-                  </div>
-                  <div class="row justify-between q-ma-md">
-                    <q-input
-                      v-model="state"
-                      label="Estado"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
-                    <q-input
-                      v-model="city"
-                      label="Ciudad"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
+                      >
+                      <template v-slot:before>
+                        <q-icon name="attach_money" :color="wishedSalary != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
                     <q-input
                       v-model="languages"
                       label="Idiomas dominados"
-                      filled
+                      borderless
+                      autogrow
                       readonly
                       disable
                       class="col-3"
-                    />
+                      >
+                      <template v-slot:before>
+                        <q-icon name="language" :color="languages != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="lastSchool"
+                      label="Institución"
+                      borderless
+                      autogrow
+                      readonly
+                      disable
+                      class="col-3"
+                      >
+                      <template v-slot:before>
+                        <q-icon name="apartment" :color="lastSchool != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                  </div>
+                  <div
+                    class="q-mt-sm q-mb-sm self-center text-blue-grey-8 text-body1"
+                  >
+                    Personal
+                    <q-separator color="blue-5" />
+                  </div>
+                  <div class="row justify-between q-ma-md">
+                    <q-input
+                      v-model="age"
+                      label="Edad"
+                      borderless
+                      readonly
+                      disable
+                      class="col-3"
+                      >
+                      <template v-slot:before>
+                        <q-icon name="face" :color="age != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="sex"
+                      label="Sexo"
+                      borderless
+                      readonly
+                      disable
+                      class="col-3"
+                      >
+                      <template v-slot:before>
+                        <q-icon name="people" :color="sex != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="phoneNumber"
+                      label="Número de teléfono"
+                      borderless
+                      readonly
+                      disable
+                      class="col-3"
+                      >
+                      <template v-slot:before>
+                        <q-icon name="phone" :color="phoneNumber != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                  </div>
+                  <div class="row justify-between q-ma-md">
+                    <q-input
+                      v-model="birthday"
+                      label="Fecha de nacimiento"
+                      borderless
+                      readonly
+                      disable
+                      class="col-3"
+                    >
+                      <template v-slot:before>
+                        <q-icon name="cake" :color="birthday != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="state"
+                      label="Estado"
+                      borderless
+                      autogrow
+                      readonly
+                      disable
+                      class="col-3"
+                    >
+                      <template v-slot:before>
+                        <q-icon name="map" :color="state != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="city"
+                      label="Ciudad"
+                      borderless
+                      autogrow
+                      readonly
+                      disable
+                      class="col-3"
+                    >
+                      <template v-slot:before>
+                        <q-icon name="location_on" :color="city != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
                   </div>
                 </q-card-actions>
               </q-card-section>
@@ -1196,7 +1356,7 @@
           </q-card>
         </q-page-container>
         <!--paste here the user information section-->
-         <!--User Information-->
+        <!--User Information-->
         <!--REFACTOR REQUIRED. The distribution of the elements in the div is not a good practice-->
 
         <div class="col">
@@ -1207,91 +1367,239 @@
               label="Información Personal"
               :caption="candidateSelection != '' ? candidateSelection : ''"
             >
-              <q-card-section horizontal style="height: 100%">
-                <div class="q-ma-md">
-                  <q-img
-                      style="width: 130px; height: 130px; border-radius: 20%"
-                      :src="getUserImage"
-                    />
-                </div>
-                <q-card-actions vertical style="width:100%">
-                  <div class="row justify-between q-ma-md">
-                    <q-input
-                      v-model="candidateSelection"
-                      label="Nombre del candidato"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
-                    <q-input
-                      v-model="birthday"
-                      label="Fecha de nacimiento"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
-                    <q-input
-                      v-model="sex"
-                      label="Sexo"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
+            <q-card-section horizontal style="height: 100%">
+                <q-card-actions vertical style="width: 100%">
+                  <div
+                    class="q-mt-sm q-mb-sm self-center text-blue-grey-8 text-body1"
+                  >
+                    Profesional
+                    <q-separator color="blue-5" />
                   </div>
-                  <div class="row justify-between q-ma-md">
+                  <div class="row justify-around q-ml-xl" >
+                    <q-btn-dropdown
+                      flat
+                      auto-close
+                      color="white"
+                      :text-color="studyLevel != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6'
+                        "
+                      icon="visibility"
+                      label="Ver candidaturas"
+                      class="text-weight-regular col-3"
+                      :dropdown-content-class="dropdownContentClass"
+                    >
+                      <q-list>
+                        <q-item
+                          v-for="(item, index) in jobsApplications"
+                          :key="index"
+                          v-close-popup
+                          @click="onModalitySelection(item)"
+                        >
+                          <q-item-section avatar>
+                            <q-avatar
+                              icon="mdi-briefcase"
+                              color="blue-grey-8"
+                              text-color="white"
+                            />
+                          </q-item-section>
+                          <q-item-section>
+                            <q-item-label>{{ item }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-btn-dropdown>
+                    <q-input
+                      v-model="studyLevel"
+                      label="Grado Estudios"
+                      borderless
+                      readonly
+                      disable
+                      class="col-3 text-blue-grey-8"
+                    >
+                      <template v-slot:before>
+                        <q-icon name="school" :color="studyLevel != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "/>
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="speciality"
+                      label="Especialidad"
+                      autogrow
+                      borderless
+                      readonly
+                      disable
+                      class="col-3"
+                      >
+                      <template v-slot:before>
+                        <q-icon name="school" :color="speciality != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "/>
+                      </template>
+                    </q-input>
+                  </div>
+                  <div class="row justify-around q-mt-md q-ml-xl">
                     <q-input
                       v-model="wishedSalary"
                       label="Sueldo Deseado"
-                      filled
+                      borderless
                       readonly
                       disable
                       class="col-3"
-                    />
-                    <q-input
-                      v-model="phoneNumber"
-                      label="Número de teléfono"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
-                    <q-input
-                      v-model="civilStatus"
-                      label="Estado Civil"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
-                  </div>
-                  <div class="row justify-between q-ma-md">
-                    <q-input
-                      v-model="state"
-                      label="Estado"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
-                    <q-input
-                      v-model="city"
-                      label="Ciudad"
-                      filled
-                      readonly
-                      disable
-                      class="col-3"
-                    />
+                      >
+                      <template v-slot:before>
+                        <q-icon name="attach_money" :color="wishedSalary != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
                     <q-input
                       v-model="languages"
                       label="Idiomas dominados"
-                      filled
+                      borderless
+                      autogrow
                       readonly
                       disable
                       class="col-3"
-                    />
+                      >
+                      <template v-slot:before>
+                        <q-icon name="language" :color="languages != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="lastSchool"
+                      label="Institución"
+                      borderless
+                      autogrow
+                      readonly
+                      disable
+                      class="col-3"
+                      >
+                      <template v-slot:before>
+                        <q-icon name="apartment" :color="lastSchool != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                  </div>
+                  <div
+                    class="q-mt-md q-mb-sm self-center text-blue-grey-8 text-body1"
+                  >
+                    Personal
+                    <q-separator color="blue-5" />
+                  </div>
+                  <div class="row justify-around q-mt-md q-ml-xl">
+                    <q-input
+                      v-model="age"
+                      label="Edad"
+                      borderless
+                      readonly
+                      disable
+                      class="col-3"
+                      >
+                      <template v-slot:before>
+                        <q-icon name="face" :color="age != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="sex"
+                      label="Sexo"
+                      borderless
+                      readonly
+                      disable
+                      class="col-3"
+                      >
+                      <template v-slot:before>
+                        <q-icon name="people" :color="sex != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="phoneNumber"
+                      label="Número de teléfono"
+                      borderless
+                      readonly
+                      disable
+                      class="col-3"
+                      >
+                      <template v-slot:before>
+                        <q-icon name="phone" :color="phoneNumber != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                  </div>
+                  <div class="row justify-around q-mt-md q-ml-xl">
+                    <q-input
+                      v-model="birthday"
+                      label="Fecha de nacimiento"
+                      borderless
+                      readonly
+                      disable
+                      class="col-3"
+                    >
+                      <template v-slot:before>
+                        <q-icon name="cake" :color="birthday != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="state"
+                      label="Estado"
+                      borderless
+                      autogrow
+                      readonly
+                      disable
+                      class="col-3"
+                    >
+                      <template v-slot:before>
+                        <q-icon name="map" :color="state != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
+                    <q-input
+                      v-model="city"
+                      label="Ciudad"
+                      borderless
+                      autogrow
+                      readonly
+                      disable
+                      class="col-3"
+                    >
+                      <template v-slot:before>
+                        <q-icon name="location_on" :color="city != ''
+                        ? 'blue-grey-8'
+                        : 'grey-6 '
+                        "
+                        />
+                      </template>
+                    </q-input>
                   </div>
                 </q-card-actions>
               </q-card-section>
@@ -1393,6 +1701,7 @@ import {
   canceledAppointmentData,
   finishedAppointmentData,
 } from "src/services/whatsApp";
+import { getAge } from "src/utils/operations";
 import { notifyPositive, notifyNegative } from "src/utils/notifies.js";
 import { getAllCandidatesDiary } from "src/services/candidates";
 import { useRouter } from "vue-router";
@@ -1456,13 +1765,20 @@ const appointmentDaysList = ref([]);
 const events = ref([]); //this is the array where the appointments are
 
 //USER INFORMATION
+const civilStatus = ref(""); //TODO delete this const
+const jobsApplications = ref([]);
+const jobsNames = ref("");
+const studyLevel = ref("");
+const speciality = ref("");
+const wishedSalary = ref("");
+const languages = ref("");
+const lastSchool = ref("");
+
+const age = ref("");
 const birthday = ref("");
 const sex = ref("");
-const wishedSalary = ref("");
-const civilStatus = ref("");
 const city = ref("");
 const state = ref("");
-const languages = ref("");
 
 let comparativeAppointment;
 /*filters*/
@@ -1723,36 +2039,21 @@ const showEventData = (event) => {
   birthday.value = event.birthday;
   sex.value = event.sex;
   wishedSalary.value = event.wishedSalary;
-  civilStatus.value = event.civilStatus;
+  if(event.sex == "M"){
+    sex.value = "Masculino";
+  } else if(event.sex == "F"){
+    sex.value = "Femenino";
+  } else {
+    sex.value = "Otro"
+  }
   city.value = event.city;
   state.value = event.state;
   languages.value = event.languages;
-  console.log("DATOS OBTENIDOS");
-  console.log(candidateSelection);
-  console.log(
-    appointmentId.value,
-    platformSelectedID.value,
-    userID.value,
-    active.value,
-    createdBy.value,
-    modifiedBy.value,
-    selectDay.value,
-    selectedHour.value,
-    selectedModality.value,
-    hex.value,
-    appointmentStatus.value,
-    candidateStatus.value,
-    fatherLastName.value,
-    motherLastName.value,
-    name.value,
-    photoUUID.value,
-    "SELECTED PLATFORM:  ",
-    selectedPlatform.value,
-    "siu,",
-    phoneNumber.value,
-    email.value,
-    linkData.value
-  );
+  jobsApplications.value = event.jobNames;
+  studyLevel.value = event.levelOfStudy;
+  speciality.value = event.lastSchoolSpeciality;
+  lastSchool.value = event.lastSchool;
+  age.value = getAge(event.birthday);
   comparativeAppointment = {
     linkID: platformSelectedID.value,
     date: selectDay.value,
@@ -2223,7 +2524,6 @@ const onCandidateSelection = (data) => {
   candidateSelection.value =
     data.name + " " + data.fatherLastName + " " + data.motherLastName;
   userID.value = data.userID;
-  console.log("VALOR USER ID EN VARIABLES: " + userID.value);
   name.value = data.name;
   fatherLastName.value = data.fatherLastName;
   motherLastName.value = data.motherLastName;
@@ -2231,12 +2531,23 @@ const onCandidateSelection = (data) => {
   email.value = data.email;
   phoneNumber.value = data.celphone;
   birthday.value = data.birthday;
-  sex.value = data.sex;
+  if(data.sex == "M"){
+    sex.value = "Masculino";
+  } else if(data.sex == "F"){
+    sex.value = "Femenino";
+  } else {
+    sex.value = "Otro"
+  }
+  console.log("SEX: ", sex.value)
   wishedSalary.value = data.wishedSalary;
-  civilStatus.value = data.civilStatus;
   city.value = data.city;
   state.value = data.state;
   languages.value = data.languages;
+  jobsApplications.value = data.jobNames;
+  studyLevel.value = data.levelOfStudy;
+  speciality.value = data.lastSchoolSpeciality;
+  lastSchool.value = data.lastSchool;
+  age.value = getAge(data.birthday);
 };
 
 const onModalitySelection = (data) => {
@@ -2276,6 +2587,11 @@ const onClickDay = (data) => {
     city.value = "";
     state.value = "";
     languages.value = "";
+    jobsApplications.value = "";
+    studyLevel.value = "";
+    speciality.value = "";
+    lastSchool.value = "";
+    age.value = "";
   }
 };
 
