@@ -62,7 +62,7 @@ export const sendPsychTestMessage= async (phoneNumber, userName, platformUserNam
 
   const data = psychTestSendedTemplate(phoneNumber, userName, platformUserName, userPassword);
   try {
-    const request = await axios.post(`/api/whatsapp/sender/psych-test-data`, data);
+    const request = await axios.post(`/api/whatsapp/send/psych-test-data`, data);
     if (requestSuccessfull(request.status)) {
       return true;
     }
