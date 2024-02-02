@@ -22,7 +22,7 @@
       Nota
     </div>
     <p class="text-body2">
-     Debe ingresar al menos 2 familiares para poder avanzar a la siguiente pantalla
+      Seleccione las opciones solo en caso de que sea necesario
     </p>
   </q-card-section>
 </q-card>

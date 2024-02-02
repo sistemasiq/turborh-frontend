@@ -14,37 +14,51 @@
         v-for="(item, index) in currentApplications"
         :key="index"
         horizontal
-        class="q-ml-lg bg-dark text-white"
-        style="border-radius: 30px"
+        class="q-ml-lg bg-dark text-white q-mt-lg"
+        style="border-radius: 30px; min-width: 100px; max-width: 400px"
       >
         <q-btn
-          v-if="item.status != 'S'"
+          v-if="item.selected === 0"
           class="absolute-top-right bg-red z-top"
           flat
           style="border-radius: 0 30px 0 30px"
           icon="delete"
           @click.prevent="openDeleteApplicationDialog(item.requisitionId)"
         />
-        <q-img
-          :src="
-            getS3FileUrl(
-              getDefaultPath(item.jobUUID, getJobImagesPath),
-              getDefaultJobUUID(item.jobUUID)
-            )
-          "
-          style="
-            max-width: 100%;
-            max-height: 260px;
-            border-radius: 30px 30px 0 0;
-          "
-        />
-        <q-card-section>
+        <div q-gutter-md row items-start>
+          <q-img
+            fit="cover"
+            :src="
+              getS3FileUrl(
+                getDefaultPath(item.jobUUID, getJobImagesPath),
+                getDefaultJobUUID(item.jobUUID)
+              )
+            "
+            style="
+              max-width: 400px;
+              height: 200px;
+              border-radius: 30px 30px 0 0;
+            "
+          />
+        </div>
+        <q-card-section
+          style="min-width: 300px; max-width: 300px; min-height: 100px"
+        >
           <p class="text-h6">{{ item.jobName }}</p>
           <p class="text-body1">
-            Estado: {{ checkStatusApplication[item.status] }}
+            Estado:
+            {{
+              item.selected === 0
+                ? checkStatusApplication[item.status]
+                : "¡Felicidades! Has sido seleccionado"
+            }}
             <q-icon
               name="circle"
-              :color="checkStatusApplicationColor[item.status]"
+              :color="
+                item.selected === 0
+                  ? checkStatusApplicationColor[item.status]
+                  : 'green'
+              "
             />
           </p>
         </q-card-section>
@@ -162,7 +176,6 @@ const fetchApplications = async () => {
   } catch (error) {
     console.log(error);
   } finally {
-    console.log(currentApplications.value);
     loadingApplications.value = false;
   }
 };
@@ -171,7 +184,6 @@ const checkStatusApplication = {
   P: "Pendiente",
   E: "Entrevistado",
   C: "Citado",
-  S: "¡Felicidades! Has sido seleccionado",
   R: "Rechazado",
 };
 
@@ -179,7 +191,6 @@ const checkStatusApplicationColor = {
   P: "yellow",
   E: "blue",
   C: "blue-2",
-  S: "green",
   R: "red",
 };
 
