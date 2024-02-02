@@ -524,10 +524,11 @@ const selectCandidateById = async () => {
 
     if (candidateSelectedCorrectly) {
       selectedCandidate.value.selected = 1;
-      updateRow(selectedCandidate.value);
       const completed = await completeRequisition(numRequisitionDetails.value);
       console.log("Is requisition completed " + completed);
       if (completed) {
+      selectedCandidate.value.requisitionState = 'PC'
+      updateRow(selectedCandidate.value, true);
         $q.notify(
           notifyPositive("Se han llenado las vacantes para este puesto")
         );
@@ -618,10 +619,13 @@ const uploadPsicometricTest = async (row) => {
   }
 };
 
-const updateRow = (row) => {
+const updateRow = (row, requisitionHasBeenCompleted = false) => {
   currentApplicants.value.forEach((element) => {
     if (element.userId === row.userId) {
       element = row;
+    }
+    if(requisitionHasBeenCompleted){
+      element.requisitionState = 'PC'
     }
   });
 };

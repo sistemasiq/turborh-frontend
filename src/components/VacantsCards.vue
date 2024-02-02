@@ -1,12 +1,13 @@
 <template>
   <q-card
   horizontal
-  class="q-ml-lg bg-dark text-white"
-  style="border-radius: 30px;"
+  class="q-ml-lg bg-dark text-white q-mt-lg"
+  style="border-radius: 30px; min-width: 100px; max-width: 400px"
   v-for="(item, index) in currentVacants"
+
   >
     <div
-  class="absolute-right text-body2"
+  class="absolute-right text-body2 z-max"
   style="
     background: rgb(215, 86, 86);
         width: 160px;
@@ -16,11 +17,16 @@
     ">
      <p class="q-ml-md q-mt-xs">Num.Vacantes: {{ item.vacancyNumber }}</p>
     </div>
-    <img
+    <q-img
+    fit="cover"
       :src="getS3FileUrl(getJobImagesPath, getDefaultJobUUID(item.jobUUID))"
-      style="max-width: 100%; max-height: 260px; border-radius: 30px 30px 0 0"
+      style="
+              max-width: 400px;
+              height: 200px;
+              border-radius: 30px 30px 0 0;
+            "
     />
-    <q-card-section>
+    <q-card-section style="min-width: 300px; max-width: 300px; min-height: 100px">
       <div class="text-h6">{{ item.jobName }}</div>
       <div class="text-h6">
        <q-btn
@@ -41,7 +47,7 @@
           full-width
           full-height
           v-model="showJobDetails"
-          class="q-mr-xl"
+          class="q-mr-xl z-max"
         >
           <q-card class="dialog-card">
             <q-img
@@ -116,7 +122,7 @@
             </div>
           </q-card>
         </q-dialog>
-        <q-dialog v-model="showApplyToVacant" persistent>
+        <q-dialog class="z-max" v-model="showApplyToVacant" persistent>
     <q-card rounded>
       <q-card-section class="row items-center">
         <span class="q-ml-sm text-h6 text-weight-regular">
