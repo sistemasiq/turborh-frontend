@@ -11,6 +11,8 @@ export const useJobStore = defineStore("job", () => {
   const extraHours = ref(false);
   const travelAvailability = ref(false);
 
+  const jobObservations = ref("");
+  const jobConditions = ref("");
   const jobStored = ref();
 
   return {
@@ -22,6 +24,8 @@ export const useJobStore = defineStore("job", () => {
     experience,
     extraHours,
     travelAvailability,
+    jobObservations,
+    jobConditions,
     jobStored
   };
 });

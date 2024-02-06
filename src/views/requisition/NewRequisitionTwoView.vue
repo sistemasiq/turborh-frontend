@@ -220,16 +220,25 @@
               color="cyan-1"
               label="Experiencia"
               label-color="white"
-              type="textarea"
               readonly
-            >
-            </q-input>
+            />
+            <q-input
+              class="q-ma-md"
+              v-model="defaultObservations"
+              dark
+              outlined
+              color="cyan-1"
+              label="Observaciones del puesto"
+              label-color="white"
+              readonly
+            />
+
             <q-input
               v-model="observations"
               dark
               outlined
               color="cyan-1"
-              label="Observaciones sobre el puesto"
+              label="Observaciones extra sobre el puesto"
               label-color="white"
               class="q-ma-md"
               type="textarea"
@@ -264,11 +273,21 @@
               </q-card-section>
             </q-card>
             <q-input
+              class="q-ma-md"
+              v-model="defaultConditions"
+              dark
+              outlined
+              color="cyan-1"
+              label="Condiciones del puesto"
+              label-color="white"
+              readonly
+            />
+            <q-input
               v-model="conditions"
               dark
               outlined
               color="cyan-1"
-              label="Condiciones especificas del puesto."
+              label="Condiciones extra del puesto."
               label-color="white"
               class="q-ma-md"
               type="textarea"
@@ -361,6 +380,9 @@ const currentPage = ref(2);
 
 const openNotes = ref(false);
 
+const defaultConditions = ref("")
+const defaultObservations = ref("")
+
 const { isAdmin, user, isRh, isBoss } = storeToRefs(useAuth);
 
 const openConfirmation = ref(false);
@@ -388,6 +410,8 @@ const {
   englishLevel,
   jobFunctions,
   jobSkills,
+  jobConditions,
+  jobObservations
 } = storeToRefs(useJob);
 
 onMounted(() => {
@@ -406,6 +430,8 @@ const showRequisitionDetails = () => {
   conditions.value = requisitionData.value.conditions;
   observations.value = requisitionData.value.observations;
   experienceRequired.value = requisitionData.value.experience;
+  defaultObservations.value = requisitionData.value.jobObservations;
+  defaultConditions.value = requisitionData.value.jobConditions;
   setDefaultJobValues();
 };
 
@@ -425,6 +451,8 @@ const setDefaultJobValues = () => {
     extraHoursRequired.value = extraHours.value === 1 ? true : false;
     travelAvailabilityRequired.value =
       travelAvailability.value === 1 ? true : false;
+    defaultConditions.value = jobConditions.value;
+    defaultObservations.value = jobObservations.value;
     return;
   }
 
@@ -435,6 +463,8 @@ const setDefaultJobValues = () => {
     requisitionData.value.extraHours === 1 ? true : false;
   travelAvailabilityRequired.value =
     requisitionData.value.travelAvailability === 1 ? true : false;
+  defaultObservations.value = requisitionData.value.jobObservations;
+  defaultConditions.value = requisitionData.value.jobConditions;
 };
 
 const disableSaveRequisitionButton = computed(() => {
