@@ -15,6 +15,8 @@ export const getAge = (date) => {
     return isNaN(years) ? " " : years;
 }
 
+
+
 //Made to build the object thay will be sended to change the password
 export const userCredentials = (password, id) => {
   return {

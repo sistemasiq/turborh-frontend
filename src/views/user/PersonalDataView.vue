@@ -178,7 +178,8 @@
                 v-model="weight"
                 label="Peso(kg) *"
                 label-color="white"
-                mask="##.#"
+                mask="###.#"
+                reverse-fill-mask
                 fill-mask="0"
                 lazy-rules
                 :rules="[
@@ -457,7 +458,9 @@ const setSavedStoredValues = () => {
   birthDate.value = savedApplication.value.fecha_nacimiento;
   phone.value = savedApplication.value.telefono;
   height.value = savedApplication.value.estatura;
-  weight.value = savedApplication.value.peso;
+  //NOTA: Multiplico el valor por diez por que al registrar un valor como 120.0 la mask lo deja como 012.0
+  //Asi me aseguro que parsee de forma correcta el valor
+  weight.value = savedApplication.value.peso * 10;
   bloodType.value = savedApplication.value.tipo_sangre;
   roomie.value = savedApplication.value.vive_con;
   dependents.value = savedApplication.value.numero_dependientes;

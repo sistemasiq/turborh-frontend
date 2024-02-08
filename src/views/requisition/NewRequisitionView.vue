@@ -54,7 +54,7 @@
                                 </q-list>
                             </q-btn-dropdown>
 
-                            <q-btn-dropdown style="height: 55px;" icon="search" color="primary" :label="selectedJob.name" no-ripple
+                            <q-btn-dropdown :loading="isFetchingJobs" style="height: 55px;" icon="search" color="primary" :label="selectedJob.name" no-ripple
                                 class="transparent q-ml-md" outline text-color="white" :disable="isFetchingJobs || showingDetails">
                                 <q-list>
                                     <q-item v-for="(item, index) in jobs" :key="index" clickable v-close-popup
@@ -180,7 +180,7 @@ const note = ref("");
 const {  showingDetails, requisitionData, numRequisitionDetails, applicantDetails, jobDetails, updatingRequisition } = storeToRefs(useRequisitionDetails);
 const {  applicantId, applicant, job, vacancyNumbers, motiveCreation } = storeToRefs(useRequisition);
 const { user, isRh, isAdmin, isBoss } = storeToRefs(useAuth);
-const { jobId, jobFunctions, jobSkills, englishLevel, educationRequired, experience, extraHours, travelAvailability } = storeToRefs(useJob);
+const { jobId, jobFunctions, jobSkills, englishLevel, educationRequired, experience, extraHours, travelAvailability, jobConditions, jobObservations } = storeToRefs(useJob);
 
 
 onMounted(() => {
@@ -253,6 +253,7 @@ const fetchJobs = async () => {
     const personalId = applicantId.value != 0 ? applicantId.value : user.value.personalId;
 
     try {
+
         isFetchingJobs.value = true;
         const jobsFetched = isRh.value || isAdmin.value ? await getAllActiveJobs() : await getJobsByPersonalId(personalId);
         if (jobsFetched) {
@@ -274,12 +275,15 @@ const fetchJobData = async (id) => {
             jobId.value = job.id;
             jobFunctions.value = job.functions;
             jobSkills.value = job.skills;
+            jobObservations.value = job.observations;
+            jobConditions.value = job.conditions;
 
             englishLevel.value = job.englishLevel;
             extraHours.value = job.extraHours;
             travelAvailability.value = job.travelAvailability;
             educationRequired.value = job.education;
             experience.value = job.experience;
+
 
             jobFunctionsRequired.value = job.functions;
             jobSkillsRequired.value = job.skills;

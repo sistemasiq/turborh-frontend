@@ -1387,7 +1387,7 @@
                       icon="visibility"
                       label="Ver candidaturas"
                       class="text-weight-regular col-3"
-                      :dropdown-content-class="dropdownContentClass"
+                      dropdown-content-class="flexible-width"
                     >
                       <q-list>
                         <q-item
@@ -1674,7 +1674,6 @@ import "@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass";
 import prev from "../components/Prev.vue";
 import next from "../components/Next.vue";
 import todayComponent from "../components/Today.vue";
-import axios from "axios";
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useQuasar } from "quasar";
 import { getS3FileUrl } from "src/services/profiles.js";
@@ -1696,10 +1695,6 @@ import {
 } from "src/services/mail.js";
 import {
   sendWhatsAppMessage,
-  presentialAppointmentData,
-  virtualAppointmentData,
-  canceledAppointmentData,
-  finishedAppointmentData,
 } from "src/services/whatsApp";
 import { getAge } from "src/utils/operations";
 import { notifyPositive, notifyNegative } from "src/utils/notifies.js";
@@ -1724,7 +1719,7 @@ const linkData = ref("");
 const selectDay = ref("");
 const selectedHour = ref("");
 const selectedModality = ref("");
-const createdBy = ref("57");
+const createdBy = ref("144");
 const active = ref();
 const color = ref("");
 const selectedDate = ref(today());
@@ -1758,7 +1753,7 @@ const disableCheckbox = ref(false);
 const firstDateRange = ref("");
 const secondDateRange = ref("");
 const selectedPlatform = ref("");
-const modifiedBy = ref("");
+const modifiedBy = ref("144");
 const appointmentStatus = ref("");
 const candidateStatus = ref("");
 const appointmentDaysList = ref([]);
@@ -1767,7 +1762,6 @@ const events = ref([]); //this is the array where the appointments are
 //USER INFORMATION
 const civilStatus = ref(""); //TODO delete this const
 const jobsApplications = ref([]);
-const jobsNames = ref("");
 const studyLevel = ref("");
 const speciality = ref("");
 const wishedSalary = ref("");
@@ -2261,7 +2255,7 @@ const postPresentialAppointment = async () => {
 
   if (request != null) {
     let getInsertedAppointment = request;
-    console.log(getInsertedAppointment);
+    console.log("SENDED APPOINTMENT: ", getInsertedAppointment)
     const candidateIndex = totalTableRows.value.findIndex(
       (candidate) => candidate.userID === request.userID
     );
