@@ -10,7 +10,7 @@
           <q-card flat bordered text-color="white"
   class="q-mb-lg"
   style="margin-left: 0%; border-color: rgb(255, 248, 43);
-  background-color: transparent; color: white; width: 100%;"
+  background-color: transparent; color: white; width: 100%; height: 80px;"
   v-if="!viewingApplication"
 >
   <q-card-section>
@@ -19,7 +19,7 @@
       Nota
     </div>
     <p class="text-body2">
-     Debe ingresar al menos 2 familiares para poder avanzar a la siguiente pantalla
+     Debe ingresar al menos 2 familiares en la tabla de padres o esposa(o) para poder avanzar a la siguiente pantalla
     </p>
   </q-card-section>
 </q-card>

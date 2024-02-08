@@ -13,6 +13,23 @@
           :required-fields="requiredFieldsOnThisPage"
         ></pagination-application>
         <div style="margin-top: 6%">
+        <q-card flat bordered text-color="white"
+  class="q-mb-lg"
+  style="margin-left: 0%; border-color: rgb(255, 248, 43);
+  background-color: transparent; color: white; width: 100%; height: 80px;"
+  v-if="!viewingApplication"
+>
+  <q-card-section>
+    <div class="text-body1 text-weight-medium row">
+      <q-icon name="warning" class="q-mr-md q-mt-xs" />
+      Nota
+    </div>
+    <p class="text-body2">
+     Todos los campos de esta pantalla son requeridos excepto los que tienen la etiqueta "Opcional"
+    </p>
+  </q-card-section>
+</q-card>
+
           <q-form class="q-gutter-md">
             <q-input
               dark
@@ -224,7 +241,7 @@
               >
               </q-input>
 
-              <q-input
+              <q-input 
                 dark
                 outlined
                 color="cyan-1"
@@ -238,6 +255,7 @@
                 class="full-width q-pl-md"
                 @update:model-value="updateStore()"
               >
+              <BadgeOptional></BadgeOptional>
               </q-input>
 
               <q-input
@@ -312,6 +330,7 @@
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
               >
+              <BadgeOptional></BadgeOptional>
               </q-input>
             </div>
 
@@ -356,6 +375,7 @@
 import { ref, onMounted, computed } from "vue";
 import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
+import BadgeOptional from "src/components/BadgeOptional.vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
 import { useLocalStorageStore } from "src/stores/localStorage";

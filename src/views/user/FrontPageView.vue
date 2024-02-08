@@ -9,7 +9,26 @@
       <q-card-section class="content" style="max-width: 100%">
         <pagination-application :page="1" :required-fields="requiredFieldsOnThisPage"/>
 
-        <div class="inputs q-mt-xl" align="center" style="width: 100%">
+        <div style="margin-top: 6%">
+        <q-card flat bordered text-color="white"
+  class="q-mb-lg"
+  style="margin-left: 0%; border-color: rgb(255, 248, 43);
+  background-color: transparent; color: white; width: 100%; height: 80px;"
+  v-if="!viewingApplication"
+>
+  <q-card-section>
+    <div class="text-body1 text-weight-medium row">
+      <q-icon name="warning" class="q-mr-md q-mt-xs" />
+      Nota
+    </div>
+    <p class="text-body2">
+     Todos los campos de esta pantalla son requeridos para avanzar a la siguiente
+    </p>
+  </q-card-section>
+</q-card>
+</div>
+
+        <div class="inputs q-mt-sm" align="center" style="width: 100%">
           <div class="row">
             <q-form class="q-mt-xl q-mr-lg" style="width: 40%; height: 100%">
               <q-input

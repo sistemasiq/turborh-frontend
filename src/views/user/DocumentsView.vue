@@ -12,7 +12,7 @@
           <q-card flat bordered text-color="white"
   class="q-mb-lg"
   style="margin-left: 0%; border-color: rgb(255, 248, 43);
-  background-color: transparent; color: white; width: 100%;"
+  background-color: transparent; color: white; width: 100%; height: 80px;"
   v-if="!viewingApplication"
 >
   <q-card-section>
@@ -21,7 +21,7 @@
       Nota
     </div>
     <p class="text-body2">
-     Es obligatorio adjuntar tu curriculum
+     Es obligatorio adjuntar su curriculum, así como llenar los campos del RFC y NSS
     </p>
   </q-card-section>
 </q-card>
@@ -56,7 +56,7 @@
               color="cyan-1"
               v-model="imss"
               type="text"
-              label="Número de IMSS *"
+              label="Número de IMSS (NSS) *"
               label-color="white"
               mask="###########"
               lazy-rules
