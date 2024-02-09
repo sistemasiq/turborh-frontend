@@ -341,7 +341,6 @@ const fillCatalog = async () => {
 
   try {
     const catalog = await getAllMachineryActive()
-    console.log(catalog);
 
     if(catalog) {
       catalog.forEach(element => {

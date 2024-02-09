@@ -479,7 +479,6 @@ const canEditRequisition = (row) => {
 };
 
 const openAuthRequisitionDialogue = (row) => {
-  console.log(row);
   showAuthRequisitionDialogue.value = true;
   selectedRequisition.value = row;
 };
@@ -513,9 +512,6 @@ const onCancelSendEmailToCandidates = async () => {
 
     const successCount = results.filter((result) => result).length;
     const failureCount = results.length - successCount;
-    console.log(
-      `Emails mandados correctamente: ${successCount}, Fallos: ${failureCount}`
-    );
     $q.notify(notifyPositive("Los candidatos han sido notificados"));
   } catch (error) {
     console.error("Error al mandar los emails:", error);
@@ -546,8 +542,6 @@ const updateRequisitionAuthorization = async (requisition) => {
       requisition.numRequisition,
       isIngUpdating
     );
-
-    console.log(newState);
 
     if (newState) {
       requisition.state = newState;
@@ -601,7 +595,7 @@ const disableRequisition = async (requisition) => {
     }
   } catch (error) {
     console.log(error);
-    $q.notify(notifyNegative("Hubo un erro al cancelar la requisición"));
+    $q.notify(notifyNegative("Hubo un error al cancelar la requisición"));
   } finally {
     $q.loading.hide();
   }

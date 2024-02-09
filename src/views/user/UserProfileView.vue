@@ -219,7 +219,6 @@ const setUserInfo = () => {
   applicationStored = applicationStored
     ? applicationStored
     : savedApplication.value;
-  console.log(applicationStored);
   if (applicationStored) {
     fullName.value =
       applicationStored.nombre +
@@ -232,7 +231,6 @@ const setUserInfo = () => {
     if (age.value === NaN) {
       age.value = 0;
     }
-    console.log("Age: " + getAge(applicationStored.fecha_nacimiento));
   }
 };
 

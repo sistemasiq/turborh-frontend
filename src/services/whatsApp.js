@@ -82,6 +82,42 @@ const psychTestSendedTemplate = (phoneNumber, userName, platformUserName, userPa
   }
 }
 
+export const sendVerificationCodeMessage = async(data) => {
+  try {
+    const request = await axios.post(`/api/whatsapp/send/verification-code`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
+export const verificationCodeData = (phoneNumber, verificationCode) => {
+  return {
+    phoneNumber: phoneNumber,
+    verificationCode: verificationCode
+  }
+}
+
+export const sendPasswordChangedInformation = async(data) => {
+  try {
+    const request = await axios.post(`/api/whatsapp/send/password-changed-information`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
+export const passwordChangedInformation = (phoneNumber, supportEmail) => {
+  return {
+    phoneNumber: phoneNumber,
+    supportEmail: supportEmail
+  }
+}
+
 /*
 export const sendMessage = async (data) => {
   try {

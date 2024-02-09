@@ -268,13 +268,6 @@ onBeforeUnmount(() => {
   window.removeEventListener("keydown", keyDownHandler);
 });
 
-const prueba = async() => {
-  const name = "default_user_icon.png"
-  const folderPath = "Users Images"
-  const response = await axios.get(`http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com:5000/files/${name}/path/${folderPath}`);
-  console.log("RESPONSE: ", response.data)
-}
-
 </script>
 
 <style scoped>

@@ -232,7 +232,6 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
-  console.log(useLocalStorage.load("documentsData"));
   const localStoreData = useLocalStorage.load("documentsData");
 
   if (localStoreData) documentsData.value = localStoreData;

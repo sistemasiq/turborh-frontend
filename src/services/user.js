@@ -13,7 +13,6 @@ export const logUser = async (userName, password) => {
     if (requestSuccessfull(request.status)) {
       return request.data;
     } else {
-      console.log(request.status);
       return null;
     }
   } catch (error) {
@@ -29,7 +28,6 @@ export const getUserByUserName = async (userName) => {
     if (requestSuccessfull(request.status)) {
       return true;
     } else {
-      console.log(request.status);
       return false;
     }
   } catch (error) {
@@ -45,7 +43,21 @@ export const getUserByCurp = async (curp) => {
     if (requestSuccessfull(request.status)) {
       return true;
     } else {
-      console.log(request.status);
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+export const getUserByEmail = async (email) => {
+  try {
+    const request = await axios.get(`users/email/${email}`);
+
+    if (requestSuccessfull(request.status)) {
+      return true;
+    } else {
       return false;
     }
   } catch (error) {
@@ -72,7 +84,6 @@ export const createUser = async (userName, email, curp, password) => {
       newUserData.id = request.data;
       return newUserData;
     } else {
-      console.log(request.status);
       return null;
     }
   } catch (error) {
@@ -88,7 +99,6 @@ export const updateUserImage = async (userId, imageUUID) => {
     if (requestSuccessfull(request.status)) {
       return true;
     } else {
-      console.log("failed with status " + request.status);
       return false;
     }
   } catch (error) {
@@ -106,7 +116,6 @@ export const updateUserPsychometricTest = async (userId, uuid) => {
     if (requestSuccessfull(request.status)) {
       return true;
     } else {
-      console.log("failed with status " + request.status);
       return false;
     }
   } catch (error) {
@@ -150,7 +159,6 @@ export const getPsychometricPlatforms = async () => {
     const request = await axios.get(`api/pysch-platforms`);
 
     if (requestSuccessfull(request.status)) {
-      console.log("request psych platform data: ", request.data);
       return request.data;
     }
   } catch (error) {

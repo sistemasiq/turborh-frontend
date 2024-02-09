@@ -1,17 +1,26 @@
 <template>
-  <q-layout view="hHr LpR lFf" class="bg-blue-grey-1">
+  <q-layout view="hhr lpr lff" class="bg-blue-grey-1">
     <q-page-container>
-      <q-img
-        src="~/assets/img/logo_turbo_navegador.png"
-        class="q-mt-xl"
-        style="width: 4%; height: 4%; position: relative; left: 48%"
-      />
-      <div class="text-grey-10 text-h6" style="text-align: center">
-        Restablecer Contraseña
+      <div
+        style="width: 100%; height: 150px"
+        class="row justify-center"
+      >
+        <div style="width: 100%;"
+        class="row justify-center q-mt-lg">
+          <q-img
+            src="~/assets/img/logo_turbo_navegador.png"
+            style="width: 70px; height: 70px"
+          />
+        </div>
+        <div class="text-grey-10 text-h6 row justify-center q-mb-lg">
+          Restablecer Contraseña
+        </div>
       </div>
-
+      <div
+        style="width: 100%; height: 150px"
+        class="row justify-center"
+      >
       <q-card
-        class="fixed-center"
         style="min-width: 35%; max-width: 40%; border-radius: 10px"
       >
         <q-card-section>
@@ -73,16 +82,15 @@
           </q-card-actions>
         </q-card-section>
       </q-card>
+      </div>
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
 import { storeToRefs } from "pinia";
 import { notifyPositive, notifyNegative } from "src/utils/notifies.js";
-import { userCredentials } from "src/utils/operations.js";
 import { useAuthStore } from "src/stores/auth.js";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
@@ -106,7 +114,6 @@ const verification = () => {
     if (securityCode.value == verificationCode.value) {
       toChangePassword();
       $q.notify(notifyPositive("Código verificado"));
-      console.log("well done");
     } else {
       $q.notify(notifyNegative("Código incorrecto, intente nuevamente"));
     }

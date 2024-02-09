@@ -500,10 +500,8 @@ const uploadUserFiles = async () => {
     let file;
 
     if (jobUUID.value === defaultUUID) {
-      console.log("Upload file");
       file = await uploadFile(jobImg.value, getJobImagesPath);
     } else{
-      console.log("Updated file");
       file = await updateFile(jobUUID.value, jobImg.value, getJobImagesPath);
     }
 
@@ -586,7 +584,6 @@ const getJobData = async (id) => {
         jobData.photo_uuid === null || jobData.photo_uuid === "" || jobData.photo_uuid === "no_image"
           ? defaultUUID
           : jobData.photo_uuid;
-      console.log("JOB UUID "+jobUUID.value);
     }
   } catch (error) {
     console.log(error);
@@ -662,7 +659,6 @@ const updateJobData = async (photoName) => {
   try {
     $q.loading.show();
     const updatedJob = await updateJob(updatedJobData)
-    console.log(updatedJob);
     if (updatedJob) {
       $q.notify(notifyPositive("El puesto ha sido actualizado correctamente"));
       goToJobsCatalog();
@@ -697,8 +693,6 @@ const createNewJob = async (photoName) => {
     key: key.value,
     photo_uuid: photoName,
   };
-
-  console.log(gender.value);
 
   try {
     $q.loading.show();

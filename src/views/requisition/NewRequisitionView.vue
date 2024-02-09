@@ -203,7 +203,6 @@ const showRequisitionDetails = () => {
     motiveCreation.value = requisitionData.value.motiveCreation;
     vacancyNumbers.value = requisitionData.value.vacancyNumber;
     note.value = requisitionData.value.notes;
-    console.log(requisitionData.value);
     fetchJobDataDetails()
 }
 
@@ -257,7 +256,6 @@ const fetchJobs = async () => {
         isFetchingJobs.value = true;
         const jobsFetched = isRh.value || isAdmin.value ? await getAllActiveJobs() : await getJobsByPersonalId(personalId);
         if (jobsFetched) {
-          console.log(jobsFetched)
             jobs.value = jobsFetched;
         }
     } catch (error) {

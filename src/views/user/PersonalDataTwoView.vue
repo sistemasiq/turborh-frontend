@@ -282,7 +282,6 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
-  console.log(useLocalStorage.load("personalData"));
   const localStoreData = useLocalStorage.load("personalData");
 
   if (localStoreData) personalData.value = localStoreData;

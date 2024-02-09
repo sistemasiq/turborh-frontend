@@ -243,7 +243,6 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
-  console.log(useLocalStorage.load("recruitingMeansData"));
   const localStoreData = useLocalStorage.load("recruitingMeansData");
 
   if (localStoreData) recruitingMeansData.value = localStoreData;

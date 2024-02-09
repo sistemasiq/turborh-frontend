@@ -532,6 +532,7 @@ const sendPsychTestInformation = async () => {
           );
         }
       }
+      resetPsychTestInformation();
     }
   } catch (error) {
     console.log(error);
@@ -589,7 +590,6 @@ const getPsychPlatformsData = async () => {
     const request = await getPsychometricPlatforms();
     if (request) {
       psychTestPlatforms.value = request;
-      console.log("Psychometric platforms data", psychTestPlatforms.value);
     }
   } catch (error) {}
 };
@@ -603,7 +603,6 @@ const setSelectedPsychPlatform = (id) => {
 };
 
 const selectPsychPlatform = (data) => {
-  console.log("PLATFORM: " + data.id);
   selectedPsychTestPlatform.value = data.psychPlatformName;
   psychTestPlatformId.value = data.id;
 };
@@ -614,9 +613,9 @@ const setSelectedCandidate = (
   openSendPsychTestDialog = false
 ) => {
   selectedCandidate.value = row;
-  console.log(selectedCandidate.value);
   openSelectCandidateDialog.value = openSelectDialog;
   openPsicometricTestDialog.value = openSendPsychTestDialog;
+  resetPsychTestInformation();
 };
 
 const selectCandidateById = async () => {
@@ -630,7 +629,6 @@ const selectCandidateById = async () => {
     if (candidateSelectedCorrectly) {
       selectedCandidate.value.selected = 1;
       const completed = await completeRequisition(numRequisitionDetails.value);
-      console.log("Is requisition completed " + completed);
       if (completed) {
         selectedCandidate.value.requisitionState = "PC";
         updateRow(selectedCandidate.value, true);
@@ -638,7 +636,6 @@ const selectCandidateById = async () => {
           notifyPositive("Se han llenado las vacantes para este puesto")
         );
       }
-      console.log("CANDIDATE HAS BEEN SELECTED");
     }
   } catch (error) {
   } finally {
@@ -761,7 +758,6 @@ const createReport = async (applicationId) => {
 };
 
 const addNotes = (applicationId) => {
-  console.log("Add notes to application " + applicationId);
 
   fetchUserApplication(applicationId);
   viewingApplication.value = true;

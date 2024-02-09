@@ -278,10 +278,8 @@ const createApplication = () => {
   }
 
   if (curriculumStored.value) {
-    console.log("updating WITH curriculum");
     updateCurriculum(completeApplication);
   } else {
-    console.log("updating WITHOUT curriculum");
     completeApplication.nombre_cv = savedApplication.value.nombre_cv;
     update(completeApplication);
   }

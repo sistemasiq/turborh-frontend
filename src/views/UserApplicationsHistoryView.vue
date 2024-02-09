@@ -594,7 +594,6 @@ const createReport = async (applicationId) => {
 };
 
 const addNotes = (applicationId) => {
-  console.log("Add notes to application " + applicationId);
 
   fetchUserApplication(applicationId);
   viewingApplication.value = true;

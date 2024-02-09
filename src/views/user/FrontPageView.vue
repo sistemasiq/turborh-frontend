@@ -540,7 +540,6 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
-  console.log(useLocalStorage.load("frontpage"));
   const localStoreData = useLocalStorage.load("frontpage");
 
   if (localStoreData) frontPageData.value = localStoreData;

@@ -1890,7 +1890,6 @@ const filteredRows = computed(() => {
       : candidate.status === "P";
   });
 
-  console.log("asdasdscacxas", filtered.length);
   if (filtered.length < 1) {
     candidatesAvailable.value = false;
   } else {
@@ -1912,7 +1911,6 @@ const getPlatforms = async () => {
     meetingPlatform.value = request;
   }
   if (meetingPlatform.value == null) {
-    console.log("meeting platform: ", meetingPlatform.value);
     $q.notify({
       type: "negative",
       message: "Hubo un problema al obtener la lista de plataformas virtuales",
@@ -1947,7 +1945,6 @@ const getCandidatesCatalog = async () => {
     loading.value = false;
     disableCheckbox.value = false;
     totalTableRows.value = request;
-    console.log("CANDIDATES", totalTableRows.value);
   } else {
     $q.notify(
       notifyNegative("Hubo un problema al obtener la lista de candidatos")
@@ -1995,7 +1992,6 @@ const showDaysAppointmentList = (data) => {
   openDialog2.value = false;
   confirm.value = false;
   appointmentDaysList.value = data;
-  console.log("Day´s appointments ", data);
 };
 
 const showEventData = (event) => {
@@ -2044,9 +2040,25 @@ const showEventData = (event) => {
   state.value = event.state;
   languages.value = event.languages;
   jobsApplications.value = event.jobNames;
-  studyLevel.value = event.levelOfStudy;
-  speciality.value = event.lastSchoolSpeciality;
-  lastSchool.value = event.lastSchool;
+
+  if(event.levelOfStudy == null){
+    studyLevel.value = "No especificado";
+  } else {
+    studyLevel.value = event.levelOfStudy;
+  }
+
+  if(event.lastSchoolSpeciality == null){
+    speciality.value = "No especificado";
+  } else {
+    speciality.value = event.lastSchoolSpeciality;
+  }
+
+  if(event.lastSchool == null){
+    lastSchool.value = "No especificado";
+  } else {
+    lastSchool.value = event.lastSchool;
+  }
+
   age.value = getAge(event.birthday);
   comparativeAppointment = {
     linkID: platformSelectedID.value,
@@ -2255,7 +2267,6 @@ const postPresentialAppointment = async () => {
 
   if (request != null) {
     let getInsertedAppointment = request;
-    console.log("SENDED APPOINTMENT: ", getInsertedAppointment)
     const candidateIndex = totalTableRows.value.findIndex(
       (candidate) => candidate.userID === request.userID
     );
@@ -2429,20 +2440,6 @@ const putPresentialAppointment = async () => {
       updatedAppointment.date != comparativeAppointment.date ||
       updatedAppointment.hour != comparativeAppointment.hour
     ) {
-      console.log(
-        "DATOS DE LA ACTUALIZACIÓN: ",
-        updatedAppointment.linkID +
-          " " +
-          comparativeAppointment.linkID +
-          " " +
-          updatedAppointment.date +
-          " " +
-          comparativeAppointment.date +
-          " " +
-          updatedAppointment.hour +
-          " " +
-          comparativeAppointment.hour
-      );
 
       /*Send a WhatsApp Message */
       const data = {
@@ -2479,7 +2476,7 @@ const putPresentialAppointment = async () => {
   } else {
     $q.notify(notifyNegative("Hubo un error al actualizar la cita"));
     $q.loading.hide();
-    console.log("error: " + error);
+    console.log("ERROR while updating the appointment: " + error);
   }
 };
 
@@ -2503,14 +2500,12 @@ const updateAppointment = async () => {
 };
 
 const eventsMap = computed(() => {
-  console.log("si lo detecta el cambio");
   const map = {};
   if (events.value.length > 0) {
     events.value.forEach((event) => {
       (map[event.date] = map[event.date] || []).push(event); //se hace un objeto que contine objetos difertenes, la clave de cada objeto es la fecha y el valor son arreglos con los objetos que guardan los valores de los datos de la cita
     });
   }
-  console.log("este es el mapa:", map);
   return map;
 });
 
@@ -2532,15 +2527,30 @@ const onCandidateSelection = (data) => {
   } else {
     sex.value = "Otro"
   }
-  console.log("SEX: ", sex.value)
   wishedSalary.value = data.wishedSalary;
   city.value = data.city;
   state.value = data.state;
   languages.value = data.languages;
   jobsApplications.value = data.jobNames;
-  studyLevel.value = data.levelOfStudy;
-  speciality.value = data.lastSchoolSpeciality;
-  lastSchool.value = data.lastSchool;
+
+  if(data.levelOfStudy == null){
+    studyLevel.value = "No especificado";
+  } else {
+    studyLevel.value = data.levelOfStudy;
+  }
+
+  if(data.lastSchoolSpeciality == null){
+    speciality.value = "No especificado";
+  } else {
+    speciality.value = data.lastSchoolSpeciality;
+  }
+
+  if(data.lastSchool == null){
+    lastSchool.value = "No especificado";
+  } else {
+    lastSchool.value = data.lastSchool;
+  }
+
   age.value = getAge(data.birthday);
 };
 
@@ -2548,9 +2558,6 @@ const onModalitySelection = (data) => {
   selectedPlatform.value = data.platformName;
   platformSelectedID.value = data.id;
   selectedModality.value = "Virtual";
-  console.log(selectedModality.value);
-  console.log(platformSelectedID.value);
-  console.log("PLATFORM NAME: IN MODALITY SELECTION ", selectedPlatform.value);
 };
 
 const onClickDay = (data) => {
@@ -2573,7 +2580,6 @@ const onClickDay = (data) => {
     }
     email.value = "";
     phoneNumber.value = "";
-    console.log("DATE 1: ", timestampDate.value);
     birthday.value = "";
     sex.value = "";
     wishedSalary.value = "";
@@ -2616,7 +2622,6 @@ const deactivateAppointment = async () => {
         (candidate) => candidate.userID === userID.value
       );
       totalTableRows.value[candidateIndex].status = "P";
-      console.log("Id del candidato: ", totalTableRows.value[candidateIndex]);
 
       const appointmentIndex = events.value.findIndex(
         (appointment) => appointment.appointmentId === appointmentId.value
@@ -2653,7 +2658,7 @@ const deactivateAppointment = async () => {
     );
     $q.loading.hide();
     openDialog2.value = false;
-    console.log("error in deactivation: " + error);
+    console.log("ERROR while deactivating the appointment: " + error);
   }
 };
 
@@ -2676,7 +2681,6 @@ const completeAppointment = async () => {
         (candidate) => candidate.userID === userID.value
       );
       totalTableRows.value[candidateIndex].status = "E";
-      console.log("Id del candidato: ", totalTableRows.value[candidateIndex]);
 
       const appointmentIndex = events.value.findIndex(
         (appointment) => appointment.appointmentId === appointmentId.value
@@ -2711,7 +2715,7 @@ const completeAppointment = async () => {
     );
     $q.loading.hide();
     openDialog2.value = false;
-    console.log("error in complete appointmente: " + error);
+    console.log("ERROR while finishing the appointment: " + error);
   }
 };
 </script>
