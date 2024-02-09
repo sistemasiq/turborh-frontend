@@ -242,7 +242,7 @@
               >
               </q-input>
 
-              <q-input 
+              <q-input
                 dark
                 outlined
                 color="cyan-1"
@@ -368,7 +368,7 @@
         </div>
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" />
+    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPage"/>
   </q-layout>
 </template>
 

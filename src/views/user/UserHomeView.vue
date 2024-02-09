@@ -53,7 +53,7 @@
           <div>
             <p
               class="text-subtitle2 text-white text-weight-regular"
-              :style="!userHasApplication  ? '' : 'visibility:hidden'"
+              :style="!userHasApplication ? '' : 'visibility:hidden'"
             >
               Crear
             </p>
@@ -64,7 +64,9 @@
               class="q-mb-lg drawer-button"
               icon="description"
               :style="!userHasApplication ? '' : 'visibility:hidden'"
-              :disable="userHasApplication || getUserPhotoUUID === 'default.png'"
+              :disable="
+                userHasApplication || getUserPhotoUUID === 'default.png'
+              "
             >
               <Tooltip
                 v-if="!userHasApplication"
@@ -151,19 +153,20 @@
               }"
               :disable="!userHasApplication"
             >
-            <q-tooltip
-      v-if="userHasApplication"
-      class="bg-dark text-white text-body2"
-      anchor="top middle"
-      self="center middle"
-      transition-show="slide-up"
-      transition-hide="fade"
-      :delay="300"
-      transition-duration="300"
-      :offset="[10, 25]"
-    >
-      {{ toolTipActiveApplicationText }}
-    </q-tooltip></q-btn>
+              <q-tooltip
+                v-if="userHasApplication"
+                class="bg-dark text-white text-body2"
+                anchor="top middle"
+                self="center middle"
+                transition-show="slide-up"
+                transition-hide="fade"
+                :delay="300"
+                transition-duration="300"
+                :offset="[10, 25]"
+              >
+                {{ toolTipActiveApplicationText }}
+              </q-tooltip></q-btn
+            >
           </div>
           <div>
             <p
@@ -221,7 +224,7 @@
     <q-dialog v-model="openNote">
       <note-component :currentRoute="currentPath" class="note"></note-component>
     </q-dialog>
-    <q-dialog v-model="openStatusApplicationDialog" persistent>
+    <q-dialog class="z-max" v-model="openStatusApplicationDialog" persistent>
       <q-card style="border-radius: 30px">
         <q-card-section class="row items-center">
           <q-avatar
@@ -274,7 +277,7 @@ import Tooltip from "src/components/Tooltip.vue";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { updateUserApplicationState } from "src/services/userApplication";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
-
+import { disableCandidateAllRequisitions } from "src/services/candidates";
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
@@ -313,9 +316,10 @@ const activeApplication = ref(false);
 const userPhotoUUID = ref("");
 
 const toolTipActiveApplicationText = computed(() => {
-  return activeApplication.value ? 'Elimina tu solicitud de trabajo' : 'Activa tu solicitud de trabajo'
-})
-
+  return activeApplication.value
+    ? "Elimina tu solicitud de trabajo"
+    : "Activa tu solicitud de trabajo";
+});
 
 onMounted(() => {
   loadLocalStorage();
@@ -329,22 +333,21 @@ const loadLocalStorage = () => {
 
   if (userStored) {
     user.value = userStored;
-    userPhotoUUID.value = user.value.photoUUID
+    userPhotoUUID.value = user.value.photoUUID;
     checkUserApplication(false);
   }
   if (loggedStored) logged.value = loggedStored;
 
-  if(isViewingApplication){
+  if (isViewingApplication) {
     viewingApplication.value = isViewingApplication;
   }
-  if(isUpdatingApplication){
+  if (isUpdatingApplication) {
     updatingApplication.value = isUpdatingApplication;
   }
-
 };
 
 const goToRequisitionApplicants = () => {
-  if(viewAllRequisitions.value){
+  if (viewAllRequisitions.value) {
     router.replace("/home/historial-solicitudes");
     return;
   }
@@ -364,6 +367,15 @@ const logout = () => {
 
 watch(
   viewingApplication, // Watch the desired store value
+  (newValue) => {
+    if (!newValue) {
+      componentKeyRouterView.value += 1;
+    }
+  }
+);
+
+watch(
+  activeApplication, // Watch the desired store value
   (newValue) => {
     if (!newValue) {
       componentKeyRouterView.value += 1;
@@ -396,19 +408,36 @@ const onDeleteApplication = async () => {
   try {
     const updatedState = await updateUserApplicationState(userData);
 
-    if (updatedState) {
-      const message = activeApplication.value
-        ? "Su solicitud ha sido eliminada correctamente"
-        : "Su solicitud ha sido activada correctamente";
-      $q.notify(notifyPositive(message));
+    if (!updatedState) return;
 
-      savedApplication.value.activo = userData.activo;
-      useLocalStorage.save("savedApplication", savedApplication.value);
-      activeApplication.value = userData.activo === 1 ? true : false;
-      router.replace("/userHome/perfil");
+    const message = activeApplication.value
+      ? "Su solicitud ha sido eliminada correctamente"
+      : "Su solicitud ha sido activada correctamente";
+
+    $q.notify(notifyPositive(message));
+
+    if (activeApplication.value) {
+      const disabledFromApplications = await disableCandidateAllRequisitions(
+        user.value.id
+      );
+
+      if (disabledFromApplications) {
+        $q.notify(
+          notifyPositive(
+            "Se han eliminado todas tus aplicaciones a los puestos."
+          )
+        );
+      }
     }
+
+    savedApplication.value.activo = userData.activo;
+    useLocalStorage.save("savedApplication", savedApplication.value);
+    activeApplication.value = userData.activo === 1 ? true : false;
+    router.replace("/userHome/perfil");
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al eliminar tu solicitud, intenta de nuevo"));
+    $q.notify(
+      notifyNegative("Hubo un error al eliminar tu solicitud, intenta de nuevo")
+    );
   }
 };
 
@@ -477,6 +506,7 @@ const checkUserApplication = (sendToApplication = true) => {
   if (!userHasApplication.value) return;
 
   activeApplication.value = savedApplication.value.activo === 1 ? true : false;
+  userHasApplication.value = savedApplication.value.solicitud_id !== 0 ? true : false;
 
   if (sendToApplication) {
     router.push("/userHome/solicitud-1");

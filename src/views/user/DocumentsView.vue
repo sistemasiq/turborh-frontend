@@ -7,7 +7,7 @@
       <q-card-section class="title"> Documentos </q-card-section>
 
       <q-card-section class="content">
-        <pagination-application :page="4" :required-fields="requiredFieldsOnThisPage" />
+        <pagination-application :page="4" :required-fields="updatingApplication ? requiredFieldsOnThisPageUpdating : requiredFieldsOnThisPage" />
         <div style="margin-top: 6%">
           <q-card flat bordered text-color="white"
   class="q-mb-lg"
@@ -82,7 +82,6 @@
               mask="###########"
               lazy-rules
               :rules="[
-                (value) => !!value || 'La clave AFORE es requerida',
                 (value) =>
                   /^[0-9]{11}$/.test(value) || 'La clave AFORE debe ser válida',
               ]"
@@ -150,7 +149,7 @@
         </div>
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" />
+    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPageUpdating"/>
   </q-layout>
 </template>
 
@@ -176,7 +175,7 @@ const afore = ref("");
 const fm2 = ref("");
 
 const requiredFieldsOnThisPage = computed(() => [rfc.value, imss.value, curriculumStored.value])
-
+const requiredFieldsOnThisPageUpdating = computed(() => [rfc.value, imss.value])
 
 const {
   documentsData,

@@ -102,7 +102,7 @@
       style="position: relative; bottom: 2%; left: 5%"
       icon="delete"
       label="Eliminar ultimo"
-      @click="deleteLastRelative"
+      @click.prevent="deleteLastRelative"
       :disable="disableDeleteButton"
     />
   </div>
@@ -122,7 +122,7 @@ const useRequest = useRequestUser();
 
 const relationOptions = ["Padre", "Madre", "Esposo/a"];
 
-const currentIndex = ref(0);
+const currentIndex = ref(1);
 
 const disableDeleteButton = ref(true);
 
@@ -164,7 +164,7 @@ onMounted(() => {
     setSavedStoredValues();
   }
   disableDeleteButton.value =
-    familyFathersData.value.length === 0 ? true : false;
+    familyFathersData.value.length === 2 ? true : false;
 });
 
 const setSavedStoredValues = () => {
@@ -217,24 +217,32 @@ const workPlaceRule = (value) => {
 
 
 const disableAddButton = () => {
-  if (familyFathersData.value.length === 0) return false;
 
-  if (
-    familyFathersData.value[currentIndex.value].relationship === "" ||
-    familyFathersData.value[currentIndex.value].name === "" ||
-    familyFathersData.value[currentIndex.value].birthdate === "" ||
-    familyFathersData.value[currentIndex.value].job === "" ||
-    familyFathersData.value[currentIndex.value].jobAddress === "" ||
-    familyFathersData.value.length === 0
+  if(familyFathersData.value.length === 3) return true;
+
+  if(familyFathersData.value[0]){
+    if (
+    familyFathersData.value[0].relationship === "" ||
+    familyFathersData.value[0].name === "" ||
+    familyFathersData.value[0].birthdate === "" ||
+    familyFathersData.value[0].job === "" ||
+    familyFathersData.value[0].jobAddress === "" ||
+    familyFathersData.value[1].relationship === "" ||
+    familyFathersData.value[1].name === "" ||
+    familyFathersData.value[1].birthdate === "" ||
+    familyFathersData.value[1].job === "" ||
+    familyFathersData.value[1].jobAddress === ""
   ) {
     return true;
   }
   return false;
+  }
+
+
 };
 
 const addNewRelative = () => {
   if (disableAddButton()) return;
-
   const newRelative = {
     relationship: "",
     name: "",
@@ -244,21 +252,19 @@ const addNewRelative = () => {
   };
 
   familyFathersData.value.push(newRelative);
+
   setCurrentIndex();
   disableDeleteButton.value = false;
-  if (familyFathersData.value.length === 3) {
-    disableAddButton.value = true;
-  }
 };
 
 const deleteLastRelative = () => {
-  if (familyFathersData.value.length > 0) {
+  if (familyFathersData.value.length > 2) {
     disableDeleteButton.value = false;
     disableAddButton.value = false;
     familyFathersData.value.pop();
     setCurrentIndex();
 
-    if (familyFathersData.value.length === 0) {
+    if (familyFathersData.value.length === 2) {
       disableDeleteButton.value = true;
       disableAddButton.value = false;
     }
@@ -279,6 +285,9 @@ const loadLocalStore = () => {
 };
 
 const setCurrentIndex = () => {
+  if(familyFathersData.value.length === 0)
+  return;
+
   currentIndex.value = familyFathersData.value.length - 1;
 };
 </script>

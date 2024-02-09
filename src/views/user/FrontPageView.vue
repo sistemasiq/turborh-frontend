@@ -170,7 +170,7 @@
 
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" />
+    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPage"/>
   </q-layout>
 </template>
 
@@ -201,10 +201,9 @@ const firstLastName = ref("");
 const secondLastName = ref("");
 const wantedSalary = ref(0);
 const genderChoosed = ref();
-const userName = ref("");
 const photoUUID = ref("");
 
-const { user, isRh, getUserPhotoUUID } = storeToRefs(useAuth);
+const { isRh, getUserPhotoUUID } = storeToRefs(useAuth);
 
 
 const getUserImage = computed(() => {
@@ -222,14 +221,6 @@ const getUserImage = computed(() => {
 
 const setUserInfo = () => {
 
-  const userStored = useLocalStorage.load("user");
-
-  if (userStored) {
-    console.log("USER STORED "+userStored.photoUUID);
-    user.value = userStored;
-    userName.value = userStored.userName;
-    photoUUID.value = userStored.photoUUID;
-  }
 
 };
 
@@ -260,19 +251,19 @@ const requiredFieldsOnThisPage = computed(() => [name.value, firstLastName.value
 
 onMounted(() => {
   setUserInfo();
-  loadLocalStore();
   if (viewingApplication.value || updatingApplication.value) {
     setSavedStoredValues();
     if (updatingApplication.value) {
       setAllStoredValues();
     }
   } else {
+    loadLocalStore();
     setStoredValues();
   }
 });
 
 //JAJAJA SPANGLISH
-//He llegado a un punto que no quiero ni refactorizar el JSON de el stored procedure
+//He llegado a un punto que no quiero ni refactorizar el JSON del stored procedure
 //Por si falla algo mejor asi lo dejamos
 const setSavedStoredValues = () => {
   if (!savedApplication.value) {

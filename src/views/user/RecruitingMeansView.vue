@@ -146,7 +146,7 @@
         />
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" />
+    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPage"/>
   </q-layout>
 </template>
 

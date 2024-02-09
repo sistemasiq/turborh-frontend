@@ -73,6 +73,22 @@ export const disableCandidate = async (requisitionId, userId) => {
   }
 };
 
+export const disableCandidateAllRequisitions = async (userId) => {
+  try {
+    const request = await axios.delete(
+      `candidates/${userId}`
+    );
+
+    if (requestSuccessfull(request.status)) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
+};
+
 export const enableCandidate = async (requisitionId, userId) => {
   try {
     const request = await axios.put(

@@ -4,7 +4,7 @@
     flat
     bordered
     style="background: rgb(234, 237, 249)"
-    title="Solicitudes para el puesto"
+    :title="'Solicitudes para el puesto: ' + tableJobName"
     :columns="columns"
     :rows="currentApplicants"
     :loading="loading"
@@ -57,6 +57,18 @@
           v-if="row.photoUUID"
           :src="getS3FileUrl(getUserImagesPath, row.photoUUID)"
           spinner-color="primary"
+        />
+      </q-td>
+    </template>
+
+    <template v-slot:body-cell-psychTestSended="{ row }">
+      <q-td>
+        <q-btn
+          rounded
+          v-if="row.psychTestStatus === 'E'"
+          icon="visibility"
+          label="Ver datos"
+          @click.prevent="seePsychTestData(row)"
         />
       </q-td>
     </template>
@@ -279,7 +291,7 @@
             outlined
             color="black"
             v-model="userNameForPsychTests"
-            label="Nombre"
+            label="Nombre de usuario"
             label-color="black"
             lazy-rules
             :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
@@ -323,6 +335,72 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="openSeeDataPsychTest">
+    <q-card>
+      <q-card-section>
+        <div class="text-h6">Datos del test psicometrico</div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section
+        style="width: 550px; max-width: 90vw; max-height: 50vh"
+        class="justify-between"
+        horizontal
+      >
+        <q-card-section style="width: 50%">
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="selectedPsychTestPlatform"
+            label="Plataforma"
+            label-color="black"
+            readonly
+            style="width: 100%"
+          />
+        </q-card-section>
+
+        <q-card-section style="width: 50%">
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="userNameForPsychTests"
+            label="Nombre"
+            label-color="black"
+            readonly
+            style="width: 100%"
+            class="q-mb-md"
+          />
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="passwordForPsychTest"
+            label="Contraseña"
+            label-color="black"
+            readonly=""
+            style="width: 100%"
+          />
+        </q-card-section>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-actions class="justify-end q-pa-md">
+        <q-btn
+          flat
+          label="Cerrar"
+          v-close-popup
+          class="text-red-8 q-mr-sm"
+          style="border-radius: 8px"
+          @click.prevent="resetPsychTestInformation()"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
@@ -337,7 +415,6 @@ import { useQuasar } from "quasar";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { useRequestUser } from "src/stores/requestUser";
 import { useNotesStore } from "src/stores/notes";
-import { useAuthStore } from "src/stores/auth";
 import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
 import {
@@ -363,7 +440,6 @@ const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
 const useLocalStorage = useLocalStorageStore();
 const useNotes = useNotesStore();
-const useAuth = useAuthStore();
 const useRequest = useRequestUser();
 const filter = ref("");
 
@@ -374,8 +450,6 @@ const selectedCandidate = ref(0);
 const currentApplicants = ref([]);
 const { numRequisitionDetails, viewAllRequisitions, idRequisitionDetails } =
   storeToRefs(useRequisitionDetails);
-
-const { user } = storeToRefs(useAuth);
 
 const noDataLabel = ref("No hay solicitantes para este puesto...");
 const loading = ref(false);
@@ -412,7 +486,8 @@ const passwordForPsychTest = ref("");
 const selectedPsychTestPlatform = ref("");
 const psychTestPlatformId = ref("");
 const psychTestPlatforms = ref([]);
-
+const tableJobName = ref("");
+const openSeeDataPsychTest = ref(false);
 
 const sendPsychTestInformation = async () => {
   try {
@@ -426,6 +501,17 @@ const sendPsychTestInformation = async () => {
     );
 
     if (updatedPsychCredentials) {
+
+      selectedCandidate.value.psychPlatformID = psychTestPlatformId.value;
+      selectedCandidate.value.userNameForPsychPlatform = userNameForPsychTests.value;
+      selectedCandidate.value.userPasswordForPsychPlatform = passwordForPsychTest.value;
+      selectedCandidate.value.psychTestStatus = "E"
+
+      updateRow(selectedCandidate.value);
+
+
+
+
       const sendedEmail = await sendPsychometricTestEmail(
         selectedCandidate.value.email,
         selectedCandidate.value.name,
@@ -441,7 +527,9 @@ const sendPsychTestInformation = async () => {
           passwordForPsychTest.value
         );
         if (sendedMessage) {
-          $q.notify(notifyPositive("Enviada prueba psicométrica correctamente"));
+          $q.notify(
+            notifyPositive("Enviada prueba psicométrica correctamente")
+          );
         }
       }
     }
@@ -452,6 +540,15 @@ const sendPsychTestInformation = async () => {
     $q.loading.hide();
   }
 };
+
+
+
+const seePsychTestData = (row) => {
+  openSeeDataPsychTest.value = true;
+  userNameForPsychTests.value = row.userNameForPsychPlatform;
+  passwordForPsychTest.value = row.userPasswordForPsychPlatform;
+  setSelectedPsychPlatform(row.psychPlatformID);
+}
 
 const resetPsychTestInformation = () => {
   selectedPsychTestPlatform.value = "";
@@ -471,7 +568,7 @@ onMounted(() => {
   viewAllRequisitions.value = false;
   loadLocalStore();
   fetchApplicants();
-  getPyschPlatformsData();
+  getPsychPlatformsData();
 });
 
 const loadLocalStore = () => {
@@ -487,7 +584,7 @@ const loadLocalStore = () => {
   }
 };
 
-const getPyschPlatformsData = async () => {
+const getPsychPlatformsData = async () => {
   try {
     const request = await getPsychometricPlatforms();
     if (request) {
@@ -495,6 +592,14 @@ const getPyschPlatformsData = async () => {
       console.log("Psychometric platforms data", psychTestPlatforms.value);
     }
   } catch (error) {}
+};
+
+const setSelectedPsychPlatform = (id) => {
+  psychTestPlatforms.value.forEach(element => {
+    if(element.id === id){
+      selectedPsychTestPlatform.value = element.psychPlatformName;
+    }
+  })
 };
 
 const selectPsychPlatform = (data) => {
@@ -527,8 +632,8 @@ const selectCandidateById = async () => {
       const completed = await completeRequisition(numRequisitionDetails.value);
       console.log("Is requisition completed " + completed);
       if (completed) {
-      selectedCandidate.value.requisitionState = 'PC'
-      updateRow(selectedCandidate.value, true);
+        selectedCandidate.value.requisitionState = "PC";
+        updateRow(selectedCandidate.value, true);
         $q.notify(
           notifyPositive("Se han llenado las vacantes para este puesto")
         );
@@ -558,6 +663,7 @@ const fetchApplicants = async () => {
 
     if (candidates) {
       currentApplicants.value = candidates;
+      tableJobName.value = currentApplicants.value[0].jobName;
       console.log(currentApplicants.value);
     }
   } catch (error) {
@@ -623,9 +729,10 @@ const updateRow = (row, requisitionHasBeenCompleted = false) => {
   currentApplicants.value.forEach((element) => {
     if (element.userId === row.userId) {
       element = row;
+      console.log(element);
     }
-    if(requisitionHasBeenCompleted){
-      element.requisitionState = 'PC'
+    if (requisitionHasBeenCompleted) {
+      element.requisitionState = "PC";
     }
   });
 };
@@ -703,7 +810,6 @@ const columns = [
   {
     name: "selected",
     label: "Seleccion",
-    required: true,
     field: (row) => (row.selected === 1 ? "Candidato Seleccionado" : ""),
     align: "left",
     classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
@@ -741,19 +847,20 @@ const columns = [
     classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
   {
+    name: "phoneNumber",
+    label: "Telefono",
+    required: true,
+    align: "left",
+    field: (row) => row.phoneNumber,
+    sortable: true,
+    classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
+  },
+  {
     name: "wishedSalary",
     label: "Salario deseado",
     required: true,
     align: "left",
     field: (row) => row.wishedSalary + " MXN",
-    classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
-  },
-  {
-    name: "jobName",
-    label: "Puesto solicitado",
-    required: true,
-    align: "left",
-    field: (row) => row.jobName,
     classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
   {
@@ -764,6 +871,14 @@ const columns = [
     field: (row) => row.dateCreated,
     sortable: true,
     classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
+  },
+  {
+    name: "psychTestSended",
+    label: "Test psicometríco",
+    required: true,
+    align: "left",
+    field: (row) => (row.psychTestStatus === "E" ? "Enviada" : ""),
+    sortable: true,
   },
   {
     name: "options",
