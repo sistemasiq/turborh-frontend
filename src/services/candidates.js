@@ -73,11 +73,24 @@ export const disableCandidate = async (requisitionId, userId) => {
   }
 };
 
-export const disableCandidateAllRequisitions = async (userId) => {
+export const disableAllCandidatesFromRequisition = async (requisitionId) => {
   try {
     const request = await axios.delete(
-      `candidates/${userId}`
+      `candidates/requisition-id/${requisitionId}`
     );
+    if (requestSuccessfull(request.status)) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
+};
+
+export const disableCandidateAllRequisitions = async (userId) => {
+  try {
+    const request = await axios.delete(`candidates/${userId}`);
 
     if (requestSuccessfull(request.status)) {
       return true;
@@ -109,16 +122,15 @@ export const selectCandidate = async (candidateId) => {
   try {
     const request = await axios.put(`candidates/select/${candidateId}`);
 
-    if(requestSuccessfull(request.status)){
+    if (requestSuccessfull(request.status)) {
       return true;
-    }else{
+    } else {
       return false;
     }
-
   } catch (error) {
     return false;
   }
-}
+};
 
 export const getAllCandidatesDiary = async () => {
   try {

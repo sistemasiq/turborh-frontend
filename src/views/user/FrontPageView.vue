@@ -219,10 +219,6 @@ const getUserImage = computed(() => {
   }
 });
 
-const setUserInfo = () => {
-
-
-};
 
 
 const {
@@ -247,10 +243,9 @@ const {
   drivingLicenceData
 } = storeToRefs(useRequest);
 
-const requiredFieldsOnThisPage = computed(() => [name.value, firstLastName.value, secondLastName.value, wantedSalary.value])
+const requiredFieldsOnThisPage = computed(() => [name.value, firstLastName.value, secondLastName.value, wantedSalary.value, genderChoosed.value])
 
 onMounted(() => {
-  setUserInfo();
   if (viewingApplication.value || updatingApplication.value) {
     setSavedStoredValues();
     if (updatingApplication.value) {

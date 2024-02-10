@@ -432,8 +432,14 @@ import {
   getPsychometricPlatforms,
 } from "src/services/user";
 import { completeRequisition } from "src/services/requisition";
-import { sendPsychometricTestEmail } from "src/services/mail";
-import { sendPsychTestMessage } from "src/services/whatsApp";
+import {
+  sendPsychometricTestEmail,
+  sendCanceledRequisitionEmail,
+} from "src/services/mail";
+import {
+  sendPsychTestMessage,
+  sendCanceledRequisitionMessage,
+} from "src/services/whatsApp";
 import { updatePsychTestCredentials } from "src/services/user";
 
 const $q = useQuasar();
@@ -501,16 +507,14 @@ const sendPsychTestInformation = async () => {
     );
 
     if (updatedPsychCredentials) {
-
       selectedCandidate.value.psychPlatformID = psychTestPlatformId.value;
-      selectedCandidate.value.userNameForPsychPlatform = userNameForPsychTests.value;
-      selectedCandidate.value.userPasswordForPsychPlatform = passwordForPsychTest.value;
-      selectedCandidate.value.psychTestStatus = "E"
+      selectedCandidate.value.userNameForPsychPlatform =
+        userNameForPsychTests.value;
+      selectedCandidate.value.userPasswordForPsychPlatform =
+        passwordForPsychTest.value;
+      selectedCandidate.value.psychTestStatus = "E";
 
       updateRow(selectedCandidate.value);
-
-
-
 
       const sendedEmail = await sendPsychometricTestEmail(
         selectedCandidate.value.email,
@@ -542,14 +546,12 @@ const sendPsychTestInformation = async () => {
   }
 };
 
-
-
 const seePsychTestData = (row) => {
   openSeeDataPsychTest.value = true;
   userNameForPsychTests.value = row.userNameForPsychPlatform;
   passwordForPsychTest.value = row.userPasswordForPsychPlatform;
   setSelectedPsychPlatform(row.psychPlatformID);
-}
+};
 
 const resetPsychTestInformation = () => {
   selectedPsychTestPlatform.value = "";
@@ -595,11 +597,11 @@ const getPsychPlatformsData = async () => {
 };
 
 const setSelectedPsychPlatform = (id) => {
-  psychTestPlatforms.value.forEach(element => {
-    if(element.id === id){
+  psychTestPlatforms.value.forEach((element) => {
+    if (element.id === id) {
       selectedPsychTestPlatform.value = element.psychPlatformName;
     }
-  })
+  });
 };
 
 const selectPsychPlatform = (data) => {
@@ -631,9 +633,23 @@ const selectCandidateById = async () => {
       const completed = await completeRequisition(numRequisitionDetails.value);
       if (completed) {
         selectedCandidate.value.requisitionState = "PC";
+
         updateRow(selectedCandidate.value, true);
+        const sendedEmails = await onCompleteSendEmailToCandidates();
+        const sendedMessages = await onCompleteSendMessageToCandidates();
+
+        if (sendedEmails && sendedMessages) {
+          $q.notify(
+            notifyPositive(
+              "Se han notificado a los candidato a los demás candidatos",
+              3000
+            )
+          );
+        }
+
+
         $q.notify(
-          notifyPositive("Se han llenado las vacantes para este puesto")
+          notifyPositive("Se han llenado las vacantes para este puesto", 3000)
         );
       }
     }
@@ -758,7 +774,6 @@ const createReport = async (applicationId) => {
 };
 
 const addNotes = (applicationId) => {
-
   fetchUserApplication(applicationId);
   viewingApplication.value = true;
 };
@@ -800,6 +815,62 @@ const fetchUserApplicationNotes = async (applicationId) => {
       notesLaboralExperience.value = notes.noteLaboralExperience;
     }
   } catch (error) {}
+};
+
+const onCompleteSendEmailToCandidates = async () => {
+  const promises = currentApplicants.value.map((candidate) => {
+    if (candidate.selected === 0) {
+      return sendCanceledRequisitionEmail(
+        candidate.email,
+        candidate.name,
+        candidate.jobName
+      );
+    }
+  });
+
+  try {
+    const results = await Promise.all(promises);
+
+    const successCount = results.filter((result) => result).length;
+    const failureCount = results.length - successCount;
+    if (failureCount === 0) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error("Error al mandar los emails:", error);
+    $q.notify(notifyNegative("Error al notificar a los candidatos"));
+    return false;
+  }
+};
+
+const onCompleteSendMessageToCandidates = async () => {
+  const promises = currentApplicants.value.map((candidate) => {
+    if (candidate.selected === 0) {
+      return sendCanceledRequisitionMessage(
+        candidate.phoneNumber,
+        candidate.name,
+        candidate.jobName
+      );
+    }
+  });
+
+  try {
+    const results = await Promise.all(promises);
+
+    const successCount = results.filter((result) => result).length;
+    const failureCount = results.length - successCount;
+    if (failureCount === 0) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error("Error al mandar los mensaje:", error);
+    $q.notify(notifyNegative("Error al notificar a los candidatos"));
+    return false;
+  }
 };
 
 const columns = [

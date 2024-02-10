@@ -128,7 +128,6 @@ const disableDeleteButton = ref(true);
 
 const {
   familyFathersData,
-  savedApplication,
   viewingApplication,
   updatingApplication,
 } = storeToRefs(useRequest);
@@ -157,25 +156,12 @@ const columns = [
 ];
 
 onMounted(() => {
-  loadLocalStore();
   setCurrentIndex();
 
-  if (viewingApplication.value || updatingApplication.value) {
-    setSavedStoredValues();
-  }
   disableDeleteButton.value =
     familyFathersData.value.length === 2 ? true : false;
 });
 
-const setSavedStoredValues = () => {
-  if (familyFathersData.value.length > 0) return;
-
-  savedApplication.value.datos_familiares.forEach((element) => {
-    if (element.job != null) {
-      familyFathersData.value.push(element);
-    }
-  });
-};
 
 const lettersRule = (value) => {
   const charactersValid = /^[A-Za-zñ áéíóúÁÉÍÓÚ]*$/.test(value);
@@ -264,7 +250,7 @@ const deleteLastRelative = () => {
     familyFathersData.value.pop();
     setCurrentIndex();
 
-    if (familyFathersData.value.length === 2) {
+    if (familyFathersData.value.length === 3 || familyFathersData.value.length === 2) {
       disableDeleteButton.value = true;
       disableAddButton.value = false;
     }

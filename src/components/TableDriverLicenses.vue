@@ -24,10 +24,7 @@
       </template>
       <template v-slot:body-cell-number="{ row }">
         <q-td>
-          <q-input
-            v-model="row.number"
-            :readonly="viewingApplication"
-          />
+          <q-input v-model="row.number" :readonly="viewingApplication" />
         </q-td>
       </template>
 
@@ -230,6 +227,11 @@ const loadLocalStore = () => {
 };
 
 const setCurrentIndex = () => {
+  if (drivingLicenceData.value.length === 0) {
+    currentIndex.value = 0;
+    return;
+  }
+
   currentIndex.value = drivingLicenceData.value.length - 1;
 };
 </script>

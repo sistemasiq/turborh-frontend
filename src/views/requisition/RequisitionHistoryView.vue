@@ -326,10 +326,11 @@ import { useAuthStore } from "src/stores/auth";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 import { useLocalStorageStore } from "src/stores/localStorage";
-import { sendEmail, canceledRequisition } from "src/services/mail";
+import { sendCanceledRequisitionEmail } from "src/services/mail";
+import { sendCanceledRequisitionMessage } from "src/services/whatsApp";
 import Tooltip from "src/components/Tooltip.vue";
 import { createRequisitionReport } from "src/services/report";
-import { getCandidatesByRequisitionId } from "src/services/candidates";
+import { getCandidatesByRequisitionId, disableAllCandidatesFromRequisition } from "src/services/candidates";
 
 import {
   getAllRequisitions,
@@ -491,6 +492,7 @@ const openPublishRequisitionDialogue = (row) => {
 const openCancelRequisitionDialogue = (row) => {
   showCancelRequisitionDialogue.value = true;
   selectedRequisition.value = row;
+  console.log(selectedRequisition.value);
 
   if (selectedRequisition.value.candidatesNumber > 0) {
     onCancelFetchApplicants();
@@ -499,12 +501,7 @@ const openCancelRequisitionDialogue = (row) => {
 
 const onCancelSendEmailToCandidates = async () => {
   const promises = selectedRequisitionCandidates.value.map((candidate) => {
-    const emailData = canceledRequisition(
-      candidate.email,
-      candidate.name,
-      candidate.jobName
-    );
-    return sendEmail("canceled-appointment", emailData);
+    return sendCanceledRequisitionEmail(candidate.email, candidate.name, candidate.jobName);
   });
 
   try {
@@ -512,11 +509,38 @@ const onCancelSendEmailToCandidates = async () => {
 
     const successCount = results.filter((result) => result).length;
     const failureCount = results.length - successCount;
-    $q.notify(notifyPositive("Los candidatos han sido notificados"));
+    if(failureCount === 0){
+      return true;
+    }else{
+      return false
+    }
   } catch (error) {
     console.error("Error al mandar los emails:", error);
     $q.notify(notifyNegative("Error al notificar a los candidatos"));
-    // Handle errors, possibly by notifying the user
+    return false;
+  }
+};
+
+const onCancelSendMessageToCandidates = async () => {
+  const promises = selectedRequisitionCandidates.value.map((candidate) => {
+    return sendCanceledRequisitionMessage(candidate.phoneNumber, candidate.name, candidate.jobName);
+  });
+
+  try {
+    const results = await Promise.all(promises);
+
+    const successCount = results.filter((result) => result).length;
+    const failureCount = results.length - successCount;
+    if(failureCount === 0){
+      return true;
+    }else{
+      return false
+    }
+
+  } catch (error) {
+    console.error("Error al mandar los mensaje:", error);
+    $q.notify(notifyNegative("Error al notificar a los candidatos"));
+    return false;
   }
 };
 
@@ -583,11 +607,19 @@ const disableRequisition = async (requisition) => {
 
     if (requisitionCanceled) {
       requisition.state = "C";
-      updateSelectedRequisition(requisition);
 
       if (selectedRequisitionCandidates.value.length > 0) {
-        await onCancelSendEmailToCandidates();
+        const sendedEmails = await onCancelSendEmailToCandidates();
+        const sendedMessages = await onCancelSendMessageToCandidates();
+        const disableCandidates = await disableAllCandidatesFromRequisition(selectedRequisitionCandidates.value[0].requisitionId);
+
+        if(sendedEmails && sendedMessages && disableCandidates){
+          requisition.candidatesNumber = 0;
+          $q.notify(notifyPositive("Los candidatos han sido notificados de la cancelación."));
+        }
+
       }
+      updateSelectedRequisition(requisition);
 
       $q.notify(
         notifyPositive("La requisición ha sido cancelada correctamente")

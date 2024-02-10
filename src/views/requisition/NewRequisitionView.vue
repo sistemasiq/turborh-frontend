@@ -153,6 +153,7 @@ import { storeToRefs } from 'pinia';
 import NoteRequisitionComponent from 'src/components/NoteRequisitionComponent.vue';
 import { getPersonalByName, getPersonalById, getAllPersonal } from 'src/services/personal';
 import { getJobById, getJobsByPersonalId, getAllActiveJobs } from 'src/services/jobs';
+import { sortAlphabetical } from 'src/utils/operations'
 const useRequisition = useRequisitionStore();
 const useRequisitionDetails = useRequisitionDetailsStore();
 const useAuth = useAuthStore();

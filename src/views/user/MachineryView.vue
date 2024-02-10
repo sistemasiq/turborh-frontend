@@ -329,7 +329,7 @@ onMounted(() => {
   }
 
   setStoredValues();
-  sortAlphabetical(machinery.value, true);
+  sortAlphabetical(machinery.value);
   sortAlphabetical(measuringInstruments.value);
   sortAlphabetical(tools.value);
 });
@@ -474,7 +474,7 @@ const removeMachinery = (item) => {
   }
   if (item.type !== "Otro") {
     machinery.value.push(item.name);
-    sortAlphabetical(machinery.value, true);
+    sortAlphabetical(machinery.value);
   }
 };
 

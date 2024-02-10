@@ -77,6 +77,15 @@ import FamilyFathers from "src/components/TableFamilyData.vue";
 import FamilySons from "src/components/TableFamilyData2.vue";
 import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
+import { useLocalStorageStore } from "src/stores/localStorage";
+
+const useLocalStorage = useLocalStorageStore();
+const useApplication = useRequestUser();
+
+
+const { updatingApplication, familyFathersData, viewingApplication, savedApplication } =
+  storeToRefs(useApplication);
+
 
 const requiredFieldsOnThisPage = computed(() => {
   if (familyFathersData.value[0] && familyFathersData.value[0]) {
@@ -97,7 +106,33 @@ const requiredFieldsOnThisPage = computed(() => {
 
 
 onMounted(() => {
-  if(familyFathersData.value.length < 1){
+  loadLocalStore();
+  if (viewingApplication.value || updatingApplication.value) {
+    setSavedStoredValues();
+  }
+  init();
+})
+
+
+  const setSavedStoredValues = () => {
+  if (familyFathersData.value.length > 0) return;
+
+  savedApplication.value.datos_familiares.forEach((element) => {
+    if (element.job != null) {
+      familyFathersData.value.push(element);
+    }
+  });
+
+};
+
+const loadLocalStore = () => {
+  const localStoreData = useLocalStorage.load("familyFathersData");
+
+  if (localStoreData) familyFathersData.value = localStoreData;
+};
+
+const init = () => {
+  if(familyFathersData.value.length === 0){
     const newRelative = {
     relationship: "",
     name: "",
@@ -109,14 +144,7 @@ onMounted(() => {
   familyFathersData.value.push(newRelative);
   familyFathersData.value.push(newRelative);
   }
-})
-
-const useApplication = useRequestUser();
-
-
-const { updatingApplication, familyFathersData, viewingApplication } =
-  storeToRefs(useApplication);
-
+}
 
 </script>
 

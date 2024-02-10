@@ -71,6 +71,21 @@ export const sendPsychTestMessage= async (phoneNumber, userName, platformUserNam
   }
 };
 
+
+export const sendCanceledRequisitionMessage = async (phoneNumber, name, jobName) => {
+
+  const data = requisitionInformationTemplate(phoneNumber, name, jobName);
+
+  try {
+    const request = await axios.post(`/api/whatsapp/send/requisitions/canceled`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
 const psychTestSendedTemplate = (phoneNumber, userName, platformUserName, userPassword) => {
   return {
     "phoneNumber": phoneNumber,
@@ -80,6 +95,14 @@ const psychTestSendedTemplate = (phoneNumber, userName, platformUserName, userPa
     "emailSupport": "reclutamiento@turbomaquinas.com"
 
   }
+}
+
+const requisitionInformationTemplate = (phoneNumber, name, jobName) => {
+  return {
+    "phoneNumber":phoneNumber,
+    "name": name,
+    "jobName":jobName
+}
 }
 
 export const sendVerificationCodeMessage = async(data) => {
@@ -117,16 +140,3 @@ export const passwordChangedInformation = (phoneNumber, supportEmail) => {
     supportEmail: supportEmail
   }
 }
-
-/*
-export const sendMessage = async (data) => {
-  try {
-    const response = await axios.post(`/whatsapp/senders/new-appointment`,data);
-    if (response.status === 200) {
-      return true;
-    }
-  } catch (error) {
-    return false;
-  }
-};
- */
