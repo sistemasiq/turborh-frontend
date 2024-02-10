@@ -201,7 +201,6 @@ onMounted(() => {
 
 const getDesignStatusJob = (props) => {
   const active = props.row.active;
-  console.log("ACTIVE: " + active);
   return {
     tooltipText: active === 1 ? "Desactivar" : "Activar",
     buttonColor: active === 1 ? "bg-red-5" : "bg-orange-5",

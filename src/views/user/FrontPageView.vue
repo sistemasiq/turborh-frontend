@@ -9,7 +9,26 @@
       <q-card-section class="content" style="max-width: 100%">
         <pagination-application :page="1" :required-fields="requiredFieldsOnThisPage"/>
 
-        <div class="inputs q-mt-xl" align="center" style="width: 100%">
+        <div style="margin-top: 6%">
+        <q-card flat bordered text-color="white"
+  class="q-mb-lg"
+  style="margin-left: 0%; border-color: rgb(255, 248, 43);
+  background-color: transparent; color: white; width: 100%; height: 80px;"
+  v-if="!viewingApplication"
+>
+  <q-card-section>
+    <div class="text-body1 text-weight-medium row">
+      <q-icon name="warning" class="q-mr-md q-mt-xs" />
+      Nota
+    </div>
+    <p class="text-body2">
+     Todos los campos de esta pantalla son requeridos para avanzar a la siguiente
+    </p>
+  </q-card-section>
+</q-card>
+</div>
+
+        <div class="inputs q-mt-sm" align="center" style="width: 100%">
           <div class="row">
             <q-form class="q-mt-xl q-mr-lg" style="width: 40%; height: 100%">
               <q-input
@@ -151,7 +170,7 @@
 
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" />
+    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPage"/>
   </q-layout>
 </template>
 
@@ -182,10 +201,9 @@ const firstLastName = ref("");
 const secondLastName = ref("");
 const wantedSalary = ref(0);
 const genderChoosed = ref();
-const userName = ref("");
 const photoUUID = ref("");
 
-const { user, isRh, getUserPhotoUUID } = storeToRefs(useAuth);
+const { isRh, getUserPhotoUUID } = storeToRefs(useAuth);
 
 
 const getUserImage = computed(() => {
@@ -201,18 +219,6 @@ const getUserImage = computed(() => {
   }
 });
 
-const setUserInfo = () => {
-
-  const userStored = useLocalStorage.load("user");
-
-  if (userStored) {
-    console.log("USER STORED "+userStored.photoUUID);
-    user.value = userStored;
-    userName.value = userStored.userName;
-    photoUUID.value = userStored.photoUUID;
-  }
-
-};
 
 
 const {
@@ -237,23 +243,22 @@ const {
   drivingLicenceData
 } = storeToRefs(useRequest);
 
-const requiredFieldsOnThisPage = computed(() => [name.value, firstLastName.value, secondLastName.value, wantedSalary.value])
+const requiredFieldsOnThisPage = computed(() => [name.value, firstLastName.value, secondLastName.value, wantedSalary.value, genderChoosed.value])
 
 onMounted(() => {
-  setUserInfo();
-  loadLocalStore();
   if (viewingApplication.value || updatingApplication.value) {
     setSavedStoredValues();
     if (updatingApplication.value) {
       setAllStoredValues();
     }
   } else {
+    loadLocalStore();
     setStoredValues();
   }
 });
 
 //JAJAJA SPANGLISH
-//He llegado a un punto que no quiero ni refactorizar el JSON de el stored procedure
+//He llegado a un punto que no quiero ni refactorizar el JSON del stored procedure
 //Por si falla algo mejor asi lo dejamos
 const setSavedStoredValues = () => {
   if (!savedApplication.value) {
@@ -530,7 +535,6 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
-  console.log(useLocalStorage.load("frontpage"));
   const localStoreData = useLocalStorage.load("frontpage");
 
   if (localStoreData) frontPageData.value = localStoreData;

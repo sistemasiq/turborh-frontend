@@ -13,6 +13,7 @@
         'text-white': hoverCreateApplication,
         'text-weight-bold': hoverCreateApplication,
       }"
+      :disable="disableButton"
     >
       {{ updatingApplication ? "Actualizar solicitud" : "Crear solicitud" }}
     </q-btn>
@@ -52,6 +53,7 @@
 </template>
 
 <script setup>
+import { computed, watch } from "vue"
 import { useRequestUser } from "src/stores/requestUser";
 import { useAuthStore } from "src/stores/auth";
 import { useRouter } from "vue-router";
@@ -64,15 +66,19 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { createUserApplication, updateUserApplication } from "src/services/userApplication";
 import { updateFile, uploadFile } from "src/services/files";
 
+
+
 const useLocalStorage = useLocalStorageStore();
 const router = useRouter();
 const useAuth = useAuthStore();
 const useApplication = useRequestUser();
 const $q = useQuasar();
 
-const props = defineProps(["disable"])
+
+const props = defineProps(["disable", "requiredFields"])
 
 const openConfirmation = ref(false);
+const currentRequiredFields = ref([])
 
 const {
   familyReferencesData,
@@ -107,6 +113,34 @@ onMounted(() => {
       notifyNegative("Adjunta tu curriculum en la página 'Documentos'")
     );
   }
+
+  setProps();
+
+});
+
+const setProps = () => {
+  if(props.requiredFields){
+    currentRequiredFields.value = props.requiredFields;
+  }
+};
+
+const computedCurrentRequiredFields = computed(() => {
+  if(currentRequiredFields.value){
+    console.log("required fields "+currentRequiredFields.value)
+    return currentRequiredFields.value
+  }
+})
+
+watch(props, (newProps) => {
+  currentRequiredFields.value = newProps.requiredFields;
+});
+
+const disableButton = computed(() => {
+
+if(currentRequiredFields.value.length === 0 || viewingApplication.value){
+  return false;
+}
+return computedCurrentRequiredFields.value.some(field => !field);
 });
 
 const createApplication = () => {
@@ -244,10 +278,8 @@ const createApplication = () => {
   }
 
   if (curriculumStored.value) {
-    console.log("updating WITH curriculum");
     updateCurriculum(completeApplication);
   } else {
-    console.log("updating WITHOUT curriculum");
     completeApplication.nombre_cv = savedApplication.value.nombre_cv;
     update(completeApplication);
   }

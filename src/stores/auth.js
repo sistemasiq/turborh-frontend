@@ -46,6 +46,7 @@ export const useAuthStore = defineStore("auth", () => {
   const userId = ref('');
   const userName = ref('');
   const userEmail = ref('');
+  const userPhoneNumber = ref('');
   const photoUUID = ref('');
   const verificationCode = ref('');
 
@@ -64,6 +65,7 @@ export const useAuthStore = defineStore("auth", () => {
     userId,
     userName,
     userEmail,
+    userPhoneNumber,
     photoUUID,
     verificationCode
   };

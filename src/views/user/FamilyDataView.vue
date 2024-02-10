@@ -3,28 +3,39 @@
     <q-card class="mainCard">
       <q-card-section class="title"> Datos familiares </q-card-section>
       <q-card-section>
-        <PaginationApplication :page="6" :required-fields="requiredFieldsOnThisPage"></PaginationApplication>
+        <PaginationApplication
+          :page="6"
+          :required-fields="requiredFieldsOnThisPage"
+        ></PaginationApplication>
 
-        <div style="margin-top: 6%">
-
-          <q-card flat bordered text-color="white"
-  class="q-mb-lg"
-  style="margin-left: 0%; border-color: rgb(255, 248, 43);
-  background-color: transparent; color: white; width: 100%;"
-  v-if="!viewingApplication"
->
-  <q-card-section>
-    <div class="text-body1 text-weight-medium row">
-      <q-icon name="warning" class="q-mr-md q-mt-xs" />
-      Nota
-    </div>
-    <p class="text-body2">
-     Debe ingresar al menos 2 familiares para poder avanzar a la siguiente pantalla
-    </p>
-  </q-card-section>
-</q-card>
-
-</div>
+        <div v-if="!viewingApplication" style="margin-top: 6%">
+          <q-card
+            flat
+            bordered
+            text-color="white"
+            class="q-mb-lg"
+            style="
+              margin-left: 0%;
+              border-color: rgb(255, 248, 43);
+              background-color: transparent;
+              color: white;
+              width: 100%;
+              height: 80px;
+            "
+            v-if="!viewingApplication"
+          >
+            <q-card-section>
+              <div class="text-body1 text-weight-medium row">
+                <q-icon name="warning" class="q-mr-md q-mt-xs" />
+                Nota
+              </div>
+              <p class="text-body2">
+                Debe ingresar al menos 2 familiares en la tabla de padres o
+                esposa(o) para poder avanzar a la siguiente pantalla
+              </p>
+            </q-card-section>
+          </q-card>
+        </div>
         <p
           style="
             font-size: 130%;
@@ -50,25 +61,91 @@
         <FamilySons class="table-position" />
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication"/>
+    <ButtonApplicationStatus
+      v-if="updatingApplication"
+      :required-fields="requiredFieldsOnThisPage"
+    />
   </q-layout>
 </template>
 
 <!-- SCRIPT BEGGINS ............................................................................................................................ -->
 <script setup>
-import { computed } from "vue"
+import { computed, onMounted } from "vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
 import FamilyFathers from "src/components/TableFamilyData.vue";
 import FamilySons from "src/components/TableFamilyData2.vue";
 import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
+import { useLocalStorageStore } from "src/stores/localStorage";
 
-const requiredFieldsOnThisPage = computed(() => [familyFathersData.value[0], familyFathersData.value[1]])
-
+const useLocalStorage = useLocalStorageStore();
 const useApplication = useRequestUser();
 
-const { updatingApplication, familyFathersData} = storeToRefs(useApplication);
+
+const { updatingApplication, familyFathersData, viewingApplication, savedApplication } =
+  storeToRefs(useApplication);
+
+
+const requiredFieldsOnThisPage = computed(() => {
+  if (familyFathersData.value[0] && familyFathersData.value[0]) {
+    return [
+      familyFathersData.value[0].job,
+      familyFathersData.value[0].jobAddress,
+      familyFathersData.value[0].name,
+      familyFathersData.value[0].relationship,
+      familyFathersData.value[0].birthdate,
+      familyFathersData.value[1].job,
+      familyFathersData.value[1].jobAddress,
+      familyFathersData.value[1].name,
+      familyFathersData.value[1].relationship,
+      familyFathersData.value[1].birthdate,
+    ];
+  }
+});
+
+
+onMounted(() => {
+  loadLocalStore();
+  if (viewingApplication.value || updatingApplication.value) {
+    setSavedStoredValues();
+  }
+  init();
+})
+
+
+  const setSavedStoredValues = () => {
+  if (familyFathersData.value.length > 0) return;
+
+  savedApplication.value.datos_familiares.forEach((element) => {
+    if (element.job != null) {
+      familyFathersData.value.push(element);
+    }
+  });
+
+};
+
+const loadLocalStore = () => {
+  const localStoreData = useLocalStorage.load("familyFathersData");
+
+  if (localStoreData) familyFathersData.value = localStoreData;
+};
+
+const init = () => {
+  if(familyFathersData.value.length === 0){
+    const newRelative = {
+    relationship: "",
+    name: "",
+    birthdate: "",
+    job: "",
+    jobAddress: "",
+  };
+
+  familyFathersData.value.push(newRelative);
+  familyFathersData.value.push(newRelative);
+  }
+}
+
 </script>
 
 <!-- STYLE BEGGINS ............................................................................................................................ -->

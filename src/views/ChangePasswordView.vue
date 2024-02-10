@@ -1,17 +1,26 @@
 <template>
-  <q-layout view="hHr LpR lFf" class="bg-blue-grey-1">
+   <q-layout view="hhr lpr lff" class="bg-blue-grey-1">
     <q-page-container>
-      <q-img
-        src="~/assets/img/logo_turbo_navegador.png"
-        class="q-mt-xl"
-        style="width: 4%; height: 4%; position: relative; left: 48%"
-      />
-      <div class="text-grey-10 text-h6" style="text-align: center">
-        Restablecer Contraseña
+      <div
+        style="width: 100%; height: 150px"
+        class="row justify-center"
+      >
+        <div style="width: 100%;"
+        class="row justify-center q-mt-lg">
+          <q-img
+            src="~/assets/img/logo_turbo_navegador.png"
+            style="width: 70px; height: 70px"
+          />
+        </div>
+        <div class="text-grey-10 text-h6 row justify-center q-mb-lg">
+          Restablecer Contraseña
+        </div>
       </div>
-
+      <div
+        style="width: 100%;"
+        class="row justify-center"
+      >
       <q-card
-        class="fixed-center q-mt-md "
         style="min-width: fit-content; width: 30%; border-radius: 10px"
       >
         <q-card-section horizontal>
@@ -113,7 +122,7 @@
           </q-card-actions>
         </q-card-section>
       </q-card>
-
+      </div>
       <q-dialog
       v-model="helpDialog"
       >
@@ -183,9 +192,10 @@ import { userCredentials } from "src/utils/operations.js";
 import { useAuthStore } from "src/stores/auth.js";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
+import { sendPasswordChangedInformation, passwordChangedInformation } from "src/services/whatsApp.js";
 
 const useAuth = useAuthStore();
-const { userId, userName, userEmail, photoUUID, verificationCode } = storeToRefs(useAuth);
+const { userId, userName, userEmail, userPhoneNumber, photoUUID, verificationCode } = storeToRefs(useAuth);
 const $q = useQuasar();
 const router = useRouter();
 const password = ref("");
@@ -203,19 +213,22 @@ const toPasswordRestored = () => {
 };
 
 const changePassword = async () => {
-  const url = "/users/verify/change-password";
+  const url = "/users/password";
 
   if (password.value == confirmPassword.value) {
     try {
       $q.loading.show({ message: "Cargando..." });
-      let data = userCredentials(password.value, userId.value);
+      let data = userCredentials(userId.value, password.value);
 
       const request = await axios.put(url, data);
 
       if (request.status == 200) {
-        const mailData = passwordChange(userEmail.value);
+        const mailData = passwordChange(userEmail.value, userName.value);
 
+        sendPasswordChangedInformation(passwordChangedInformation(userPhoneNumber.value, "reclutamiento@turbomaquinas.com"));
         sendEmail("password-changed-confirmation", mailData);
+        $q.notify(notifyPositive("Contraseña actualizada"));
+        toPasswordRestored();
 
         userId.value = '';
         userName.value = '';
@@ -223,11 +236,9 @@ const changePassword = async () => {
         photoUUID.value = '';
         verificationCode.value = '';
         password.value = '';
-        toPasswordRestored();
-        $q.notify(notifyPositive("Contraseña actualizada"));
       }
     } catch (error) {
-      console.log("error al cambiar la contraseña: " + error);
+      console.log("ERROR while changing the password: " + error);
     } finally {
       $q.loading.hide();
     }

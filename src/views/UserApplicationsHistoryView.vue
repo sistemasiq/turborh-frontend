@@ -61,6 +61,18 @@
       </q-td>
     </template>
 
+    <template v-slot:body-cell-psychTestSended="{ row }">
+      <q-td>
+        <q-btn
+          rounded
+          v-if="row.test_psicometrico_estado === 'E'"
+          icon="visibility"
+          label="Ver datos"
+          @click.prevent="seePsychTestData(row)"
+        />
+      </q-td>
+    </template>
+
     <template v-slot:body-cell-options="{ row }">
       <q-td>
         <q-btn
@@ -263,6 +275,73 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="openSeeDataPsychTest">
+    <q-card>
+      <q-card-section>
+        <div class="text-h6">Datos del test psicometrico</div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section
+        style="width: 550px; max-width: 90vw; max-height: 50vh"
+        class="justify-between"
+        horizontal
+      >
+        <q-card-section style="width: 50%">
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="selectedPsychTestPlatform"
+            label="Plataforma"
+            label-color="black"
+            readonly
+            style="width: 100%"
+          />
+        </q-card-section>
+
+        <q-card-section style="width: 50%">
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="userNameForPsychTests"
+            label="Nombre"
+            label-color="black"
+            readonly
+            style="width: 100%"
+            class="q-mb-md"
+          />
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="passwordForPsychTest"
+            label="Contraseña"
+            label-color="black"
+            readonly=""
+            style="width: 100%"
+          />
+        </q-card-section>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-actions class="justify-end q-pa-md">
+        <q-btn
+          flat
+          label="Cerrar"
+          v-close-popup
+          class="text-red-8 q-mr-sm"
+          style="border-radius: 8px"
+          @click.prevent="resetPsychTestInformation()"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
 </template>
 
 <script setup>
@@ -338,6 +417,8 @@ const passwordForPsychTest = ref("")
 const psychTestPlatforms = ref([]);
 const psychTestPlatformId = ref(0)
 
+const openSeeDataPsychTest = ref(false);
+
 onMounted(() => {
   viewAllRequisitions.value = true;
   fetchApplicants();
@@ -360,7 +441,6 @@ const gendersParsed = {
 }
 
 const selectPsychPlatform = (data) => {
-  console.log("PLATFORM: " + data.id);
   selectedPsychTestPlatform.value = data.psychPlatformName;
   psychTestPlatformId.value = data.id;
 };
@@ -369,7 +449,7 @@ const setSelectedUser = (
   row
 ) => {
   selectedUser.value = row;
-  console.log(selectedUser.value)
+  console.log(selectedUser.value);
   openPsicometricTestDialog.value = true;
 };
 
@@ -399,6 +479,14 @@ const sendPsychTestInformation = async () => {
     );
 
     if (updatedPsychCredentials) {
+
+      selectedUser.value.test_psicometrico_id = psychTestPlatformId.value;
+      selectedUser.value.test_psicometrico_nombre_usuario = userNameForPsychTests.value;
+      selectedUser.value.test_psicometrico_password = passwordForPsychTest.value;
+      selectedUser.value.test_psicometrico_estado = "E"
+
+      updateRow(selectedUser.value);
+
       const sendedEmail = await sendPsychometricTestEmail(
         selectedUser.value.email,
         selectedUser.value.nombre,
@@ -426,13 +514,36 @@ const sendPsychTestInformation = async () => {
   }
 };
 
+const seePsychTestData = (row) => {
+  openSeeDataPsychTest.value = true;
+  userNameForPsychTests.value = row.test_psicometrico_nombre_usuario;
+  passwordForPsychTest.value = row.test_psicometrico_password;
+  setSelectedPsychPlatform(row.test_psicometrico_id);
+}
+
+const updateRow = (row) => {
+  currentApplicants.value.forEach(element => {
+    if(element.solicitud_id === row.solicitud_id){
+      element = row;
+    }
+  })
+}
+
+const setSelectedPsychPlatform = (id) => {
+  psychTestPlatforms.value.forEach(element => {
+    if(element.id === id){
+      selectedPsychTestPlatform.value = element.psychPlatformName;
+    }
+  })
+};
+
 const fetchApplicants = async () => {
   try {
     loading.value = true;
-    const candidates = await getAllUserApplications();
+    const totalApplicants = await getAllUserApplications();
 
-    if (candidates) {
-      currentApplicants.value = candidates;
+    if (totalApplicants) {
+      currentApplicants.value = totalApplicants;
       console.log(currentApplicants.value)
     }
   } catch (error) {
@@ -483,7 +594,6 @@ const createReport = async (applicationId) => {
 };
 
 const addNotes = (applicationId) => {
-  console.log("Add notes to application " + applicationId);
 
   fetchUserApplication(applicationId);
   viewingApplication.value = true;
@@ -560,6 +670,14 @@ const columns = [
     field: (row) => getAge(row.fecha_nacimiento) + " años",
   },
   {
+    name: "phoneNumber",
+    label: "Telefono",
+    required: true,
+    align: "left",
+    field: (row) => row.telefono,
+    sortable: true
+  },
+  {
     name: "wishedSalary",
     label: "Salario deseado",
     required: true,
@@ -572,6 +690,15 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => row.creado,
+    sortable: true,
+  },
+
+  {
+    name: "psychTestSended",
+    label: "Test psicometríco",
+    required: true,
+    align: "left",
+    field: (row) => (row.test_psicometrico_estado === "E" ? "Enviado" : ""),
     sortable: true,
   },
   {

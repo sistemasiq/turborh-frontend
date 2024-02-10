@@ -12,7 +12,7 @@
            <q-card flat bordered text-color="white"
   class="q-mb-lg"
   style="margin-left: 0%; border-color: rgb(255, 248, 43);
-  background-color: transparent; color: white; width: 100%;;"
+  background-color: transparent; color: white; width: 100%; height: 80px;"
   v-if="!viewingApplication"
 >
   <q-card-section>
@@ -282,7 +282,6 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
-  console.log(useLocalStorage.load("personalData"));
   const localStoreData = useLocalStorage.load("personalData");
 
   if (localStoreData) personalData.value = localStoreData;

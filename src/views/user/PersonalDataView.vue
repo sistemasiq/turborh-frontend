@@ -13,6 +13,23 @@
           :required-fields="requiredFieldsOnThisPage"
         ></pagination-application>
         <div style="margin-top: 6%">
+        <q-card flat bordered text-color="white"
+  class="q-mb-lg"
+  style="margin-left: 0%; border-color: rgb(255, 248, 43);
+  background-color: transparent; color: white; width: 100%; height: 80px;"
+  v-if="!viewingApplication"
+>
+  <q-card-section>
+    <div class="text-body1 text-weight-medium row">
+      <q-icon name="warning" class="q-mr-md q-mt-xs" />
+      Nota
+    </div>
+    <p class="text-body2">
+     Todos los campos de esta pantalla son requeridos excepto los que tienen la etiqueta "Opcional"
+    </p>
+  </q-card-section>
+</q-card>
+
           <q-form class="q-gutter-md">
             <q-input
               dark
@@ -161,7 +178,8 @@
                 v-model="weight"
                 label="Peso(kg) *"
                 label-color="white"
-                mask="##.#"
+                mask="###.#"
+                reverse-fill-mask
                 fill-mask="0"
                 lazy-rules
                 :rules="[
@@ -238,6 +256,7 @@
                 class="full-width q-pl-md"
                 @update:model-value="updateStore()"
               >
+              <BadgeOptional></BadgeOptional>
               </q-input>
 
               <q-input
@@ -312,6 +331,7 @@
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
               >
+              <BadgeOptional></BadgeOptional>
               </q-input>
             </div>
 
@@ -348,7 +368,7 @@
         </div>
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" />
+    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPage"/>
   </q-layout>
 </template>
 
@@ -356,6 +376,7 @@
 import { ref, onMounted, computed } from "vue";
 import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
+import BadgeOptional from "src/components/BadgeOptional.vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
 import { useLocalStorageStore } from "src/stores/localStorage";
@@ -437,7 +458,9 @@ const setSavedStoredValues = () => {
   birthDate.value = savedApplication.value.fecha_nacimiento;
   phone.value = savedApplication.value.telefono;
   height.value = savedApplication.value.estatura;
-  weight.value = savedApplication.value.peso;
+  //NOTA: Multiplico el valor por diez por que al registrar un valor como 120.0 la mask lo deja como 012.0
+  //Asi me aseguro que parsee de forma correcta el valor
+  weight.value = savedApplication.value.peso * 10;
   bloodType.value = savedApplication.value.tipo_sangre;
   roomie.value = savedApplication.value.vive_con;
   dependents.value = savedApplication.value.numero_dependientes;
@@ -527,7 +550,6 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
-  console.log(useLocalStorage.load("personalData"));
   const localStoreData = useLocalStorage.load("personalData");
 
   if (localStoreData) personalData.value = localStoreData;

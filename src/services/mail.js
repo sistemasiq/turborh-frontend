@@ -28,16 +28,31 @@ export const canceledAppointment = {
   emailType: "not required",
 };
 
-export const canceledRequisition = (emailToSend, recipientName, jobName) => {
+export const canceledRequisitionTemplate = (email, name, jobName) => {
   return {
-    to: emailToSend,
-    name: recipientName,
-    subject: "Postulacion cancelada",
-    firstText: `Lamentamos informarte que hemos tenido que cancelar su postulación al puesto '${jobName}'. Sin embargo, estamos trabajando en la reprogramación y te contactaremos pronto para informarte sobre nuevas vacantes. Apreciamos tu comprensión y paciencia.`,
+    to: email,
+    subject: "Vacante Cancelada",
+    greeting: `Hola ${name}`,
+    firstText: `Queremos agradecerte por tu interés en nuestra oferta de trabajo aplicando al puesto ${jobName}.`,
+    secondText:
+      "De momento la empresa ha decidido cancelar esta vacante, sin embargo te invitamos a estar atento ante una posible reapertura de la vacante en el portal.",
     lastText:
-      "Agradecemos tu paciencia y compromiso con Turbomaquinas S.A de C.V.",
-    emailType: "not required",
+      "¡Te deseamos mucha suerte en tu búsqueda de empleo! ¡Saludos, y hasta pronto!",
   };
+};
+
+export const sendCanceledRequisitionEmail = async (email, name, jobName) => {
+  const data = canceledRequisitionTemplate(email, name, jobName);
+  try {
+    const request = await axios.post(`/mail/send/requisitions/canceled`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
 };
 
 export const finishedAppointment = {
@@ -66,14 +81,14 @@ export const passwordChange = (to, userName) => {
     subject: "Aviso de cambio de contraseña",
     name: userName,
     firstText: "Queremos comunicarte que tu contraseña a sido cambiada.",
-    lastText:  "Ahora podrás acceder a tu cuenta utilizando tu nueva contraseña. Si tienes alguna pregunta o necesitas información adicional, no dudes en contactarnos a este mismo correo.",
+    lastText:
+      "Ahora podrás acceder a tu cuenta utilizando tu nueva contraseña. Si tienes alguna pregunta o necesitas información adicional, no dudes en contactarnos a este mismo correo.",
     emailType: "not required",
-  }
-}
+  };
+};
 
 export const sendEmail = async (type, data) => {
   try {
-
     const mailResponse = await axios.post(`/mail/send/${type}`, data);
     if (requestSuccessfull(mailResponse.status)) {
       return true;
@@ -83,39 +98,55 @@ export const sendEmail = async (type, data) => {
   }
 };
 
-export const sendPsychometricTestEmail = async (email, userName, platformUserName, userPassword) => {
-  const data = psychTestSendedTemplate(email, userName, platformUserName, userPassword);
+export const sendPsychometricTestEmail = async (
+  email,
+  userName,
+  platformUserName,
+  userPassword
+) => {
+  const data = psychTestSendedTemplate(
+    email,
+    userName,
+    platformUserName,
+    userPassword
+  );
   try {
-    const request = await axios.post("/mail/send/psychometric-test-data", data)
+    const request = await axios.post("/mail/send/psychometric-test-data", data);
 
-    if(requestSuccessfull(request.status)){
+    if (requestSuccessfull(request.status)) {
       return true;
-    }else{
+    } else {
       return false;
     }
+  } catch (error) {}
+};
 
-  } catch (error) {
-
-  }
-}
-
-const psychTestSendedTemplate = (email, userName, platformUserName, userPassword) => {
+const psychTestSendedTemplate = (
+  email,
+  userName,
+  platformUserName,
+  userPassword
+) => {
   return {
-    "to": email,
-    "subject": "Realización de la Prueba Psicométrica",
-    "userName": userName,
-    "firstText": "Como acordamos en la entrevista. Aquí tienes la información para realizar tu prueba psicométrica, solo necesitaras el siguiente usuario y contraseña:",
-    "platformUserName": platformUserName,
-    "userPassword": userPassword,
-    "secondText": "Para acceder la plataforma donde realizarás tu prueba psicométrica, solo sigue los siguientes pasos:",
-    "stepOne":"1.- Ingresa a la plataforma dando clic en el botón de ",
-    "stepTwo": "2.- Copia y pega el usuario y contraseña en la pantalla principal dentro de las casillas asignadas.",
-    "stepThree": "3.- Realiza tu registro con los datos personales solicitados.",
-    "complementText": "Y LISTO! Contesta tu evaluación psicométrica siguiendo las instrucciones.",
-    "lastText": "Si tienes alguna duda o algun problema para acceder a tu prueba, escribenos al correo reclutamiento@turbomaquinas.com y con gusto te ayudaremos.",
-    "link": "http://201.161.74.228/sidesiseph",
-    "btnText": "Comenzar prueba",
-    "emailSupport": "reclutamiento@turbomaquinas.com"
-
-  }
-}
+    to: email,
+    subject: "Realización de la Prueba Psicométrica",
+    userName: userName,
+    firstText:
+      "Como acordamos en la entrevista. Aquí tienes la información para realizar tu prueba psicométrica, solo necesitaras el siguiente usuario y contraseña:",
+    platformUserName: platformUserName,
+    userPassword: userPassword,
+    secondText:
+      "Para acceder la plataforma donde realizarás tu prueba psicométrica, solo sigue los siguientes pasos:",
+    stepOne: "1.- Ingresa a la plataforma dando clic en el botón de ",
+    stepTwo:
+      "2.- Copia y pega el usuario y contraseña en la pantalla principal dentro de las casillas asignadas.",
+    stepThree: "3.- Realiza tu registro con los datos personales solicitados.",
+    complementText:
+      "Y LISTO! Contesta tu evaluación psicométrica siguiendo las instrucciones.",
+    lastText:
+      "Si tienes alguna duda o algun problema para acceder a tu prueba, escribenos al correo reclutamiento@turbomaquinas.com y con gusto te ayudaremos.",
+    link: "http://201.161.74.228/sidesiseph",
+    btnText: "Comenzar prueba",
+    emailSupport: "reclutamiento@turbomaquinas.com",
+  };
+};

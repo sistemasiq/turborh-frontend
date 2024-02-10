@@ -329,7 +329,7 @@ onMounted(() => {
   }
 
   setStoredValues();
-  sortAlphabetical(machinery.value, true);
+  sortAlphabetical(machinery.value);
   sortAlphabetical(measuringInstruments.value);
   sortAlphabetical(tools.value);
 });
@@ -341,7 +341,6 @@ const fillCatalog = async () => {
 
   try {
     const catalog = await getAllMachineryActive()
-    console.log(catalog);
 
     if(catalog) {
       catalog.forEach(element => {
@@ -475,7 +474,7 @@ const removeMachinery = (item) => {
   }
   if (item.type !== "Otro") {
     machinery.value.push(item.name);
-    sortAlphabetical(machinery.value, true);
+    sortAlphabetical(machinery.value);
   }
 };
 

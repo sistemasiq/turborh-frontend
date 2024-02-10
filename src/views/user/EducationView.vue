@@ -6,7 +6,7 @@
     <q-card class="card-education">
       <q-card-section class="title"> Información Escolar</q-card-section>
       <q-card-section>
-        <PaginationApplication :page="7"></PaginationApplication>
+        <PaginationApplication :page="7" :required-fields="requiredFieldsOnThisPage"></PaginationApplication>
       </q-card-section>
       <q-card-section style="display: flex; margin-top: 3%">
         <div class="name">Nombre de la Institución</div>

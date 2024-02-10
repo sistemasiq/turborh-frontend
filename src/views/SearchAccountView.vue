@@ -1,16 +1,26 @@
 <template>
-  <q-layout view="hHr LpR lFf" class="bg-blue-grey-1">
+   <q-layout view="hhr lpr lff" class="bg-blue-grey-1">
     <q-page-container>
-      <q-img
-        src="~/assets/img/logo_turbo_navegador.png"
-        class="q-mt-xl"
-        style="width: 4%; height: 4%; position: relative; left: 48%"
-      />
-      <div class="text-grey-10 text-h6" style="text-align: center">
-        Restablecer Contraseña
+      <div
+        style="width: 100%; height: 150px"
+        class="row justify-center"
+      >
+        <div style="width: 100%;"
+        class="row justify-center q-mt-lg">
+          <q-img
+            src="~/assets/img/logo_turbo_navegador.png"
+            style="width: 70px; height: 70px"
+          />
+        </div>
+        <div class="text-grey-10 text-h6 row justify-center q-mb-lg">
+          Restablecer Contraseña
+        </div>
       </div>
+      <div
+        style="width: 100%;"
+        class="row justify-center"
+      >
       <q-card
-        class="fixed-center"
         style="min-width: 35%; max-width: 40%; border-radius: 10px;"
       >
         <q-card-section>
@@ -73,6 +83,7 @@
           </q-card-actions>
         </q-card-section>
       </q-card>
+      </div>
     </q-page-container>
   </q-layout>
 </template>
@@ -88,7 +99,7 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 
 const useAuth = useAuthStore();
-const { userId, userName, userEmail, photoUUID } = storeToRefs(useAuth);
+const { userId, userName, userEmail, userPhoneNumber, photoUUID } = storeToRefs(useAuth);
 const $q = useQuasar();
 const router = useRouter();
 const email = ref("");
@@ -107,21 +118,21 @@ const searchUserAccount = async () => {
     try {
       $q.loading.show({ message: "Cargando..." });
 
-      const request = await axios.get(`/users/verify/email/`+email.value);
+      const request = await axios.get(`/users/${email.value}/data`);
 
         if(request.status == 200) {
           userId.value = request.data.id;
           userName.value = request.data.userName;
           userEmail.value = email.value;
+          userPhoneNumber.value = request.data.phoneNumber;
           photoUUID.value = request.data.photoUUID;
-          console.log(request.data)
           toSendVerificationCode();
         } else {
           $q.notify(notifyNegative("Usuario no encontrado. Intenta nuevamente"));
         }
 
     } catch (error) {
-      console.log("Error de envío de correo: " + error);
+      console.log("ERROR sending the email: " + error);
     } finally {
       $q.loading.hide();
     }

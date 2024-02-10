@@ -61,6 +61,7 @@
             outlined
             color="cyan-1"
             v-model="email"
+            @blur="checkIfEmailAlreadyExists"
             type="text"
             label="Correo electrónico"
             label-color="white"
@@ -198,7 +199,7 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "src/stores/auth";
 import { getImageSource } from "src/services/profiles.js";
 import { storeToRefs } from "pinia";
-import { getUserByUserName, getUserByCurp, createUser } from "src/services/user";
+import { getUserByUserName, getUserByCurp, getUserByEmail, createUser } from "src/services/user";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 
@@ -219,6 +220,7 @@ const isConfirmPasswordVisible = ref(false);
 const curpRegex = new RegExp("^[A-Z]{4}[0-9]{6}(H|M)[A-Z]{5}[A-Z0-9][0-9]$");
 let curpExistsValidation = ref(false);
 const userNameExistsValidation = ref(false);
+const userEmailExistValidation = ref(false);
 
 const { logged, user } = storeToRefs(useAuth);
 
@@ -231,7 +233,8 @@ const disableRegisterButton = () => {
     !confirmPassword.value ||
     password.value != confirmPassword.value ||
     !curpExistsValidation.value ||
-    !userNameExistsValidation.value
+    !userNameExistsValidation.value ||
+    !userEmailExistValidation.value
   );
 };
 
@@ -280,6 +283,18 @@ const checkIfCurpAlreadyExists = async () => {
 
 };
 
+const checkIfEmailAlreadyExists = async () => {
+
+  const emailExists = await getUserByEmail(email.value);
+
+  userEmailExistValidation.value = emailExists ? false : true;
+
+  if (emailExists) {
+    $q.notify(notifyNegative("Este correo electrónico ya está registrado"));
+  }
+
+};
+
 /* PASSWORD MATCHING ---------------------------------------------------------------------------------------------------*/
 const passwordMatching = () => {
   if (password.value != confirmPassword.value) {
@@ -292,7 +307,9 @@ const registerUser = async () => {
 
   await checkIfUserNameAlreadyExists();
 
-  if (userNameExistsValidation.value && curpExistsValidation.value) {
+  await checkIfEmailAlreadyExists();
+
+  if (userNameExistsValidation.value && curpExistsValidation.value && userEmailExistValidation.value) {
     addUser();
   }
 };
@@ -306,6 +323,7 @@ const addUser = async () => {
     if (newUserData) {
       logged.value = 1;
       user.value = newUserData;
+      useLocalStorage.clear();
       useLocalStorage.save("logged", logged.value)
       useLocalStorage.save("user", user.value);
       $q.notify(notifyPositive("Te has registrado correctamente"));

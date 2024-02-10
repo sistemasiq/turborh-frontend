@@ -13,7 +13,7 @@
           <q-card flat bordered text-color="white"
   class="q-mb-lg"
   style="margin-left: 0%; border-color: rgb(255, 248, 43);
-  background-color: transparent; color: white; width: 100%;"
+  background-color: transparent; color: white; width: 100%; height: 80px;"
   v-if="!viewingApplication"
 >
   <q-card-section>
@@ -45,6 +45,7 @@
               class="input-brand"
               @update:model-value="updateStore()"
             >
+            <BadgeRequired></BadgeRequired>
             </q-input>
 
             <div class="home-content rounded-borders" style="display: flex">
@@ -145,7 +146,7 @@
         />
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" />
+    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPage"/>
   </q-layout>
 </template>
 
@@ -156,6 +157,7 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
 import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
+import BadgeRequired from "src/components/BadgeRequired.vue";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 
@@ -241,7 +243,6 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
-  console.log(useLocalStorage.load("recruitingMeansData"));
   const localStoreData = useLocalStorage.load("recruitingMeansData");
 
   if (localStoreData) recruitingMeansData.value = localStoreData;

@@ -31,7 +31,7 @@
           {{ disableNextButton ? 'Llena primero los campos necesarios' : 'Siguiente' }}
         </q-tooltip>
     </q-btn>
-    <q-btn v-if="currentPage < 11 && (viewingApplication || updatingApplication)" color="cyan" round icon="done" @click.prevent="goToLaboralExperience">
+    <q-btn :disable="disableNextButton" v-if="currentPage < 11 && (viewingApplication || updatingApplication)" color="cyan" round icon="done" @click.prevent="goToLaboralExperience">
       <q-tooltip class="text-body2"
               transition-show="scale"
               transition-hide="scale" anchor="top middle"  self="bottom middle" :offset="[10, 10]">
@@ -66,7 +66,6 @@ onMounted(() => {
 
 const computedCurrentRequiredFields = computed(() => {
   if(currentRequiredFields.value){
-    console.log("required fields "+currentRequiredFields.value)
     return currentRequiredFields.value
   }
 })
@@ -75,11 +74,9 @@ const {updatingApplication, viewingApplication} = storeToRefs(useRequest);
 
 const disableNextButton = computed(() => {
 
-  if(currentRequiredFields.value.length === 0 || viewingApplication.value || updatingApplication.value){
-    console.log("Disable next button false")
+  if(currentRequiredFields.value.length === 0 || viewingApplication.value){
     return false;
   }
-  console.log("Disable next button true")
   return computedCurrentRequiredFields.value.some(field => !field);
 });
 

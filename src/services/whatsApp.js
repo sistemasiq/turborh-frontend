@@ -71,6 +71,21 @@ export const sendPsychTestMessage= async (phoneNumber, userName, platformUserNam
   }
 };
 
+
+export const sendCanceledRequisitionMessage = async (phoneNumber, name, jobName) => {
+
+  const data = requisitionInformationTemplate(phoneNumber, name, jobName);
+
+  try {
+    const request = await axios.post(`/api/whatsapp/send/requisitions/canceled`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
 const psychTestSendedTemplate = (phoneNumber, userName, platformUserName, userPassword) => {
   return {
     "phoneNumber": phoneNumber,
@@ -82,15 +97,46 @@ const psychTestSendedTemplate = (phoneNumber, userName, platformUserName, userPa
   }
 }
 
-/*
-export const sendMessage = async (data) => {
+const requisitionInformationTemplate = (phoneNumber, name, jobName) => {
+  return {
+    "phoneNumber":phoneNumber,
+    "name": name,
+    "jobName":jobName
+}
+}
+
+export const sendVerificationCodeMessage = async(data) => {
   try {
-    const response = await axios.post(`/whatsapp/senders/new-appointment`,data);
-    if (response.status === 200) {
+    const request = await axios.post(`/api/whatsapp/send/verification-code`, data);
+    if (requestSuccessfull(request.status)) {
       return true;
     }
   } catch (error) {
     return false;
   }
-};
- */
+}
+
+export const verificationCodeData = (phoneNumber, verificationCode) => {
+  return {
+    phoneNumber: phoneNumber,
+    verificationCode: verificationCode
+  }
+}
+
+export const sendPasswordChangedInformation = async(data) => {
+  try {
+    const request = await axios.post(`/api/whatsapp/send/password-changed-information`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
+export const passwordChangedInformation = (phoneNumber, supportEmail) => {
+  return {
+    phoneNumber: phoneNumber,
+    supportEmail: supportEmail
+  }
+}

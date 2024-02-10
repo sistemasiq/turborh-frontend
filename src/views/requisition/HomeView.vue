@@ -6,7 +6,6 @@
         <q-img
           :src="getLogoImage"
           style="width: 45px; height: 45px; margin-left: 45%"
-          class=""
         />
         <q-toolbar-title>Turbomaquinas</q-toolbar-title>
       </q-toolbar>
@@ -242,8 +241,6 @@ const loadLocalStorage = () => {
       user.value.photoUUID === null || user.value.photoUUID === "" ? photoUUID.value : user.value.photoUUID;
   }
 
-  console.log(user.value);
-
   if (loggedStored) logged.value = loggedStored;
 };
 
@@ -271,7 +268,6 @@ const uploadImage = async () => {
     } else {
       newFileName = await uploadFile(selectedImage.value, getAdminImagesPath);
     }
-    console.log("file name: " + newFileName);
     if (newFileName) {
       updateUserImageInDatabase(newFileName);
     }

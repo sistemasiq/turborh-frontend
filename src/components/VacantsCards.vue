@@ -251,7 +251,6 @@ const fetchAddCandidate = async (requisitionId) => {
 
 try {
   const candidate = await candidateExists(requisitionId, user.value.id)
-  console.log(candidate);
   if(candidate){
     isCandidate.value = true;
   }else{

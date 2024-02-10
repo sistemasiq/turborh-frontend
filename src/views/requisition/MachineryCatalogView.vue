@@ -281,7 +281,6 @@ onMounted(() => {
 
 const getDesignStatusJob = (props) => {
   const active = props.row.active;
-  console.log("ACTIVE: " + active);
   return {
     tooltipText: active === 1 ? "Desactivar" : "Activar",
     buttonColor: active === 1 ? "bg-red-5" : "bg-orange-5",
@@ -302,7 +301,7 @@ const showJobs = async () => {
       totalTableRows.value = catalog;
     }
   } catch (error) {
-    console.log("Hubo un error al obtener los datos: " + error);
+    console.log("Something went wrong while getting the machinery information: " + error);
   } finally{
     loading.value = false;
   }
@@ -311,7 +310,6 @@ const showJobs = async () => {
 const createJob = async () => {
   if (selectedType.value != "" && name.value != "") {
     const elementType = selectedType.value.substring(0, 2).toUpperCase();
-    console.log("elementType: ", elementType);
 
     const data = {
       createdBy: createdBy.value,
@@ -340,7 +338,7 @@ const createJob = async () => {
 };
 
 const confirmDeleteTool = async () => {
-  
+
   try {
     $q.loading.show();
     const updatedState = selectedTool.value.active ? await disableMachinery(id.value) : await enableMachinery(id.value)
@@ -367,7 +365,6 @@ const updateTool = async () => {
   const url = `/machinerytools/editmachinerytools`;
   if (selectedType.value != "" && name.value != "") {
     const elementType = selectedType.value.substring(0, 2).toUpperCase();
-    console.log("elementType: ", elementType);
     const data = {
       id: id.value,
       modifiedBy: modifiedBy.value,
@@ -376,7 +373,7 @@ const updateTool = async () => {
     };
     try {
       $q.loading.show("Cargando...");
-      const updatedMachinery = await updateMachinery(data); 
+      const updatedMachinery = await updateMachinery(data);
       if (updatedMachinery) {
         updateMachineryData(updatedMachinery); //[].active=0
 
@@ -401,7 +398,6 @@ const deleteTool = (row) => {
   id.value = row.id;
   selectedTool.value = row;
   deleteDialog.value = true;
-  console.log("Entró 1: ", row.active);
 };
 
 const updateMachineryData = (updatedMachinery) => {

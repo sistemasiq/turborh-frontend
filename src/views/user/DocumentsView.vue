@@ -7,12 +7,12 @@
       <q-card-section class="title"> Documentos </q-card-section>
 
       <q-card-section class="content">
-        <pagination-application :page="4" :required-fields="requiredFieldsOnThisPage" />
+        <pagination-application :page="4" :required-fields="updatingApplication ? requiredFieldsOnThisPageUpdating : requiredFieldsOnThisPage" />
         <div style="margin-top: 6%">
           <q-card flat bordered text-color="white"
   class="q-mb-lg"
   style="margin-left: 0%; border-color: rgb(255, 248, 43);
-  background-color: transparent; color: white; width: 100%;"
+  background-color: transparent; color: white; width: 100%; height: 80px;"
   v-if="!viewingApplication"
 >
   <q-card-section>
@@ -21,7 +21,7 @@
       Nota
     </div>
     <p class="text-body2">
-     Es obligatorio adjuntar tu curriculum
+     Es obligatorio adjuntar su curriculum, así como llenar los campos del RFC y NSS
     </p>
   </q-card-section>
 </q-card>
@@ -56,7 +56,7 @@
               color="cyan-1"
               v-model="imss"
               type="text"
-              label="Número de IMSS *"
+              label="Número de IMSS (NSS) *"
               label-color="white"
               mask="###########"
               lazy-rules
@@ -82,7 +82,6 @@
               mask="###########"
               lazy-rules
               :rules="[
-                (value) => !!value || 'La clave AFORE es requerida',
                 (value) =>
                   /^[0-9]{11}$/.test(value) || 'La clave AFORE debe ser válida',
               ]"
@@ -150,7 +149,7 @@
         </div>
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" />
+    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPageUpdating"/>
   </q-layout>
 </template>
 
@@ -176,7 +175,7 @@ const afore = ref("");
 const fm2 = ref("");
 
 const requiredFieldsOnThisPage = computed(() => [rfc.value, imss.value, curriculumStored.value])
-
+const requiredFieldsOnThisPageUpdating = computed(() => [rfc.value, imss.value])
 
 const {
   documentsData,
@@ -233,7 +232,6 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
-  console.log(useLocalStorage.load("documentsData"));
   const localStoreData = useLocalStorage.load("documentsData");
 
   if (localStoreData) documentsData.value = localStoreData;
