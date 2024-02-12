@@ -556,7 +556,7 @@
               round
               dense
               icon="close"
-              @click="closeAppointmentDialog"
+              @click.prevent="closeAppointmentDialog"
             >
               <q-tooltip> Cerrar ventana </q-tooltip>
             </q-btn>
@@ -568,7 +568,7 @@
             <q-table
               flat
               bordered
-              style="background: rgb(234, 237, 249)"
+              style="background: rgb(234, 237, 249); height: 100%;"
               v-bind:rows="filteredRows"
               separator="horizontal"
               @request="getCandidatesCatalog"
@@ -630,7 +630,7 @@
                 <q-td>
                   <q-item
                     :clickable="checkSelection(row)"
-                    @click="onCandidateSelection(row)"
+                    @click.prevent="onCandidateSelection(row)"
                   >
                     <div class="row">
                       <q-item-label
@@ -858,7 +858,7 @@
                             :key="index"
                             clickable
                             v-close-popup
-                            @click="onModalitySelection(item)"
+                            @click.prevent="onModalitySelection(item)"
                           >
                             <q-item-section avatar>
                               <q-avatar
@@ -902,7 +902,7 @@
                       flat
                       label="Agendar"
                       icon="add"
-                      @click="createAppointment()"
+                      @click.prevent="createAppointment()"
                       class="bg-cyan-4 text-white q-mr-xs"
                       style="border-radius: 20px"
                     />
@@ -911,7 +911,7 @@
                       flat
                       label="Actualizar"
                       icon="update"
-                      @click="updateAppointment"
+                      @click.prevent="updateAppointment"
                       class="bg-green-13 text-white q-mr-xs"
                       style="border-radius: 20px"
                     />
@@ -924,6 +924,7 @@
 
         <!--User Information-->
         <!--REFACTOR REQUIRED. The distribution of the elements in the div is not a good practice-->
+        <!-- Echele ganas al que quiera refactorizar por que mi compa ni quizo hacerlo jajajajjaa -->
 
         <div class="col">
           <q-card class="col-auto" style="height: 100%">
@@ -965,14 +966,14 @@
                       : 'Candidaturas'
                       "
                       class="text-weight-regular col-3"
-                      :dropdown-content-class="dropdownContentClass"
+                      dropdown-content-class="flexible-width"
                     >
                       <q-list>
                         <q-item
                           v-for="(item, index) in jobsApplications"
                           :key="index"
                           v-close-popup
-                          @click="onModalitySelection(item)"
+                          @click.prevent="onModalitySelection(item)"
                         >
                           <q-item-section avatar>
                             <q-avatar
@@ -1760,7 +1761,7 @@ const appointmentDaysList = ref([]);
 const events = ref([]); //this is the array where the appointments are
 
 //USER INFORMATION
-const civilStatus = ref(""); //TODO delete this const
+const civilStatus = ref(""); //TODO: delete this const
 const jobsApplications = ref([]);
 const studyLevel = ref("");
 const speciality = ref("");
@@ -2533,26 +2534,18 @@ const onCandidateSelection = (data) => {
   languages.value = data.languages;
   jobsApplications.value = data.jobNames;
 
-  if(data.levelOfStudy == null){
-    studyLevel.value = "No especificado";
-  } else {
-    studyLevel.value = data.levelOfStudy;
-  }
-
-  if(data.lastSchoolSpeciality == null){
-    speciality.value = "No especificado";
-  } else {
-    speciality.value = data.lastSchoolSpeciality;
-  }
-
-  if(data.lastSchool == null){
-    lastSchool.value = "No especificado";
-  } else {
-    lastSchool.value = data.lastSchool;
-  }
+  studyLevel.value = setDefaultIfNull(data.levelOfStudy);
+  speciality.value = setDefaultIfNull(data.lastSchoolSpeciality);
+  lastSchool.value = setDefaultIfNull(data.lastSchool);
 
   age.value = getAge(data.birthday);
 };
+
+const setDefaultIfNull = (data) => {
+
+  return data === null ? "No especificado" : data;
+
+}
 
 const onModalitySelection = (data) => {
   selectedPlatform.value = data.platformName;

@@ -27,6 +27,9 @@ export const requestSuccessfull = (status) => {
   return status === 200 || status === 201 || status === 202;
 }
 
-export const sortAlphabetical = (array) => {
- return array.sort((a, b) => a.localeCompare(b));
-};
+
+export const gendersObject = {
+  M:"Masculino",
+  F:"Femenino",
+  O:"Otro"
+}
