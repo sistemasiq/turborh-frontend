@@ -433,7 +433,7 @@ const setFilesJsonSavedValues = () => {
 
   if (familyFathersData.value.length === 0) {
     savedApplication.value.datos_familiares.forEach((element) => {
-      if (element.job != null && familyFathersData.value.length === 0) {
+      if (element.job != null) {
         familyFathersData.value.push(element);
       }
     });

@@ -108,17 +108,17 @@ const requiredFieldsOnThisPage = computed(() => {
 onMounted(() => {
   loadLocalStore();
   if (viewingApplication.value || updatingApplication.value) {
-    setSavedStoredValues();
+    //setSavedStoredValues();
   }
   init();
 })
 
 
   const setSavedStoredValues = () => {
-  if (familyFathersData.value.length > 0) return;
+  if (!savedApplication.value) return;
 
   savedApplication.value.datos_familiares.forEach((element) => {
-    if (element.job != null) {
+    if (element.job !== null) {
       familyFathersData.value.push(element);
     }
   });
@@ -128,7 +128,8 @@ onMounted(() => {
 const loadLocalStore = () => {
   const localStoreData = useLocalStorage.load("familyFathersData");
 
-  if (localStoreData) familyFathersData.value = localStoreData;
+  if (localStoreData && !viewingApplication.value && !updatingApplication.value
+  ) familyFathersData.value = localStoreData;
 };
 
 const init = () => {

@@ -18,7 +18,7 @@
         style="border-radius: 30px; min-width: 100px; max-width: 400px"
       >
         <q-btn
-          v-if="item.selected === 0"
+          v-if="item.requisitionState !== 'PC'"
           class="absolute-top-right bg-red z-top"
           flat
           style="border-radius: 0 30px 0 30px"
@@ -172,6 +172,7 @@ const fetchApplications = async () => {
           currentApplications.value.push(candidateJobs[i]);
         }
       }
+      console.log(currentApplications.value)
     }
   } catch (error) {
     console.log(error);

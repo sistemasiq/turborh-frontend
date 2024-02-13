@@ -130,14 +130,6 @@
         </q-btn>
       </q-td>
     </template>
-    <template
-      v-if="hasPermitRequisitionAuthorization"
-      v-slot:body-cell-authorized="{ row }"
-    >
-      <q-td :class="getDesignStatusRequisition(row).rowLabelColor">
-        <div>{{ getDesignStatusRequisition(row).rowLabel }}</div>
-      </q-td>
-    </template>
     <template v-slot:body-cell-authorized="{ row }">
       <q-td>
         <div :class="getDesignStatusRequisition(row).rowLabelColor">
@@ -464,9 +456,7 @@ const stateChangeNotifyText = {
 };
 
 const addSignsToReport = (row) => {
-
   return row.state === 'AC' || row.state === 'P' || row.state === 'PC'
-
 }
 
 const canEditRequisition = (row) => {
