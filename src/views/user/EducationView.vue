@@ -549,6 +549,7 @@
               @update:modelValue="handleMasterCheckboxChange('yes')"
               label="Sí"
               style="color: rgb(255, 255, 255); margin-left: 10%"
+              :disable="viewingApplication"
             />
             <q-checkbox
               color="cyan"
