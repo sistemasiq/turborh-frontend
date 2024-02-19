@@ -115,7 +115,7 @@
           @click.prevent="addNotes(row.applicationId)"
         />
         <q-btn
-          v-if="row.selected === 0 && row.requisitionState === 'P'"
+          v-if="row.selected === 0 && row.requisitionState === 'P' && row.hasBeenSelected === 0"
           class="q-ml-lg bg-green"
           rounded
           icon="done"
@@ -408,7 +408,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
-import { getAge } from "src/utils/operations";
+import { getAge, gendersObject } from "src/utils/operations";
 import { getUserImagesPath, getUserDocumentsPath } from "src/utils/folderPaths";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { useQuasar } from "quasar";
@@ -659,12 +659,6 @@ const selectCandidateById = async () => {
   }
 };
 
-const gendersParsed = {
-  F: "Femenino",
-  M: "Masculino",
-  O: "Otro",
-};
-
 const fetchApplicants = async () => {
   if (!idRequisitionDetails.value) return;
 
@@ -873,11 +867,25 @@ const onCompleteSendMessageToCandidates = async () => {
   }
 };
 
+const getRowSelectedText = (row) => {
+
+if(row.selected === 1){
+  return "Candidato Seleccionado"
+}
+
+if(row.hasBeenSelected > 0 && row.hasBeenSelected !== row.id){
+  return "Candidato seleccionado en la requisición con folio: "+row.hasBeenSelected
+}
+
+return "";
+
+}
+
 const columns = [
   {
     name: "selected",
     label: "Seleccion",
-    field: (row) => (row.selected === 1 ? "Candidato Seleccionado" : ""),
+    field: (row) => getRowSelectedText(row),
     align: "left",
     classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
@@ -902,7 +910,7 @@ const columns = [
     label: "Sexo",
     required: true,
     align: "left",
-    field: (row) => gendersParsed[row.gender],
+    field: (row) => gendersObject[row.gender],
     classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
   {

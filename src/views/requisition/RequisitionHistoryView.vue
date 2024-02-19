@@ -648,9 +648,9 @@ const columns = [
   },
   {
     name: "numRequisition",
-    label: "No. Requisicion",
+    label: "Folio",
     required: true,
-    align: "center",
+    align: "left",
     field: (row) => row.numRequisition,
     sortable: true,
   },
