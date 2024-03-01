@@ -11,6 +11,7 @@ export const logUser = async (userName, password) => {
     const request = await axios.post(`users/login`, body);
 
     if (requestSuccessfull(request.status)) {
+      axios.defaults.headers.common['Authorization'] = request.data.token;
       return request.data;
     } else {
       return null;

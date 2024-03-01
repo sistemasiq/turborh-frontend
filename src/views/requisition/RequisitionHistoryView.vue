@@ -778,8 +778,6 @@ const fetchRequisitions = async () => {
 
     if (requisitionsFetched) {
       totalRequisitions.value = requisitionsFetched;
-    } else {
-      console.log("Error on fetch requisitions with status " + request.status);
     }
   } catch (error) {
     console.log(error);
