@@ -83,13 +83,6 @@ const router = createRouter({
     },
 
     {
-      path: "/diary",
-      name: "diary",
-      component: () => import("/src/views/DiaryView.vue"),
-      beforeEnter: authGuard
-    },
-
-    {
       path: "/agenda",
       name: "agenda",
       component: () => import("/src/views/AgendaView.vue"),
