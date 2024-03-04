@@ -258,8 +258,7 @@ const checkIfUserNameAlreadyExists = async () => {
 
   const userExists = await getUserByUserName(userName.value);
 
-  userNameExistsValidation.value = userExists.value ? false : true;
-
+  userNameExistsValidation.value = userExists ? false : true;
   if (userExists) {
     $q.notify(notifyNegative("Este nombre de usuario ya esta registrado"));
   }

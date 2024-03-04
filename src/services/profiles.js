@@ -18,7 +18,7 @@ export const getS3UploadUrl = () => {
 
 export const getS3FileUrl = (folderPath, fileName) => {
   return dev
-    ? `http://localhost:5000/files/${fileName}/path/${folderPath}`
+    ? `http://localhost:5000/files/images/${fileName}/path/${folderPath}`
     : `http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com/files/${fileName}/path/${folderPath}`;
 };
 
@@ -37,6 +37,7 @@ export const getUserRoute = () => {
 export const getAdminRoute = () => {
   return "/home";
 };
+
 
 
 //DEV and Prod configuration in Turbomaquinas´s server

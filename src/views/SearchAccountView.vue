@@ -118,7 +118,7 @@ const searchUserAccount = async () => {
     try {
       $q.loading.show({ message: "Cargando..." });
 
-      const request = await axios.get(`/users/${email.value}/data`);
+      const request = await axios.get(`/users/account-information-by/email/${email.value}`);
 
         if(request.status == 200) {
           userId.value = request.data.id;

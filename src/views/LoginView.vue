@@ -158,7 +158,6 @@ import { getAssetsPath } from "src/utils/folderPaths";
 import { useRequestUser } from "src/stores/requestUser";
 import { logUser } from "src/services/user";
 import { getUserApplicationById } from "src/services/userApplication";
-import axios from "axios";
 
 
 const useAuth = useAuthStore();
@@ -220,6 +219,7 @@ const onLoginClick = async () => {
 
 
     } else {
+      console.log(userData)
       $q.notify(notifyNegative("Tienes datos incorrectos!"));
     }
   } catch (error) {

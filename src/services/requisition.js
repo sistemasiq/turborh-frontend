@@ -16,6 +16,7 @@ export const createRequisition = async (requisitionData) => {
 };
 
 export const getAllRequisitions = async () => {
+
   try {
     const request = await axios.get(`requisitions`);
 

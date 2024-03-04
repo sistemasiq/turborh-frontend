@@ -11,8 +11,10 @@ export const logUser = async (userName, password) => {
     const request = await axios.post(`users/login`, body);
 
     if (requestSuccessfull(request.status)) {
+      axios.defaults.headers.common['Authorization'] = request.data.token;
       return request.data;
     } else {
+      console.log("ERROR: ", request.status )
       return null;
     }
   } catch (error) {
@@ -23,7 +25,7 @@ export const logUser = async (userName, password) => {
 
 export const getUserByUserName = async (userName) => {
   try {
-    const request = await axios.get(`users/${userName}`);
+    const request = await axios.get(`users/validate-by/name/${userName}`);
 
     if (requestSuccessfull(request.status)) {
       return true;
@@ -38,7 +40,7 @@ export const getUserByUserName = async (userName) => {
 
 export const getUserByCurp = async (curp) => {
   try {
-    const request = await axios.get(`users/curp/${curp}`);
+    const request = await axios.get(`users/validate-by/curp/${curp}`);
 
     if (requestSuccessfull(request.status)) {
       return true;
@@ -53,7 +55,7 @@ export const getUserByCurp = async (curp) => {
 
 export const getUserByEmail = async (email) => {
   try {
-    const request = await axios.get(`users/email/${email}`);
+    const request = await axios.get(`users/validate-by/email/${email}`);
 
     if (requestSuccessfull(request.status)) {
       return true;
@@ -78,7 +80,7 @@ export const createUser = async (userName, email, curp, password) => {
   };
 
   try {
-    const request = await axios.post(`users`, newUserData);
+    const request = await axios.post(`users/register`, newUserData);
 
     if (requestSuccessfull(request.status)) {
       newUserData.id = request.data;
