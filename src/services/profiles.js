@@ -19,7 +19,7 @@ export const getS3UploadUrl = () => {
 export const getS3FileUrl = (folderPath, fileName) => {
   return dev
     ? `http://localhost:5000/files/images/${fileName}/path/${folderPath}`
-    : `http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com/files/${fileName}/path/${folderPath}`;
+    : `http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com/files/images/${fileName}/path/${folderPath}`;
 };
 
 export const getImageSource = (imgName) => {
