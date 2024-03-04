@@ -43,6 +43,8 @@ export const useAuthStore = defineStore("auth", () => {
     }
   });
 
+
+
   const userId = ref('');
   const userName = ref('');
   const userEmail = ref('');
