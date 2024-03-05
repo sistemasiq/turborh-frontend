@@ -1,6 +1,6 @@
 //true = dev mode
 //false = production mode
-const dev = false;
+const dev = true;
 
 /* BACKEND FUNCIONAL ELASTIC BEANSTALK: http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com
 BACKEND DE PRUEBAS ELASTIC BEANSTALK: http://test-back-end-1.eba-75di3x8z.us-east-2.elasticbeanstalk.com

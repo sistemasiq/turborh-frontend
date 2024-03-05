@@ -1,12 +1,12 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 
+
+
 export const useAuthStore = defineStore("auth", () => {
   const user = ref();
   const logged = ref(false);
   const isLogged = computed(() => logged.value === 1);
-  const currentRoles = ["r", "j", "l", "i"];
-
   const isAdmin = computed(() => {
     if (user.value) {
       return user.value.role === "l" || user.value.role === "i";
@@ -39,18 +39,20 @@ export const useAuthStore = defineStore("auth", () => {
 
   const getUserPhotoUUID = computed(() => {
     if (user.value) {
-      return user.value.photoUUID === '' || user.value.photoUUID === null || user.value.photoUUID === undefined ? 'default.png' : user.value.photoUUID;
+      return user.value.photoUUID === "" ||
+        user.value.photoUUID === null ||
+        user.value.photoUUID === undefined
+        ? "default.png"
+        : user.value.photoUUID;
     }
   });
 
-
-
-  const userId = ref('');
-  const userName = ref('');
-  const userEmail = ref('');
-  const userPhoneNumber = ref('');
-  const photoUUID = ref('');
-  const verificationCode = ref('');
+  const userId = ref("");
+  const userName = ref("");
+  const userEmail = ref("");
+  const userPhoneNumber = ref("");
+  const photoUUID = ref("");
+  const verificationCode = ref("");
 
   return {
     user,

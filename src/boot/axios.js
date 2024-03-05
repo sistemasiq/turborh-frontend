@@ -5,4 +5,7 @@ import { getAxiosBaseUrl } from "src/services/profiles"
 
 //Localhost
 axios.defaults.baseURL = getAxiosBaseUrl();
+
+
+
 export { axios };

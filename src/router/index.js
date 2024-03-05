@@ -1,14 +1,44 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
+import { watch, ref } from 'vue';
 import { useLocalStorageStore } from '/src/stores/localStorage'
+import { axiosErrorResponseStatus } from 'src/services/setupInterceptors';
+
+const tokenPayload = ref("")
 
 const authGuard = (to, from, next) => {
   const useLocalStorage = useLocalStorageStore();
+  const userStored = useLocalStorage.load("user");
+
+  if(userStored){
+    tokenPayload.value = parseJwt(userStored.token);
+    console.log(tokenPayload.value);
+  }
+
   if (!useLocalStorage.load("logged")) {
     next('/login')
   } else {
     next()
   }
 }
+const parseJwt = (token) => {
+
+  const [header, payload, signature] = token.split('.');
+  const decodedPayload = atob(payload);
+  return JSON.parse(decodedPayload);
+};
+
+const checkForTokenExpirationTime = () => {
+  if(!tokenPayload.value.exp)
+  return 'N/A';
+
+  const currentTime = Math.floor(Date.now() / 1000);
+  const expirationTime = tokenPayload.value.exp;
+  const timeRemaining = expirationTime - currentTime;
+
+  return `${timeRemaining} seconds`
+
+}
+
 
 const router = createRouter({
   mode: 'history',
@@ -55,6 +85,7 @@ const router = createRouter({
         { path: "sin-vacantes", component: () => import('/src/views/NoVacanciesView.vue') }
       ],
       beforeEnter: authGuard
+
     },
 
     {
