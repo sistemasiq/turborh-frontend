@@ -329,8 +329,11 @@ const addUser = async () => {
       router.replace("/userHome/perfil");
     } else {
       $q.notify(notifyNegative("Hubo un error en el registro. Intenta de nuevo"));
+      console.log("newUserData es null")
+      console.log(user.value)
     }
   } catch (error) {
+    console.log(user.value)
     $q.notify(notifyNegative("Hubo un error en el registro. Intenta de nuevo"));
   }finally{
     $q.loading.hide();

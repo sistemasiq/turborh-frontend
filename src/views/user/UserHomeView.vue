@@ -216,7 +216,7 @@
         icon="logout"
         class="logout-btn z-top q-mb-sm"
         label="Cerrar Sesión"
-        @click.prevent="logout"
+        @click.prevent="redirectToLogin"
         v-if="!isRh"
       >
       </q-btn>
@@ -278,6 +278,9 @@ import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { updateUserApplicationState } from "src/services/userApplication";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { disableCandidateAllRequisitions } from "src/services/candidates";
+import { logOut } from "src/services/user";
+import { axiosErrorResponseStatus, initInterceptors } from "src/services/setupInterceptors";
+
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
@@ -307,7 +310,6 @@ const {
   viewingApplication,
   updatingApplication,
   userHasApplication,
-  curriculumStored,
 } = storeToRefs(useRequest);
 
 const openNote = ref(false);
@@ -323,6 +325,7 @@ const toolTipActiveApplicationText = computed(() => {
 
 onMounted(() => {
   loadLocalStorage();
+  initInterceptors(router)
 });
 
 const loadLocalStorage = () => {
@@ -354,14 +357,8 @@ const goToRequisitionApplicants = () => {
   router.replace("/home/historial-requisiciones-solicitudes");
 };
 
-const logout = () => {
-  useLocalStorage.remove("user");
-  useLocalStorage.remove("logged");
-  useLocalStorage.remove("savedApplication");
-  user.value = {};
-  logged.value = false;
-  savedApplication.value = {};
-  curriculumStored.value = null;
+const redirectToLogin = () => {
+  logOut();
   router.replace("/login").catch(() => {});
 };
 
@@ -396,6 +393,14 @@ watch(userHasApplication, (newValue) => {
   if (newValue) {
     forceUserHomeRender.value += 1;
     checkUserApplication(false);
+  }
+});
+
+watch(axiosErrorResponseStatus, (newValue) => {
+  console.log(newValue);
+  if (newValue === 401 || newValue === 403) {
+    console.log("Unauthorized");
+    logOut();
   }
 });
 

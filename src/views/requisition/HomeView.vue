@@ -27,7 +27,6 @@
               standout
               v-model="selectedImage"
               bg-color="white"
-
             >
               <template v-slot:prepend>
                 <div class="q-avatar">
@@ -38,7 +37,9 @@
                   >
                   </q-img>
                 </div>
-                <div class="text-dark text-body2 q-ml-md q-mt-sm">{{ userName }}</div>
+                <div class="text-dark text-body2 q-ml-md q-mt-sm">
+                  {{ userName }}
+                </div>
               </template>
               <q-tooltip>Cambiar foto</q-tooltip>
             </q-file>
@@ -86,7 +87,12 @@
               <q-item-label caption>Historial de requisiciones</q-item-label>
             </q-item-section>
           </q-item>
-          <q-item v-if="isRh" clickable to="/home/historial-solicitudes" :inset-level="1">
+          <q-item
+            v-if="isRh"
+            clickable
+            to="/home/historial-solicitudes"
+            :inset-level="1"
+          >
             <q-item-section avatar>
               <q-icon name="search" />
             </q-item-section>
@@ -170,7 +176,7 @@
         </q-item>
       </q-list>
 
-      <q-btn class="logout-button" @click="logout" flat>
+      <q-btn class="logout-button" @click.prevent="redirectToLogin" flat>
         <q-icon name="logout" class="logout-icon" />
         <label>Cerrar Sesión</label>
       </q-btn>
@@ -196,13 +202,12 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { storeToRefs } from "pinia";
 import { getAdminImagesPath, getAssetsPath } from "src/utils/folderPaths";
-import { useRequisitionStore } from "src/stores/requisition";
 import { uploadFile, updateFile } from "src/services/files";
-import { updateUserImage } from "src/services/user";
+import { updateUserImage, logOut } from "src/services/user";
+import { axiosErrorResponseStatus, initInterceptors } from "src/services/setupInterceptors";
 
 const $q = useQuasar();
 const router = useRouter();
-const useRequisition = useRequisitionStore();
 const useRequisitionDetails = useRequisitionDetailsStore();
 const useAuth = useAuthStore();
 const useLocalStorage = useLocalStorageStore();
@@ -217,6 +222,7 @@ const { user, logged, isRh, hasPermitRequisitionCreation } =
 
 onMounted(() => {
   loadLocalStorage();
+  initInterceptors(router);
 });
 
 const selectedImage = ref();
@@ -238,7 +244,9 @@ const loadLocalStorage = () => {
     user.value = userStored;
     userName.value = user.value.userName;
     photoUUID.value =
-      user.value.photoUUID === null || user.value.photoUUID === "" ? photoUUID.value : user.value.photoUUID;
+      user.value.photoUUID === null || user.value.photoUUID === ""
+        ? photoUUID.value
+        : user.value.photoUUID;
   }
 
   if (loggedStored) logged.value = loggedStored;
@@ -250,9 +258,7 @@ const onNewRequisitionClicked = () => {
   updatingRequisition.value = false;
 };
 
-
 const uploadImage = async () => {
-
   try {
     $q.loading.show();
     let newFileName;
@@ -273,7 +279,7 @@ const uploadImage = async () => {
     }
   } catch (error) {
     console.log(error);
-  } finally{
+  } finally {
     $q.loading.hide();
   }
 };
@@ -294,15 +300,6 @@ const updateUserImageInDatabase = async (imageUUID) => {
 };
 
 watch(
-  showingDetails, // Watch the desired store value
-  (newValue) => {
-    if (!newValue) {
-      componentKey.value += 1;
-    }
-  }
-);
-
-watch(
   updatingRequisition, // Watch the desired store value
   (newValue) => {
     if (!newValue) {
@@ -311,11 +308,17 @@ watch(
   }
 );
 
-const logout = () => {
-  useLocalStorage.remove("user");
-  useLocalStorage.remove("logged");
-  useRequisition.clearStore();
-  router.replace("/login");
+watch(axiosErrorResponseStatus, (newValue) => {
+  console.log(newValue);
+  if (newValue === 401 || newValue === 403) {
+    console.log("Unauthorized");
+    logOut();
+  }
+});
+
+const redirectToLogin = () => {
+  logOut();
+  router.replace("/login").catch(() => {});
 };
 </script>
 
