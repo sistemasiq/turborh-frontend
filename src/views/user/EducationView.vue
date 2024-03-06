@@ -25,7 +25,7 @@
 
       <q-form>
         <q-card rounded class="my-card  bg-white text-black">
-          <q-card-section class="title2" style="display: flex; margin-top: 3%"> 
+          <q-card-section class="title2" style="display: flex; margin-top: 3%">
             <div class="name">Secundaria</div>
             <div class="city">¿Qué estudió?</div>
             <div class="date">Fecha de inicio a fin</div>
@@ -93,7 +93,7 @@
 
 
       <q-card rounded class="my-card  bg-white text-black">
-        <q-card-section class="title2" style="display: flex; margin-top: 3%"> 
+        <q-card-section class="title2" style="display: flex; margin-top: 3%">
             <div class="name">Bachillerato</div>
             <div class="city">¿Qué estudió?</div>
             <div class="date">Fecha de inicio a fin</div>
@@ -161,7 +161,7 @@
       </q-card>
 
       <q-card rounded class="my-card bg-white text-black">
-        <q-card-section class="title2" style="display: flex; margin-top: 3%"> 
+        <q-card-section class="title2" style="display: flex; margin-top: 3%">
             <div class="name">Profesional</div>
             <div class="city">¿Qué estudió?</div>
             <div class="date">Fecha de inicio a fin</div>
@@ -229,7 +229,7 @@
       </q-card>
 
       <q-card rounded class="my-card bg-white text-black">
-        <q-card-section class="title2" style="display: flex; margin-top: 3%"> 
+        <q-card-section class="title2" style="display: flex; margin-top: 3%">
             <div class="name">Maestría</div>
             <div class="maestria">¿Qué estudió?</div>
             <div class="date">Fecha de inicio a fin</div>
@@ -280,7 +280,7 @@
           <div class="maestry-content" style="display: flex">
             <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
               class="checkbox" v-model="certifiedMaster" @update:modelValue="handleMasterCheckboxChange('yes')" label="Sí"
-              style="color: rgb(0, 0, 0); margin-left: 10%" />
+              style="color: rgb(0, 0, 0); margin-left: 10%" :disable="viewingApplication" />
             <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
               class="checkbox" v-model="notCertifiedMaster" @update:modelValue="handleMasterCheckboxChange('no')"
               label="No" style="color: rgb(0, 0, 0); margin-right: 10%" :disable="viewingApplication" />
@@ -295,7 +295,7 @@
       </q-card>
 
       <q-card rounded class="my-card bg-white text-black">
-        <q-card-section class="title2" style="display: flex; margin-top: 3%"> 
+        <q-card-section class="title2" style="display: flex; margin-top: 3%">
             <div class="otro">Otro</div>
             <div class="carrer">¿Qué estudió?</div>
             <div class="date">Fecha de inicio a fin</div>
@@ -361,9 +361,9 @@
       </q-card>
 
       <q-card rounded class="my-card bg-white text-black">
-        <q-card-section class="title2" style="display: flex; margin-top: 3%"> 
+        <q-card-section class="title2" style="display: flex; margin-top: 3%">
          </q-card-section>
-       
+
         <div style="display: flex; flex-grow: 1; margin-left: 1%">
           <q-input ligth outlined color="cyan-1" mask="##########" v-model="professionalLicence"
             label="No. de cedula profesional" label-color="black" class="input-brand" style="width: 32%; margin-left: 1%"

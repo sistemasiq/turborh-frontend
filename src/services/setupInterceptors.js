@@ -17,6 +17,10 @@ export const initInterceptors = (router) => {
       axiosErrorResponseStatus.value = error.response.status
 
       if(axiosErrorResponseStatus.value === 401 || axiosErrorResponseStatus.value === 403){
+        console.log("error: ",error.response);
+        delete axios.defaults.headers.common["Authorization"];
+        localStorage.removeItem("user");
+        localStorage.removeItem("logged");
         router.replace("/login").catch(() => {});
       }
 
