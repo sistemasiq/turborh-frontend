@@ -19,12 +19,15 @@ export const getAllRequisitions = async () => {
 
   try {
     const request = await axios.get(`requisitions`);
-
+    console.log(request.status)
     if (requestSuccessfull(request.status)) {
+      console.log(request.status)
       return request.data;
     } else {
+      console.log(request.status)
       return null;
     }
+
   } catch (error) {
     return null;
   }

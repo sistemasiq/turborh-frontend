@@ -1,5 +1,29 @@
 import axios from "axios";
 import { requestSuccessfull } from "src/utils/operations";
+import { useLocalStorageStore } from "src/stores/localStorage";
+import { useRequisitionStore } from "src/stores/requisition";
+import { useAuthStore } from "src/stores/auth";
+import { storeToRefs } from "pinia";
+
+const useLocalStorage = useLocalStorageStore();
+const useAuth = useAuthStore()
+const useRequisition = useRequisitionStore();
+
+const { user, logged } = storeToRefs(useAuth);
+
+export const removeHeaderAuthorization = () =>{
+
+  delete axios.defaults.headers.common["Authorization"];
+}
+
+export const logOut = () => {
+  useLocalStorage.remove("user");
+  useLocalStorage.remove("logged");
+  user.value = {};
+  logged.value = false;
+  removeHeaderAuthorization();
+  useRequisition.clearStore();
+};
 
 export const logUser = async (userName, password) => {
   const body = {
@@ -69,7 +93,7 @@ export const getUserByEmail = async (email) => {
 };
 
 export const createUser = async (userName, email, curp, password) => {
-  const newUserData = {
+  let newUserData = {
     applicationId: 0,
     id: 0,
     userName: userName,
@@ -83,7 +107,8 @@ export const createUser = async (userName, email, curp, password) => {
     const request = await axios.post(`users/register`, newUserData);
 
     if (requestSuccessfull(request.status)) {
-      newUserData.id = request.data;
+      newUserData = request.data;
+      axios.defaults.headers.common['Authorization'] = request.data.token;
       return newUserData;
     } else {
       return null;

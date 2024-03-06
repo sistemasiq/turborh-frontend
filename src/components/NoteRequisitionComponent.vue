@@ -29,7 +29,7 @@
   </q-card>
 </template>
 
-  
+
   <script setup>
   import { ref, onMounted } from "vue";
   import { storeToRefs } from "pinia";
@@ -38,7 +38,7 @@
   import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
   import { useAuthStore } from "src/stores/auth";
   import { updateRequisitionNotes } from "src/services/requisition";
-  
+
   const $q = useQuasar();
   const props = defineProps(["currentNote"]);
   const note = ref("");
@@ -54,7 +54,7 @@
   onMounted(() => {
     note.value = props.currentNote;
   })
-  
+
   const saveNote = async() => {
     try {
       savingNote.value = true;
