@@ -51,7 +51,7 @@
         >
           <q-card class="dialog-card">
             <q-img
-            :src="getS3FileUrl(getDefaultPath(jobDetails ? jobDetails.photo_uuid : null, getJobImagesPath), getDefaultJobUUID(jobDetails ? jobDetails.photo_uuid : null))"
+            :src="getS3FileUrl(getJobImagesPath, getDefaultJobUUID(jobDetails ? jobDetails.photo_uuid : null))"
               spinner-color="white"
               class="full-width q-pt-md"
               style="height: 25%; border-radius: 30px"
