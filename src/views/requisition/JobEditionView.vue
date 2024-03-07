@@ -242,6 +242,18 @@
             style="color: white"
             :disable="readOnly"
           />
+          <q-radio
+            color="cyan"
+            unchecked-icon="radio_button_unchecked"
+            checked-icon="radio_button_checked"
+            size="lg"
+            class="checkbox"
+            val="I"
+            v-model="gender"
+            label="Indistinto"
+            style="color: white"
+            :disable="readOnly"
+          />
         </div>
       </div>
       <div class="gender-content">
@@ -270,6 +282,18 @@
             val="S"
             v-model="civilStatus"
             label="Soltero"
+            style="color: white"
+            :disable="readOnly"
+          />
+          <q-radio
+            color="cyan"
+            unchecked-icon="radio_button_unchecked"
+            checked-icon="radio_button_checked"
+            size="lg"
+            class="checkbox"
+            val="I"
+            v-model="civilStatus"
+            label="Indistinto"
             style="color: white"
             :disable="readOnly"
           />

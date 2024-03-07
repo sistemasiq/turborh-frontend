@@ -180,7 +180,7 @@ const note = ref("");
 const {  showingDetails, requisitionData, numRequisitionDetails, applicantDetails, jobDetails, updatingRequisition } = storeToRefs(useRequisitionDetails);
 const {  applicantId, applicant, job, vacancyNumbers, motiveCreation } = storeToRefs(useRequisition);
 const { user, isRh, isAdmin, isBoss } = storeToRefs(useAuth);
-const { jobId, jobFunctions, jobSkills, englishLevel, educationRequired, experience, extraHours, travelAvailability, jobConditions, jobObservations } = storeToRefs(useJob);
+const { jobData, jobId, jobFunctions, jobSkills, englishLevel, educationRequired, experience, extraHours, travelAvailability, jobConditions, jobObservations } = storeToRefs(useJob);
 
 
 onMounted(() => {
@@ -271,6 +271,7 @@ const fetchJobData = async (id) => {
     try {
         const job = await getJobById(id);
         if (job) {
+            jobData.value = job;
             jobId.value = job.id;
             jobFunctions.value = job.functions;
             jobSkills.value = job.skills;
