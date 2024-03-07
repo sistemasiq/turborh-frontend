@@ -30,7 +30,7 @@
             fit="cover"
             :src="
               getS3FileUrl(
-                getDefaultPath(item.jobUUID, getJobImagesPath),
+                getJobImagesPath,
                 getDefaultJobUUID(item.jobUUID)
               )
             "
