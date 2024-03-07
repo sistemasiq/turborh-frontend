@@ -747,18 +747,22 @@ const showDetails = async (
   updatingRequisition.value = isUpdating;
 
   try {
+    $q.loading.show();
     const requisitionSearched = await getRequisitionByNum(
       numRequisitionDetails.value
     );
 
     if (requisitionSearched) {
       requisitionData.value = requisitionSearched;
+      router.push("nueva-requisicion-1");
     }
   } catch (error) {
     console.log("Error fetching requisition details " + error);
+  }finally{
+    $q.loading.hide()
   }
 
-  router.push("nueva-requisicion-1");
+
 };
 
 const fetchRequisitions = async () => {
