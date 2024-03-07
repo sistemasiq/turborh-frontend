@@ -104,6 +104,7 @@ const saveNote = async (currentRoute) => {
   return;
 
   try {
+    $q.loading.show()
     const notes = {
       applicationId: savedApplication.value.solicitud_id,
       noteFrontPage: notesFrontPage.value,
@@ -128,6 +129,8 @@ const saveNote = async (currentRoute) => {
     $q.notify(
       notifyNegative("Hubo un error al guardar su nota, intente de nuevo.")
     );
+  }finally{
+    $q.loading.hide()
   }
 };
 

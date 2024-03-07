@@ -203,6 +203,7 @@ const showRequisitionDetails = () => {
     motiveCreation.value = requisitionData.value.motiveCreation;
     vacancyNumbers.value = requisitionData.value.vacancyNumber;
     note.value = requisitionData.value.notes;
+    console.log(note.value);
     fetchJobDataDetails()
 }
 
