@@ -122,7 +122,8 @@ export const updateRequisitionState = async (state, numRequisition) => {
 
 export const updateRequisitionNotes = async (newNote, numRequisition) => {
     try {
-        const request = await axios.put(`requisitions/${numRequisition}/note/${newNote}`)
+        //Con encodeURIComponent me aseguro de se incluya cualquier caracter especial
+        const request = await axios.put(`requisitions/${numRequisition}/note?newNote=${encodeURIComponent(newNote)}`)
 
         if(requestSuccessfull(request.status)){
             return true;

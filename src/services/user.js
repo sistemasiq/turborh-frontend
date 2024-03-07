@@ -11,9 +11,14 @@ const useRequisition = useRequisitionStore();
 
 const { user, logged } = storeToRefs(useAuth);
 
+
 export const removeHeaderAuthorization = () =>{
 
   delete axios.defaults.headers.common["Authorization"];
+}
+
+export const setHeaderAuthorization = (token) => {
+  axios.defaults.headers.common['Authorization'] = token;
 }
 
 export const logOut = () => {
@@ -35,7 +40,7 @@ export const logUser = async (userName, password) => {
     const request = await axios.post(`users/login`, body);
 
     if (requestSuccessfull(request.status)) {
-      axios.defaults.headers.common['Authorization'] = request.data.token;
+      setHeaderAuthorization(request.data.token)
       return request.data;
     } else {
       console.log("ERROR: ", request.status )

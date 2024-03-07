@@ -203,7 +203,7 @@ import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { storeToRefs } from "pinia";
 import { getAdminImagesPath, getAssetsPath } from "src/utils/folderPaths";
 import { uploadFile, updateFile } from "src/services/files";
-import { updateUserImage, logOut } from "src/services/user";
+import { updateUserImage, logOut, setHeaderAuthorization } from "src/services/user";
 import { axiosErrorResponseStatus, initInterceptors } from "src/services/setupInterceptors";
 
 const $q = useQuasar();
@@ -219,6 +219,7 @@ const { showingDetails, updatingRequisition } = storeToRefs(
 );
 const { user, logged, isRh, hasPermitRequisitionCreation } =
   storeToRefs(useAuth);
+const settedHeaderAuthorization = ref(false);
 
 onMounted(() => {
   loadLocalStorage();
@@ -247,6 +248,8 @@ const loadLocalStorage = () => {
       user.value.photoUUID === null || user.value.photoUUID === ""
         ? photoUUID.value
         : user.value.photoUUID;
+    setHeaderAuthorization(userStored.token);
+    settedHeaderAuthorization.value = true;
   }
 
   if (loggedStored) logged.value = loggedStored;
@@ -303,6 +306,15 @@ watch(
   updatingRequisition, // Watch the desired store value
   (newValue) => {
     if (!newValue) {
+      componentKey.value += 1;
+    }
+  }
+);
+
+watch(
+  settedHeaderAuthorization, // Watch the desired store value
+  (newValue) => {
+    if (newValue) {
       componentKey.value += 1;
     }
   }

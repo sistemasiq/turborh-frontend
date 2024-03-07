@@ -261,6 +261,7 @@ const keyDownHandler = (event) => {
 };
 
 onMounted(() => {
+
   window.addEventListener("keydown", keyDownHandler);
 });
 

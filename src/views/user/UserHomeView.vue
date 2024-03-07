@@ -278,7 +278,7 @@ import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { updateUserApplicationState } from "src/services/userApplication";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { disableCandidateAllRequisitions } from "src/services/candidates";
-import { logOut } from "src/services/user";
+import { logOut, setHeaderAuthorization } from "src/services/user";
 import { axiosErrorResponseStatus, initInterceptors } from "src/services/setupInterceptors";
 
 
@@ -316,6 +316,7 @@ const openNote = ref(false);
 
 const activeApplication = ref(false);
 const userPhotoUUID = ref("");
+const settedHeaderAuthorization = ref(false);
 
 const toolTipActiveApplicationText = computed(() => {
   return activeApplication.value
@@ -333,10 +334,12 @@ const loadLocalStorage = () => {
   const loggedStored = useLocalStorage.load("logged");
   const isViewingApplication = useLocalStorage.load("viewingApplication");
   const isUpdatingApplication = useLocalStorage.load("updatingApplication");
-
+  const userApplicationStored = useLocalStorage.load("savedApplication");
   if (userStored) {
     user.value = userStored;
     userPhotoUUID.value = user.value.photoUUID;
+    setHeaderAuthorization(userStored.token)
+    settedHeaderAuthorization.value = true;
     checkUserApplication(false);
   }
   if (loggedStored) logged.value = loggedStored;
@@ -347,6 +350,10 @@ const loadLocalStorage = () => {
   if (isUpdatingApplication) {
     updatingApplication.value = isUpdatingApplication;
   }
+  if(userApplicationStored){
+    savedApplication.value = userApplicationStored
+  }
+
 };
 
 const goToRequisitionApplicants = () => {
@@ -361,6 +368,15 @@ const redirectToLogin = () => {
   logOut();
   router.replace("/login").catch(() => {});
 };
+
+watch(
+  settedHeaderAuthorization, // Watch the desired store value
+  (newValue) => {
+    if (newValue) {
+      componentKeyRouterView.value += 1;
+    }
+  }
+);
 
 watch(
   viewingApplication, // Watch the desired store value
