@@ -19,7 +19,7 @@
       </div>
 
       <q-list>
-        <div style="position: absolute; top: 25%; left: 5%">
+        <div style="position: absolute; top: 20%; left: 5%">
           <q-item v-ripple class="drawer-item">
             <q-item-section avatar class="text-center">
               <q-avatar class="text-center drawer-avatar" style="color: #1cabc1"
@@ -322,7 +322,7 @@ const addUser = async () => {
     if (newUserData) {
       logged.value = 1;
       user.value = newUserData;
-      useLocalStorage.clear();
+      localStorage.clear();
       useLocalStorage.save("logged", logged.value)
       useLocalStorage.save("user", user.value);
       $q.notify(notifyPositive("Te has registrado correctamente"));
@@ -346,7 +346,7 @@ const keyDownHandler = (event) => {
   if (event.key === "Enter") {
     if (isRegisterPage.value) {
       registerUser();
-    }
+  }
   }
 };
 

@@ -195,7 +195,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onBeforeMount } from "vue";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { useAuthStore } from "src/stores/auth";
 import { useLocalStorageStore } from "src/stores/localStorage";
@@ -221,10 +221,12 @@ const { user, logged, isRh, hasPermitRequisitionCreation } =
   storeToRefs(useAuth);
 const settedHeaderAuthorization = ref(false);
 
-onMounted(() => {
+onBeforeMount(() => {
+
   loadLocalStorage();
   initInterceptors(router);
-});
+})
+
 
 const selectedImage = ref();
 

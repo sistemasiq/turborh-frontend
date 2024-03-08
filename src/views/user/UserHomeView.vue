@@ -264,7 +264,7 @@
 <script setup>
 import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onBeforeMount, watch} from "vue";
 import { useAuthStore } from "src/stores/auth";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
@@ -324,9 +324,11 @@ const toolTipActiveApplicationText = computed(() => {
     : "Activa tu solicitud de trabajo";
 });
 
-onMounted(() => {
+
+onBeforeMount(() => {
   loadLocalStorage();
   initInterceptors(router)
+  router.replace('/userHome/perfil');
 });
 
 const loadLocalStorage = () => {

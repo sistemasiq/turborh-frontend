@@ -67,7 +67,22 @@ export const useRequestUser = defineStore("requestUser", () => {
   const familyReferencesData = ref([]);
   const commercialReferencesData = ref([]);
 
-  const familyFathersData = ref([]);
+  const familyFathersData = ref([
+    {
+      relationship: "",
+      name: "",
+      birthdate: "",
+      job: "",
+      jobAddress: "",
+    },
+    {
+      relationship: "",
+      name: "",
+      birthdate: "",
+      job: "",
+      jobAddress: "",
+    },
+  ]);
   const familySonsData = ref([]);
 
   const educationData = ref({
@@ -156,7 +171,7 @@ export const useRequestUser = defineStore("requestUser", () => {
 
   const savedApplication = ref();
 
-  
+
   const userHasApplication = computed(() => {
     if(savedApplication.value){
       return savedApplication.value.solicitud_id !== 0 && savedApplication.value.solicitud_id !== undefined;
@@ -171,7 +186,7 @@ export const useRequestUser = defineStore("requestUser", () => {
 
   const viewingApplication = ref(false);
   const updatingApplication = ref(false);
-  
+
 
 
   return {
