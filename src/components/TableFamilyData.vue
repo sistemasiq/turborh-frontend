@@ -109,7 +109,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted} from "vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
@@ -122,7 +122,6 @@ const useRequest = useRequestUser();
 
 const relationOptions = ["Padre", "Madre", "Esposo/a"];
 
-const currentIndex = ref(1);
 
 const disableDeleteButton = ref(true);
 
@@ -130,6 +129,7 @@ const {
   familyFathersData,
   viewingApplication,
   updatingApplication,
+  savedApplication
 } = storeToRefs(useRequest);
 
 const columns = [
@@ -155,12 +155,26 @@ const columns = [
   },
 ];
 
+
 onMounted(() => {
-  setCurrentIndex();
+  if(updatingApplication.value || viewingApplication.value){
+    setSavedStoredValues();
+  }
 
   disableDeleteButton.value =
     familyFathersData.value.length === 2 ? true : false;
 });
+
+const setSavedStoredValues = () => {
+  if (!savedApplication.value) return;
+  familyFathersData.value = []
+
+  savedApplication.value.datos_familiares.forEach((element) => {
+    if (element.job !== null) {
+      familyFathersData.value.push(element);
+    }
+  })
+};
 
 
 const lettersRule = (value) => {
@@ -239,7 +253,6 @@ const addNewRelative = () => {
 
   familyFathersData.value.push(newRelative);
 
-  setCurrentIndex();
   disableDeleteButton.value = false;
 };
 
@@ -248,7 +261,6 @@ const deleteLastRelative = () => {
     disableDeleteButton.value = false;
     disableAddButton.value = false;
     familyFathersData.value.pop();
-    setCurrentIndex();
 
     if (familyFathersData.value.length === 3 || familyFathersData.value.length === 2) {
       disableDeleteButton.value = true;
@@ -264,16 +276,6 @@ const saveLocalStore = () => {
   }
 };
 
-const loadLocalStore = () => {
-  const localStoreData = useLocalStorage.load("familyFathersData");
 
-  if (localStoreData) familyFathersData.value = localStoreData;
-};
 
-const setCurrentIndex = () => {
-  if(familyFathersData.value.length === 0)
-  return;
-
-  currentIndex.value = familyFathersData.value.length - 1;
-};
 </script>

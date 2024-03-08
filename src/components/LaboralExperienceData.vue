@@ -294,14 +294,14 @@
       />
       <q-btn
         flat
-        @click="removeLaboralExperience"
+        @click.prevent="removeLaboralExperience"
         round
         dense
         icon="delete"
         color="white"
         class="q-ml-md"
-        :class="currentIndex <= 0 ? 'bg-grey' : 'bg-red'"
-        :disable="currentIndex <= 0"
+        :class="laboralExperienceData.length <= 1 ? 'bg-grey' : 'bg-red'"
+        :disable="laboralExperienceData.length === 1"
       />
     </div>
     <ButtonApplicationStatus v-if="updatingApplication" />
@@ -340,10 +340,11 @@ onMounted(() => {
   if (viewingApplication.value || updatingApplication.value) {
     setSavedStoredValues();
     if (updatingApplication.value) {
-      currentIndex.value = laboralExperienceData.value.length - 1;
+      setCurrentIndex();
     }
   } else {
-    currentIndex.value = laboralExperienceData.value.length - 1;
+    setCurrentIndex();
+
   }
 });
 
@@ -367,9 +368,7 @@ const disableAddButton = computed(() => {
     !laboralExperienceData.value[currentIndex.value].startMontlySalary ||
     !laboralExperienceData.value[currentIndex.value].endingMontlySalary ||
     !laboralExperienceData.value[currentIndex.value].functionsPerformed ||
-    !laboralExperienceData.value[currentIndex.value].separationCause ||
-    !laboralExperienceData.value[currentIndex.value].inmediateLastBossName ||
-    !laboralExperienceData.value[currentIndex.value].inmediateLastBossPosition
+    !laboralExperienceData.value[currentIndex.value].separationCause
   );
 });
 
@@ -387,9 +386,7 @@ const addLaboralExperience = () => {
     startMontlySalary: "",
     endingMontlySalary: "",
     functionsPerformed: "",
-    separationCause: "",
-    inmediateLastBossName: "",
-    inmediateLastBossPosition: "",
+    separationCause: ""
   });
   laboralExperienceData.value[currentIndex.value].expanded = false;
   currentIndex.value++;
@@ -397,8 +394,15 @@ const addLaboralExperience = () => {
 
 const removeLaboralExperience = () => {
   laboralExperienceData.value.pop();
-  currentIndex.value--;
+  setCurrentIndex();
 };
+
+const setCurrentIndex = () => {
+
+  if(laboralExperienceData.value.length > 0){
+    currentIndex.value = laboralExperienceData.value.length - 1;
+  }
+}
 
 /* INPUTS KEY - VALUE - RULES -------------------------------------- */
 
@@ -510,6 +514,7 @@ const loadLocalStore = () => {
   const localStoreData = useLocalStorage.load("laboralExperienceData");
 
   if (localStoreData) laboralExperienceData.value = localStoreData;
+
 };
 </script>
 

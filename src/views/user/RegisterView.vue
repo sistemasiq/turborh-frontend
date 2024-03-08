@@ -322,7 +322,7 @@ const addUser = async () => {
     if (newUserData) {
       logged.value = 1;
       user.value = newUserData;
-      useLocalStorage.clear();
+      localStorage.clear();
       useLocalStorage.save("logged", logged.value)
       useLocalStorage.save("user", user.value);
       $q.notify(notifyPositive("Te has registrado correctamente"));

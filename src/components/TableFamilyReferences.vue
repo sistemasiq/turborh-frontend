@@ -175,6 +175,7 @@ const deleteLastReference = () => {
 };
 
 const setCurrentIndex = () => {
+  if(familyReferencesData.value.length > 0)
   currentIndex.value = familyReferencesData.value.length - 1;
 };
 
