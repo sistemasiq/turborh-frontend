@@ -44,7 +44,8 @@
             padding-top: 2%;
           "
         >
-          Datos de Padres y Esposa(o)
+          Datos de Padres y Esposa(o) 
+          * Es obligatorios ingresar 2 personas *
         </p>
         <FamilyFathers class="table-position" />
         <br />
