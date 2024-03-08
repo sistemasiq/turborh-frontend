@@ -346,7 +346,7 @@ const keyDownHandler = (event) => {
   if (event.key === "Enter") {
     if (isRegisterPage.value) {
       registerUser();
-    }
+  }
   }
 };
 

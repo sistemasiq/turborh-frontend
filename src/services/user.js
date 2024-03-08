@@ -113,7 +113,7 @@ export const createUser = async (userName, email, curp, password) => {
 
     if (requestSuccessfull(request.status)) {
       newUserData = request.data;
-      axios.defaults.headers.common['Authorization'] = request.data.token;
+      setHeaderAuthorization()
       return newUserData;
     } else {
       return null;
