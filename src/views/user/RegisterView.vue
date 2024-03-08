@@ -19,7 +19,7 @@
       </div>
 
       <q-list>
-        <div style="position: absolute; top: 25%; left: 5%">
+        <div style="position: absolute; top: 20%; left: 5%">
           <q-item v-ripple class="drawer-item">
             <q-item-section avatar class="text-center">
               <q-avatar class="text-center drawer-avatar" style="color: #1cabc1"
