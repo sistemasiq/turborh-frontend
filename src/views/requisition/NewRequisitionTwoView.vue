@@ -402,6 +402,7 @@ const {
   applicantId,
 } = storeToRefs(useRequisition);
 const {
+  jobData,
   jobId,
   educationRequired,
   extraHours,
@@ -446,6 +447,9 @@ const onNumberTypePaste = (event) => {
 
 const setDefaultJobValues = () => {
   if (!showingDetails.value && !updatingRequisition.value) {
+    gender.value = jobData.value.gender;
+    ageRequired.value = jobData.value.age;
+    civilStatus.value = jobData.value.civilStatus;
     englishLevelRequired.value = englishLevel.value;
     experienceRequired.value = experience.value;
     extraHoursRequired.value = extraHours.value === 1 ? true : false;
@@ -453,6 +457,7 @@ const setDefaultJobValues = () => {
       travelAvailability.value === 1 ? true : false;
     defaultConditions.value = jobConditions.value;
     defaultObservations.value = jobObservations.value;
+
     return;
   }
 

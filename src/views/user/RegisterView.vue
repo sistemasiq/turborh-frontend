@@ -19,7 +19,7 @@
       </div>
 
       <q-list>
-        <div style="position: absolute; top: 25%; left: 5%">
+        <div style="position: absolute; top: 20%; left: 5%">
           <q-item v-ripple class="drawer-item">
             <q-item-section avatar class="text-center">
               <q-avatar class="text-center drawer-avatar" style="color: #1cabc1"
@@ -38,6 +38,23 @@
     <q-card class="layout-background">
       <q-card-section class="tittle"> Registro de usuario </q-card-section>
       <q-card-section class="card-register">
+        <div style="margin-top: 6%">
+        <q-card flat bordered text-color="white"
+  class="q-mb-lg"
+  style="margin-left: 0%; border-color: rgb(255, 248, 43);
+  background-color: transparent; color: white; width: 100%; height: 80px;"
+>
+  <q-card-section>
+    <div class="text-body1 text-weight-medium row">
+      <q-icon name="warning" class="q-mr-md q-mt-xs" />
+      Nota
+    </div>
+    <p class="text-body2">
+     No ingrese caracteres especiales al nombre de usuario. Ejemplo: ( ñ , Ñ * /$ " { } &  # () [] + : )
+    </p>
+  </q-card-section>
+</q-card>
+</div>
         <q-form class="q-gutter-md">
           <q-input
             dark
@@ -322,7 +339,7 @@ const addUser = async () => {
     if (newUserData) {
       logged.value = 1;
       user.value = newUserData;
-      useLocalStorage.clear();
+      localStorage.clear();
       useLocalStorage.save("logged", logged.value)
       useLocalStorage.save("user", user.value);
       $q.notify(notifyPositive("Te has registrado correctamente"));
@@ -346,7 +363,7 @@ const keyDownHandler = (event) => {
   if (event.key === "Enter") {
     if (isRegisterPage.value) {
       registerUser();
-    }
+  }
   }
 };
 

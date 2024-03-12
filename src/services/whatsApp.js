@@ -86,6 +86,20 @@ export const sendCanceledRequisitionMessage = async (phoneNumber, name, jobName)
   }
 }
 
+export const sendUserNotSelectedMessage = async (phoneNumber, name, jobName) => {
+
+  const data = requisitionInformationTemplate(phoneNumber, name, jobName);
+
+  try {
+    const request = await axios.post(`/api/whatsapp/send/requisitions/candidates/not-selected`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
 const psychTestSendedTemplate = (phoneNumber, userName, platformUserName, userPassword) => {
   return {
     "phoneNumber": phoneNumber,

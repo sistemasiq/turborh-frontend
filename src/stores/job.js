@@ -2,6 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 
 export const useJobStore = defineStore("job", () => {
+  const jobData = ref();
   const jobId = ref();
   const jobFunctions = ref("");
   const jobSkills = ref("");
@@ -16,6 +17,7 @@ export const useJobStore = defineStore("job", () => {
   const jobStored = ref();
 
   return {
+    jobData,
     jobId,
     jobFunctions,
     jobSkills,

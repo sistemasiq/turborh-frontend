@@ -45,6 +45,7 @@
           "
         >
           Datos de Padres y Esposa(o)
+          * Es obligatorio ingresar mínimo 2 personas *
         </p>
         <FamilyFathers class="table-position" />
         <br />
@@ -70,7 +71,7 @@
 
 <!-- SCRIPT BEGGINS ............................................................................................................................ -->
 <script setup>
-import { computed, onMounted } from "vue";
+import { computed, onBeforeMount } from "vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
 import FamilyFathers from "src/components/TableFamilyData.vue";
@@ -88,7 +89,7 @@ const { updatingApplication, familyFathersData, viewingApplication, savedApplica
 
 
 const requiredFieldsOnThisPage = computed(() => {
-  if (familyFathersData.value[0] && familyFathersData.value[0]) {
+  if (familyFathersData.value[0] && familyFathersData.value[1]) {
     return [
       familyFathersData.value[0].job,
       familyFathersData.value[0].jobAddress,
@@ -104,26 +105,10 @@ const requiredFieldsOnThisPage = computed(() => {
   }
 });
 
-
-onMounted(() => {
+onBeforeMount(() => {
   loadLocalStore();
-  if (viewingApplication.value || updatingApplication.value) {
-    //setSavedStoredValues();
-  }
-  init();
 })
 
-
-  const setSavedStoredValues = () => {
-  if (!savedApplication.value) return;
-
-  savedApplication.value.datos_familiares.forEach((element) => {
-    if (element.job !== null) {
-      familyFathersData.value.push(element);
-    }
-  });
-
-};
 
 const loadLocalStore = () => {
   const localStoreData = useLocalStorage.load("familyFathersData");
@@ -131,21 +116,6 @@ const loadLocalStore = () => {
   if (localStoreData && !viewingApplication.value && !updatingApplication.value
   ) familyFathersData.value = localStoreData;
 };
-
-const init = () => {
-  if(familyFathersData.value.length === 0){
-    const newRelative = {
-    relationship: "",
-    name: "",
-    birthdate: "",
-    job: "",
-    jobAddress: "",
-  };
-
-  familyFathersData.value.push(newRelative);
-  familyFathersData.value.push(newRelative);
-  }
-}
 
 </script>
 

@@ -103,6 +103,7 @@
               :readonly="viewingApplication"
               @update:model-value="updateStore()"
             >
+            <BadgeOptional></BadgeOptional>
             </q-input>
 
             <div
@@ -163,7 +164,7 @@ import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
 import TableDriverLicenses from "src/components/TableDriverLicenses.vue";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
-
+import BadgeOptional from "src/components/BadgeOptional.vue";
 
 const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();

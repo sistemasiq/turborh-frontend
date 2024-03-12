@@ -1,11 +1,10 @@
 <template>
-  <q-page-sticky position="bottom-right" :offset="[18, 18]">
+  <q-page-sticky position="bottom-right" :offset="[160, 1]">
     <q-btn
       v-if="!viewingApplication"
       @mouseover="hoverCreateApplication = true"
       @mouseleave="hoverCreateApplication = false"
       @click.prevent="openConfirmation = true"
-      unelevated
       size="lg"
       :icon="updatingApplication ? 'update' : 'done_all'"
       class="bg-green-6 text-white btn-brand text-capitalize text-h6 q-mr-xl q-mb-xs q-mt-xl"

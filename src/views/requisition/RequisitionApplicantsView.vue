@@ -438,7 +438,7 @@ import {
 } from "src/services/mail";
 import {
   sendPsychTestMessage,
-  sendCanceledRequisitionMessage,
+  sendUserNotSelectedMessage,
 } from "src/services/whatsApp";
 import { updatePsychTestCredentials } from "src/services/user";
 
@@ -842,7 +842,7 @@ const onCompleteSendEmailToCandidates = async () => {
 const onCompleteSendMessageToCandidates = async () => {
   const promises = currentApplicants.value.map((candidate) => {
     if (candidate.selected === 0) {
-      return sendCanceledRequisitionMessage(
+      return sendUserNotSelectedMessage(
         candidate.phoneNumber,
         candidate.name,
         candidate.jobName
