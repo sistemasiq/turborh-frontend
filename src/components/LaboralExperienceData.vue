@@ -219,7 +219,7 @@
             lazy-rules
             :rules="[salaryRule]"
             :readonly="viewingApplication"
-            type="number"
+            mask="######"
             min="0"
             label="Sueldo mensual inicial"
             label-color="white"
@@ -237,7 +237,7 @@
             lazy-rules
             :rules="[salaryRule]"
             :readonly="viewingApplication"
-            type="number"
+            mask="######"
             label="Sueldo mensual final"
             label-color="white"
           >

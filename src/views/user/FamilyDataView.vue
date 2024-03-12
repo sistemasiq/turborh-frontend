@@ -45,7 +45,7 @@
           "
         >
           Datos de Padres y Esposa(o)
-          * Es obligatorios ingresar 2 personas *
+          * Es obligatorio ingresar mínimo 2 personas *
         </p>
         <FamilyFathers class="table-position" />
         <br />

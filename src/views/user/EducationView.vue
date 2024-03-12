@@ -1,436 +1,1169 @@
 <template>
-  <q-layout style="background-color: rgb(30, 61, 88)" v-on:vnode-unmounted="saveLocalStore()">
+  <q-layout
+    style="background-color: rgb(30, 61, 88)"
+    v-on:vnode-unmounted="saveLocalStore()"
+  >
     <q-card class="card-education">
       <q-card-section class="title"> Información Escolar</q-card-section>
       <q-card-section>
-        <PaginationApplication :page="7" :required-fields="requiredFieldsOnThisPage"></PaginationApplication>
+        <PaginationApplication
+          :page="7"
+          :required-fields="requiredFieldsOnThisPage"
+        ></PaginationApplication>
       </q-card-section>
 
       <div style="margin-top: 6%">
-        <div style="display: flex; flex-grow: 1; margin-left: 2%; margin-right: 2%;">
-        <q-card flat bordered rounded text-color="white" class="q-mb-lg" style="margin-left: 0%; border-color: rgb(255, 248, 43);
-        background-color: transparent; color: white; width: 100%; height: 80px;" v-if="!viewingApplication">
-          <q-card-section>
-            <div class="text-body1 text-weight-medium row">
-              <q-icon name="warning" class="q-mr-md q-mt-xs" />
-              Nota
-            </div>
-            <p class="text-body2">
-              Es requerido que tenga al menos la secundaria terminada y con certificado
-            </p>
-          </q-card-section>
-        </q-card>
-      </div>
+        <div
+          style="display: flex; flex-grow: 1; margin-left: 2%; margin-right: 2%"
+        >
+          <q-card
+            flat
+            bordered
+            rounded
+            text-color="white"
+            class="q-mb-lg"
+            style="
+              margin-left: 0%;
+              border-color: rgb(255, 248, 43);
+              background-color: transparent;
+              color: white;
+              width: 100%;
+              height: 80px;
+            "
+            v-if="!viewingApplication"
+          >
+            <q-card-section>
+              <div class="text-body1 text-weight-medium row">
+                <q-icon name="warning" class="q-mr-md q-mt-xs" />
+                Nota
+              </div>
+              <p class="text-body2">
+                Es requerido que tenga al menos la secundaria terminada y con
+                certificado
+              </p>
+            </q-card-section>
+          </q-card>
+        </div>
       </div>
 
       <q-form>
-        <q-card rounded class="my-card  bg-white text-black">
-          <q-card-section class="title2" style="display: flex; margin-top: 3%">
-            <div class="name">Secundaria</div>
-            <div class="city">¿Qué estudió?</div>
-            <div class="date">Fecha de inicio a fin</div>
-            <div class="certificate">¿Tiene Certificado?</div>
+        <q-card rounded class="bg-white text-black q-mb-lg rounded-borders">
+          <div style="display: flex; flex-grow: 1; margin-left: 1%">
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                Secundaria
+              </div>
+              <q-input
+                ligth
+                outlined
+                color="cyan-1"
+                v-model="secondary"
+                label="Nombre *"
+                label-color="grey-8"                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                ¿Qué estudió?
+              </div>
+              <q-input
+                ligth
+                outlined
+                color="cyan-1"
+                v-model="secondarySpeciality"
+                label="Especificar"
+                label-color="grey-8"                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 30%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Fecha de inicio a fin
+              </div>
+              <q-card-section
+                horizontal
+                style="width: 100%"
+                class="row justify-between"
+              >
+                <q-input
+                  filled
+                  v-model="dateStartSecondary"
+                  mask="####/##/##"
+                  lazy-rules
+                  :rules="[dateRule]"
+                  label="AAAA/MM/DD *"
+                  light
+                  outlined
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateStartSecondary"
+                          :readonly="viewingApplication"
+                          @update:model-value="updateStore()"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+
+                <q-input
+                  filled
+                  v-model="dateEndSecondary"
+                  mask="####/##/##"
+                  lazy-rules
+                  :rules="[dateRule]"
+                  label="AAAA/MM/DD *"
+                  ligth
+                  outlined
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateEndSecondary"
+                          :readonly="viewingApplication"
+                          @update:model-value="updateStore()"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </q-card-section>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                ¿Tiene certificado?
+              </div>
+              <div class="row justify-around">
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="certifiedSecondary"
+                  @update:modelValue="handleSecondaryCheckboxChange('yes')"
+                  label="Sí"
+                  :disable="viewingApplication"
+                />
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="notCertifiedSecondary"
+                  @update:modelValue="handleSecondaryCheckboxChange('no')"
+                  label="No"
+                  :disable="viewingApplication"
+                />
+              </div>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Tipo de institución
+              </div>
+              <q-checkbox
+                v-model="isPublicSecondary"
+                color="cyan"
+                unchecked-icon="radio_button_unchecked"
+                checked-icon="radio_button_checked"
+                size="lg"
+                class="checkbox"
+                label="Esta institución es publica"
+                :disable="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+          </div>
+        </q-card>
+
+        <!-- HIGH SCHOOL CARD -->
+
+        <q-card rounded class="bg-white text-black q-mb-lg rounded-borders">
+          <div style="display: flex; flex-grow: 1; margin-left: 1%">
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                Bachillerato
+              </div>
+              <q-input
+                ligth
+                outlined
+                color="cyan-1"
+                v-model="highSchool"
+                label="Nombre"
+                label-color="grey-8"                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                ¿Qué estudió?
+              </div>
+              <q-input
+                ligth
+                outlined
+                color="cyan-1"
+                v-model="highSchoolSpeciality"
+                label="Especificar"
+                label-color="grey-8"                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+
+            <q-card-section vertical style="width: 30%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Fecha de inicio a fin
+              </div>
+              <q-card-section
+                horizontal
+                style="width: 100%"
+                class="row justify-between"
+              >
+                <q-input
+                  filled
+                  v-model="dateStartHighSchool"
+                  mask="####/##/##"
+                  lazy-rules
+                  :rules="[dateRule]"
+                  label="AAAA/MM/DD"
+                  ligth
+                  outlined
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateStartHighSchool"
+                          :readonly="viewingApplication"
+                          @update:model-value="updateStore()"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+
+                <q-input
+                  filled
+                  v-model="dateEndHighSchool"
+                  mask="####/##/##"
+                  lazy-rules
+                  :rules="[dateRule]"
+                  label="AAAA/MM/DD"
+                  ligth
+                  outlined
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateEndHighSchool"
+                          :readonly="viewingApplication"
+                          @update:model-value="updateStore()"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </q-card-section>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                ¿Tiene certificado?
+              </div>
+              <div class="row justify-around">
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="certifiedHighSchool"
+                  @update:modelValue="handleHighSchoolCheckboxChange('yes')"
+                  label="Sí"
+                  :disable="viewingApplication"
+                />
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="notCertifiedHighSchool"
+                  @update:modelValue="handleHighSchoolCheckboxChange('no')"
+                  label="No"
+                  :disable="viewingApplication"
+                />
+              </div>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Tipo de institución
+              </div>
+              <q-checkbox
+                v-model="isPublicHighSchool"
+                color="cyan"
+                unchecked-icon="radio_button_unchecked"
+                checked-icon="radio_button_checked"
+                size="lg"
+                class="checkbox"
+                label="Esta institución es publica"
+                style="color: black"
+                :disable="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+          </div>
+        </q-card>
+
+        <q-card rounded class="bg-white text-black q-mb-lg rounded-borders">
+          <div style="display: flex; flex-grow: 1; margin-left: 1%">
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                Profesional
+              </div>
+              <q-input
+                ligth
+                outlined
+                color="cyan-1"
+                v-model="professional"
+                label="Nombre"
+                label-color="grey-8"                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                ¿Qué estudió?
+              </div>
+
+              <q-select
+                ligth
+                outlined
+                v-model="selectedProfesional"
+                :options="careers"
+                label="Selecciona tu carrera"
+                color="black"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+
+            <q-card-section vertical style="width: 30%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Fecha de inicio a fin
+              </div>
+              <q-card-section
+                horizontal
+                style="width: 100%"
+                class="row justify-between"
+              >
+                <q-input
+                  filled
+                  v-model="dateStartProfessional"
+                  mask="####/##/##"
+                  lazy-rules
+                  :rules="[dateRule]"
+                  label="AAAA/MM/DD"
+                  ligth
+                  outlined
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateStartProfessional"
+                          :readonly="viewingApplication"
+                          @update:model-value="updateStore()"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+
+                <q-input
+                  filled
+                  v-model="dateEndProfessional"
+                  mask="####/##/##"
+                  lazy-rules
+                  :rules="[dateRule]"
+                  label="AAAA/MM/DD"
+                  ligth
+                  outlined
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateEndProfessional"
+                          :readonly="viewingApplication"
+                          @update:model-value="updateStore()"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </q-card-section>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                ¿Tiene certificado?
+              </div>
+              <div class="row justify-around">
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="certifiedProfessional"
+                  @update:modelValue="handleProfesionalCheckboxChange('yes')"
+                  label="Sí"
+                  :disable="viewingApplication"
+                />
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="notCertifiedProfessional"
+                  @update:modelValue="handleProfesionalCheckboxChange('no')"
+                  label="No"
+                  :disable="viewingApplication"
+                />
+              </div>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Tipo de institución
+              </div>
+              <q-checkbox
+                v-model="isPublicProfessional"
+                color="cyan"
+                unchecked-icon="radio_button_unchecked"
+                checked-icon="radio_button_checked"
+                size="lg"
+                class="checkbox"
+                label="Esta institución es publica"
+                style="color: black"
+                :disable="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+          </div>
+        </q-card>
+
+        <q-card rounded class="bg-white text-black q-mb-lg rounded-borders">
+          <div style="display: flex; flex-grow: 1; margin-left: 1%">
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">Maestría</div>
+
+              <q-input
+                ligth
+                outlined
+                color="cyan-1"
+                v-model="master"
+                label="Institución"
+                label-color="grey-8"                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                ¿Qué estudió?
+              </div>
+
+              <q-input
+                ligth
+                outlined
+                color="cyan-1"
+                v-model="masterSpeciality"
+                label="Especificar"
+                label-color="grey-8"                class="input-brand"
+                style="width: 100"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+
+            <q-card-section vertical style="width: 30%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Fecha de inicio a fin
+              </div>
+              <q-card-section
+                horizontal
+                style="width: 100%"
+                class="row justify-between"
+              >
+                <q-input
+                  filled
+                  v-model="dateStartMaster"
+                  mask="####/##/##"
+                  lazy-rules
+                  :rules="[dateRule]"
+                  label="AAAA/MM/DD"
+                  ligth
+                  outlined
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateStartMaster"
+                          :readonly="viewingApplication"
+                          @update:model-value="updateStore()"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+
+                <q-input
+                  filled
+                  v-model="dateEndMaster"
+                  mask="####/##/##"
+                  lazy-rules
+                  :rules="[dateRule]"
+                  label="AAAA/MM/DD"
+                  ligth
+                  outlined
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateEndMaster"
+                          :readonly="viewingApplication"
+                          @update:model-value="updateStore()"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </q-card-section>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                ¿Tiene certificado?
+              </div>
+              <div class="row justify-around">
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="certifiedMaster"
+                  @update:modelValue="handleMasterCheckboxChange('yes')"
+                  label="Sí"
+                  :disable="viewingApplication"
+                />
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="notCertifiedMaster"
+                  @update:modelValue="handleMasterCheckboxChange('no')"
+                  label="No"
+                  :disable="viewingApplication"
+                />
+              </div>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Tipo de institución
+              </div>
+              <q-checkbox
+                v-model="isPublicMaster"
+                color="cyan"
+                unchecked-icon="radio_button_unchecked"
+                checked-icon="radio_button_checked"
+                size="lg"
+                class="checkbox"
+                label="Esta institución es publica"
+                style="color: black"
+                :disable="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+          </div>
+        </q-card>
+
+        <q-card rounded class="bg-white text-black q-mb-xl rounded-borders">
+          <div style="display: flex; flex-grow: 1; margin-left: 1%">
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">Otro</div>
+
+              <q-input
+                light
+                outlined
+                color="cyan-1"
+                v-model="other"
+                label="Institución"
+                label-color="grey-8"                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                ¿Qué estudió?
+              </div>
+
+              <q-input
+                light
+                outlined
+                color="cyan-1"
+                v-model="otherSpeciality"
+                label="Especificar"
+                label-color="grey-8"                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+
+            <q-card-section vertical style="width: 30%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Fecha de inicio a fin
+              </div>
+              <q-card-section
+                horizontal
+                style="width: 100%"
+                class="row justify-between"
+              >
+                <q-input
+                  filled
+                  v-model="dateStartOther"
+                  mask="####/##/##"
+                  lazy-rules
+                  :rules="[dateRule]"
+                  label="AAAA/MM/DD"
+                  ligth
+                  outlined
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateStartOther"
+                          :readonly="viewingApplication"
+                          @update:model-value="updateStore()"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+
+                <q-input
+                  filled
+                  v-model="dateEndOther"
+                  mask="####/##/##"
+                  lazy-rules
+                  :rules="[dateRule]"
+                  label="AAAA/MM/DD"
+                  ligth
+                  outlined
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          v-model="dateEndOther"
+                          :readonly="viewingApplication"
+                          @update:model-value="updateStore()"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Close"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </q-card-section>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                ¿Tiene certificado?
+              </div>
+              <div class="row justify-around">
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="certifiedOther"
+                  @update:modelValue="handleOtherCheckboxChange('yes')"
+                  label="Sí"
+                  :disable="viewingApplication"
+                />
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="notCertifiedOther"
+                  @update:modelValue="handleOtherCheckboxChange('no')"
+                  label="No"
+                  :disable="viewingApplication"
+                />
+              </div>
+            </q-card-section>
+
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Tipo de institución
+              </div>
+              <q-checkbox
+                v-model="isPublicOther"
+                color="cyan"
+                unchecked-icon="radio_button_unchecked"
+                checked-icon="radio_button_checked"
+                size="lg"
+                class="checkbox"
+                label="Esta institución es publica"
+                style="color: black"
+                :disable="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+          </div>
+        </q-card>
+
+        <!--PROFESIONAL DATA -->
+        <q-card class="bg-white text-black rounded-borders q-pb-xl">
+          <q-card-section
+            class="q-ml-sm text-h6 text-weight-medium flex flex-center"
+          >
+            Información profesional
           </q-card-section>
-          <div style="display: flex; flex-grow: 1; margin-left: 1%;">
-          <q-input ligth outlined color="cyan-1" v-model="secondary" label="Nombre *" label-color="black"
-            class="input-brand" style="width: 16%; margin-left: 1%; margin-top:10px;"  :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-          </q-input>
+          <div style="display: flex; flex-grow: 1; margin-left: 1%">
+            <q-card-section vertical style="width: 20%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                No. Cédula Professional
+              </div>
+              <q-input
+                ligth
+                outlined
+                color="cyan-1"
+                mask="##########"
+                v-model="professionalLicence"
+                label="Cédula"
+                label-color="grey-8"
+                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
 
-          <q-input ligth outlined color="cyan-1" v-model="secondarySpeciality" label="Especificar *" label-color="black"
-            class="input-brand" style="width: 16%; margin-left: 1%; margin-top:10px;" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-          </q-input>
+            <q-card-section vertical style="width: 30%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                Especialidad
+              </div>
+              <q-input
+                ligth
+                outlined
+                color="cyan-1"
+                v-model="speciality"
+                label="Su especialidad"
+                label-color="grey-8"
+                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
 
-          <q-input filled v-model="dateStartSecondary" mask="####/##/##" lazy-rules :rules="[dateRule]"
-            label="AAAA/MM/DD *" light outlined color="cyan-1" style="width: 14%; margin-left: 2%; margin-top:10px;"
-            :readonly="viewingApplication" @update:model-value="updateStore()">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="dateStartSecondary" :readonly="viewingApplication" @update:model-value="updateStore()">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
+            <q-card-section vertical style="width: 30%">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                Idiomas que domina
+              </div>
 
-          <q-input filled v-model="dateEndSecondary" mask="####/##/##" lazy-rules :rules="[dateRule]" label="AAAA/MM/DD *"
-            ligth outlined color="cyan-1" style="width: 14%; margin-left: 2%; margin-top:10px;" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="dateEndSecondary" :readonly="viewingApplication" @update:model-value="updateStore()">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-
-          <div class="secoundary-content" style="display: flex">
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="certifiedSecondary" @update:modelValue="handleSecondaryCheckboxChange('yes')"
-              label="Sí" style="color: rgb(0, 0, 0); margin-left: 10%" :disable="viewingApplication" />
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="notCertifiedSecondary" @update:modelValue="handleSecondaryCheckboxChange('no')"
-              label="No" style="color: rgb(0, 0, 0); margin-right: 10%" :disable="viewingApplication" />
+              <q-input
+                ligth
+                outlined
+                color="cyan-1"
+                v-model="languages"
+                label="Idiomas dominados"
+                label-color="grey-8"
+                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+            <q-card-section vertical style="width: 20%">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                ¿Estudia actualmente?
+              </div>
+              <q-card-section
+                horizontal
+                style="width: 100%"
+                class="row justify-around"
+              >
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  v-model="currentlyStudying"
+                  @update:modelValue="handlestudyCheckboxChange('yes')"
+                  label="Si"
+                  :disable="viewingApplication"
+                />
+                <q-checkbox
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox q-mr-md"
+                  v-model="currentlyNotStudying"
+                  @update:modelValue="handlestudyCheckboxChange('no')"
+                  label="No"
+                  :disable="viewingApplication"
+                />
+              </q-card-section>
+            </q-card-section>
           </div>
 
-          <div class="public-content rounded-borders" style="display: flex; margin-top:10px;">
-            <q-checkbox v-model="isPublicSecondary" color="cyan" unchecked-icon="radio_button_unchecked"
-              checked-icon="radio_button_checked" size="lg" class="checkbox" label="Esta institución fue publica"
-              style="color: black" :disable="viewingApplication" @update:model-value="updateStore()"></q-checkbox>
-          </div>
-        </div>
-      </q-card>
+          <!-- STUDING NOW DAYS -->
+          <div style="display: flex; flex-grow: 1; margin-left: 1%">
+            <q-card-section vertical style="width: 20%" v-if="currentlyStudying">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                ¿En qué institución?
+              </div>
+            <q-input
+              outlined
+              color="cyan-1"
+              v-model="currentInstitution"
+              label="Institución"
+              label-color="grey-8"
+              class="input-brand"
+              style="width: 100%"
+              :readonly="viewingApplication"
+              @update:model-value="updateStore()"
+            />
+              </q-card-section>
 
+              <q-card-section vertical style="width: 30%" v-if="currentlyStudying">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                ¿Qué estudia?
+              </div>
+            <q-input
+              outlined
+              color="cyan-1"
+              v-model="currentSpeciality"
+              label="Nombre de la carrera, oficio u otro"
+              label-color="grey-8"
+              class="input-brand"
+              style="width: 100%"
+              :readonly="viewingApplication"
+              @update:model-value="updateStore()"
+            />
+             </q-card-section>
 
-      <q-card rounded class="my-card  bg-white text-black">
-        <q-card-section class="title2" style="display: flex; margin-top: 3%">
-            <div class="name">Bachillerato</div>
-            <div class="city">¿Qué estudió?</div>
-            <div class="date">Fecha de inicio a fin</div>
-            <div class="certificate">¿Tiene Certificado?</div>
-          </q-card-section>
-        <div style="display: flex; flex-grow: 1; margin-left: 1%; margin-top: 5px;">
-          <q-input ligth outlined color="cyan-1" v-model="highSchool" label="Nombre" label-color="black"
-            class="input-brand" style="width: 16%; margin-left: 1%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-          </q-input>
+             <q-card-section vertical style="width: 30%" v-if="currentlyStudying">
+              <div class="q-mb-md text-body1 text-weight-medium">
+                Horario de asistencia
+              </div>
+            <q-input
+              outlined
+              color="cyan-1"
+              v-model="schedules"
+              label="Horarios"
+              label-color="grey-8"
+              class="input-brand"
+              style="width: 100%"
+              :readonly="viewingApplication"
+              @update:model-value="updateStore()"
+            />
+              </q-card-section>
 
-          <q-input ligth outlined color="cyan-1" v-model="highSchoolSpeciality" label="Especificar" label-color="black"
-            class="input-brand" style="width: 16%; margin-left: 1%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-          </q-input>
-
-          <q-input filled v-model="dateStartHighSchool" mask="####/##/##" lazy-rules :rules="[dateRule]"
-            label="AAAA/MM/DD" ligth outlined color="cyan-1" style="width: 14%; margin-left: 2%"
-            :readonly="viewingApplication" @update:model-value="updateStore()">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="dateStartHighSchool" :readonly="viewingApplication"
-                    @update:model-value="updateStore()">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-
-          <q-input filled v-model="dateEndHighSchool" mask="####/##/##" lazy-rules :rules="[dateRule]" label="AAAA/MM/DD"
-          ligth outlined color="cyan-1" style="width: 14%; margin-left: 2%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="dateEndHighSchool" :readonly="viewingApplication" @update:model-value="updateStore()">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-
-          <div class="highschool-content" style="display: flex">
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="certifiedHighSchool" @update:modelValue="handleHighSchoolCheckboxChange('yes')"
-              label="Sí" style="color: rgb(0, 0, 0); margin-left: 10%" :disable="viewingApplication" />
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="notCertifiedHighSchool" @update:modelValue="handleHighSchoolCheckboxChange('no')"
-              label="No" style="color: rgb(0, 0, 0); margin-right: 10%" :disable="viewingApplication" />
-          </div>
-
-          <div class="public-content rounded-borders" style="display: flex">
-            <q-checkbox v-model="isPublicHighSchool" color="cyan" unchecked-icon="radio_button_unchecked"
-              checked-icon="radio_button_checked" size="lg" class="checkbox" label="Esta institución fue publica"
-              style="color: black" :disable="viewingApplication" @update:model-value="updateStore()"></q-checkbox>
-          </div>
-        </div>
-      </q-card>
-
-      <q-card rounded class="my-card bg-white text-black">
-        <q-card-section class="title2" style="display: flex; margin-top: 3%">
-            <div class="name">Profesional</div>
-            <div class="city">¿Qué estudió?</div>
-            <div class="date">Fecha de inicio a fin</div>
-            <div class="certificate">¿Tiene Certificado?</div>
-          </q-card-section>
-        <div style="display: flex; flex-grow: 1; margin-left: 1%">
-          <q-input ligth outlined color="cyan-1" v-model="professional" label="Nombre" label-color="black"
-            class="input-brand" style="width: 16%; margin-left: 1%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-          </q-input>
-
-          <q-select ligth outlined v-model="selectedProfesional" :options="careers" label="Selecciona tu carrera"
-            color="black" class="selectprofessional" :readonly="viewingApplication" @update:model-value="updateStore()" />
-
-          <q-input filled v-model="dateStartProfessional" mask="####/##/##" lazy-rules :rules="[dateRule]"
-            label="AAAA/MM/DD" ligth outlined color="cyan-1" style="width: 14%; margin-left: 2%"
-            :readonly="viewingApplication" @update:model-value="updateStore()">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="dateStartProfessional" :readonly="viewingApplication"
-                    @update:model-value="updateStore()">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-
-          <q-input filled v-model="dateEndProfessional" mask="####/##/##" lazy-rules :rules="[dateRule]"
-            label="AAAA/MM/DD" ligth outlined color="cyan-1" style="width: 14%; margin-left: 2%"
-            :readonly="viewingApplication" @update:model-value="updateStore()">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="dateEndProfessional" :readonly="viewingApplication"
-                    @update:model-value="updateStore()">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-
-          <div class="profesional-content" style="display: flex">
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="certifiedProfessional" @update:modelValue="handleProfesionalCheckboxChange('yes')"
-              label="Sí" style="color: rgb(0, 0, 0); margin-left: 10%" :disable="viewingApplication" />
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="notCertifiedProfessional"
-              @update:modelValue="handleProfesionalCheckboxChange('no')" label="No"
-              style="color: rgb(0, 0, 0); margin-right: 10%" :disable="viewingApplication" />
-          </div>
-
-          <div class="public-content rounded-borders" style="display: flex">
-            <q-checkbox v-model="isPublicProfessional" color="cyan" unchecked-icon="radio_button_unchecked"
-              checked-icon="radio_button_checked" size="lg" class="checkbox" label="Esta institución fue publica"
-              style="color: black" :disable="viewingApplication" @update:model-value="updateStore()"></q-checkbox>
-          </div>
-        </div>
-      </q-card>
-
-      <q-card rounded class="my-card bg-white text-black">
-        <q-card-section class="title2" style="display: flex; margin-top: 3%">
-            <div class="name">Maestría</div>
-            <div class="maestria">¿Qué estudió?</div>
-            <div class="date">Fecha de inicio a fin</div>
-            <div class="certificate">¿Tiene Certificado?</div>
-          </q-card-section>
-        <div style="display: flex; flex-grow: 1; margin-left: 1%">
-          <q-input ligth outlined color="cyan-1" v-model="master" label="Institución" label-color="black" class="input-brand"
-            style="width: 16%; margin-left: 1%" :readonly="viewingApplication" @update:model-value="updateStore()">
-          </q-input>
-
-          <q-input ligth outlined color="cyan-1" v-model="masterSpeciality" label="Especificar" label-color="black"
-            class="input-brand" style="width: 16%; margin-left: 1%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-          </q-input>
-
-          <q-input filled v-model="dateStartMaster" mask="####/##/##" lazy-rules :rules="[dateRule]" label="AAAA/MM/DD"
-          ligth outlined color="cyan-1" style="width: 14%; margin-left: 2%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="dateStartMaster" :readonly="viewingApplication" @update:model-value="updateStore()">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-
-          <q-input filled v-model="dateEndMaster" mask="####/##/##" lazy-rules :rules="[dateRule]" label="AAAA/MM/DD" ligth
-            outlined color="cyan-1" style="width: 14%; margin-left: 2%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="dateEndMaster" :readonly="viewingApplication" @update:model-value="updateStore()">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-
-          <div class="maestry-content" style="display: flex">
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="certifiedMaster" @update:modelValue="handleMasterCheckboxChange('yes')" label="Sí"
-              style="color: rgb(0, 0, 0); margin-left: 10%" :disable="viewingApplication" />
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="notCertifiedMaster" @update:modelValue="handleMasterCheckboxChange('no')"
-              label="No" style="color: rgb(0, 0, 0); margin-right: 10%" :disable="viewingApplication" />
-          </div>
-
-          <div class="public-content rounded-borders" style="display: flex">
-            <q-checkbox v-model="isPublicMaster" color="cyan" unchecked-icon="radio_button_unchecked"
-              checked-icon="radio_button_checked" size="lg" class="checkbox" label="Esta institución fue publica"
-              style="color: black" :disable="viewingApplication" @update:model-value="updateStore()"></q-checkbox>
-          </div>
-        </div>
-      </q-card>
-
-      <q-card rounded class="my-card bg-white text-black">
-        <q-card-section class="title2" style="display: flex; margin-top: 3%">
-            <div class="otro">Otro</div>
-            <div class="carrer">¿Qué estudió?</div>
-            <div class="date">Fecha de inicio a fin</div>
-            <div class="certificate">¿Tiene Certificado?</div>
-          </q-card-section>
-        <div style="display: flex; flex-grow: 1; margin-left: 1%">
-          <q-input light outlined color="cyan-1" v-model="other" label="Institución" label-color="black" class="input-brand"
-            style="width: 16%; margin-left: 1%" :readonly="viewingApplication" @update:model-value="updateStore()">
-          </q-input>
-
-          <q-input light outlined color="cyan-1" v-model="otherSpeciality" label="Especificar" label-color="black"
-            class="input-brand" style="width: 16%; margin-left: 1%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-          </q-input>
-
-          <q-input filled v-model="dateStartOther" mask="####/##/##" lazy-rules :rules="[dateRule]" label="AAAA/MM/DD"
-          ligth outlined color="cyan-1" style="width: 14%; margin-left: 2%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="dateStartOther" :readonly="viewingApplication" @update:model-value="updateStore()">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-
-          <q-input filled v-model="dateEndOther" mask="####/##/##" lazy-rules :rules="[dateRule]" label="AAAA/MM/DD" ligth
-            outlined color="cyan-1" style="width: 14%; margin-left: 2%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer">
-                <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                  <q-date v-model="dateEndOther" :readonly="viewingApplication" @update:model-value="updateStore()">
-                    <div class="row items-center justify-end">
-                      <q-btn v-close-popup label="Close" color="primary" flat />
-                    </div>
-                  </q-date>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input>
-
-          <div class="other-content" style="display: flex">
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="certifiedOther" @update:modelValue="handleOtherCheckboxChange('yes')" label="Sí"
-              style="color: rgb(0, 0, 0); margin-left: 10%" :disable="viewingApplication" />
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="notCertifiedOther" @update:modelValue="handleOtherCheckboxChange('no')" label="No"
-              style="color: rgb(0, 0, 0); margin-right: 10%" :disable="viewingApplication" />
-          </div>
-
-          <div class="public-content rounded-borders" style="display: flex">
-            <q-checkbox v-model="isPublicOther" color="cyan" unchecked-icon="radio_button_unchecked"
-              checked-icon="radio_button_checked" size="lg" class="checkbox" label="Esta institución fue publica"
-              style="color: black" :disable="viewingApplication" @update:model-value="updateStore()"></q-checkbox>
-          </div>
-        </div>
-      </q-card>
-
-      <q-card rounded class="my-card bg-white text-black">
-        <q-card-section class="title2" style="display: flex; margin-top: 3%">
-         </q-card-section>
-
-        <div style="display: flex; flex-grow: 1; margin-left: 1%">
-          <q-input ligth outlined color="cyan-1" mask="##########" v-model="professionalLicence"
-            label="No. de cedula profesional" label-color="black" class="input-brand" style="width: 32%; margin-left: 1%"
-            :readonly="viewingApplication" @update:model-value="updateStore()">
-          </q-input>
-
-          <q-input ligth outlined color="cyan-1" v-model="speciality" label="Especialidad" label-color="black"
-            class="input-brand" style="width: 29%; margin-left: 2%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-          </q-input>
-
-          <q-input ligth outlined color="cyan-1" v-model="languages" label="Idiomas que domina" label-color="black"
-            class="input-brand" style="width: 32%; margin-left: 2%; margin-bottom: 2%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-          </q-input>
-        </div>
-      </q-card>
-
-        <div style="
-            display: flex;
-            flex-grow: 1;
-            margin-left: 1%;
-            margin-bottom: 2%;
-            margin-top:5%;
-          ">
-          <div class="study-content rounded-borders q-ml-sm" style="display: flex">
-            <p class="studytittle q-mt-md q-ml-sm">Estudia actualmente</p>
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox" v-model="currentlyStudying" @update:modelValue="handlestudyCheckboxChange('yes')"
-              label="Si" :disable="viewingApplication" />
-            <q-checkbox color="cyan" unchecked-icon="radio_button_unchecked" checked-icon="radio_button_checked" size="lg"
-              class="checkbox q-mr-md" v-model="currentlyNotStudying" @update:modelValue="handlestudyCheckboxChange('no')"
-              label="No" :disable="viewingApplication" />
-          </div>
-
-          <q-input v-if="currentlyStudying" dark outlined color="cyan-1" v-model="currentInstitution"
-            label="En qué institución" label-color="white" class="input-brand"
-            style="width: 20%; margin-left: 1%; margin-right: 1%" :readonly="viewingApplication"
-            @update:model-value="updateStore()">
-          </q-input>
-
-          <q-input v-if="currentlyStudying" dark outlined color="cyan-1" v-model="currentSpeciality" label="¿Qué estudia?"
-            label-color="white" class="input-brand" style="width: 20%; margin-left: 1%; margin-right: 1%"
-            :readonly="viewingApplication" @update:model-value="updateStore()">
-          </q-input>
-
-          <q-input v-if="currentlyStudying" dark outlined color="cyan-1" v-model="schedules" label="Horarios"
-            label-color="white" class="input-brand" style="width: 20%; margin-left: 1%; margin-right: 1%"
-            :readonly="viewingApplication" @update:model-value="updateStore()">
-          </q-input>
-
-          <div v-if="currentlyStudying" class="ipublic-content rounded-borders2 " style="display: flex">
-            <q-checkbox v-model="isPublicCurrent" color="cyan" unchecked-icon="radio_button_unchecked"
-              checked-icon="radio_button_checked" size="lg" class="checkbox" label="Esta institución es publica"
-              style="color: rgb(0, 0, 0)" :disable="viewingApplication" @update:model-value="updateStore()"></q-checkbox>
-          </div>
+              <q-card-section vertical style="width: 20%" v-if="currentlyStudying">
+              <div
+                class="q-mb-md text-body1 flex flex-center text-weight-medium"
+              >
+                Tipo de institución
+              </div>
+              <q-card-section
+                horizontal
+                style="width: 100%"
+                class="row justify-around"
+              >
+              <q-checkbox
+                v-model="isPublicCurrent"
+                color="cyan"
+                unchecked-icon="radio_button_unchecked"
+                checked-icon="radio_button_checked"
+                size="lg"
+                class="checkbox"
+                label="Esta institución es publica"
+                style="color: rgb(0, 0, 0)"
+                :disable="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
+            </q-card-section>
         </div>
 
-        <div class="column">
-          <q-btn v-if="!viewingApplication && !updatingApplication" class="btn-clean q-mt-xl" rounded text-color="white"
-            color="red-5" label="Limpiar" icon="cleaning_services" @click.prevent="clean" />
-        </div>
+          <div class="column">
+            <q-btn
+              v-if="!viewingApplication && !updatingApplication"
+              class="btn-clean q-mt-xl"
+              rounded
+              text-color="white"
+              color="red-5"
+              label="Limpiar"
+              icon="cleaning_services"
+              @click.prevent="clean"
+            />
+          </div>
+        </q-card>
       </q-form>
     </q-card>
-    <br>
-    <br>
-    <br>
+    <br />
+    <br />
+    <br />
     <ButtonApplicationStatus v-if="updatingApplication" />
   </q-layout>
 </template>
@@ -448,8 +1181,6 @@ import { useQuasar } from "quasar";
 const $q = useQuasar();
 const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();
-
-
 
 const {
   educationData,
@@ -534,10 +1265,15 @@ const careers = [
   "Ingeniería Química",
   "Mercadotecnia",
   "Relaciones Internacionales",
-  "Carreras afines u otras"
+  "Carreras afines u otras",
 ];
 
-const requiredFieldsOnThisPage = computed(() => [secondary.value, secondarySpeciality.value, dateStartSecondary.value, dateEndSecondary.value])
+const requiredFieldsOnThisPage = computed(() => [
+  secondary.value,
+  secondarySpeciality.value,
+  dateStartSecondary.value,
+  dateEndSecondary.value,
+]);
 
 onMounted(() => {
   loadLocalStore();
@@ -875,8 +1611,7 @@ const saveLocalStore = () => {
 const loadLocalStore = () => {
   const localStoreData = useLocalStorage.load("educationData");
 
-  if (localStoreData)
-    educationData.value = localStoreData;
+  if (localStoreData) educationData.value = localStoreData;
 };
 
 const dateRule = (value) => {
@@ -891,16 +1626,9 @@ const dateRule = (value) => {
 
   return true; // La validación pasa
 };
-
-
 </script>
 
 <style scoped>
-.selectprofessional {
-  width: 16%;
-  margin-left: 1%;
-}
-
 .ipublic-content {
   background-color: #ffffff;
   height: 1%;
@@ -909,11 +1637,7 @@ const dateRule = (value) => {
 }
 
 .public-content {
-  background-color: #747ba1c0;
-  height: 1%;
-  width: 20%;
-  margin-left: 3%;
-  margin-right: 2%;
+  width: 100%;
 }
 
 .rounded-borders {
@@ -926,11 +1650,8 @@ const dateRule = (value) => {
   background-color: #ffffff;
 }
 
-
 .study-content {
-  background-color: #ffffff;
-  height: 1%;
-  width: 24%;
+  width: 25%;
 }
 
 .certificate {
@@ -967,11 +1688,12 @@ const dateRule = (value) => {
 
 .otro {
   margin-left: 1%;
-  color: rgb(0, 0, 0)}
+  color: rgb(0, 0, 0);
+}
 
 .name {
   margin-left: 1%;
-  color: rgb(0, 0, 0)
+  color: rgb(0, 0, 0);
 }
 
 .title {

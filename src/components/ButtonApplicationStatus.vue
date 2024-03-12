@@ -5,7 +5,6 @@
       @mouseover="hoverCreateApplication = true"
       @mouseleave="hoverCreateApplication = false"
       @click.prevent="openConfirmation = true"
-      unelevated
       size="lg"
       :icon="updatingApplication ? 'update' : 'done_all'"
       class="bg-green-6 text-white btn-brand text-capitalize text-h6 q-mr-xl q-mb-xs q-mt-xl"

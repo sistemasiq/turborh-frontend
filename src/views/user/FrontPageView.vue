@@ -87,7 +87,7 @@
                 outlined
                 color="cyan-1"
                 v-model="wantedSalary"
-                type="number"
+                mask="######"
                 min="0"
                 label="Sueldo mensual deseado *"
                 label-color="white"
