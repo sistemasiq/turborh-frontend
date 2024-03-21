@@ -8,7 +8,7 @@
         <div style="width: 100%;"
         class="row justify-center q-mt-lg">
           <q-img
-            src="~/assets/img/logo_turbo_navegador.png"
+            :src="getS3FileUrl(getAssetsPath, 'logo_turbo_black.png')"
             style="width: 70px; height: 70px"
           />
         </div>
@@ -84,6 +84,7 @@ import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { getUserImagesPath } from "src/utils/folderPaths.js";
+import { getAssetsPath } from "src/utils/folderPaths";
 import { notifyNegative } from "src/utils/notifies.js";
 import { useAuthStore } from "src/stores/auth.js";
 import { useRouter } from "vue-router";

@@ -8,7 +8,7 @@
         <div style="width: 100%;"
         class="row justify-center q-mt-lg">
           <q-img
-            src="~/assets/img/logo_turbo_navegador.png"
+            :src="getS3FileUrl(getAssetsPath, 'logo_turbo_black.png')"
             style="width: 70px; height: 70px"
           />
         </div>
@@ -41,7 +41,7 @@
               v-model="email"
               label="Ingresa tu correo electrónico"
               clearable
-              standout="text-green-13"
+              standout="text-blue-6"
               label-color="grey-8"
               class="q-mt-md"
               style="width: 100%"
@@ -92,7 +92,8 @@
 import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import axios from "axios";
-
+import { getS3FileUrl } from "src/services/profiles.js";
+import { getAssetsPath } from "src/utils/folderPaths";
 import { notifyNegative } from "src/utils/notifies.js";
 import { useAuthStore } from "src/stores/auth.js";
 import { useRouter } from "vue-router";
