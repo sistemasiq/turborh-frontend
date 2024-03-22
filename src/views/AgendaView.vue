@@ -15,7 +15,7 @@
         />
 
         <q-img
-          src="~/assets/img/logo_turbo_navegador.png"
+         :src="getS3FileUrl(getAssetsPath, 'logo_turbo_navegador.png')"
           class="q-ml-lg q-mr-sm"
           style="width: 30px; height: 30px"
         />
@@ -1677,6 +1677,7 @@ import next from "../components/Next.vue";
 import todayComponent from "../components/Today.vue";
 import { ref, computed, onMounted, onUnmounted, onBeforeMount } from "vue";
 import { useQuasar } from "quasar";
+import { getAssetsPath } from "src/utils/folderPaths";
 import { getS3FileUrl } from "src/services/profiles.js";
 import {
   getLinksList,

@@ -486,7 +486,7 @@ const openSelectCandidateDialog = ref(false);
 const selectedCandidate = ref(0);
 
 const sendLink = ref(false);
-const testLink = ref(false);
+const testLink = ref("");
 
 const currentApplicants = ref([]);
 const { numRequisitionDetails, viewAllRequisitions, idRequisitionDetails } =

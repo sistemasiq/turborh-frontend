@@ -443,7 +443,7 @@ const passwordForPsychTest = ref("");
 const psychTestPlatforms = ref([]);
 const psychTestPlatformId = ref(0);
 const sendLink = ref(false);
-const testLink = ref(false);
+const testLink = ref("");
 
 const openSeeDataPsychTest = ref(false);
 
