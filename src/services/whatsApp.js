@@ -100,6 +100,18 @@ export const sendUserNotSelectedMessage = async (phoneNumber, name, jobName) => 
   }
 }
 
+export const sendLinkMessage = async(phoneNumber, userName, link) => {
+  const data = psychTestLinkTemplate(phoneNumber, userName, link);
+  try {
+    const request = await axios.post(`/api/whatsapp/send/psych-forms-data`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
 const psychTestSendedTemplate = (phoneNumber, userName, platformUserName, userPassword) => {
   return {
     "phoneNumber": phoneNumber,
@@ -110,6 +122,16 @@ const psychTestSendedTemplate = (phoneNumber, userName, platformUserName, userPa
 
   }
 }
+const psychTestLinkTemplate = (phoneNumber, userName, link) => {
+  return {
+    "phoneNumber": phoneNumber,
+    "userName": userName,
+    "link": link,
+    "emailSupport": "reclutamiento@turbomaquinas.com"
+
+  }
+}
+
 
 const requisitionInformationTemplate = (phoneNumber, name, jobName) => {
   return {

@@ -220,18 +220,18 @@ import { ref, computed, onMounted } from "vue";
 import Tooltip from "src/components/Tooltip.vue";
 import { useQuasar } from "quasar";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import { useAuthStore } from "src/stores/auth";
 import { getAllMachinery, createNewMachinery, updateMachinery, enableMachinery, disableMachinery } from "src/services/machineryTools";
+import { storeToRefs } from "pinia";
 
 const $q = useQuasar();
+const useAuth = useAuthStore();
 
 const createDialog = ref(false);
 const id = ref("");
-const createdBy = ref("101");
-const modifiedBy = ref("101");
 const name = ref("");
 const selectedType = ref("");
 const deleteDialog = ref(false);
-const selectedJob = ref();
 const showDeletedJobs = ref(false);
 const filter = ref("");
 const noDataLabel = ref("No hay herramiemtas existentes");
@@ -241,6 +241,8 @@ const disableCheckbox = ref(false);
 const operation = ref("");
 const selectedTool = ref("");
 const isToolActive = ref();
+
+const { user } = storeToRefs(useAuth);
 
 const types = [
   "Maquinaria",
@@ -312,7 +314,7 @@ const createJob = async () => {
     const elementType = selectedType.value.substring(0, 2).toUpperCase();
 
     const data = {
-      createdBy: createdBy.value,
+      createdBy: user.value.id,
       type: elementType,
       name: name.value,
     };
@@ -327,7 +329,6 @@ const createJob = async () => {
     } catch (error) {
       $q.notify(notifyNegative("Hubo un error al ingresar el elemento"));
     } finally {
-      createdBy.value = "";
       selectedType.value = "";
       name.value = "";
       $q.loading.hide();
@@ -362,12 +363,11 @@ const confirmDeleteTool = async () => {
 };
 
 const updateTool = async () => {
-  const url = `/machinerytools/editmachinerytools`;
   if (selectedType.value != "" && name.value != "") {
     const elementType = selectedType.value.substring(0, 2).toUpperCase();
     const data = {
       id: id.value,
-      modifiedBy: modifiedBy.value,
+      modifiedBy: user.value.id,
       type: elementType,
       name: name.value,
     };
@@ -383,7 +383,6 @@ const updateTool = async () => {
       $q.notify(notifyNegative("Hubo un error al actualizar el elemento"));
       console.log(error);
     } finally {
-      createdBy.value = "";
       selectedType.value = "";
       name.value = "";
       $q.loading.hide();
@@ -414,12 +413,10 @@ const cardEdition = (opType, props) => {
   operation.value = opType;
 
   if (operation.value == "create") {
-    createdBy.value = "";
     selectedType.value = "";
     name.value = "";
   } else if (operation.value == "update") {
     id.value = props.id;
-    modifiedBy.value = props.modifiedBy;
     selectedType.value = props.type;
     name.value = props.name;
   }

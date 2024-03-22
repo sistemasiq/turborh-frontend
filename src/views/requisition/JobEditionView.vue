@@ -441,7 +441,6 @@
 import { ref, onMounted, computed } from "vue";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { useQuasar } from "quasar";
-import { getImageSource } from "src/services/profiles.js";
 import { useJobCatalogStore } from "src/stores/jobCatalog";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
@@ -450,8 +449,10 @@ import { getJobImagesPath } from "src/utils/folderPaths";
 import { getAllDepartments, createJob, updateJob, getJobById } from "src/services/jobs";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { updateFile, uploadFile } from "src/services/files";
+import { useAuthStore } from "src/stores/auth";
 
 const router = useRouter();
+const useAuth = useAuthStore();
 const $q = useQuasar();
 const drawer = ref(false);
 
@@ -486,6 +487,8 @@ const jobUUID = ref(defaultUUID);
 
 
 const { jobId, readOnly, updatingJob } = storeToRefs(useJobCatalog);
+
+const { user } = storeToRefs(useAuth)
 
 onMounted(() => {
   fetchDepartments();
@@ -659,7 +662,7 @@ const changeJobState = (photoName) => {
 
 const updateJobData = async (photoName) => {
   const updatedJobData = {
-    createdBy: 1,
+    createdBy: user.value.id,
     id: jobId.value,
     name: name.value,
     mainFunction: mainFunction.value,
@@ -698,7 +701,7 @@ const updateJobData = async (photoName) => {
 
 const createNewJob = async (photoName) => {
   const newJobData = {
-    createdBy: 1,
+    createdBy: user.value.id,
     name: name.value,
     mainFunction: mainFunction.value,
     functions: functions.value,

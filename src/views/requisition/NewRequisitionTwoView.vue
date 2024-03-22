@@ -503,6 +503,7 @@ const createNewRequisition = async () => {
   } = storeToRefs(useJob);
 
   const newRequisition = {
+    createdBy:user.value.id,
     jobId: jobId.value,
     personalId: applicantId.value,
     vacancyNumber: vacancyNumbers.value,
@@ -556,7 +557,7 @@ const updateRequisitionData = async () => {
 
   const updatedRequisitionData = {
     numRequisition: requisitionData.value.numRequisition,
-    createdBy: user.value.personalId,
+    createdBy: user.value.id,
     jobId: jobId.value,
     vacancyNumber: vacancyNumbers.value,
     motiveCreation: motiveCreation.value,

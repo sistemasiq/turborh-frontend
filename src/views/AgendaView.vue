@@ -15,7 +15,7 @@
         />
 
         <q-img
-          src="~/assets/img/logo_turbo_navegador.png"
+         :src="getS3FileUrl(getAssetsPath, 'logo_turbo_navegador.png')"
           class="q-ml-lg q-mr-sm"
           style="width: 30px; height: 30px"
         />
@@ -1675,8 +1675,9 @@ import "@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass";
 import prev from "../components/Prev.vue";
 import next from "../components/Next.vue";
 import todayComponent from "../components/Today.vue";
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, onBeforeMount } from "vue";
 import { useQuasar } from "quasar";
+import { getAssetsPath } from "src/utils/folderPaths";
 import { getS3FileUrl } from "src/services/profiles.js";
 import {
   getLinksList,
@@ -1701,8 +1702,15 @@ import { getAge } from "src/utils/operations";
 import { notifyPositive, notifyNegative } from "src/utils/notifies.js";
 import { getAllCandidatesDiary } from "src/services/candidates";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "src/stores/auth";
+import { setHeaderAuthorization } from "src/services/user";
+import { useLocalStorageStore } from "src/stores/localStorage";
+import { storeToRefs } from "pinia";
 /* REF CONSTANTS ---------------------------------------------------------------------------------------------------------------------------------------------------- */
 
+const useAuth = useAuthStore();
+const { user, logged } = storeToRefs(useAuth);
+const useLocalStorage = useLocalStorageStore();
 const router = useRouter();
 const $q = useQuasar();
 const appointmentId = ref("");
@@ -1720,7 +1728,7 @@ const linkData = ref("");
 const selectDay = ref("");
 const selectedHour = ref("");
 const selectedModality = ref("");
-const createdBy = ref("144");
+const createdBy = ref(""); //TODO: change the created by in the asignations where is used
 const active = ref();
 const color = ref("");
 const selectedDate = ref(today());
@@ -1754,7 +1762,7 @@ const disableCheckbox = ref(false);
 const firstDateRange = ref("");
 const secondDateRange = ref("");
 const selectedPlatform = ref("");
-const modifiedBy = ref("144");
+const modifiedBy = ref("");
 const appointmentStatus = ref("");
 const candidateStatus = ref("");
 const appointmentDaysList = ref([]);
@@ -1816,6 +1824,10 @@ const colorPalette = [
 ];
 /* Eventos del teclado */
 
+onBeforeMount(() => {
+  loadLocalStorage();
+})
+
 onMounted(() => {
   getCandidatesCatalog();
   getAppointments();
@@ -1826,6 +1838,20 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("keydown", windowKeydownListener);
 });
+
+const loadLocalStorage = () => {
+  const userStored = useLocalStorage.load("user");
+  const loggedStored = useLocalStorage.load("logged");
+
+  if (userStored) {
+    user.value = userStored;
+    createdBy.value = user.value.id;
+    modifiedBy.value = user.value.id;
+    setHeaderAuthorization(userStored.token);
+  }
+
+  if (loggedStored) logged.value = loggedStored;
+};
 
 const windowKeydownListener = (event) => {
   if (
@@ -2007,8 +2033,6 @@ const showEventData = (event) => {
   platformSelectedID.value = event.linkID;
   userID.value = event.userID;
   active.value = event.active;
-  createdBy.value = event.createdBy;
-  modifiedBy.value = event.modifiedBy;
   selectDay.value = event.date;
   selectedHour.value = event.hour;
   if (event.modality == "V") {
@@ -2341,7 +2365,7 @@ const putVirtualApppointment = async () => {
     appointmentId: appointmentId.value,
     userID: userID.value,
     linkID: platformSelectedID.value,
-    modifiedBy: createdBy.value,
+    modifiedBy: modifiedBy.value,
     date: selectDay.value,
     hour: selectedHour.value,
     modality: "V",
@@ -2416,7 +2440,7 @@ const putPresentialAppointment = async () => {
     appointmentId: appointmentId.value,
     userID: userID.value,
     linkID: 4,
-    modifiedBy: createdBy.value,
+    modifiedBy: modifiedBy.value,
     date: selectDay.value,
     hour: selectedHour.value,
     modality: "P",

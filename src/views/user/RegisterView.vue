@@ -12,7 +12,7 @@
     >
       <div class="q-mt-sm">
         <q-img
-          :src="getImageSource('logo-turbomaquinas.png')"
+          :src="getS3FileUrl(getAssetsPath, 'logo-turbomaquinas.png')"
           style="width: 30%; height: 10%; margin-left: 33%"
         />
         <p class="turbo q-ml-xl">Turbomáquinas</p>
@@ -214,7 +214,8 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "src/stores/auth";
-import { getImageSource } from "src/services/profiles.js";
+import { getS3FileUrl } from "src/services/profiles.js";
+import { getAssetsPath } from "src/utils/folderPaths";
 import { storeToRefs } from "pinia";
 import { getUserByUserName, getUserByCurp, getUserByEmail, createUser } from "src/services/user";
 import { useLocalStorageStore } from "src/stores/localStorage";

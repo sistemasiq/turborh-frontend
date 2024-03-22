@@ -8,7 +8,7 @@
         <div style="width: 100%;"
         class="row justify-center q-mt-lg">
           <q-img
-            src="~/assets/img/logo_turbo_navegador.png"
+            :src="getS3FileUrl(getAssetsPath, 'logo_turbo_black.png')"
             style="width: 70px; height: 70px"
           />
         </div>
@@ -59,6 +59,8 @@
 
 <script setup>
 import { useRouter } from "vue-router";
+import { getS3FileUrl } from "src/services/profiles.js";
+import { getAssetsPath } from "src/utils/folderPaths";
 
 const router = useRouter();
 

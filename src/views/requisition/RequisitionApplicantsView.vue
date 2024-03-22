@@ -115,7 +115,11 @@
           @click.prevent="addNotes(row.applicationId)"
         />
         <q-btn
-          v-if="row.selected === 0 && row.requisitionState === 'P' && row.hasBeenSelected === 0"
+          v-if="
+            row.selected === 0 &&
+            row.requisitionState === 'P' &&
+            row.hasBeenSelected === 0
+          "
           class="q-ml-lg bg-green"
           rounded
           icon="done"
@@ -224,11 +228,18 @@
     <q-card>
       <q-card-section>
         <div class="text-h6">Enviar test psicometrico</div>
+        <q-checkbox
+          class="absolute-right q-mr-xl"
+          v-model="sendLink"
+          label="Enviar link"
+          @update:model-value="resetPsychTestInformation()"
+        />
       </q-card-section>
 
       <q-separator />
 
       <q-card-section
+        v-if="!sendLink"
         style="width: 550px; max-width: 90vw; max-height: 50vh"
         class="justify-between"
         horizontal
@@ -291,7 +302,7 @@
             outlined
             color="black"
             v-model="userNameForPsychTests"
-            label="Nombre de usuario"
+            label="Nombre"
             label-color="black"
             lazy-rules
             :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
@@ -307,6 +318,26 @@
             lazy-rules
             :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
             style="width: 100%"
+          />
+        </q-card-section>
+      </q-card-section>
+
+      <q-card-section
+        v-if="sendLink"
+        style="width: 550px; max-width: 90vw; max-height: 50vh"
+        class="justify-between"
+        horizontal
+      >
+        <q-card-section style="width: 100%">
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="testLink"
+            label="Link del formulario"
+            label-color="black"
+            lazy-rules
+            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
           />
         </q-card-section>
       </q-card-section>
@@ -439,6 +470,7 @@ import {
 import {
   sendPsychTestMessage,
   sendUserNotSelectedMessage,
+  sendLinkMessage,
 } from "src/services/whatsApp";
 import { updatePsychTestCredentials } from "src/services/user";
 
@@ -452,6 +484,9 @@ const filter = ref("");
 const openSelectCandidateDialog = ref(false);
 
 const selectedCandidate = ref(0);
+
+const sendLink = ref(false);
+const testLink = ref("");
 
 const currentApplicants = ref([]);
 const { numRequisitionDetails, viewAllRequisitions, idRequisitionDetails } =
@@ -495,7 +530,7 @@ const psychTestPlatforms = ref([]);
 const tableJobName = ref("");
 const openSeeDataPsychTest = ref(false);
 
-const sendPsychTestInformation = async () => {
+const sendPsychTestCredentials = async () => {
   try {
     $q.loading.show();
 
@@ -546,6 +581,36 @@ const sendPsychTestInformation = async () => {
   }
 };
 
+const sendPsychTestLink = async () => {
+  try {
+    $q.loading.show();
+
+    const sendedMessage = await sendLinkMessage(
+      selectedCandidate.value.phoneNumber,
+      selectedCandidate.value.name,
+      testLink.value
+    );
+
+    if (sendedMessage) {
+      $q.notify(notifyPositive("Enviado link correctamente"));
+    }
+
+  } catch (error) {
+    console.log(error);
+  } finally {
+    openPsicometricTestDialog.value = false;
+    $q.loading.hide();
+  }
+};
+
+const sendPsychTestInformation = async () => {
+  if (sendLink.value) {
+    await sendPsychTestLink();
+  } else {
+    await sendPsychTestCredentials();
+  }
+};
+
 const seePsychTestData = (row) => {
   openSeeDataPsychTest.value = true;
   userNameForPsychTests.value = row.userNameForPsychPlatform;
@@ -560,11 +625,15 @@ const resetPsychTestInformation = () => {
 };
 
 const disableSendPsychTestButton = computed(() => {
-  return selectedPsychTestPlatform.value === "" ||
-    userNameForPsychTests.value === "" ||
-    passwordForPsychTest.value === ""
-    ? true
-    : false;
+  if (sendLink.value) {
+    return testLink.value === "" ? true : false;
+  } else {
+    return selectedPsychTestPlatform.value === "" ||
+      userNameForPsychTests.value === "" ||
+      passwordForPsychTest.value === ""
+      ? true
+      : false;
+  }
 });
 
 onMounted(() => {
@@ -646,7 +715,6 @@ const selectCandidateById = async () => {
             )
           );
         }
-
 
         $q.notify(
           notifyPositive("Se han llenado las vacantes para este puesto", 3000)
@@ -868,18 +936,19 @@ const onCompleteSendMessageToCandidates = async () => {
 };
 
 const getRowSelectedText = (row) => {
+  if (row.selected === 1) {
+    return "Candidato Seleccionado";
+  }
 
-if(row.selected === 1){
-  return "Candidato Seleccionado"
-}
+  if (row.hasBeenSelected > 0 && row.hasBeenSelected !== row.id) {
+    return (
+      "Candidato seleccionado en la requisición con folio: " +
+      row.hasBeenSelected
+    );
+  }
 
-if(row.hasBeenSelected > 0 && row.hasBeenSelected !== row.id){
-  return "Candidato seleccionado en la requisición con folio: "+row.hasBeenSelected
-}
-
-return "";
-
-}
+  return "";
+};
 
 const columns = [
   {
