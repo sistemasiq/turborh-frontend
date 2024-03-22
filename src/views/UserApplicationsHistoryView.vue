@@ -104,13 +104,13 @@
           <Tooltip :text="'Descargar prueba psicometríca'" />
         </q-btn>
         <q-btn
-            class="q-ma-lg q-pa-md text-black"
-            style="height: fit-content"
-            rounded
-            icon="link"
-            label="Enviar test psicométrico"
-            @click.prevent="setSelectedUser(row, false, true)"
-          />
+          class="q-ma-lg q-pa-md text-black"
+          style="height: fit-content"
+          rounded
+          icon="link"
+          label="Enviar test psicométrico"
+          @click.prevent="setSelectedUser(row, false, true)"
+        />
 
         <q-btn
           class="q-ml-lg"
@@ -121,7 +121,6 @@
           label="Añadir notas"
           @click.prevent="addNotes(row.solicitud_id)"
         />
-
       </q-td>
     </template>
   </q-table>
@@ -164,11 +163,18 @@
     <q-card>
       <q-card-section>
         <div class="text-h6">Enviar test psicometrico</div>
+        <q-checkbox
+          class="absolute-right q-mr-xl"
+          v-model="sendLink"
+          label="Enviar link"
+          @update:model-value="resetPsychTestInformation()"
+        />
       </q-card-section>
 
       <q-separator />
 
       <q-card-section
+        v-if="!sendLink"
         style="width: 550px; max-width: 90vw; max-height: 50vh"
         class="justify-between"
         horizontal
@@ -251,6 +257,25 @@
         </q-card-section>
       </q-card-section>
 
+      <q-card-section
+        v-if="sendLink"
+        style="width: 550px; max-width: 90vw; max-height: 50vh"
+        class="justify-between"
+        horizontal
+      >
+        <q-card-section style="width: 100%">
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="testLink"
+            label="Link del formulario"
+            label-color="black"
+            lazy-rules
+            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
+          />
+        </q-card-section>
+      </q-card-section>
       <q-separator />
 
       <q-card-actions class="justify-end q-pa-md">
@@ -341,7 +366,6 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
-
 </template>
 
 <script setup>
@@ -363,11 +387,14 @@ import { downloadFile } from "src/services/files";
 import {
   getUserApplicationById,
   getUserApplicationNotesById,
-  getAllUserApplications
+  getAllUserApplications,
 } from "src/services/userApplication";
-import { sendPsychTestMessage } from "src/services/whatsApp";
+import { sendPsychTestMessage, sendLinkMessage } from "src/services/whatsApp";
 import { sendPsychometricTestEmail } from "src/services/mail";
-import { updatePsychTestCredentials, getPsychometricPlatforms } from "src/services/user";
+import {
+  updatePsychTestCredentials,
+  getPsychometricPlatforms,
+} from "src/services/user";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -375,7 +402,6 @@ const useLocalStorage = useLocalStorageStore();
 const useNotes = useNotesStore();
 const useRequest = useRequestUser();
 const filter = ref("");
-
 
 const currentApplicants = ref([]);
 const { viewAllRequisitions } = storeToRefs(useRequisitionDetails);
@@ -409,13 +435,15 @@ const resumeViewLink = ref(resumeSrc.value);
 const showResume = ref(false);
 
 const selectedUser = ref();
-const openPsicometricTestDialog = ref(false)
+const openPsicometricTestDialog = ref(false);
 const dropdownContentClass = "flexible-width";
 const selectedPsychTestPlatform = ref("");
-const userNameForPsychTests = ref("")
-const passwordForPsychTest = ref("")
+const userNameForPsychTests = ref("");
+const passwordForPsychTest = ref("");
 const psychTestPlatforms = ref([]);
-const psychTestPlatformId = ref(0)
+const psychTestPlatformId = ref(0);
+const sendLink = ref(false);
+const testLink = ref(false);
 
 const openSeeDataPsychTest = ref(false);
 
@@ -435,19 +463,17 @@ const getPsychometricPlatformsData = async () => {
 };
 
 const gendersParsed = {
-  F:"Femenino",
-  M:"Masculino",
-  O:"Otro"
-}
+  F: "Femenino",
+  M: "Masculino",
+  O: "Otro",
+};
 
 const selectPsychPlatform = (data) => {
   selectedPsychTestPlatform.value = data.psychPlatformName;
   psychTestPlatformId.value = data.id;
 };
 
-const setSelectedUser = (
-  row
-) => {
+const setSelectedUser = (row) => {
   selectedUser.value = row;
   console.log(selectedUser.value);
   openPsicometricTestDialog.value = true;
@@ -457,17 +483,30 @@ const resetPsychTestInformation = () => {
   selectedPsychTestPlatform.value = "";
   userNameForPsychTests.value = "";
   passwordForPsychTest.value = "";
+  testLink.value = "";
 };
 
 const disableSendPsychTestButton = computed(() => {
-  return selectedPsychTestPlatform.value === "" ||
-    userNameForPsychTests.value === "" ||
-    passwordForPsychTest.value === ""
-    ? true
-    : false;
+  if (sendLink.value) {
+    return testLink.value === "" ? true : false;
+  } else {
+    return selectedPsychTestPlatform.value === "" ||
+      userNameForPsychTests.value === "" ||
+      passwordForPsychTest.value === ""
+      ? true
+      : false;
+  }
 });
 
 const sendPsychTestInformation = async () => {
+  if (sendLink.value) {
+    await sendPsychTestLink();
+  } else {
+    await sendPsychTestCredentials();
+  }
+};
+
+const sendPsychTestCredentials = async () => {
   try {
     $q.loading.show();
 
@@ -479,11 +518,12 @@ const sendPsychTestInformation = async () => {
     );
 
     if (updatedPsychCredentials) {
-
       selectedUser.value.test_psicometrico_id = psychTestPlatformId.value;
-      selectedUser.value.test_psicometrico_nombre_usuario = userNameForPsychTests.value;
-      selectedUser.value.test_psicometrico_password = passwordForPsychTest.value;
-      selectedUser.value.test_psicometrico_estado = "E"
+      selectedUser.value.test_psicometrico_nombre_usuario =
+        userNameForPsychTests.value;
+      selectedUser.value.test_psicometrico_password =
+        passwordForPsychTest.value;
+      selectedUser.value.test_psicometrico_estado = "E";
 
       updateRow(selectedUser.value);
 
@@ -502,9 +542,31 @@ const sendPsychTestInformation = async () => {
           passwordForPsychTest.value
         );
         if (sendedMessage) {
-          $q.notify(notifyPositive("Enviada prueba psicométrica correctamente"));
+          $q.notify(
+            notifyPositive("Enviada prueba psicométrica correctamente")
+          );
         }
       }
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    openPsicometricTestDialog.value = false;
+    $q.loading.hide();
+  }
+};
+
+const sendPsychTestLink = async () => {
+  try {
+    $q.loading.show();
+
+    const sendedMessage = await sendLinkMessage(
+      selectedUser.value.telefono,
+      selectedUser.value.nombre,
+      testLink.value
+    );
+    if (sendedMessage) {
+      $q.notify(notifyPositive("Enviado link correctamente"));
     }
   } catch (error) {
     console.log(error);
@@ -519,22 +581,22 @@ const seePsychTestData = (row) => {
   userNameForPsychTests.value = row.test_psicometrico_nombre_usuario;
   passwordForPsychTest.value = row.test_psicometrico_password;
   setSelectedPsychPlatform(row.test_psicometrico_id);
-}
+};
 
 const updateRow = (row) => {
-  currentApplicants.value.forEach(element => {
-    if(element.solicitud_id === row.solicitud_id){
+  currentApplicants.value.forEach((element) => {
+    if (element.solicitud_id === row.solicitud_id) {
       element = row;
     }
-  })
-}
+  });
+};
 
 const setSelectedPsychPlatform = (id) => {
-  psychTestPlatforms.value.forEach(element => {
-    if(element.id === id){
+  psychTestPlatforms.value.forEach((element) => {
+    if (element.id === id) {
       selectedPsychTestPlatform.value = element.psychPlatformName;
     }
-  })
+  });
 };
 
 const fetchApplicants = async () => {
@@ -544,7 +606,7 @@ const fetchApplicants = async () => {
 
     if (totalApplicants) {
       currentApplicants.value = totalApplicants;
-      console.log(currentApplicants.value)
+      console.log(currentApplicants.value);
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
@@ -594,7 +656,6 @@ const createReport = async (applicationId) => {
 };
 
 const addNotes = (applicationId) => {
-
   fetchUserApplication(applicationId);
   viewingApplication.value = true;
 };
@@ -607,7 +668,6 @@ const fetchUserApplication = async (applicationId) => {
     if (userApplication) {
       savedApplication.value = userApplication;
       useLocalStorage.save("savedApplication", savedApplication.value);
-
 
       await fetchUserApplicationNotes(applicationId);
       useLocalStorage.save("addingNotesApplicationId", applicationId);
@@ -675,7 +735,7 @@ const columns = [
     required: true,
     align: "left",
     field: (row) => row.telefono,
-    sortable: true
+    sortable: true,
   },
   {
     name: "wishedSalary",
