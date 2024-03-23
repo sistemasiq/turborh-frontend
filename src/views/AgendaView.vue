@@ -1,5 +1,7 @@
+<!--MADE all the things you do with interest and passion, good luck with the next implementations :)-->
 <template>
   <q-layout view="hhh LpR lfr" class="bg-white text-black">
+    <!--The Header starts here-->
     <q-header
       reveal
       bordered
@@ -14,6 +16,7 @@
           icon="menu"
         />
 
+        <!--We take the images from the S3 bucket-->
         <q-img
          :src="getS3FileUrl(getAssetsPath, 'logo_turbo_navegador.png')"
           class="q-ml-lg q-mr-sm"
@@ -23,6 +26,7 @@
           Agenda de entrevistas
         </div>
 
+        <!--Month navigation controllers-->
         <div class="row col-auto items-center justify-center q-ml-sm">
           <todayComponent @today="onToday" />
           <prev @prev="onPrev" />
@@ -31,6 +35,7 @@
         </div>
       </q-toolbar>
 
+      <!--Button to open the search bar-->
       <q-toolbar class="row col-3 items-center" v-if="showSearch">
         <q-btn
           flat
@@ -44,6 +49,7 @@
         <div class="text-weight-medium text-body1 q-ml-md">Buscar</div>
       </q-toolbar>
 
+      <!--search bar section-->
       <q-toolbar
         style="min-height: 68px"
         class="row col-8"
@@ -66,6 +72,8 @@
           >
             <q-tooltip class="bg-white text-primary">Búsqueda</q-tooltip>
           </q-btn>
+
+          <!--input to search by name in the active appointments -->
           <q-input
             rounded
             borderless
@@ -91,6 +99,7 @@
             </template>
           </q-input>
 
+          <!--This section is to get the history using a range of dates-->
           <q-btn-dropdown
             flat
             rounded
@@ -223,6 +232,7 @@
       </q-toolbar>
     </q-header>
 
+    <!--The left drawer starts here-->
     <q-drawer
       v-model="drawerLeft"
       side="left"
@@ -230,6 +240,7 @@
       show-if-above
       class="drawer-container"
     >
+    <!--The small calendar month can just select days but is not the main option to register an appointment-->
       <div class="row justify-center">
         <q-calendar-month
           ref="calendar"
@@ -242,6 +253,7 @@
         />
       </div>
 
+      <!--This filters can be viewed just if the user search the appointment´s history -->
       <q-list v-if="searchedAppointments.length > 0">
         <q-expansion-item
           default-opened
@@ -1610,7 +1622,7 @@
       </q-layout>
     </q-dialog>
 
-    <!--DIALOG TO SHOW MORE APPOINTMENTS WHEN A DAY HAS MORE OF 3-->
+    <!--DIALOG TO SHOW MORE APPOINTMENTS WHEN A DAY HAS MORE OF 3 APPOINTMENTS REGISTERED FOR THAT DAY-->
     <q-dialog auto-close seamless v-model="dayAppointmentsDialog">
       <q-card-section class="bg-white shadow-24">
         <div class="row items-center justify-between" style="width: 100%">
@@ -1728,13 +1740,13 @@ const linkData = ref("");
 const selectDay = ref("");
 const selectedHour = ref("");
 const selectedModality = ref("");
-const createdBy = ref(""); //TODO: change the created by in the asignations where is used
+const createdBy = ref("");
 const active = ref();
 const color = ref("");
 const selectedDate = ref(today());
 const email = ref("");
 const phoneNumber = ref("");
-const locale = ref(""); // Puedes establecer el valor de la localización según tus necesidades
+const locale = ref(""); // YOU CAN DEFINE THE LOCALE AS YOU NEED, IS THE LANGUAGE SELECTION BASICALLY
 const selectedMonth = ref(new Date().getMonth());
 const confirm = ref(false); //show the qdialog
 const small = ref(false); //show the qdialog
@@ -2117,6 +2129,7 @@ const columns = [
   },
 ];
 
+//to navigate between the different months
 const searchActivation = () => {
   showSearch.value = true;
   drawerLeft.value = true;
@@ -2524,6 +2537,8 @@ const updateAppointment = async () => {
   }
 };
 
+//this maps an object with the date and every registered event in the agenda, so is the MAIN handler to know in which date are registered all the appointments, when the value in one date change, it registers the event in that date
+//this and the event array are the MAIN handlers of the appointments registration in the agenda.
 const eventsMap = computed(() => {
   const map = {};
   if (events.value.length > 0) {
@@ -2534,6 +2549,7 @@ const eventsMap = computed(() => {
   return map;
 });
 
+//When a candidate is selected this recover his information in variables, then we can use his information to register an appointment or just see its information
 const onCandidateSelection = (data) => {
   candidateSelection.value =
     data.name + " " + data.fatherLastName + " " + data.motherLastName;
@@ -2565,18 +2581,21 @@ const onCandidateSelection = (data) => {
   age.value = getAge(data.birthday);
 };
 
+//To check the school level if there is empty then we define a default message
 const setDefaultIfNull = (data) => {
 
   return data === null ? "No especificado" : data;
 
 }
 
+//the modality selection checks the platform selected and defines the varible with the selected platform and defines a virtual modality
 const onModalitySelection = (data) => {
   selectedPlatform.value = data.platformName;
   platformSelectedID.value = data.id;
   selectedModality.value = "Virtual";
 };
 
+//Function to handle when a day is clicked and cleans all the variables
 const onClickDay = (data) => {
   if (openDialog2.value === true || dayAppointmentsDialog.value === true) {
     confirm.value = false;

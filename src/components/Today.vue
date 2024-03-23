@@ -1,3 +1,4 @@
+<!--This is a component of the agenda to go to the current month-->
 <template>
     <div class="row justify-center">
       <div class="q-pa-md q-gutter-sm row">
@@ -7,23 +8,22 @@
         >
           Hoy
         </q-btn>
-  
+
       </div>
     </div>
   </template>
-  
+
   <script setup>
   import { defineEmits } from 'vue';
-  
-  // Define los eventos que puedes emitir desde este componente
+
+  // Defines the eventos that you can emit from this component
   const emits = defineEmits(['today']);
-  
-  // Manejadores de eventos
+
+  // events handler
   const handleToday = () => {
     emits('today');
   };
-  
+
   </script>
-  
-  
- 
+
+

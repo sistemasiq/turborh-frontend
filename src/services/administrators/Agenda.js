@@ -1,6 +1,10 @@
+/* This JS file is used to manage the request that are made by the agenda
+  Here are all the operations of the appointments that are basically a CRUD
+*/
 import axios from 'axios';
-import { requestSuccessfull } from "src/utils/operations";
+import { requestSuccessfull } from "src/utils/operations"; //This is used to check if the response status of all request are successful
 
+//This get the psych platforms information
 export const getLinksList = async () => {
   try {
     const request = await axios.get(`/links/list`, {
@@ -17,6 +21,7 @@ export const getLinksList = async () => {
   }
 };
 
+//This get ALL the active appointments of the users
 export const getAppointmentsCatalog = async () => {
   try {
     const request = await axios.get(`/api/agenda/appointments`, {
@@ -33,6 +38,8 @@ export const getAppointmentsCatalog = async () => {
   }
 };
 
+
+//Gets All the hisotory of appointments that have been registered, it doesn't matter the state of the appointments
 export const getAppointmentsHistory = async (firstDateRange, secondDateRange) => {
   try {
     const request = await axios.get(`/api/agenda/appointments/history?firstDate=${firstDateRange}&lastDate=${secondDateRange}`, {
@@ -49,6 +56,7 @@ export const getAppointmentsHistory = async (firstDateRange, secondDateRange) =>
   }
 };
 
+//This creates a new appointment
 export const postAppointment = async (data) => {
   try {
     const request = await axios.post(`/api/agenda/appointments`, data);
@@ -63,6 +71,7 @@ export const postAppointment = async (data) => {
   }
 };
 
+//this update and appointment
 export const putAppointment = async (data) => {
   try {
     const request = await axios.put(`/api/agenda/appointments`, data);
@@ -77,6 +86,7 @@ export const putAppointment = async (data) => {
   }
 };
 
+//this one change the state of the appointment to inactive and the status of the candidate (with his user id not with the candidate id)
 export const deleteAppointment = async (candidateStatus, userId, appointmentStatus, appointmentId) => {
   try {
     const request = await axios.delete(`/api/agenda/appointments?candidateStatus=${candidateStatus}&userID=${userId}&appointmentStatus=${appointmentStatus}&appointmentId=${appointmentId}`);

@@ -1,3 +1,4 @@
+<!--This is a component to get the information of the family data of the users-->
 <template>
   <div v-on:vnode-unmounted="saveLocalStore()">
     <q-table

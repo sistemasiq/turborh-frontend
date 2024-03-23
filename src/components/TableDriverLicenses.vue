@@ -1,3 +1,4 @@
+<!--This component is used to get the info about driver´s licences of the users-->
 <template>
   <div v-on:vnode-unmounted="saveLocalStore()">
     <q-table
