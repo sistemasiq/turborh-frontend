@@ -42,12 +42,21 @@
               <p class="q-mt-xs">{{ userPhoneNumber }}</p>
             </div>
           </q-card-actions>
-          <div class="text-grey-7 text-body1 text-center">
+          <div v-if="userPhoneNumber != null" class="text-grey-7 text-body1 text-center">
             Al dar clic en
             <q-badge class="q-pa-xs bg-green-13 text-white" label="enviar" />
             recibirás un <strong>código de verificación de un solo uso</strong>.
             <br />
             Podras ver tu código de verificación tanto por whatsApp como en tu
+            bandeja de correo electrónico
+          </div>
+
+          <div v-if="userPhoneNumber == null" class="text-grey-7 text-body1 text-center">
+            Al dar clic en
+            <q-badge class="q-pa-xs bg-green-13 text-white" label="enviar" />
+            recibirás un <strong>código de verificación de un solo uso</strong>.
+            <br />
+            Podras ver tu código de verificación en tu
             bandeja de correo electrónico
           </div>
         </q-card-section>
@@ -83,8 +92,7 @@
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { getS3FileUrl } from "src/services/profiles.js";
-import { getUserImagesPath } from "src/utils/folderPaths.js";
-import { getAssetsPath } from "src/utils/folderPaths";
+import { getUserImagesPath, getAdminImagesPath, getAssetsPath } from "src/utils/folderPaths.js";
 import { notifyNegative } from "src/utils/notifies.js";
 import { useAuthStore } from "src/stores/auth.js";
 import { useRouter } from "vue-router";
@@ -96,7 +104,7 @@ import {
 } from "src/services/whatsApp.js";
 
 const useAuth = useAuthStore();
-const { userName, userEmail, userPhoneNumber, photoUUID, verificationCode } =
+const { userName, userEmail, userPhoneNumber, photoUUID, verificationCode, role } =
   storeToRefs(useAuth);
 const $q = useQuasar();
 const router = useRouter();
@@ -111,14 +119,15 @@ const toChangePassword = () => {
 };
 
 const getUserImage = computed(() => {
+  let folder = role.value === "u" ? getUserImagesPath : getAdminImagesPath;
   if (
     photoUUID.value === null ||
     photoUUID.value === undefined ||
     photoUUID.value === ""
   ) {
-    return getS3FileUrl(getUserImagesPath, "default_user_icon.png");
+    return getS3FileUrl(folder, "default.png");
   } else {
-    return getS3FileUrl(getUserImagesPath, photoUUID.value);
+    return getS3FileUrl(folder, photoUUID.value);
   }
 });
 
@@ -130,7 +139,7 @@ const generateRandomNumber = () => {
 
 const sendVerificationCode = () => {
   //Call the 'generateRandomNumber' function to generate the verification code and send an email to the user
-  if (userEmail.value != "") {
+  if (userEmail.value != "" && userPhoneNumber.value != null) {
     try {
       $q.loading.show({ message: "Cargando..." });
       generateRandomNumber();
@@ -148,8 +157,19 @@ const sendVerificationCode = () => {
     } finally {
       $q.loading.hide();
     }
-  } else if (userEmail.value == "") {
-    $q.notify(notifyNegative("Ingrese su correo electrónico"));
+  } else if (userEmail.value != "", userPhoneNumber.value == null) {
+    try {
+      $q.loading.show({ message: "Cargando..." });
+      generateRandomNumber();
+      verificationCode.value = generateRandomNumber();
+      const mailData = sendSecurityCode(userEmail.value, randomNumber.value);
+      sendEmail("security-code", mailData);
+      toChangePassword();
+    } catch (error) {
+      console.log("ERROR while sending the email: " + error);
+    } finally {
+      $q.loading.hide();
+    }
   }
 };
 </script>

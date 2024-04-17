@@ -100,7 +100,7 @@ import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 
 const useAuth = useAuthStore();
-const { userId, userName, userEmail, userPhoneNumber, photoUUID } = storeToRefs(useAuth);
+const { userId, userName, userEmail, userPhoneNumber, photoUUID, role } = storeToRefs(useAuth);
 const $q = useQuasar();
 const router = useRouter();
 const email = ref("");
@@ -125,8 +125,14 @@ const searchUserAccount = async () => {
           userId.value = request.data.id;
           userName.value = request.data.userName;
           userEmail.value = email.value;
-          userPhoneNumber.value = request.data.phoneNumber;
+          if('phoneNumber' in request.data){
+            userPhoneNumber.value = request.data.phoneNumber;
+          } else {
+            userPhoneNumber.value = null;
+          }
+
           photoUUID.value = request.data.photoUUID;
+          role.value = request.data.role;
           toSendVerificationCode();
         } else {
           $q.notify(notifyNegative("Usuario no encontrado. Intenta nuevamente"));
