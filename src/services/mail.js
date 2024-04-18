@@ -1,6 +1,7 @@
 import axios from "axios";
 import { requestSuccessfull } from "src/utils/operations";
 
+//These are just the email messages defined to send in every operation
 export const scheduledAppointment = {
   subject: "Entrevista agendada!",
   firstText:
@@ -87,6 +88,7 @@ export const passwordChange = (to, userName) => {
   };
 };
 
+//The main method to send an email message, in the type it receives the email that is going to send, and in the body you have to send the user email
 export const sendEmail = async (type, data) => {
   try {
     const mailResponse = await axios.post(`/mail/send/${type}`, data);

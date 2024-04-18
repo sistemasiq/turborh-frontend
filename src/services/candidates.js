@@ -132,6 +132,7 @@ export const selectCandidate = async (candidateId) => {
   }
 };
 
+//this one gets all the available users that have applied to be a candidate for a job, and the state of its candidacy/candidacies is/are diferent than Entrevisted(E state)
 export const getAllCandidatesDiary = async () => {
   try {
     const request = await axios.get(`candidates/diary`);

@@ -1,11 +1,7 @@
 //true = dev mode
 //false = production mode
-const dev = false;
+const dev = true;
 
-/* BACKEND FUNCIONAL ELASTIC BEANSTALK: http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com
-BACKEND DE PRUEBAS ELASTIC BEANSTALK: http://test-back-end-1.eba-75di3x8z.us-east-2.elasticbeanstalk.com
-*/
-/*hola */
 export const getAxiosBaseUrl = () => {
   return dev ? "http://localhost:5000" : "http://TurboMBERH-env.eba-imamt22j.us-east-2.elasticbeanstalk.com";
 };
@@ -40,7 +36,7 @@ export const getAdminRoute = () => {
 
 
 
-//DEV and Prod configuration in Turbomaquinas´s server
+//OLD DEV and Prod configuration in Turbomaquinas´s server
 /*
 export const getAxiosBaseUrl = () => {
   return dev ? "http://localhost:5000" : "http://192.168.20.59:8181";

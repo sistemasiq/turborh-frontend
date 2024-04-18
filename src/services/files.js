@@ -1,9 +1,10 @@
+//This js file is to administrate the operations of the files
 import axios from "axios";
-import { computed } from "vue";
 import { requestSuccessfull } from "src/utils/operations";
 
 const dev = false;
 
+//This method upload files to a specific folder path in the S3 bucket
 export const uploadFile = async (fileName, folderPath) => {
   const formData = new FormData();
 
@@ -27,6 +28,7 @@ export const uploadFile = async (fileName, folderPath) => {
   }
 };
 
+//Update an specific file, we need the name of the file that is going to be updated, the new file and the folder path
 export const updateFile = async (oldFileName, newFileName, folderPath) => {
   const formData = new FormData();
 
@@ -68,10 +70,4 @@ export const downloadFile = async (fileName, folderPath) => {
   } catch (error) {
     return false;
   }
-};
-
-const getFileURL = (fileName, folderPath) => {
-  const url = dev ? `http://localhost:5000/` : `http://192.168.20.59:8181/`;
-
-  return `${url}/${fileName}/path/${folderPath}`;
 };

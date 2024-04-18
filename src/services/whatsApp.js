@@ -1,6 +1,13 @@
+/*
+IMPORTANT: ALL the whastApp messages are predefined in the twilio platform, to send a whatsApp message (business initiated conversation)
+we need to create a template with the content template builder in the twilio platform to send that message to the users
+the messages sended state and more information is at the monitor section and there are different options to see stats of the messages
+and its performance
+*/
 import axios from "axios";
 import { requestSuccessfull } from "src/utils/operations";
 
+//This functions are just to create the message object for every whatsApp message
 export const presentialAppointmentData = (phoneNumber, name, date, hour) => {
   const data = {
     phoneNumber: phoneNumber,
@@ -47,6 +54,7 @@ export const finishedAppointmentData = (phoneNumber, name) => {
   };
 };
 
+//this is the MAIN function to send the APPOINTMENTS messages
 export const sendWhatsAppMessage = async (type, data) => {
   try {
     const response = await axios.post(`/api/whatsapp/send/appointments/${type}`, data);
