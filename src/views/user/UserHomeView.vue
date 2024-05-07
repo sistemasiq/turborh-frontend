@@ -264,7 +264,7 @@
 <script setup>
 import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
-import { ref, computed, onBeforeMount, watch} from "vue";
+import { ref, computed, onBeforeMount, watch } from "vue";
 import { useAuthStore } from "src/stores/auth";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
@@ -279,8 +279,10 @@ import { updateUserApplicationState } from "src/services/userApplication";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { disableCandidateAllRequisitions } from "src/services/candidates";
 import { logOut, setHeaderAuthorization } from "src/services/user";
-import { axiosErrorResponseStatus, initInterceptors } from "src/services/setupInterceptors";
-
+import {
+  axiosErrorResponseStatus,
+  initInterceptors,
+} from "src/services/setupInterceptors";
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
@@ -324,12 +326,17 @@ const toolTipActiveApplicationText = computed(() => {
     : "Activa tu solicitud de trabajo";
 });
 
-
 onBeforeMount(() => {
-  loadLocalStorage();
-  initInterceptors(router)
-  router.replace('/userHome/perfil');
+  loadUserData();
 });
+
+const loadUserData = () => {
+  if (user.value.role === "u") {
+    loadLocalStorage();
+    initInterceptors(router);
+    router.replace("/userHome/perfil");
+  }
+};
 
 const loadLocalStorage = () => {
   const userStored = useLocalStorage.load("user");
@@ -340,7 +347,7 @@ const loadLocalStorage = () => {
   if (userStored) {
     user.value = userStored;
     userPhotoUUID.value = user.value.photoUUID;
-    setHeaderAuthorization(userStored.token)
+    setHeaderAuthorization(userStored.token);
     settedHeaderAuthorization.value = true;
     checkUserApplication(false);
   }
@@ -352,10 +359,9 @@ const loadLocalStorage = () => {
   if (isUpdatingApplication) {
     updatingApplication.value = isUpdatingApplication;
   }
-  if(userApplicationStored){
-    savedApplication.value = userApplicationStored
+  if (userApplicationStored) {
+    savedApplication.value = userApplicationStored;
   }
-
 };
 
 const goToRequisitionApplicants = () => {
@@ -529,7 +535,8 @@ const checkUserApplication = (sendToApplication = true) => {
   if (!userHasApplication.value) return;
 
   activeApplication.value = savedApplication.value.activo === 1 ? true : false;
-  userHasApplication.value = savedApplication.value.solicitud_id !== 0 ? true : false;
+  userHasApplication.value =
+    savedApplication.value.solicitud_id !== 0 ? true : false;
 
   if (sendToApplication) {
     router.push("/userHome/solicitud-1");
