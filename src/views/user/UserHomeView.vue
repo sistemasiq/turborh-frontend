@@ -264,7 +264,7 @@
 <script setup>
 import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
-import { ref, computed, onBeforeMount, watch } from "vue";
+import { ref, computed, onBeforeMount, watch, onBeforeUnmount } from "vue";
 import { useAuthStore } from "src/stores/auth";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
@@ -330,6 +330,18 @@ onBeforeMount(() => {
   loadUserData();
 });
 
+onBeforeUnmount(() => {
+  removeUserApplicationOnRhUser();
+});
+
+const removeUserApplicationOnRhUser = () => {
+  if (!isRh.value) return;
+
+  useLocalStorage.remove("savedApplication");
+  useLocalStorage.remove("addingNotesApplicationId");
+
+};
+
 const loadUserData = () => {
   if (user.value.role === "u") {
     loadLocalStorage();
@@ -367,6 +379,7 @@ const loadLocalStorage = () => {
 const goToRequisitionApplicants = () => {
   if (viewAllRequisitions.value) {
     router.replace("/home/historial-solicitudes");
+
     return;
   }
   router.replace("/home/historial-requisiciones-solicitudes");
