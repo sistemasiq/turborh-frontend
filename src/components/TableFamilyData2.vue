@@ -87,15 +87,19 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRequestUser } from "src/stores/requestUser";
+import { useAuthStore } from "src/stores/auth";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
 
 const useLocalStorage = useLocalStorageStore();
 const useRequest = useRequestUser();
+const useAuth = useAuthStore();
 
 const disableDeleteButton = ref(true);
 
 const currentIndex = ref(0)
+
+const { isRh } = storeToRefs(useAuth)
 
 const {
   familySonsData,
@@ -126,6 +130,7 @@ onMounted(() => {
   if (viewingApplication.value || updatingApplication.value) {
     setSavedStoredValues();
   }
+
   disableDeleteButton.value = familySonsData.value.length === 0 ? true : false;
 });
 
@@ -144,7 +149,8 @@ const disableAddButton = () => {
 };
 
 const setSavedStoredValues = () => {
-  if (familySonsData.value.length > 0) return;
+  if (!savedApplication.value) return;
+  familySonsData.value = []
 
   savedApplication.value.datos_familiares.forEach((element) => {
     if (element.son != null) {
@@ -220,9 +226,14 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
+  if(viewingApplication.value)
+  return;
+
   const localStoreData = useLocalStorage.load("familySonsData");
 
-  if (localStoreData) familySonsData.value = localStoreData;
+  if (localStoreData){
+    familySonsData.value = localStoreData;
+  }
 };
 
 const setCurrentIndex = () => {
