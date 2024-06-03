@@ -108,6 +108,20 @@ export const sendUserNotSelectedMessage = async (phoneNumber, name, jobName) => 
   }
 }
 
+export const sendUserSelectedMessage = async (phoneNumber, name, jobName) => {
+
+  const data = requisitionInformationTemplate(phoneNumber, name, jobName);
+
+  try {
+    const request = await axios.post(`/api/whatsapp/send/requisitions/candidates/selected`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
 export const sendLinkMessage = async(phoneNumber, userName, link) => {
   const data = psychTestLinkTemplate(phoneNumber, userName, link);
   try {

@@ -1922,11 +1922,13 @@ const getUserImage = computed(() => {
   }
 });
 
+//This filter checks the checkbox in the table of candidates, and if it´s checked then it returns true so the list of the candidates is going to show
+//only the candidates with the status of C = citados if not, then is going to show the candidates with the status different than C which are P = pendientes and E = Entrevistados
 const filteredRows = computed(() => {
   const filtered = totalTableRows.value.filter((candidate) => {
     return showCitedCandidates.value
       ? candidate.status === "C"
-      : candidate.status === "P";
+      : candidate.status != "C";
   });
 
   if (filtered.length < 1) {
@@ -1984,6 +1986,7 @@ const getCandidatesCatalog = async () => {
     loading.value = false;
     disableCheckbox.value = false;
     totalTableRows.value = request;
+    console.log(totalTableRows.value);
   } else {
     $q.notify(
       notifyNegative("Hubo un problema al obtener la lista de candidatos")

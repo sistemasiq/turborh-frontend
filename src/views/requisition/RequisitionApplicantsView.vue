@@ -464,12 +464,14 @@ import {
 import { completeRequisition } from "src/services/requisition";
 import {
   sendPsychometricTestEmail,
-  sendCanceledRequisitionEmail,
+  sendCandidateNotSelectedEmail,
+  sendCandidateSelectedEmail
 } from "src/services/mail";
 import {
   sendPsychTestMessage,
   sendUserNotSelectedMessage,
-  sendLinkMessage,
+  sendUserSelectedMessage,
+  sendLinkMessage
 } from "src/services/whatsApp";
 import { updatePsychTestCredentials } from "src/services/user";
 
@@ -881,11 +883,19 @@ const fetchUserApplicationNotes = async (applicationId) => {
 const onCompleteSendEmailToCandidates = async () => {
   const promises = currentApplicants.value.map((candidate) => {
     if (candidate.selected === 0) {
-      return sendCanceledRequisitionEmail(
+      return sendCandidateNotSelectedEmail(
         candidate.email,
         candidate.name,
         candidate.jobName
       );
+    }
+    if (candidate.selected === 1) {
+      return sendCandidateSelectedEmail(
+        candidate.email,
+        candidate.name,
+        candidate.jobName
+      );
+      console.log("USER " + candidate.email);
     }
   });
 
@@ -910,6 +920,14 @@ const onCompleteSendMessageToCandidates = async () => {
   const promises = currentApplicants.value.map((candidate) => {
     if (candidate.selected === 0) {
       return sendUserNotSelectedMessage(
+        candidate.phoneNumber,
+        candidate.name,
+        candidate.jobName
+      );
+    }
+    console.log(currentApplicants.value);
+    if (candidate.selected === 1) {
+      return sendUserSelectedMessage(
         candidate.phoneNumber,
         candidate.name,
         candidate.jobName
