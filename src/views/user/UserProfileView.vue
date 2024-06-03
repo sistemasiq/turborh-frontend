@@ -62,13 +62,13 @@
 
                 <q-card-actions align="right">
                   <q-file
-                    class="q-mr-md"
+                    class="q-mr-xl"
                     max-file-size="5242880"
                     accept=".jpg, image/*"
                     v-model="selectedImage"
                     clearable
                     borderless
-                    label="Seleccionar imagen"
+                    label="Selecciona tu imagen"
                     bg-color="white"
                     flat
                     @update:model-value="updateSelectedImageURL()"
