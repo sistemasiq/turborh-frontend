@@ -117,8 +117,7 @@
         <q-btn
           v-if="
             row.selected === 0 &&
-            row.requisitionState === 'P' &&
-            row.hasBeenSelected === 0
+            row.requisitionState === 'P'
           "
           class="q-ml-lg bg-green"
           rounded

@@ -56,8 +56,9 @@
 
                             <q-btn-dropdown :loading="isFetchingJobs" style="height: 55px;" icon="search" color="primary" :label="selectedJob.name" no-ripple
                                 class="transparent q-ml-md" outline text-color="white" :disable="isFetchingJobs || showingDetails">
+                                <q-input class="q-mb-sm" v-model="searchJob" placeholder="Buscar..." dense outlined />
                                 <q-list>
-                                    <q-item v-for="(item, index) in jobs" :key="index" clickable v-close-popup
+                                    <q-item v-for="(item, index) in filteredJobs()" :key="index" clickable v-close-popup
                                         @click.prevent="handleSelectedJob(item)">
                                         <q-item-section>
                                             <q-item-label>{{ item.name }}</q-item-label>
@@ -161,6 +162,7 @@ const useJob = useJobStore();
 const selectedApplicant = ref('')
 const applicants = ref([''])
 
+const searchJob = ref("");
 
 const selectedJob = ref('')
 const jobs = ref([''])
@@ -192,6 +194,18 @@ onMounted(() => {
     }
 
 })
+
+const filteredJobs = () => {
+
+  if(!searchJob.value){
+    return jobs.value;
+  }
+
+  const searchTermLower = searchJob.value.toLowerCase();
+
+  return jobs.value.filter(job => job.name.toLowerCase().includes(searchTermLower));
+
+}
 
 const showRequisitionDetails = () => {
 
@@ -258,7 +272,11 @@ const fetchJobs = async () => {
         const jobsFetched = isRh.value || isAdmin.value ? await getAllActiveJobs() : await getJobsByPersonalId(personalId);
         if (jobsFetched) {
             jobs.value = jobsFetched;
+            jobs.value.sort((a,b) => a.name.localeCompare(b.name));
         }
+
+
+
     } catch (error) {
         console.error('Error fetching applicants: ', error)
     }finally{
