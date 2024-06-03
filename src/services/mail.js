@@ -56,6 +56,62 @@ export const sendCanceledRequisitionEmail = async (email, name, jobName) => {
   }
 };
 
+const candidateNotSelectedTemplate = (email, name, jobName) => {
+  return {
+    to: email,
+    subject: "Actualización sobre tu candidatura",
+    greeting: `Hola ${name}.`,
+    firstText: `Muchas gracias por tu interés en
+    Turbomaquinas y por el tiempo que dedicaste durante todo el proceso
+    de selección, aplicando al puesto ${jobName}.`,
+    secondText:
+      "Te escribimos para informarte que de momento consideramos que, para este puesto, tu perfil no se ajusta plenamente a nuestras necesidades actuales, sin embargo, guardaremos tu información en nuestra base de datos por si en el futuro tenemos alguna vacante para ti.",
+    lastText:
+      "¡Te deseamos mucha suerte en tu búsqueda de empleo! ¡Saludos, y hasta pronto!"
+  };
+}
+
+export const sendCandidateNotSelectedEmail = async (email, name, jobName) => {
+  const data = candidateNotSelectedTemplate(email, name, jobName);
+  try {
+    const request = await axios.post(`/mail/send/requisitions/candidates/not-selected`, data);
+    if (requestSuccessfull(request.status)) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
+};
+
+//This is just the template, this method returns an object with the message predifined
+const candidateSelectedTemplate = (email, name, jobName) => {
+  return {
+    to: email,
+    subject: "Felicitaciones! Ha sido seleccionado!",
+    greeting: `Estimado ${name}.`,
+    firstText: `Nos complace comunicarle que ha sido seleccionado(a) para el puesto de ${jobName}. Su experiencia y habilidades profesionales se ajustan a los requisitos del puesto y estamos seguros de que tiene el potencial para tener éxito en este puesto.`,
+    secondText: "Apreciamos su interés en nuestra empresa y el tiempo que dedicó a completar el proceso de selección. En breve, recibirá más información del equipo de Recursos Humanos sobre los próximos pasos del proceso de incorporación. Mientras tanto, si tiene alguna pregunta, no dude en contactarnos a este mismo correo.",
+    lastText: "¡Felicitaciones por este éxito!"
+  }
+}
+
+// This is the method to send an email to the selected candidates
+export const sendCandidateSelectedEmail = async (email, name, jobName) => { //Receives the needed information to send the email
+  const data = candidateSelectedTemplate(email, name, jobName); //this builds the email object to send
+  try {
+    const request = await axios.post(`/mail/send/requisitions/candidates/selected`, data); //send the email to the endpoint
+    if (requestSuccessfull(request.status)) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
+};
+
 export const finishedAppointment = {
   subject: "Entrevista Completada!",
   firstText:

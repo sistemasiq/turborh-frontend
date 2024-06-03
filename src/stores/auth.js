@@ -17,6 +17,10 @@ export const useAuthStore = defineStore("auth", () => {
     return user.value && user.value.role === "r";
   });
 
+  const isUser = computed(() => {
+    return user.value && user.value.role === "u";
+  });
+
   const isIng = computed(() => {
     return user.value && user.value.role === "i";
   });
@@ -62,6 +66,7 @@ export const useAuthStore = defineStore("auth", () => {
     isAdmin,
     isRh,
     isBoss,
+    isUser,
     isIng,
     isLic,
     hasPermitRequisitionAuthorization,

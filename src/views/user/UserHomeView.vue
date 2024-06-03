@@ -306,7 +306,7 @@ const hoverUpdateApplication = ref(false);
 const hoverDeleteApplication = ref(false);
 const useLocalStorage = useLocalStorageStore();
 const { viewAllRequisitions } = storeToRefs(useRequisitionDetails);
-const { user, isRh, logged, getUserPhotoUUID } = storeToRefs(useAuth);
+const { user, isRh, logged, getUserPhotoUUID, isUser } = storeToRefs(useAuth);
 const {
   savedApplication,
   viewingApplication,
@@ -343,11 +343,12 @@ const removeUserApplicationOnRhUser = () => {
 };
 
 const loadUserData = () => {
-  if (user.value.role === "u") {
+  if (isUser.value) {
     loadLocalStorage();
     initInterceptors(router);
     router.replace("/userHome/perfil");
   }
+
 };
 
 const loadLocalStorage = () => {
@@ -373,6 +374,11 @@ const loadLocalStorage = () => {
   }
   if (userApplicationStored) {
     savedApplication.value = userApplicationStored;
+  }
+
+  if (user.value.role === "u") {
+    initInterceptors(router);
+    router.replace("/userHome/perfil");
   }
 };
 

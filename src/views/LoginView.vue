@@ -67,8 +67,8 @@
                         :rules="[
                           (value) =>
                             !!value || 'Este campo no puede estar vacío.',
-                            (value) =>
-                            value === password || 'La contraseña es incorrecta'
+                          (value) =>
+                            value === password || 'La contraseña es incorrecta',
                         ]"
                         class="input-brand"
                       >
@@ -124,7 +124,12 @@
                       </q-btn>
                     </div>
                     <div class="q-mt-lg">
-                      <q-btn flat class="text-white" @click="toRestorePassword()">¿Has olvidado tu contraseña?</q-btn>
+                      <q-btn
+                        flat
+                        class="text-white"
+                        @click="toRestorePassword()"
+                        >¿Has olvidado tu contraseña?</q-btn
+                      >
                     </div>
                   </q-card-actions>
                 </q-card>
@@ -152,13 +157,16 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
-import { getAdminRoute, getUserRoute, getS3FileUrl } from "src/services/profiles.js";
+import {
+  getAdminRoute,
+  getUserRoute,
+  getS3FileUrl,
+} from "src/services/profiles.js";
 import { notifyPositive, notifyNegative } from "src/utils/notifies.js";
 import { getAssetsPath } from "src/utils/folderPaths";
 import { useRequestUser } from "src/stores/requestUser";
 import { logUser } from "src/services/user";
 import { getUserApplicationById } from "src/services/userApplication";
-
 
 const useAuth = useAuthStore();
 const useLocalStorage = useLocalStorageStore();
@@ -169,11 +177,15 @@ const userName = ref("");
 const password = ref("");
 const isPasswordVisible = ref(false);
 
-const getLoginMainImage = computed(() => getS3FileUrl(getAssetsPath, "login-main.jpg"))
-const getLogoImage = computed(() => getS3FileUrl(getAssetsPath, "logo-turbomaquinas.png"))
+const getLoginMainImage = computed(() =>
+  getS3FileUrl(getAssetsPath, "login-main.jpg")
+);
+const getLogoImage = computed(() =>
+  getS3FileUrl(getAssetsPath, "logo-turbomaquinas.png")
+);
 
 const { savedApplication } = storeToRefs(useRequest);
-const { user, logged } = storeToRefs(useAuth);
+const { user, logged, isUser } = storeToRefs(useAuth);
 
 const changePasswordVisibility = () => {
   if (password.value) {
@@ -187,68 +199,69 @@ const onRegisterClick = () => {
 
 const toRestorePassword = () => {
   router.replace("/restore-password/search-account");
-}
+};
 
 const disableLoginButton = () => {
   return !userName.value || !password.value;
 };
 
 const onLoginClick = async () => {
-
   try {
     $q.loading.show();
 
     const userData = await logUser(userName.value, password.value);
 
     if (userData) {
-
       user.value = userData;
       logged.value = 1;
-
       useLocalStorage.save("user", user.value);
       useLocalStorage.save("logged", logged.value);
 
-
-      if(user.value.role != "u"){
+      if (user.value.role != "u") {
         router.replace(getAdminRoute());
-        $q.notify(
-        notifyPositive(`Bienvenido`));
-      }else{
+        $q.notify(notifyPositive(`Bienvenido`));
+      } else {
         await fetchUserApplication();
       }
-
-
     } else {
-      console.log(userData)
+      console.log(userData);
       $q.notify(notifyNegative("Tienes datos incorrectos!"));
     }
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al iniciar sesion. Intenta de nuevo."));
+    $q.notify(
+      notifyNegative("Hubo un error al iniciar sesion. Intenta de nuevo.")
+    );
   } finally {
     $q.loading.hide();
   }
 };
 
-const fetchUserApplication = async() => {
+const fetchUserApplication = async () => {
+  if (!isUser.value) return;
 
-  if(user.value.role !== "u")
-  return;
+  if (user.value.applicationId === 0) {
+    router.replace(getUserRoute());
+    savedApplication.value = {};
+    useLocalStorage.remove("savedApplication");
+    $q.notify(notifyPositive(`Bienvenido`));
+    return;
+  }
 
   try {
-    const userApplication = await getUserApplicationById(user.value.applicationId)
+    const userApplication = await getUserApplicationById(
+      user.value.applicationId
+    );
 
     if (userApplication) {
       savedApplication.value = userApplication;
       useLocalStorage.save("savedApplication", savedApplication.value);
-      $q.notify(
-        notifyPositive(`Bienvenido`));
+      $q.notify(notifyPositive(`Bienvenido`));
     }
   } catch (error) {
-
-  }finally{
-    router.replace(getUserRoute())
+  } finally {
+    router.replace(getUserRoute());
   }
-}
+};
 
 const isLoginPage = ref(true);
 
@@ -261,14 +274,12 @@ const keyDownHandler = (event) => {
 };
 
 onMounted(() => {
-
   window.addEventListener("keydown", keyDownHandler);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("keydown", keyDownHandler);
 });
-
 </script>
 
 <style scoped>

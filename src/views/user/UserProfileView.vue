@@ -62,29 +62,53 @@
 
                 <q-card-actions align="right">
                   <q-file
-                    class="q-mr-md"
+                    class="q-mr-xl"
+                    max-file-size="5242880"
                     accept=".jpg, image/*"
                     v-model="selectedImage"
                     clearable
                     borderless
-                    label="Seleccionar imagen"
+                    label="Selecciona tu imagen"
                     bg-color="white"
                     flat
                     @update:model-value="updateSelectedImageURL()"
                   >
-                    <q-tooltip>Selecciona tu imagen</q-tooltip>
+                    <q-tooltip
+                      class="bg-dark text-white text-body2 z-max"
+                      anchor="bottom middle"
+                      self="center middle"
+                      transition-show="slide-up"
+                      transition-hide="fade"
+                      :delay="300"
+                      transition-duration="300"
+                      :offset="[10, 25]"
+                    >
+                      Maximo tamaño de imagen 5 MB
+                    </q-tooltip>
 
-                    <template v-slot:prepend> </template>
+                    <template v-slot:prepend>
+                      <q-icon name="attach_file" />
+                    </template>
                   </q-file>
                   <q-btn
-                    color="blue"
+                    color="primary"
                     label="Subir imagen"
                     @click.prevent="uploadImage"
                     :disable="!selectedImage || !canUpload"
                     :loading="isUploading"
-                    flat
                   >
-                    <q-tooltip>Da click para subir tu imagen</q-tooltip>
+                    <q-tooltip
+                      class="bg-dark text-white text-body2 z-max"
+                      anchor="bottom middle"
+                      self="center middle"
+                      transition-show="slide-up"
+                      transition-hide="fade"
+                      :delay="300"
+                      transition-duration="300"
+                      :offset="[10, 25]"
+                    >
+                      Da click para subir tu imagen
+                    </q-tooltip>
                   </q-btn>
                 </q-card-actions>
               </q-card>
@@ -137,7 +161,9 @@ import { getUserImagesPath } from "src/utils/folderPaths";
 import { getAge } from "src/utils/operations";
 import { updateUserImage } from "src/services/user";
 import { uploadFile, updateFile } from "src/services/files";
+import { useQuasar } from "quasar";
 
+const $q = useQuasar();
 const useLocalStorage = useLocalStorageStore();
 const useRequest = useRequestUser();
 const useAuth = useAuthStore();
@@ -239,6 +265,7 @@ const uploadImage = async () => {
     isUploading.value = true;
 
     let newFileName;
+    $q.loading.show();
     if (user.value.photoUUID) {
       newFileName = await updateFile(
         user.value.photoUUID,
@@ -259,6 +286,7 @@ const uploadImage = async () => {
   } catch (error) {
     console.log(error);
   } finally {
+    $q.loading.hide();
     isUploading.value = false;
   }
 };

@@ -87,40 +87,17 @@
               <q-item-label caption>Historial de requisiciones</q-item-label>
             </q-item-section>
           </q-item>
-          <q-item
-            v-if="isRh"
-            clickable
-            to="/home/historial-solicitudes"
-            :inset-level="1"
-          >
-            <q-item-section avatar>
-              <q-icon name="search" />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label>Ver Solicitudes</q-item-label>
-              <q-item-label caption>Historial de Solicitudes</q-item-label>
-            </q-item-section>
-          </q-item>
+
         </q-expansion-item>
-        <!-- TODO: Remover cuando se verifique que no se ocupa -->
-        <!-- <q-expansion-item
-        v-if="isRh"
-          icon="description"
-          label="Solicitudes de usuarios"
-          header-class="bg-blue-1"
-        >
-          <div class="content" ref="contentRef">
-            <q-item clickable to="/home" :inset-level="1" class="custom-item">
-              <q-item-section avatar class="items-seleccion-elements">
-                <q-icon name="fas fa-user" class="icon-user" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Selección de candidato</q-item-label>
-                <q-item-label caption>Selecciona un candidato</q-item-label>
-              </q-item-section>
-            </q-item>
-          </div>
-        </q-expansion-item> -->
+
+        <q-item v-if="isRh" clickable to="/home/historial-solicitudes" class="bg-blue-1">
+          <q-item-section avatar>
+              <q-icon name="description" />
+            </q-item-section>
+          <q-item-section class="text-left q-pt-md q-pb-md">
+            <q-item-label>Solicitudes</q-item-label>
+          </q-item-section>
+        </q-item>
 
         <q-expansion-item
           v-if="isRh"
