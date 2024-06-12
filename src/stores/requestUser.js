@@ -16,6 +16,8 @@ export const useRequestUser = defineStore("requestUser", () => {
 
   const personalData = ref({
     homeAddress: "",
+    cologne: "",
+    postcode: "",
     state: "",
     city: "",
     birthPlace: "",

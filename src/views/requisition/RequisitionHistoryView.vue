@@ -15,7 +15,7 @@
     loading-label="Cargando historial de requisiciones..."
     no-results-label="No hay coincidencias con la busqueda..."
     :no-data-label="noDataLabel"
-    :rows-per-page-options="[10, 20, 30]"
+    :rows-per-page-options="[5, 10, 20, 30]"
   >
     <template v-slot:top-right>
       <q-card-actions>
