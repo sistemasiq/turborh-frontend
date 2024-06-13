@@ -180,6 +180,8 @@ const createApplication = () => {
     domicilio: personalData.value.homeAddress,
     estado: personalData.value.state,
     ciudad: personalData.value.city,
+    colonia: personalData.value.cologne === null ? "": personalData.value.cologne,
+    codigo_postal: personalData.value.postcode === null ? "": personalData.value.postcode,
     lugar_nacimiento: personalData.value.birthPlace,
     fecha_nacimiento: personalData.value.birthDate,
     telefono: personalData.value.phone,

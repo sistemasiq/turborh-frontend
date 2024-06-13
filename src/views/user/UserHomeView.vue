@@ -519,17 +519,17 @@ const onViewApplication = () => {
 };
 
 const pathMapping = {
-  "/userHome/solicitud-1": "Portada",
-  "/userHome/solicitud-2": "Datos Personales 1/2",
-  "/userHome/solicitud-3": "Datos Personales 2/2",
+  "/userHome/solicitud-1": "Presentacion Personal y Salario Deseado",
+  "/userHome/solicitud-2": "Datos Personales y Aspiraciones",
+  "/userHome/solicitud-3": "Informacion Medica y Situacion Socioeconomica",
   "/userHome/solicitud-4": "Documentos",
   "/userHome/solicitud-5": "Medios de reclutamiento",
-  "/userHome/solicitud-6": "Referencias",
-  "/userHome/solicitud-7": "Datos familiares",
-  "/userHome/solicitud-8": "Escolaridad",
-  "/userHome/solicitud-9": "Manejo de máquinas, herramientas y software",
-  "/userHome/solicitud-10": "Oficios",
-  "/userHome/solicitud-11": "Experiencia laboral",
+  "/userHome/solicitud-6": "Datos familiares",
+  "/userHome/solicitud-7": "Información Escolar",
+  "/userHome/solicitud-8": "Maquinaria y herramientas",
+  "/userHome/solicitud-9": "Oficios",
+  "/userHome/solicitud-10": "Experiencia laboral",
+  "/userHome/solicitud-11": "Referencias familiares y comerciales",
 };
 
 const currentPath = computed(() => {

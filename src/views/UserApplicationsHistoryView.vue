@@ -2,6 +2,7 @@
   <q-table
     class="my-sticky-column-table"
     flat
+    style="background: rgb(234, 237, 249)"
     bordered
     title="Historial de solicitudes"
     :columns="columns"
@@ -50,6 +51,7 @@
 
     <template v-slot:body-cell-applicantName="{ row }">
       <q-td>
+        {{ getse }}
           <q-img
           width="100px"
           height="100px"
@@ -706,7 +708,7 @@ const columns = [
     name: "applicantName",
     label: "Nombre del solicitante",
     required: true,
-    field: (row) => row,
+    field: (row) => row.nombre + " " + row.apellido_paterno + " " + row.apellido_materno,
     align: "left",
   },
   {

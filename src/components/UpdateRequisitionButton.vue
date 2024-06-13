@@ -38,7 +38,6 @@ import { useQuasar } from "quasar";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { storeToRefs } from "pinia";
 import router from "src/router";
-import axios from "axios";
 import { ref } from "vue";
 
 const openConfirmation = ref(false);

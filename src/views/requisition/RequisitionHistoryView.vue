@@ -114,7 +114,7 @@
       </q-card-actions>
     </template>
 
-    <template v-if="isRh" v-slot:body-cell-applicants="{ row }">
+    <template v-slot:body-cell-applicants="{ row }">
       <q-td :style="{ color: row.authorized ? 'green' : 'red' }">
         <q-btn
           label="Solicitudes"

@@ -1,6 +1,6 @@
 <template>
   <q-table
-    class="q-pa-md"
+    class="my-sticky-column-table"
     flat
     bordered
     style="background: rgb(234, 237, 249)"
@@ -49,15 +49,21 @@
       </q-card-actions>
     </template>
 
-    <template v-slot:body-cell-applicantPhoto="{ row }">
+    <template v-slot:body-cell-applicantName="{ row }">
       <q-td :class="row.selected === 1 ? 'bg-green-3' : ''">
+
+        {{ getRowSelectedText(row) }}
         <q-img
+        class="q-ml-xs"
           width="100px"
           height="100px"
           v-if="row.photoUUID"
           :src="getS3FileUrl(getUserImagesPath, row.photoUUID)"
           spinner-color="primary"
         />
+        {{ row.name }}
+        {{ row.firstLastName}}
+        {{ row.secondLastName }}
       </q-td>
     </template>
 
@@ -115,10 +121,7 @@
           @click.prevent="addNotes(row.applicationId)"
         />
         <q-btn
-          v-if="
-            row.selected === 0 &&
-            row.requisitionState === 'P'
-          "
+          v-if="row.selected === 0 && row.requisitionState === 'P' && isRh"
           class="q-ml-lg bg-green"
           rounded
           icon="done"
@@ -444,6 +447,7 @@ import { getS3FileUrl } from "src/services/profiles.js";
 import { useQuasar } from "quasar";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { useRequestUser } from "src/stores/requestUser";
+import { useAuthStore } from "src/stores/auth";
 import { useNotesStore } from "src/stores/notes";
 import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
@@ -465,18 +469,19 @@ import { completeRequisition } from "src/services/requisition";
 import {
   sendPsychometricTestEmail,
   sendCandidateNotSelectedEmail,
-  sendCandidateSelectedEmail
+  sendCandidateSelectedEmail,
 } from "src/services/mail";
 import {
   sendPsychTestMessage,
   sendUserNotSelectedMessage,
   sendUserSelectedMessage,
-  sendLinkMessage
+  sendLinkMessage,
 } from "src/services/whatsApp";
 import { updatePsychTestCredentials } from "src/services/user";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
+const useAuth = useAuthStore();
 const useLocalStorage = useLocalStorageStore();
 const useNotes = useNotesStore();
 const useRequest = useRequestUser();
@@ -511,6 +516,8 @@ const {
   notesOffices,
   notesLaboralExperience,
 } = storeToRefs(useNotes);
+
+const { isRh } = storeToRefs(useAuth);
 
 const reportSrc = ref("");
 const reportViewLink = ref(reportSrc.value);
@@ -595,7 +602,6 @@ const sendPsychTestLink = async () => {
     if (sendedMessage) {
       $q.notify(notifyPositive("Enviado link correctamente"));
     }
-
   } catch (error) {
     console.log(error);
   } finally {
@@ -895,7 +901,6 @@ const onCompleteSendEmailToCandidates = async () => {
         candidate.name,
         candidate.jobName
       );
-      console.log("USER " + candidate.email);
     }
   });
 
@@ -968,21 +973,7 @@ const getRowSelectedText = (row) => {
 };
 
 const columns = [
-  {
-    name: "selected",
-    label: "Seleccion",
-    field: (row) => getRowSelectedText(row),
-    align: "left",
-    classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
-  },
-  {
-    name: "applicantPhoto",
-    label: "Foto",
-    required: true,
-    field: (row) => row.photoUUID,
-    align: "left",
-  },
-  {
+{
     name: "applicantName",
     label: "Nombre del solicitante",
     required: true,
@@ -991,6 +982,8 @@ const columns = [
       row.name + " " + row.firstLastName + " " + row.secondLastName,
     classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
+
+
   {
     name: "applicantGender",
     label: "Sexo",
@@ -1100,4 +1093,18 @@ const columns = [
 .history-item p {
   font-size: 20px;
 }
+</style>
+
+<style lang="sass">
+.my-sticky-column-table
+
+  thead tr:first-child th:first-child
+
+  td:first-child
+
+  th:first-child,
+  td:first-child
+    position: sticky
+    left: 0
+    z-index: 1
 </style>
