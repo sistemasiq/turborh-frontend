@@ -823,10 +823,10 @@ const columns = [
 .my-sticky-column-table
 
   thead tr:first-child th:first-child
-    background-color: #caf0f8
+    background-color: #EAEDF9
 
   td:first-child
-    background-color: #caf0f8
+    background-color: #EAEDF9
 
   th:first-child,
   td:first-child

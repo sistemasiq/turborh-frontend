@@ -53,7 +53,7 @@
               dark
               outlined
               color="cyan-1"
-              v-model="cologne"
+              v-model="colony"
               type="text"
               label="Colonia *"
               label-color="white"
@@ -70,7 +70,7 @@
               dark
               outlined
               color="cyan-1"
-              v-model="postcode"
+              v-model="zipcode"
               type="text"
               label="Código Postal *"
               label-color="white"
@@ -447,8 +447,8 @@ const kinship = ref("");
 const amount = ref(0);
 const clubs = ref("");
 const goalInLife = ref("");
-const cologne = ref("");
-const postcode = ref("");
+const colony = ref("");
+const zipcode = ref("");
 
 const {
   personalData,
@@ -459,8 +459,8 @@ const {
 
 const requiredFieldsOnThisPage = computed(() => [
   homeAddress.value,
-  cologne.value,
-  postcode.value,
+  colony.value,
+  zipcode.value,
   state.value,
   city.value,
   birthPlace.value,
@@ -495,8 +495,8 @@ const setSavedStoredValues = () => {
   currentHomeStatus.value = savedApplication.value.tipo_vivienda;
 
   homeAddress.value = savedApplication.value.domicilio;
-  cologne.value = savedApplication.value.colonia;
-  postcode.value = savedApplication.value.codigo_postal;
+  colony.value = savedApplication.value.colonia;
+  zipcode.value = savedApplication.value.codigo_postal;
   state.value = savedApplication.value.estado;
   city.value = savedApplication.value.ciudad;
   birthPlace.value = savedApplication.value.lugar_nacimiento;
@@ -526,8 +526,8 @@ const setStoredValues = () => {
   currentHomeStatus.value = personalData.value.homeProperty;
 
   homeAddress.value = personalData.value.homeAddress;
-  cologne.value = personalData.value.cologne;
-  postcode.value = personalData.value.postcode;
+  colony.value = personalData.value.colony;
+  zipcode.value = personalData.value.zipcode;
   state.value = personalData.value.state;
   city.value = personalData.value.city;
   birthPlace.value = personalData.value.birthPlace;
@@ -553,8 +553,8 @@ const updateStore = () => {
   personalData.value.homeProperty = currentHomeStatus.value;
 
   personalData.value.homeAddress = homeAddress.value;
-  personalData.value.cologne = cologne.value;
-  personalData.value.postcode = postcode.value;
+  personalData.value.colony = colony.value;
+  personalData.value.zipcode = zipcode.value;
   personalData.value.state = state.value;
   personalData.value.city = city.value;
   personalData.value.birthPlace = birthPlace.value;
@@ -574,8 +574,8 @@ const updateStore = () => {
 //Clean the local variables
 const clean = () => {
   homeAddress.value = "";
-  cologne.value = "";
-  postcode.value = "";
+  colony.value = "";
+  zipcode.value = "";
   state.value = "";
   city.value = "";
   birthPlace.value = "";

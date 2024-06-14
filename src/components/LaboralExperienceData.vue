@@ -26,7 +26,7 @@
                 Nota
               </div>
               <p class="text-body2">
-                Añade tu experiencia laboral en orden cronologico descendente, del primero que tuviste al ultimo
+                Ordena tu experiencia laboral comenzando por añadir tu último empleo que tuviste hasta el primero
               </p>
             </q-card-section>
           </q-card>
