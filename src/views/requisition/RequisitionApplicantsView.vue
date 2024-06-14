@@ -1098,7 +1098,8 @@ const columns = [
 <style lang="sass">
 .my-sticky-column-table
 
-  thead tr:first-child th:first-child
+  thead tr:first-child
+  th:first-child
 
   td:first-child
 

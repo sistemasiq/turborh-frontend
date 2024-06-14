@@ -203,12 +203,12 @@ const wantedSalary = ref(0);
 const genderChoosed = ref();
 const photoUUID = ref("");
 
-const { isRh, getUserPhotoUUID } = storeToRefs(useAuth);
+const { isRh, isAdmin, isBoss, getUserPhotoUUID } = storeToRefs(useAuth);
 
 
 const getUserImage = computed(() => {
 
-  if(!isRh.value){
+  if(!isRh.value && !isAdmin.value && !isBoss.value){
     photoUUID.value = getUserPhotoUUID.value;
   }
 

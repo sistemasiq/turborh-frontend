@@ -16,7 +16,7 @@
         Opciones de usuario
       </p>
       <q-item-section class="text-center column q-ml-xl q-mt-xl">
-        <div class="q-mr-xl" v-if="isRh">
+        <div class="q-mr-xl" v-if="hideUserApplicationInterface">
           <p class="text-subtitle2 text-white text-weight-regular">
             Añadir nota
           </p>
@@ -32,7 +32,7 @@
           />
         </div>
 
-        <div class="row q-ml-md" v-if="!isRh">
+        <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
           <div>
             <p class="text-subtitle2 q-mr-lg text-white text-weight-regular">
               Inicio
@@ -75,7 +75,7 @@
             </q-btn>
           </div>
         </div>
-        <div class="row q-ml-md" v-if="!isRh">
+        <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
           <div>
             <p
               class="text-subtitle2 q-mr-lg text-weight-regular"
@@ -131,7 +131,7 @@
           </div>
         </div>
 
-        <div class="row q-ml-md" v-if="!isRh">
+        <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
           <div>
             <p
               class="text-subtitle2 q-mr-lg text-center text-weight-regular"
@@ -203,10 +203,10 @@
         dense
         icon="arrow_back"
         class="logout-btn z-top"
-        :class="isRh ? 'q-ml-md absolute-bottom q-mb-xl' : 'q-ml-xs'"
+        :class="hideUserApplicationInterface ? 'q-ml-md absolute-bottom q-mb-xl q-mr-xl' : 'q-ml-xs'"
         label="Regresar"
         @click.prevent="goToRequisitionApplicants"
-        v-if="isRh"
+        v-if="hideUserApplicationInterface"
       >
       </q-btn>
 
@@ -217,7 +217,7 @@
         class="logout-btn z-top q-mb-sm"
         label="Cerrar Sesión"
         @click.prevent="redirectToLogin"
-        v-if="!isRh"
+        v-if="!hideUserApplicationInterface"
       >
       </q-btn>
     </q-drawer>
@@ -306,7 +306,7 @@ const hoverUpdateApplication = ref(false);
 const hoverDeleteApplication = ref(false);
 const useLocalStorage = useLocalStorageStore();
 const { viewAllRequisitions } = storeToRefs(useRequisitionDetails);
-const { user, isRh, logged, getUserPhotoUUID, isUser } = storeToRefs(useAuth);
+const { user, isRh, logged, getUserPhotoUUID, isUser, isBoss, isAdmin } = storeToRefs(useAuth);
 const {
   savedApplication,
   viewingApplication,
@@ -326,16 +326,20 @@ const toolTipActiveApplicationText = computed(() => {
     : "Activa tu solicitud de trabajo";
 });
 
+const hideUserApplicationInterface = computed(() => {
+  return isRh.value || isAdmin.value || isBoss.value
+});
+
 onBeforeMount(() => {
   loadUserData();
 });
 
 onBeforeUnmount(() => {
-  removeUserApplicationOnRhUser();
+  removeUserApplicationOnAdminUser();
 });
 
-const removeUserApplicationOnRhUser = () => {
-  if (!isRh.value) return;
+const removeUserApplicationOnAdminUser = () => {
+  if (!isRh.value && !isAdmin.value && !isBoss.value) return;
 
   useLocalStorage.remove("savedApplication");
   useLocalStorage.remove("addingNotesApplicationId");
