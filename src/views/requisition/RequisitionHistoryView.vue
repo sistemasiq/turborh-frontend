@@ -15,7 +15,7 @@
     loading-label="Cargando historial de requisiciones..."
     no-results-label="No hay coincidencias con la busqueda..."
     :no-data-label="noDataLabel"
-    :rows-per-page-options="[10, 20, 30]"
+    :rows-per-page-options="[5, 10, 20, 30]"
   >
     <template v-slot:top-right>
       <q-card-actions>
@@ -114,7 +114,7 @@
       </q-card-actions>
     </template>
 
-    <template v-if="isRh" v-slot:body-cell-applicants="{ row }">
+    <template v-slot:body-cell-applicants="{ row }">
       <q-td :style="{ color: row.authorized ? 'green' : 'red' }">
         <q-btn
           label="Solicitudes"

@@ -20,7 +20,7 @@
 
       <div v-for="(item, index) in noteItems">
         <q-chat-message
-        v-if="item.name != '' || item.content === 'null' || item.content === null"
+        v-if="item.timestamp != '' && item.content != 'null' && item.content != null"
         :key="index"
         :name="item.name"
         :text="[item.content]"
@@ -61,7 +61,7 @@ const previousNote = ref("");
 
 onMounted(() => {
   previousNote.value = note.value;
-  note.value = note.value === ("null" ||  null) ? "" : note.value;
+  note.value = note.value === "null" || note.value === null ? "" : note.value;
 });
 
 const {
@@ -83,31 +83,31 @@ const { user } = storeToRefs(useAuth);
 const { savedApplication } = storeToRefs(useRequest);
 
 const noteStoreMapping = {
-  Portada: notesFrontPage,
-  "Datos Personales 1/2": notesPersonalData,
-  "Datos Personales 2/2": notesPersonalDataTwo,
+  'Presentacion Personal y Salario Deseado': notesFrontPage,
+  "Datos Personales y Aspiraciones": notesPersonalData,
+  "Informacion Medica y Situacion Socioeconomica": notesPersonalDataTwo,
   Documentos: notesDocuments,
   "Medios de reclutamiento": notesRecruitingMeans,
-  Referencias: notesReferences,
   "Datos familiares": notesFamily,
-  Escolaridad: notesEducation,
-  "Manejo de máquinas, herramientas y software": notesMachinery,
+  "Información Escolar": notesEducation,
+  "Maquinaria y herramientas": notesMachinery,
   Oficios: notesOffices,
   "Experiencia laboral": notesLaboralExperience,
+  "Referencias familiares y comerciales": notesReferences,
 };
 
 const noteContentMapping = {
-  Portada: notesFrontPage.value,
-  "Datos Personales 1/2": notesPersonalData.value,
-  "Datos Personales 2/2": notesPersonalDataTwo.value,
+  'Presentacion Personal y Salario Deseado': notesFrontPage.value,
+  "Datos Personales y Aspiraciones": notesPersonalData.value,
+  "Informacion Medica y Situacion Socioeconomica": notesPersonalDataTwo.value,
   Documentos: notesDocuments.value,
   "Medios de reclutamiento": notesRecruitingMeans.value,
-  Referencias: notesReferences.value,
   "Datos familiares": notesFamily.value,
-  Escolaridad: notesEducation.value,
-  "Manejo de máquinas, herramientas y software": notesMachinery.value,
+  "Información Escolar": notesEducation.value,
+  "Maquinaria y herramientas": notesMachinery.value,
   Oficios: notesOffices.value,
   "Experiencia laboral": notesLaboralExperience.value,
+  "Referencias familiares y comerciales": notesReferences.value,
 };
 
 const noteItems = computed(() => {
@@ -130,7 +130,8 @@ const noteItems = computed(() => {
       content: ""
     }
 
-    newNoteItem.content = authorSegment;
+    console.log(" AUTHOR "+authorSegment);
+    console.log(" CONTENT "+contentSegment);
 
     if (authorSegment.startsWith("Nota hecha por: ")) {
 
@@ -140,18 +141,43 @@ const noteItems = computed(() => {
       newNoteItem.name = name;
       newNoteItem.timestamp = timestamp;
 
-      if(contentSegment != ""){
+
+      if(contentSegment != "" && contentSegment != "null"){
         newNoteItem.content = contentSegment;
       }
 
 
     }
 
+    newNoteItem = checkNoteItem(newNoteItem)
+
     noteItems.push(newNoteItem);
+
   }
   console.log(noteItems);
   return noteItems;
 });
+
+const checkNoteItem = (noteItem) => {
+ if(noteItem.name === ''){
+  noteItem.name = user.value.userName;
+ }
+ if(noteItem.timestamp === ''){
+  noteItem.timestamp = null
+ }
+
+ if(noteItem.content === ''){
+  noteItem.content = null
+ }
+
+
+ return noteItem
+}
+
+
+const noteItemFull = (noteItem) => {
+return noteItem.name != "" && noteItem.timestamp != "" && noteItem.content != "";
+}
 
 
 const saveNote = async (currentRoute) => {
@@ -178,17 +204,17 @@ const saveNote = async (currentRoute) => {
 
     const notes = {
       applicationId: savedApplication.value.solicitud_id,
-      noteFrontPage: notesFrontPage.value,
-      notePersonalData: notesPersonalData.value,
-      notePersonalDataTwo: notesPersonalDataTwo.value,
-      noteRecruitingMeans: notesRecruitingMeans.value,
-      noteDocuments: notesDocuments.value,
-      noteEducation: notesEducation.value,
-      noteReferences: notesReferences.value,
-      noteFamilyData: notesFamily.value,
-      noteMachinery: notesMachinery.value,
-      noteSkills: notesOffices.value,
-      noteLaboralExperience: notesLaboralExperience.value,
+      noteFrontPage: notesFrontPage.value === 'null' || notesFrontPage.value === null? '' : notesFrontPage.value,
+      notePersonalData: notesPersonalData.value === 'null' || notesPersonalData.value === null? '' : notesPersonalData.value,
+      notePersonalDataTwo: notesPersonalDataTwo.value === 'null' || notesPersonalDataTwo.value === null ? '' : notesPersonalDataTwo.value,
+      noteRecruitingMeans: notesRecruitingMeans.value === 'null' || notesRecruitingMeans.value === null ? '' : notesRecruitingMeans.value,
+      noteDocuments: notesDocuments.value === 'null' || notesDocuments.value === null ? '' : notesDocuments.value,
+      noteEducation: notesEducation.value === 'null' || notesEducation.value === null ? '' : notesEducation.value,
+      noteReferences: notesReferences.value === 'null' || notesReferences.value === null ? '' : notesReferences.value,
+      noteFamilyData: notesFamily.value === 'null' ||  notesFamily.value === null? '' : notesFamily.value,
+      noteMachinery: notesMachinery.value === 'null' || notesMachinery.value === null? '' : notesMachinery.value,
+      noteSkills: notesOffices.value === 'null' || notesOffices.value === null? '' : notesOffices.value,
+      noteLaboralExperience: notesLaboralExperience.value === 'null' || notesLaboralExperience.value === null? '' : notesLaboralExperience.value,
     };
 
     const notesUpdated = await updateUserApplicationNotes(notes);

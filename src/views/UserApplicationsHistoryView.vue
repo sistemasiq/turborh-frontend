@@ -1,9 +1,9 @@
 <template>
   <q-table
-    class="q-pa-md"
+    class="my-sticky-column-table"
     flat
-    bordered
     style="background: rgb(234, 237, 249)"
+    bordered
     title="Historial de solicitudes"
     :columns="columns"
     :rows="currentApplicants"
@@ -15,7 +15,7 @@
     loading-label="Cargando solicitudes..."
     no-results-label="No hay coincidencias con la busqueda..."
     :no-data-label="noDataLabel"
-    :rows-per-page-options="[10, 20, 30]"
+    :rows-per-page-options="[5, 10, 20, 30]"
   >
     <template v-slot:top-right>
       <q-card-actions horizontal align="center">
@@ -49,15 +49,19 @@
       </q-card-actions>
     </template>
 
-    <template v-slot:body-cell-applicantPhoto="{ row }">
+    <template v-slot:body-cell-applicantName="{ row }">
       <q-td>
-        <q-img
+        {{ getse }}
+          <q-img
           width="100px"
           height="100px"
           v-if="row.foto_uuid"
           :src="getS3FileUrl(getUserImagesPath, row.foto_uuid)"
           spinner-color="primary"
         />
+        {{row.nombre}}
+        {{row.apellido_paterno}}
+        {{row.apellido_materno}}
       </q-td>
     </template>
 
@@ -701,19 +705,11 @@ const fetchUserApplicationNotes = async (applicationId) => {
 
 const columns = [
   {
-    name: "applicantPhoto",
-    label: "Foto",
-    required: true,
-    field: (row) => row.foto_uuid,
-    align: "left",
-  },
-  {
     name: "applicantName",
     label: "Nombre del solicitante",
     required: true,
+    field: (row) => row.nombre + " " + row.apellido_paterno + " " + row.apellido_materno,
     align: "left",
-    field: (row) =>
-      row.nombre + " " + row.apellido_paterno + " " + row.apellido_materno,
   },
   {
     name: "applicantGender",
@@ -820,4 +816,22 @@ const columns = [
 .history-item p {
   font-size: 20px;
 }
+
+</style>
+
+<style lang="sass">
+.my-sticky-column-table
+
+  thead tr:first-child th:first-child
+    background-color: #EAEDF9
+
+  td:first-child
+    background-color: #EAEDF9
+
+  th:first-child,
+  td:first-child
+    position: sticky
+    left: 0
+    z-index: 1
+
 </style>
