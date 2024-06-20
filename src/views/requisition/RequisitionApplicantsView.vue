@@ -973,6 +973,7 @@ const getRowSelectedText = (row) => {
 };
 
 const columns = [
+
 {
     name: "applicantName",
     label: "Nombre del solicitante",
@@ -982,7 +983,15 @@ const columns = [
       row.name + " " + row.firstLastName + " " + row.secondLastName,
     classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
   },
-
+  {
+    name: "userApplicationId",
+    label: "ID",
+    required: true,
+    align: "left",
+    field: (row) =>
+      row.userId,
+      classes: (row) => (row.selected === 1 ? "bg-green-3" : ""),
+  },
 
   {
     name: "applicantGender",

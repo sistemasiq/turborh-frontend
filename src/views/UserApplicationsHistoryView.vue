@@ -704,13 +704,6 @@ const fetchUserApplicationNotes = async (applicationId) => {
 };
 
 const columns = [
-{
-    name: "userApplicationId",
-    label: "ID",
-    required: true,
-    align: "left",
-    field: (row) => row.solicitud_id,
-  },
   {
     name: "applicantName",
     label: "Nombre del solicitante",
