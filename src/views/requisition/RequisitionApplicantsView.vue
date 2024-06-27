@@ -778,28 +778,28 @@ const uploadPsicometricTest = async (row) => {
 
     let newFile;
 
-    if (row.psychometricTest) {
-      newFile = await updateFile(
-        row.psychometricTest,
-        row.psychometricTestSelected,
-        getUserDocumentsPath
-      );
-    } else {
-      newFile = await uploadFile(
-        row.psychometricTestSelected,
-        getUserDocumentsPath
-      );
-    }
-
-    if (newFile) {
-      const updatedTest = await updateUserPsychometricTest(row.userId, newFile);
-
-      if (updatedTest) {
-        row.psychometricTest = newFile;
-        updateRow(row);
-        $q.notify(notifyPositive("Prueba psicometríca subida correctamente"));
+      if (row.psychometricTest) {
+        newFile = await updateFile(
+          row.psychometricTest,
+          row.psychometricTestSelected,
+          getUserDocumentsPath
+        );
+      } else {
+        newFile = await uploadFile(
+          row.psychometricTestSelected,
+          getUserDocumentsPath
+        );
       }
-    }
+
+      if (newFile) {
+        const updatedTest = await updateUserPsychometricTest(row.userId, newFile);
+
+        if (updatedTest) {
+          row.psychometricTest = newFile;
+          updateRow(row);
+          $q.notify(notifyPositive("Prueba psicometríca subida correctamente"));
+        }
+      }
   } catch (error) {
     $q.notify(notifyNegative("Hubo un error al subir la prueba psicometríca"));
   } finally {

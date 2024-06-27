@@ -51,25 +51,24 @@
 
     <template v-slot:body-cell-applicantName="{ row }">
       <q-td>
-        {{ getse }}
-          <q-img
+        <q-img
           width="100px"
           height="100px"
           v-if="row.foto_uuid"
           :src="getS3FileUrl(getUserImagesPath, row.foto_uuid)"
           spinner-color="primary"
         />
-        {{row.nombre}}
-        {{row.apellido_paterno}}
-        {{row.apellido_materno}}
+        {{ row.nombre }}
+        {{ row.apellido_paterno }}
+        {{ row.apellido_materno }}
       </q-td>
     </template>
 
     <template v-slot:body-cell-psychTestSended="{ row }">
       <q-td>
         <q-btn
+          v-if="row.test_psicometrico_estado === 'E' || row.prueba_psicometrica"
           rounded
-          v-if="row.test_psicometrico_estado === 'E'"
           icon="visibility"
           label="Ver datos"
           @click.prevent="seePsychTestData(row)"
@@ -97,23 +96,21 @@
         >
           <Tooltip :text="'Descargar currículum'" />
         </q-btn>
+
         <q-btn
-          v-if="row.prueba_psicometrica"
-          class="q-ml-lg"
           rounded
-          icon="mdi-file-download"
-          label="Prueba psicometríca"
-          @click.prevent="downloadDocument(row.prueba_psicometrica)"
+          class="q-ma-sm"
+          icon="upload"
+          label="Subir resultados"
+          @click.prevent="setSelectedUser(row, true)"
         >
-          <Tooltip :text="'Descargar prueba psicometríca'" />
         </q-btn>
         <q-btn
-          class="q-ma-lg q-pa-md text-black"
-          style="height: fit-content"
+          class="q-ma-lg text-black"
           rounded
           icon="link"
           label="Enviar test psicométrico"
-          @click.prevent="setSelectedUser(row, false, true)"
+          @click.prevent="setSelectedUser(row)"
         />
 
         <q-btn
@@ -360,12 +357,71 @@
 
       <q-card-actions class="justify-end q-pa-md">
         <q-btn
+          v-if="selectedUser.prueba_psicometrica"
+          icon="check"
+          label="Ver resultados"
+          v-close-popup
+          class="q-mr-sm absolute-bottom-left q-mb-md q-ml-md"
+          style="border-radius: 8px"
+          @click.prevent="downloadDocument(selectedUser.prueba_psicometrica)"
+        />
+        <q-btn
           flat
           label="Cerrar"
           v-close-popup
           class="text-red-8 q-mr-sm"
           style="border-radius: 8px"
           @click.prevent="resetPsychTestInformation()"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+  <q-dialog v-model="openUploadResults">
+    <q-card>
+      <q-card-section>
+        <div class="text-h6">Subir resultados de la prueba psicometrica</div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section class="justify-between" horizontal>
+        <q-card-section>
+          <q-file
+            rounded
+            standout
+            accept=".pdf, pdf/*"
+            bg-color="white"
+            v-model="psychometricTestSelected"
+            clearable
+            label="Seleccionar resultados de la prueba psicometríca"
+          >
+            <template v-slot:prepend
+              ><q-icon color="dark" name="folder" />
+            </template>
+          </q-file>
+        </q-card-section>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-actions class="justify-end q-pa-md">
+        <q-btn
+          flat
+          label="Cerrar"
+          v-close-popup
+          class="text-red-8 q-mr-sm"
+          style="border-radius: 8px"
+          @click.prevent="resetResults()"
+        />
+        <q-btn
+          flat
+          icon="upload"
+          label="Subir"
+          class="text-white"
+          :class="!psychometricTestSelected ? 'bg-grey-5' : 'bg-green-13'"
+          style="border-radius: 8px"
+          @click.prevent="uploadPsicometricTest()"
+          :disable="!psychometricTestSelected"
         />
       </q-card-actions>
     </q-card>
@@ -399,6 +455,8 @@ import {
   updatePsychTestCredentials,
   getPsychometricPlatforms,
 } from "src/services/user";
+import { updateFile, uploadFile } from "src/services/files";
+import { updateUserPsychometricTestByApplicationId } from "src/services/user";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -413,6 +471,7 @@ const { viewAllRequisitions } = storeToRefs(useRequisitionDetails);
 const noDataLabel = ref("No hay solicitantes para este puesto...");
 const loading = ref(false);
 
+const openUploadResults = ref(false);
 const { viewingApplication, savedApplication } = storeToRefs(useRequest);
 
 const {
@@ -448,6 +507,7 @@ const psychTestPlatforms = ref([]);
 const psychTestPlatformId = ref(0);
 const sendLink = ref(false);
 const testLink = ref("");
+const psychometricTestSelected = ref();
 
 const openSeeDataPsychTest = ref(false);
 
@@ -477,10 +537,11 @@ const selectPsychPlatform = (data) => {
   psychTestPlatformId.value = data.id;
 };
 
-const setSelectedUser = (row) => {
+const setSelectedUser = (row, openUploadResultsDialog = false) => {
   selectedUser.value = row;
   console.log(selectedUser.value);
-  openPsicometricTestDialog.value = true;
+  openPsicometricTestDialog.value = openUploadResultsDialog ? false : true;
+  openUploadResults.value = openUploadResultsDialog;
 };
 
 const resetPsychTestInformation = () => {
@@ -488,6 +549,10 @@ const resetPsychTestInformation = () => {
   userNameForPsychTests.value = "";
   passwordForPsychTest.value = "";
   testLink.value = "";
+};
+
+const resetResults = () => {
+  psychometricTestSelected.value = null;
 };
 
 const disableSendPsychTestButton = computed(() => {
@@ -507,6 +572,58 @@ const sendPsychTestInformation = async () => {
     await sendPsychTestLink();
   } else {
     await sendPsychTestCredentials();
+  }
+};
+
+const uploadPsicometricTest = async () => {
+  try {
+    $q.loading.show();
+
+    let newFile;
+
+    console.log(psychometricTestSelected.value);
+
+    if (selectedUser.value.prueba_psicometrica) {
+      newFile = await updateFile(
+        selectedUser.value.prueba_psicometrica,
+        psychometricTestSelected.value,
+        getUserDocumentsPath
+      );
+
+      console.log("Tryiing to update file");
+    } else {
+      newFile = await uploadFile(
+        psychometricTestSelected.value,
+        getUserDocumentsPath
+      );
+
+      console.log("Tryiing to upload file");
+    }
+
+    if (newFile) {
+      const updatedTest = await updateUserPsychometricTestByApplicationId(
+        selectedUser.value.solicitud_id,
+        newFile
+      );
+
+      if (updatedTest) {
+        selectedUser.value.prueba_psicometrica = newFile;
+        updateRow(selectedUser.value);
+        $q.notify(
+          notifyPositive(
+            "Resultados de la prueba psicometrica subidos correctamente"
+          )
+        );
+      }
+    }
+  } catch (error) {
+    $q.notify(
+      notifyNegative(
+        "Hubo un error al subir los resultados de la prueba psicometrica"
+      )
+    );
+  } finally {
+    $q.loading.hide();
   }
 };
 
@@ -581,6 +698,7 @@ const sendPsychTestLink = async () => {
 };
 
 const seePsychTestData = (row) => {
+  selectedUser.value = row;
   openSeeDataPsychTest.value = true;
   userNameForPsychTests.value = row.test_psicometrico_nombre_usuario;
   passwordForPsychTest.value = row.test_psicometrico_password;
@@ -708,7 +826,8 @@ const columns = [
     name: "applicantName",
     label: "Nombre del solicitante",
     required: true,
-    field: (row) => row.nombre + " " + row.apellido_paterno + " " + row.apellido_materno,
+    field: (row) =>
+      row.nombre + " " + row.apellido_paterno + " " + row.apellido_materno,
     align: "left",
   },
   {
@@ -816,7 +935,6 @@ const columns = [
 .history-item p {
   font-size: 20px;
 }
-
 </style>
 
 <style lang="sass">
@@ -833,5 +951,4 @@ const columns = [
     position: sticky
     left: 0
     z-index: 1
-
 </style>

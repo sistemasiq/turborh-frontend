@@ -196,8 +196,6 @@
                 v-model="height"
                 label="Estatura(m) *"
                 label-color="white"
-                mask="#.##"
-                fill-mask="0"
                 lazy-rules
                 :rules="[
                   (value) => !!value || 'Este campo no puede estar vacío.',
@@ -215,9 +213,6 @@
                 v-model="weight"
                 label="Peso(kg) *"
                 label-color="white"
-                mask="###.#"
-                reverse-fill-mask
-                fill-mask="0"
                 lazy-rules
                 :rules="[
                   (value) => !!value || 'Este campo no puede estar vacío.',
@@ -505,7 +500,7 @@ const setSavedStoredValues = () => {
   height.value = savedApplication.value.estatura;
   //NOTA: Multiplico el valor por diez por que al registrar un valor como 120.0 la mask lo deja como 012.0
   //Asi me aseguro que parsee de forma correcta el valor
-  weight.value = savedApplication.value.peso * 10;
+  weight.value = checkWeightValidValue(savedApplication.value.peso);
   bloodType.value = savedApplication.value.tipo_sangre;
   roomie.value = savedApplication.value.vive_con;
   dependents.value = savedApplication.value.numero_dependientes;
@@ -514,6 +509,21 @@ const setSavedStoredValues = () => {
   clubs.value = savedApplication.value.club_perteneciente;
   goalInLife.value = savedApplication.value.meta_vida;
 };
+
+const checkWeightValidValue = (currentWeight) => {
+  if(currentWeight < 10.0){
+    currentWeight *= 10
+
+    if(currentWeight < 10.0){
+      currentWeight *= 10
+      return currentWeight;
+    }
+
+    return currentWeight;
+  }else{
+    return currentWeight;
+  }
+}
 
 //Set the stored values in the store (pinia) in the local variables
 const setStoredValues = () => {
