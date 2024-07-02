@@ -32,6 +32,8 @@
           />
         </div>
 
+        <ApplicationModifications v-if="isRh || isBoss || isAdmin"/>
+
         <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
           <div>
             <p class="text-subtitle2 q-mr-lg text-white text-weight-regular">
@@ -283,6 +285,7 @@ import {
   axiosErrorResponseStatus,
   initInterceptors,
 } from "src/services/setupInterceptors";
+import ApplicationModifications from "src/components/ApplicationModifications.vue"
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
@@ -305,7 +308,7 @@ const hoverSeeApplication = ref(false);
 const hoverUpdateApplication = ref(false);
 const hoverDeleteApplication = ref(false);
 const useLocalStorage = useLocalStorageStore();
-const { viewAllRequisitions } = storeToRefs(useRequisitionDetails);
+const { viewAllRequisitions, viewAllSelectedCandidates } = storeToRefs(useRequisitionDetails);
 const { user, isRh, logged, getUserPhotoUUID, isUser, isBoss, isAdmin } = storeToRefs(useAuth);
 const {
   savedApplication,
@@ -389,7 +392,10 @@ const loadLocalStorage = () => {
 const goToRequisitionApplicants = () => {
   if (viewAllRequisitions.value) {
     router.replace("/home/historial-solicitudes");
-
+    return;
+  }
+  if (viewAllSelectedCandidates.value) {
+    router.replace("/home/candidatos-seleccionados");
     return;
   }
   router.replace("/home/historial-requisiciones-solicitudes");

@@ -12,7 +12,7 @@
     row-key="name"
     separator="horizontal"
     rows-per-page-label="Puestos por página"
-    loading-label="Cargando solicitudes..."
+    loading-label="Cargando candidatos..."
     no-results-label="No hay coincidencias con la busqueda..."
     :no-data-label="noDataLabel"
     :rows-per-page-options="[5, 10, 20, 30]"

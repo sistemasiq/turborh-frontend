@@ -96,7 +96,7 @@ const {
   viewingApplication,
   updatingApplication,
   savedApplication,
-  curriculumStored,
+  curriculumStored
 } = storeToRefs(useApplication);
 
 const { user } = storeToRefs(useAuth);

@@ -57,6 +57,19 @@ export const getCandidateJobs = async (userId) => {
   }
 };
 
+export const getSelectedCandidates = async () => {
+  try {
+    const request = await axios.get("candidates/selected");
+    if (requestSuccessfull(request.status)) {
+      return request.data;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    return null;
+  }
+};
+
 export const disableCandidate = async (requisitionId, userId) => {
   try {
     const request = await axios.delete(

@@ -4,7 +4,7 @@
     style="background-color: rgb(30, 61, 88)"
   >
     <q-card flat bordered class="rounded-borders">
-      <q-card-section class="title"> Presentación Personal y Salario Deseado </q-card-section>
+      <q-card-section class="title"> {{ pageTitle }} </q-card-section>
 
       <q-card-section class="content" style="max-width: 100%">
         <pagination-application :page="1" :required-fields="requiredFieldsOnThisPage"/>
@@ -187,14 +187,11 @@ import { useQuasar } from "quasar";
 import { getUserImagesPath } from "src/utils/folderPaths";
 import { useAuthStore } from "src/stores/auth";
 
+
 const $q = useQuasar();
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();
-
-const priorityOne = ref(false);
-const priorityTwo = ref(false);
-const priorityThree = ref(false);
 
 const name = ref("");
 const firstLastName = ref("");
@@ -204,6 +201,8 @@ const genderChoosed = ref();
 const photoUUID = ref("");
 
 const { isRh, isAdmin, isBoss, getUserPhotoUUID } = storeToRefs(useAuth);
+
+const pageTitle = "Presentación Personal y Salario Deseado"
 
 
 const getUserImage = computed(() => {
@@ -308,6 +307,8 @@ const setPersonalDataSavedValues = () => {
   personalData.value.amount = savedApplication.value.monto_renta;
   personalData.value.clubs = savedApplication.value.club_perteneciente;
   personalData.value.goalInLife = savedApplication.value.meta_vida;
+  personalData.value.zipcode = savedApplication.value.codigo_postal;
+  personalData.value.colony = savedApplication.value.colonia;
 
   //Datos personales 2
   personalData.value.diseases = savedApplication.value.padecimiento;
@@ -501,7 +502,9 @@ const updateStore = () => {
   frontPageData.value.secondLastName = secondLastName.value;
   frontPageData.value.wantedSalary = wantedSalary.value;
   frontPageData.value.gender = genderChoosed.value;
+
 };
+
 
 const clean = () => {
   name.value = "";
@@ -511,21 +514,6 @@ const clean = () => {
 };
 
 
-const handlePriorityCheckboxChange = (selectedCheckbox) => {
-  const priority = {
-    one: priorityOne,
-    two: priorityTwo,
-    three: priorityThree,
-  };
-
-  Object.keys(priority).forEach((key) => {
-    if (key === selectedCheckbox) {
-      priority[key].value = true;
-    } else {
-      priority[key].value = false;
-    }
-  });
-};
 
 const saveLocalStore = () => {
   useLocalStorage.save("frontpage", frontPageData.value);
