@@ -131,31 +131,6 @@
         <!-- Aqui esta la variable del backend que sirve como vmodel
         Si se encuentra una mejor manera, adelante -->
         <div class="row">
-          <q-file
-            style="max-width: 420px"
-            rounded
-            standout
-            accept=".pdf, pdf/*"
-            class="q-ml-lg q-mt-lg"
-            bg-color="white"
-            v-model="row.psychometricTestSelected"
-            clearable
-            label="Seleccionar prueba psicometríca"
-          >
-            <template v-slot:prepend
-              ><q-icon color="dark" name="folder" />
-            </template>
-          </q-file>
-          <q-btn
-            v-if="row.psychometricTestSelected"
-            rounded
-            class="q-ma-sm"
-            icon="upload"
-            label="Subir prueba psicometríca"
-            @click.prevent="uploadPsicometricTest(row)"
-          >
-          </q-btn>
-
           <q-btn
             class="q-ma-lg q-pa-md text-black"
             style="height: fit-content"
@@ -552,7 +527,7 @@ const dropdownContentClass = "flexible-width";
 const openPsicometricTestDialog = ref(false);
 
 //Variables to store the data of one of the registered selected platform
-const psychTestPlatforms = ref([]); //Saves the list of psych platforms available 
+const psychTestPlatforms = ref([]); //Saves the list of psych platforms available
 const selectedPsychTestPlatform = ref("");
 const psychTestPlatformId = ref("");
 const psychPlatformRequireCredentials = ref(false);
@@ -564,7 +539,7 @@ const testLink = ref(""); //stores the free link from the input field
 //Variables to store the data when wants to send a registered psuch platform
 const psychPlatformLink = ref(""); //stores the link from a selected platform from the list
 const candidatesPsychData = ref([]); //Stores the user psych data, To see the list of psych platfor tests sended to the user in the "historial de test psicometricos"
-const userNameForPsychTests = ref(""); //stores the user name for the psych test 
+const userNameForPsychTests = ref(""); //stores the user name for the psych test
 const passwordForPsychTest = ref(""); // stores the user password for the psych test
 
 const tableJobName = ref("");
@@ -587,6 +562,7 @@ const postUserPsychData = async () => {
     };
 
     //TODO: this is useless
+    //NOTA Esquire: a
     let userPsychPlatformStatus = "";
     if (selectedCandidate.value.psychTestStatus == null || selectedCandidate.value.psychTestStatus == "") {
       userPsychPlatformStatus = "P";
@@ -906,7 +882,7 @@ const selectPsychPlatform = (data) => {
   psychTestPlatformId.value = data.id;
   selectedPsychTestPlatform.value = data.psychPlatformName;
   psychPlatformLink.value = data.link;
-  
+
   if (data.requireCredentials == 1) {
     psychPlatformRequireCredentials.value = true;
     sendLink.value = false; // if you are selecting a psych platform option then the status of the send free links will return to the default status(false)
@@ -1005,41 +981,7 @@ const downloadDocument = async (uuid) => {
   }
 };
 
-//TODO: DOCUMENT THIS ONE
-const uploadPsicometricTest = async (row) => {
-  try {
-    $q.loading.show();
 
-    let newFile;
-
-      if (row.psychometricTest) {
-        newFile = await updateFile(
-          row.psychometricTest,
-          row.psychometricTestSelected,
-          getUserDocumentsPath
-        );
-      } else {
-        newFile = await uploadFile(
-          row.psychometricTestSelected,
-          getUserDocumentsPath
-        );
-      }
-
-      if (newFile) {
-        const updatedTest = await updateUserPsychometricTest(row.userId, newFile);
-
-        if (updatedTest) {
-          row.psychometricTest = newFile;
-          updateRow(row);
-          $q.notify(notifyPositive("Prueba psicometríca subida correctamente"));
-        }
-      }
-  } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al subir la prueba psicometríca"));
-  } finally {
-    $q.loading.hide();
-  }
-};
 
 const updateRow = (row, requisitionHasBeenCompleted = false) => {
   currentApplicants.value.forEach((element) => {
