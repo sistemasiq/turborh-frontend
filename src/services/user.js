@@ -246,3 +246,45 @@ export const updatePsychTestCredentials = async (
     return false;
   }
 };
+
+
+export const postUserPsychTestData = async (userId, psychPlatformId, psychPlatformUserName, psychPlatformPassword, userPsychPlatformStatus) => {
+  const data = {
+    userId: userId,
+    psychPlatformId: psychPlatformId,
+    psychPlatformUserName: psychPlatformUserName,
+    psychPlatformPassword: psychPlatformPassword,
+    userPsychPlatformStatus: userPsychPlatformStatus
+  };
+  try {
+    const request = await axios.post("/users/psych-data", data)
+    if(requestSuccessfull(request.status)){
+      return true;
+    }else{{
+      return false;
+    }}
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+} 
+
+export const putUserPsychTestData = async(psychPlatformUserName, psychPlatformPassword, userId, psychPlatformId) => {
+  const data = {
+    psychPlatformUserName: psychPlatformUserName,
+    psychPlatformPassword: psychPlatformPassword,
+    userId: userId,
+    psychPlatformId: psychPlatformId
+  }
+  try {
+    const request = await axios.put("/users/psych-data", data)
+    if(requestSuccessfull(request.status)){
+      return true;
+    }else{{
+      return false;
+    }}
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+}
