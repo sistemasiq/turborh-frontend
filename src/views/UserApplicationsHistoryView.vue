@@ -98,14 +98,15 @@
           <Tooltip :text="'Descargar currículum'" />
         </q-btn>
 
-        <q-btn
-          rounded
-          class="q-ma-sm"
-          icon="upload"
-          label="Subir resultados"
-          @click.prevent="setSelectedUser(row, true)"
-        >
-        </q-btn>
+        <FileUploader
+          :button-text="'Subir resultados'"
+          :dialog-text="'Subir resultados de la prueba psicometrica'"
+          :open-dialog="openFileUploader"
+          :file-selector-label="'Seleccionar archivo'"
+          @on-open-dialog="openFileUploaderDialog(row)"
+          @on-close="closeFileUploaderDialog"
+          @on-upload="uploadTestResults"
+        />
         <q-btn
           class="q-ma-lg text-black"
           rounded
@@ -377,56 +378,7 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
-  <q-dialog v-model="openUploadResults">
-    <q-card>
-      <q-card-section>
-        <div class="text-h6">Subir resultados de la prueba psicometrica</div>
-      </q-card-section>
 
-      <q-separator />
-
-      <q-card-section class="justify-between" horizontal>
-        <q-card-section>
-          <q-file
-            rounded
-            standout
-            accept=".pdf, pdf/*"
-            bg-color="white"
-            v-model="psychometricTestSelected"
-            clearable
-            label="Seleccionar resultados de la prueba psicometríca"
-          >
-            <template v-slot:prepend
-              ><q-icon color="dark" name="folder" />
-            </template>
-          </q-file>
-        </q-card-section>
-      </q-card-section>
-
-      <q-separator />
-
-      <q-card-actions class="justify-end q-pa-md">
-        <q-btn
-          flat
-          label="Cerrar"
-          v-close-popup
-          class="text-red-8 q-mr-sm"
-          style="border-radius: 8px"
-          @click.prevent="resetResults()"
-        />
-        <q-btn
-          flat
-          icon="upload"
-          label="Subir"
-          class="text-white"
-          :class="!psychometricTestSelected ? 'bg-grey-5' : 'bg-green-13'"
-          style="border-radius: 8px"
-          @click.prevent="uploadPsicometricTest()"
-          :disable="!psychometricTestSelected"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
 </template>
 
 <script setup>
@@ -459,6 +411,7 @@ import {
 import { updateFile, uploadFile } from "src/services/files";
 import { updateUserPsychometricTestByApplicationId } from "src/services/user";
 import UserApplicationHistoryFilter from "src/components/UserApplicationHistoryFilter.vue";
+import FileUploader from "src/components/FileUploader.vue";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -479,6 +432,8 @@ const openUploadResults = ref(false);
 const { viewingApplication, savedApplication } = storeToRefs(useRequest);
 
 const filters = ref({});
+
+const openFileUploader = ref(false);
 
 const {
   notesFrontPage,
@@ -513,8 +468,6 @@ const psychTestPlatforms = ref([]);
 const psychTestPlatformId = ref(0);
 const sendLink = ref(false);
 const testLink = ref("");
-const psychometricTestSelected = ref();
-
 const openSeeDataPsychTest = ref(false);
 
 onMounted(() => {
@@ -523,6 +476,16 @@ onMounted(() => {
   fetchApplicants();
   getPsychometricPlatformsData();
 });
+
+const openFileUploaderDialog = (row) => {
+  openFileUploader.value = true;
+  selectedUser.value = row
+};
+
+const closeFileUploaderDialog = () => {
+  openFileUploader.value = false;
+};
+
 
 const getPsychometricPlatformsData = async () => {
   try {
@@ -688,9 +651,6 @@ const resetPsychTestInformation = () => {
   testLink.value = "";
 };
 
-const resetResults = () => {
-  psychometricTestSelected.value = null;
-};
 
 const disableSendPsychTestButton = computed(() => {
   if (sendLink.value) {
@@ -712,25 +672,25 @@ const sendPsychTestInformation = async () => {
   }
 };
 
-const uploadPsicometricTest = async () => {
+const uploadTestResults = async (file) => {
   try {
     $q.loading.show();
 
     let newFile;
 
-    console.log(psychometricTestSelected.value);
+    console.log(file);
 
     if (selectedUser.value.prueba_psicometrica) {
       newFile = await updateFile(
         selectedUser.value.prueba_psicometrica,
-        psychometricTestSelected.value,
+        file,
         getUserDocumentsPath
       );
 
       console.log("Tryiing to update file");
     } else {
       newFile = await uploadFile(
-        psychometricTestSelected.value,
+        file,
         getUserDocumentsPath
       );
 

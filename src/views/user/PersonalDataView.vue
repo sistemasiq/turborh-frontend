@@ -134,7 +134,7 @@
                 hide-hint
                 label="Fecha de nacimiento *"
                 v-model="birthDate"
-                mask="####/##/##"
+                mask="####-##-##"
                 dark
                 outlined
                 color="cyan-1"
@@ -557,6 +557,8 @@ const setStoredValues = () => {
 //Updates the store (pinia) values with the new ones
 const updateStore = () => {
   if (viewingApplication.value) return;
+
+  console.log("UPDATE STORE CALLED");
 
   personalData.value.civilStatus = currentCivilStatus.value.charAt(0);
 

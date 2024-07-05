@@ -99,7 +99,7 @@
                 <q-input
                   filled
                   v-model="dateStartSecondary"
-                  mask="####/##/##"
+                  mask="####-##-##"
                   lazy-rules
                   :rules="[dateRule]"
                   label="AAAA/MM/DD *"
@@ -139,7 +139,7 @@
                 <q-input
                   filled
                   v-model="dateEndSecondary"
-                  mask="####/##/##"
+                  mask="####-##-##"
                   lazy-rules
                   :rules="[dateRule]"
                   label="AAAA/MM/DD *"
@@ -284,7 +284,7 @@
                 <q-input
                   filled
                   v-model="dateStartHighSchool"
-                  mask="####/##/##"
+                  mask="####-##-##"
                   lazy-rules
                   :rules="[dateRule]"
                   label="AAAA/MM/DD"
@@ -324,7 +324,7 @@
                 <q-input
                   filled
                   v-model="dateEndHighSchool"
-                  mask="####/##/##"
+                  mask="####-##-##"
                   lazy-rules
                   :rules="[dateRule]"
                   label="AAAA/MM/DD"
@@ -467,7 +467,7 @@
                 <q-input
                   filled
                   v-model="dateStartProfessional"
-                  mask="####/##/##"
+                  mask="####-##-##"
                   lazy-rules
                   :rules="[dateRule]"
                   label="AAAA/MM/DD"
@@ -507,7 +507,7 @@
                 <q-input
                   filled
                   v-model="dateEndProfessional"
-                  mask="####/##/##"
+                  mask="####-##-##"
                   lazy-rules
                   :rules="[dateRule]"
                   label="AAAA/MM/DD"
@@ -650,7 +650,7 @@
                 <q-input
                   filled
                   v-model="dateStartMaster"
-                  mask="####/##/##"
+                  mask="####-##-##"
                   lazy-rules
                   :rules="[dateRule]"
                   label="AAAA/MM/DD"
@@ -690,7 +690,7 @@
                 <q-input
                   filled
                   v-model="dateEndMaster"
-                  mask="####/##/##"
+                  mask="####-##-##"
                   lazy-rules
                   :rules="[dateRule]"
                   label="AAAA/MM/DD"
@@ -833,7 +833,7 @@
                 <q-input
                   filled
                   v-model="dateStartOther"
-                  mask="####/##/##"
+                  mask="####-##-##"
                   lazy-rules
                   :rules="[dateRule]"
                   label="AAAA/MM/DD"
@@ -873,7 +873,7 @@
                 <q-input
                   filled
                   v-model="dateEndOther"
-                  mask="####/##/##"
+                  mask="####-##-##"
                   lazy-rules
                   :rules="[dateRule]"
                   label="AAAA/MM/DD"

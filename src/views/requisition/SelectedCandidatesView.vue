@@ -97,6 +97,17 @@
           <Tooltip :text="'Descargar currículum'" />
         </q-btn>
 
+        <FileUploader
+          :button-text="'Subir resultados'"
+          :dialog-text="'Subir resultados de la prueba psicometrica'"
+          :open-dialog="openFileUploader"
+          :file-selector-label="'Seleccionar archivo'"
+          @on-open-dialog="openFileUploaderDialog(row)"
+          @on-close="closeFileUploaderDialog"
+          @on-upload="uploadTestResults"
+        />
+        
+
         <q-btn
           class="q-ml-lg"
           rounded
@@ -218,7 +229,6 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
-
 </template>
 
 <script setup>
@@ -235,15 +245,14 @@ import { useNotesStore } from "src/stores/notes";
 import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
 import router from "src/router";
-import { downloadFile } from "src/services/files";
+import { downloadFile, uploadFile } from "src/services/files";
 import {
   getUserApplicationById,
   getUserApplicationNotesById,
 } from "src/services/userApplication";
-import {
-  getPsychometricPlatforms,
-} from "src/services/user";
+import { getPsychometricPlatforms } from "src/services/user";
 import { getSelectedCandidates } from "src/services/candidates";
+import FileUploader from "src/components/FileUploader.vue";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -253,7 +262,9 @@ const useRequest = useRequestUser();
 const filter = ref("");
 
 const currentSelectedApplicants = ref([]);
-const { viewAllRequisitions, viewAllSelectedCandidates } = storeToRefs(useRequisitionDetails);
+const { viewAllRequisitions, viewAllSelectedCandidates } = storeToRefs(
+  useRequisitionDetails
+);
 
 const noDataLabel = ref("No hay solicitantes para este puesto...");
 const loading = ref(false);
@@ -291,12 +302,83 @@ const psychTestPlatforms = ref([]);
 const testLink = ref("");
 const openSeeDataPsychTest = ref(false);
 
+const openFileUploader = ref(false);
+
 onMounted(() => {
   viewAllRequisitions.value = false;
   viewAllSelectedCandidates.value = true;
   fetchSelectedApplicants();
   getPsychometricPlatformsData();
 });
+
+const uploadTestResults = async (file) => {
+  try {
+    $q.loading.show();
+
+    let newFile;
+
+
+    if (selectedUser.value.psychometricTestUUID) {
+      newFile = await updateFile(
+        selectedUser.value.psychometricTestUUID,
+        file,
+        getUserDocumentsPath
+      );
+
+      console.log("Tryiing to update file");
+    } else {
+      newFile = await uploadFile(
+        file,
+        getUserDocumentsPath
+      );
+
+      console.log("Trying to upload file");
+    }
+
+    if (newFile) {
+      const updatedTest = await updateUserPsychometricTestByApplicationId(
+        selectedUser.value.userApplicationID,
+        newFile
+      );
+
+      if (updatedTest) {
+        selectedUser.value.psychometricTestUUID = newFile;
+        updateRow(selectedUser.value);
+        $q.notify(
+          notifyPositive(
+            "Resultados de la prueba psicometrica subidos correctamente"
+          )
+        );
+      }
+    }
+  } catch (error) {
+    $q.notify(
+      notifyNegative(
+        "Hubo un error al subir los resultados de la prueba psicometrica"
+      )
+    );
+  } finally {
+    $q.loading.hide();
+  }
+};
+
+const updateRow = (row) => {
+  currentSelectedApplicants.value.forEach((element) => {
+    if (element.userApplicationID === row.userApplicationID) {
+      element = row;
+    }
+  });
+};
+
+const openFileUploaderDialog = (row) => {
+  openFileUploader.value = true;
+  selectedUser.value = row
+  console.log(selectedUser.value);
+};
+
+const closeFileUploaderDialog = () => {
+  openFileUploader.value = false;
+};
 
 const getPsychometricPlatformsData = async () => {
   try {
@@ -314,9 +396,6 @@ const resetPsychTestInformation = () => {
   testLink.value = "";
 };
 
-
-
-
 const seePsychTestData = (row) => {
   selectedUser.value = row;
   openSeeDataPsychTest.value = true;
@@ -324,7 +403,6 @@ const seePsychTestData = (row) => {
   passwordForPsychTest.value = row.userPasswordForPsychPlatform;
   setSelectedPsychPlatform(row.userPsychPlatformID);
 };
-
 
 const setSelectedPsychPlatform = (id) => {
   console.log(psychTestPlatforms.value);
@@ -342,7 +420,6 @@ const fetchSelectedApplicants = async () => {
 
     if (totalApplicants) {
       currentSelectedApplicants.value = totalApplicants;
-      console.log(currentSelectedApplicants.value);
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
