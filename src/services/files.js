@@ -2,7 +2,6 @@
 import axios from "axios";
 import { requestSuccessfull } from "src/utils/operations";
 
-const dev = false;
 
 //This method upload files to a specific folder path in the S3 bucket
 export const uploadFile = async (fileName, folderPath) => {

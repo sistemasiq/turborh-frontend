@@ -12,6 +12,7 @@ export const useRequisitionDetailsStore = defineStore(
     const jobDetails = ref("");
     const updatingRequisition = ref(false);
     const viewAllRequisitions = ref(false);
+    const viewAllSelectedCandidates = ref(false);
 
     return {
       requisitionData,
@@ -22,6 +23,7 @@ export const useRequisitionDetailsStore = defineStore(
       showingDetails,
       updatingRequisition,
       viewAllRequisitions,
+      viewAllSelectedCandidates
     };
   }
 );

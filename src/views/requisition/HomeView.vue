@@ -99,6 +99,15 @@
           </q-item-section>
         </q-item>
 
+        <q-item v-if="isRh" clickable to="/home/candidatos-seleccionados" class="bg-blue-1">
+          <q-item-section avatar>
+              <q-icon name="checklist" />
+            </q-item-section>
+          <q-item-section class="text-left q-pt-md q-pb-md">
+            <q-item-label>Candidatos seleccionados</q-item-label>
+          </q-item-section>
+        </q-item>
+
         <q-expansion-item
           v-if="isRh"
           icon="description"
@@ -137,6 +146,23 @@
                 <q-item-label caption
                   >Modifica el catalogo de maquinaría y
                   herramientas</q-item-label
+                >
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              clickable
+              to="/home/catalogo-plataformas-psicometricas"
+              :inset-level="1"
+              class="custom-item"
+            >
+              <q-item-section avatar class="items-seleccion-elements">
+                <q-icon name="description" class="icon-user" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Control de pruebas psicométricas</q-item-label>
+                <q-item-label caption
+                  >Modifica los nombres y links de las pruebas psicométricas</q-item-label
                 >
               </q-item-section>
             </q-item>

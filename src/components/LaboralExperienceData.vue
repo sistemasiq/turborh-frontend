@@ -338,7 +338,7 @@
         :disable="laboralExperienceData.length === 1"
       />
     </div>
-    <ButtonApplicationStatus v-if="updatingApplication" />
+    <ButtonApplicationStatus v-if="updatingApplication"/>
   </q-layout>
 </template>
 

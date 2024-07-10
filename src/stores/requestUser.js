@@ -1,9 +1,7 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
-import { useLocalStorageStore } from "./localStorage";
 
 export const useRequestUser = defineStore("requestUser", () => {
-  const useLocalStorage = useLocalStorageStore();
 
   const frontPageData = ref({
     name: "",
@@ -140,6 +138,7 @@ export const useRequestUser = defineStore("requestUser", () => {
   const measuringInstrumentsData = ref([]);
   const otherToolsData = ref([]);
 
+
   const machinery = computed(() =>
     machineryData.value.concat(
       toolsData.value,
@@ -172,6 +171,7 @@ export const useRequestUser = defineStore("requestUser", () => {
   ]);
 
   const savedApplication = ref();
+
 
 
   const userHasApplication = computed(() => {

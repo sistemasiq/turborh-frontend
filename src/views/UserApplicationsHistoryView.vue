@@ -6,7 +6,7 @@
     bordered
     title="Historial de solicitudes"
     :columns="columns"
-    :rows="currentApplicants"
+    :rows="filteredApplicants"
     :loading="loading"
     :filter="filter"
     row-key="name"
@@ -18,6 +18,7 @@
     :rows-per-page-options="[5, 10, 20, 30]"
   >
     <template v-slot:top-right>
+      <UserApplicationHistoryFilter @filters-changed="applyFilters" />
       <q-card-actions horizontal align="center">
         <q-checkbox
           unchecked-icon="remove_circle_outline"
@@ -51,25 +52,24 @@
 
     <template v-slot:body-cell-applicantName="{ row }">
       <q-td>
-        {{ getse }}
-          <q-img
+        <q-img
           width="100px"
           height="100px"
           v-if="row.foto_uuid"
           :src="getS3FileUrl(getUserImagesPath, row.foto_uuid)"
           spinner-color="primary"
         />
-        {{row.nombre}}
-        {{row.apellido_paterno}}
-        {{row.apellido_materno}}
+        {{ row.nombre }}
+        {{ row.apellido_paterno }}
+        {{ row.apellido_materno }}
       </q-td>
     </template>
 
     <template v-slot:body-cell-psychTestSended="{ row }">
       <q-td>
         <q-btn
+          v-if="row.test_psicometrico_estado === 'E' || row.prueba_psicometrica"
           rounded
-          v-if="row.test_psicometrico_estado === 'E'"
           icon="visibility"
           label="Ver datos"
           @click.prevent="seePsychTestData(row)"
@@ -97,23 +97,22 @@
         >
           <Tooltip :text="'Descargar currículum'" />
         </q-btn>
+
+        <FileUploader
+          :button-text="'Subir resultados'"
+          :dialog-text="'Subir resultados de la prueba psicometrica'"
+          :open-dialog="openFileUploader"
+          :file-selector-label="'Seleccionar archivo'"
+          @on-open-dialog="openFileUploaderDialog(row)"
+          @on-close="closeFileUploaderDialog"
+          @on-upload="uploadTestResults"
+        />
         <q-btn
-          v-if="row.prueba_psicometrica"
-          class="q-ml-lg"
-          rounded
-          icon="mdi-file-download"
-          label="Prueba psicometríca"
-          @click.prevent="downloadDocument(row.prueba_psicometrica)"
-        >
-          <Tooltip :text="'Descargar prueba psicometríca'" />
-        </q-btn>
-        <q-btn
-          class="q-ma-lg q-pa-md text-black"
-          style="height: fit-content"
+          class="q-ma-lg text-black"
           rounded
           icon="link"
           label="Enviar test psicométrico"
-          @click.prevent="setSelectedUser(row, false, true)"
+          @click.prevent="setSelectedUser(row)"
         />
 
         <q-btn
@@ -360,6 +359,15 @@
 
       <q-card-actions class="justify-end q-pa-md">
         <q-btn
+          v-if="selectedUser.prueba_psicometrica"
+          icon="check"
+          label="Ver resultados"
+          v-close-popup
+          class="q-mr-sm absolute-bottom-left q-mb-md q-ml-md"
+          style="border-radius: 8px"
+          @click.prevent="downloadDocument(selectedUser.prueba_psicometrica)"
+        />
+        <q-btn
           flat
           label="Cerrar"
           v-close-popup
@@ -398,7 +406,12 @@ import { sendPsychometricTestEmail } from "src/services/mail";
 import {
   updatePsychTestCredentials,
   getPsychometricPlatforms,
+  updateUserPsychometricTest,
+  updateUserPsychometricTestByApplicationId
 } from "src/services/user";
+import { updateFile, uploadFile } from "src/services/files";
+import UserApplicationHistoryFilter from "src/components/UserApplicationHistoryFilter.vue";
+import FileUploader from "src/components/FileUploader.vue";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -408,12 +421,19 @@ const useRequest = useRequestUser();
 const filter = ref("");
 
 const currentApplicants = ref([]);
-const { viewAllRequisitions } = storeToRefs(useRequisitionDetails);
+const { viewAllRequisitions, viewAllSelectedCandidates } = storeToRefs(
+  useRequisitionDetails
+);
 
 const noDataLabel = ref("No hay solicitantes para este puesto...");
 const loading = ref(false);
 
+const openUploadResults = ref(false);
 const { viewingApplication, savedApplication } = storeToRefs(useRequest);
+
+const filters = ref({});
+
+const openFileUploader = ref(false);
 
 const {
   notesFrontPage,
@@ -448,14 +468,23 @@ const psychTestPlatforms = ref([]);
 const psychTestPlatformId = ref(0);
 const sendLink = ref(false);
 const testLink = ref("");
-
 const openSeeDataPsychTest = ref(false);
 
 onMounted(() => {
   viewAllRequisitions.value = true;
+  viewAllSelectedCandidates.value = false;
   fetchApplicants();
   getPsychometricPlatformsData();
 });
+
+const openFileUploaderDialog = (row) => {
+  openFileUploader.value = true;
+  selectedUser.value = row;
+};
+
+const closeFileUploaderDialog = () => {
+  openFileUploader.value = false;
+};
 
 const getPsychometricPlatformsData = async () => {
   try {
@@ -472,15 +501,146 @@ const gendersParsed = {
   O: "Otro",
 };
 
+const applyFilters = (newFilters) => {
+  filters.value = newFilters;
+};
+
+const filteredApplicants = computed(() => {
+  return currentApplicants.value.filter((applicant) => {
+    // Gender filter
+    if (filters.value.gender && applicant.sexo !== filters.value.gender) {
+      return false;
+    }
+
+    // Age filter
+    if (filters.value.ageRange) {
+      const age = getAge(applicant.fecha_nacimiento); // Implement this function
+      if (
+        age < filters.value.ageRange.min ||
+        age > filters.value.ageRange.max
+      ) {
+        return false;
+      }
+    }
+
+    // Salary filter
+    if (filters.value.salaryRange) {
+      const salary = Number(applicant.sueldo_deseado);
+      if (
+        salary < filters.value.salaryRange.min ||
+        salary > filters.value.salaryRange.max
+      ) {
+        return false;
+      }
+    }
+
+    // Civil status filter
+    if (
+      filters.value.civilStatus &&
+      applicant.estado_civil !== filters.value.civilStatus
+    ) {
+      return false;
+    }
+
+    // License types filter
+    if (filters.value.licenceTypes && filters.value.licenceTypes.length > 0) {
+      const applicantLicenceTypes = applicant.licencias_manejo.map(
+        (lt) => lt.type
+      );
+
+      if (
+        !filters.value.licenceTypes.every((lt) =>
+          applicantLicenceTypes.includes(lt)
+        )
+      ) {
+        return false;
+      }
+    }
+
+    // Scholarity filter
+    if (filters.value.scholarity) {
+      switch (filters.value.scholarity) {
+        case "Secundaria":
+          if (applicant.secundaria.length === 0) return false;
+
+          break;
+        case "Bachillerato":
+          if (applicant.bachillerato.length === 0) return false;
+          break;
+        case "Profesional":
+          if (applicant.profesional.length === 0) return false;
+          break;
+        case "Maestria":
+          if (applicant.maestria.length === 0) return false;
+          break;
+        case "Otro":
+          if (applicant.otro.length === 0) return false;
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    // Machinery use filter
+    if (filters.value.machineryUse && filters.value.machineryUse.length > 0) {
+      const applicantMachineryUse = applicant.manejo_maquinas_herramientas.map(
+        (machinery) => machinery.name
+      );
+      const applicantToolUse = applicant.manejo_maquinas_herramientas.map(
+        (machinery) => machinery.toolName
+      );
+      const applicantMeasuringInstrumentsUse =
+        applicant.manejo_maquinas_herramientas.map(
+          (machinery) => machinery.measuringInstrumentName
+        );
+      const applicantOthersUse = applicant.manejo_maquinas_herramientas.map(
+        (machinery) => machinery.otherToolName
+      );
+
+      const totalApplicantMachineryUse = applicantMachineryUse.concat(
+        applicantToolUse,
+        applicantMeasuringInstrumentsUse,
+        applicantOthersUse
+      );
+      console.log(totalApplicantMachineryUse);
+
+      if (
+        !filters.value.machineryUse.every((machinery) =>
+          totalApplicantMachineryUse.includes(machinery)
+        )
+      ) {
+        return false;
+      }
+    }
+
+    // Skills filter
+    if (filters.value.skills && filters.value.skills.length > 0) {
+      const applicantSkills = applicant.conocimientos_oficios.map(
+        (skill) => skill.name
+      );
+
+      if (
+        !filters.value.skills.every((skill) => applicantSkills.includes(skill))
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+});
+
 const selectPsychPlatform = (data) => {
   selectedPsychTestPlatform.value = data.psychPlatformName;
   psychTestPlatformId.value = data.id;
 };
 
-const setSelectedUser = (row) => {
+const setSelectedUser = (row, openUploadResultsDialog = false) => {
   selectedUser.value = row;
   console.log(selectedUser.value);
-  openPsicometricTestDialog.value = true;
+  openPsicometricTestDialog.value = openUploadResultsDialog ? false : true;
+  openUploadResults.value = openUploadResultsDialog;
 };
 
 const resetPsychTestInformation = () => {
@@ -507,6 +667,57 @@ const sendPsychTestInformation = async () => {
     await sendPsychTestLink();
   } else {
     await sendPsychTestCredentials();
+  }
+};
+
+const uploadTestResults = async (file) => {
+  try {
+    $q.loading.show();
+
+    let newFile;
+
+    console.log("UUID TEST: "+selectedUser.value.prueba_psicometrica);
+
+    if (selectedUser.value.prueba_psicometrica) {
+      newFile = await updateFile(
+        selectedUser.value.prueba_psicometrica,
+        file,
+        getUserDocumentsPath
+      );
+
+
+      console.log("Trying to update file "+newFile);
+    } else {
+      newFile = await uploadFile(file, getUserDocumentsPath);
+
+      console.log("Trying to upload file");
+    }
+
+    if (newFile) {
+      const updatedTest = await updateUserPsychometricTestByApplicationId(
+        selectedUser.value.solicitud_id,
+        newFile
+      );
+
+      if (updatedTest) {
+        selectedUser.value.prueba_psicometrica = newFile;
+        updateRow(selectedUser.value);
+        $q.notify(
+          notifyPositive(
+            "Resultados de la prueba psicometrica subidos correctamente"
+          )
+        );
+      }
+    }
+  } catch (error) {
+    $q.notify(
+      notifyNegative(
+        "Hubo un error al subir los resultados de la prueba psicometrica"
+      )
+    );
+  } finally {
+    $q.loading.hide();
+    openFileUploader.value = false;
   }
 };
 
@@ -581,6 +792,7 @@ const sendPsychTestLink = async () => {
 };
 
 const seePsychTestData = (row) => {
+  selectedUser.value = row;
   openSeeDataPsychTest.value = true;
   userNameForPsychTests.value = row.test_psicometrico_nombre_usuario;
   passwordForPsychTest.value = row.test_psicometrico_password;
@@ -708,7 +920,8 @@ const columns = [
     name: "applicantName",
     label: "Nombre del solicitante",
     required: true,
-    field: (row) => row.nombre + " " + row.apellido_paterno + " " + row.apellido_materno,
+    field: (row) =>
+      row.nombre + " " + row.apellido_paterno + " " + row.apellido_materno,
     align: "left",
   },
   {
@@ -816,7 +1029,6 @@ const columns = [
 .history-item p {
   font-size: 20px;
 }
-
 </style>
 
 <style lang="sass">
@@ -833,5 +1045,4 @@ const columns = [
     position: sticky
     left: 0
     z-index: 1
-
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <q-page-sticky position="bottom-right" :offset="[160, 1]">
+  <q-page-sticky position="bottom-right" :offset="[300, 1]">
     <q-btn
       v-if="!viewingApplication"
       @mouseover="hoverCreateApplication = true"
@@ -96,7 +96,7 @@ const {
   viewingApplication,
   updatingApplication,
   savedApplication,
-  curriculumStored,
+  curriculumStored
 } = storeToRefs(useApplication);
 
 const { user } = storeToRefs(useAuth);

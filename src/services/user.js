@@ -156,6 +156,23 @@ export const updateUserPsychometricTest = async (userId, uuid) => {
   }
 };
 
+export const updateUserPsychometricTestByApplicationId = async (applicationId, uuid) => {
+  try {
+    const request = await axios.put(
+      `users/${applicationId}/psychometric-test-by-application-id/${uuid}`
+    );
+
+    if (requestSuccessfull(request.status)) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
 export const updatePassword = async () => {
   const userCredentials = {};
 
@@ -250,7 +267,7 @@ export const postUserPsychTestData = async (userId, psychPlatformId, psychPlatfo
     console.log(error);
     return false;
   }
-} 
+}
 
 export const putUserPsychTestData = async(psychPlatformUserName, psychPlatformPassword, userId, psychPlatformId) => {
   const data = {

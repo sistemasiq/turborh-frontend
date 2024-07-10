@@ -1,42 +1,15 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { watch, ref } from 'vue';
 import { useLocalStorageStore } from '/src/stores/localStorage'
-import { axiosErrorResponseStatus } from 'src/services/setupInterceptors';
 
-const tokenPayload = ref("")
 
 const authGuard = (to, from, next) => {
   const useLocalStorage = useLocalStorageStore();
-  const userStored = useLocalStorage.load("user");
-
-  if(userStored){
-    tokenPayload.value = parseJwt(userStored.token);
-    console.log(tokenPayload.value);
-  }
 
   if (!useLocalStorage.load("logged")) {
     next('/login')
   } else {
     next()
   }
-}
-const parseJwt = (token) => {
-
-  const [header, payload, signature] = token.split('.');
-  const decodedPayload = atob(payload);
-  return JSON.parse(decodedPayload);
-};
-
-const checkForTokenExpirationTime = () => {
-  if(!tokenPayload.value.exp)
-  return 'N/A';
-
-  const currentTime = Math.floor(Date.now() / 1000);
-  const expirationTime = tokenPayload.value.exp;
-  const timeRemaining = expirationTime - currentTime;
-
-  return `${timeRemaining} seconds`
-
 }
 
 
@@ -96,9 +69,11 @@ const router = createRouter({
         { path: "nueva-requisicion-1", component: () => import('/src/views/requisition/NewRequisitionView.vue') },
         { path: "nueva-requisicion-2", component: () => import('/src/views/requisition/NewRequisitionTwoView.vue') },
         { path: "catalogo-maquinaria", component: () => import('/src/views/requisition/MachineryCatalogView.vue') },
+        { path: "catalogo-plataformas-psicometricas", component: () => import('/src/views/requisition/PsychPlatformsCatalogView.vue') },
         { path: "historial-solicitudes", component: () => import('/src/views/UserApplicationsHistoryView.vue') },
         { path: "historial-requisiciones", component: () => import('/src/views/requisition/RequisitionHistoryView.vue') },
         { path: "historial-requisiciones-solicitudes", component: () => import('/src/views/requisition/RequisitionApplicantsView.vue') },
+        { path: "candidatos-seleccionados", component: () => import('/src/views/requisition/SelectedCandidatesView.vue') },
         { path: "catalogo-puestos", component: () => import('/src/views/requisition/JobCatalog.vue') },
         { path: "edicion-puesto", component: () => import('/src/views/requisition/JobEditionView.vue') },
         { path: "catalogo-maquinaria", component: () => import('/src/views/requisition/MachineryCatalogView.vue') },

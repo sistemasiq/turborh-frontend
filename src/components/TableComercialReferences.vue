@@ -37,7 +37,7 @@
         </q-td>
       </template>
     </q-table>
-    <q-btn 
+    <q-btn
       v-if="!viewingApplication"
       rounded
       style="
@@ -191,6 +191,8 @@ const loadLocalStore = () => {
 }
 
 const setCurrentIndex = () => {
+
+  if(commercialReferencesData.value && commercialReferencesData.value.length > 0)
   currentIndex.value = commercialReferencesData.value.length - 1;
 };
 
