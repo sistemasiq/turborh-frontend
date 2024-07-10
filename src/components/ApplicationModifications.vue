@@ -36,12 +36,27 @@
           />
         </q-card-section>
 
-        <q-input
-          class="q-ml-xl q-mr-xl q-mt-xs"
-          readonly
-          v-model="item.newValue"
-          :label="item.fieldName"
-        />
+        <div class="row items-center">
+          <div class="column items-center ">
+          <p v-if="!pageNameAlreadySet(index)" class="text-body2 q-mr-xl text-red-8" >Anterior</p>
+          <q-input
+            class="q-ml-xl q-mr-xl q-mt-xs"
+            readonly
+            v-model="item.oldValue"
+            :label="item.fieldName"
+          />
+          </div>
+
+          <div class="column items-center ">
+            <p v-if="!pageNameAlreadySet(index)" class="text-body2 q-mr-xl text-blue-8">Actual</p>
+          <q-input
+            class="q-ml-xl q-mr-xl q-mt-xs"
+            readonly
+            v-model="item.newValue"
+            :label="item.fieldName"
+          />
+        </div>
+        </div>
       </div>
 
       <q-card-actions align="right">

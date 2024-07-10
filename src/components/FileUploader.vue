@@ -8,7 +8,7 @@
   >
   </q-btn>
 
-  <q-dialog v-model="props.openDialog" @update:model-value="onCloseDialog()">
+  <q-dialog v-model="props.openDialog">
     <q-card>
       <q-card-section>
         <div class="text-h6">{{ props.dialogText }}</div>

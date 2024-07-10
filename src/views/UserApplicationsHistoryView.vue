@@ -378,7 +378,6 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
-
 </template>
 
 <script setup>
@@ -407,9 +406,10 @@ import { sendPsychometricTestEmail } from "src/services/mail";
 import {
   updatePsychTestCredentials,
   getPsychometricPlatforms,
+  updateUserPsychometricTest,
+  updateUserPsychometricTestByApplicationId
 } from "src/services/user";
 import { updateFile, uploadFile } from "src/services/files";
-import { updateUserPsychometricTestByApplicationId } from "src/services/user";
 import UserApplicationHistoryFilter from "src/components/UserApplicationHistoryFilter.vue";
 import FileUploader from "src/components/FileUploader.vue";
 
@@ -479,13 +479,12 @@ onMounted(() => {
 
 const openFileUploaderDialog = (row) => {
   openFileUploader.value = true;
-  selectedUser.value = row
+  selectedUser.value = row;
 };
 
 const closeFileUploaderDialog = () => {
   openFileUploader.value = false;
 };
-
 
 const getPsychometricPlatformsData = async () => {
   try {
@@ -651,7 +650,6 @@ const resetPsychTestInformation = () => {
   testLink.value = "";
 };
 
-
 const disableSendPsychTestButton = computed(() => {
   if (sendLink.value) {
     return testLink.value === "" ? true : false;
@@ -678,7 +676,7 @@ const uploadTestResults = async (file) => {
 
     let newFile;
 
-    console.log(file);
+    console.log("UUID TEST: "+selectedUser.value.prueba_psicometrica);
 
     if (selectedUser.value.prueba_psicometrica) {
       newFile = await updateFile(
@@ -687,14 +685,12 @@ const uploadTestResults = async (file) => {
         getUserDocumentsPath
       );
 
-      console.log("Tryiing to update file");
-    } else {
-      newFile = await uploadFile(
-        file,
-        getUserDocumentsPath
-      );
 
-      console.log("Tryiing to upload file");
+      console.log("Trying to update file "+newFile);
+    } else {
+      newFile = await uploadFile(file, getUserDocumentsPath);
+
+      console.log("Trying to upload file");
     }
 
     if (newFile) {
@@ -721,6 +717,7 @@ const uploadTestResults = async (file) => {
     );
   } finally {
     $q.loading.hide();
+    openFileUploader.value = false;
   }
 };
 

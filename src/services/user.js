@@ -267,7 +267,7 @@ export const postUserPsychTestData = async (userId, psychPlatformId, psychPlatfo
     console.log(error);
     return false;
   }
-} 
+}
 
 export const putUserPsychTestData = async(psychPlatformUserName, psychPlatformPassword, userId, psychPlatformId) => {
   const data = {
