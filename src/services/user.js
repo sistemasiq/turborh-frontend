@@ -256,6 +256,7 @@ export const postUserPsychTestData = async (userId, psychPlatformId, psychPlatfo
     psychPlatformPassword: psychPlatformPassword,
     userPsychPlatformStatus: userPsychPlatformStatus
   };
+  console.log("POST OBJECT: ", data);
   try {
     const request = await axios.post("/users/psych-data", data)
     if(requestSuccessfull(request.status)){
@@ -276,6 +277,7 @@ export const putUserPsychTestData = async(psychPlatformUserName, psychPlatformPa
     userId: userId,
     psychPlatformId: psychPlatformId
   }
+  console.log("PUT OBJECT: ", data);
   try {
     const request = await axios.put("/users/psych-data", data)
     if(requestSuccessfull(request.status)){

@@ -67,8 +67,8 @@
     <template v-slot:body-cell-psychTestSended="{ row }">
       <q-td>
         <q-btn
-          v-if="row.psychometricTestResults || row.userPsychPlatformID"
           rounded
+          v-if="row.psychTestStatus === 'E'"
           icon="visibility"
           label="Ver datos"
           @click.prevent="seePsychTestData(row)"
@@ -78,6 +78,14 @@
 
     <template v-slot:body-cell-options="{ row }">
       <q-td>
+        <q-btn
+          class="q-ma-lg q-pa-md text-black"
+          style="height: fit-content"
+          rounded
+          icon="link"
+          label="Enviar test psicométrico"
+          @click.prevent="setSelectedCandidate(row, true)"
+        />
         <q-btn
           class="q-ml-lg"
           rounded
@@ -106,7 +114,6 @@
           @on-close="closeFileUploaderDialog"
           @on-upload="uploadTestResults"
         />
-        
 
         <q-btn
           class="q-ml-lg"
@@ -155,53 +162,122 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="openSeeDataPsychTest">
+  <q-dialog v-model="openPsicometricTestDialog">
     <q-card>
       <q-card-section>
-        <div class="text-h6">Datos del test psicometrico</div>
+        <div class="text-h6">Enviar test psicometrico</div>
+        <q-checkbox
+          class="absolute-right q-mr-xl"
+          v-model="sendLink"
+          label="Enviar link"
+          @update:model-value="resetPsychTestInformation()"
+        />
       </q-card-section>
 
       <q-separator />
 
       <q-card-section
+        v-if="!sendLink"
         style="width: 550px; max-width: 90vw; max-height: 50vh"
         class="justify-between"
         horizontal
       >
         <q-card-section style="width: 50%">
-          <q-input
-            light
-            outlined
-            color="black"
-            v-model="selectedPsychTestPlatform"
-            label="Plataforma"
-            label-color="black"
-            readonly
-            style="width: 100%"
-          />
+          <q-btn-dropdown
+            flat
+            auto-close
+            color="white"
+            text-color="grey-9"
+            :icon="
+              selectedPsychTestPlatform === ''
+                ? 'list'
+                : selectedPsychTestPlatform === 'Grupo Arhca'
+                ? 'group'
+                : 'list'
+            "
+            :label="
+              selectedPsychTestPlatform != ''
+                ? selectedPsychTestPlatform
+                : 'plataforma'
+            "
+            class="text-weight-regular"
+            :dropdown-content-class="dropdownContentClass"
+          >
+            <q-list>
+              <q-item
+                v-for="(item, index) in psychTestPlatforms"
+                :key="index"
+                clickable
+                v-close-popup
+                @click.prevent="selectPsychPlatform(item)"
+              >
+                <q-item-section avatar>
+                  <q-avatar
+                    :icon="
+                      item.psychPlatformName != 'Grupo Arhca'
+                        ? 'list'
+                        : 'Google Meet'
+                    "
+                    :color="
+                      item.psychPlatformName === 'Grupo Arhca'
+                        ? 'purple-4'
+                        : 'grey-4'
+                    "
+                    text-color="white"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ item.psychPlatformName }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
         </q-card-section>
 
         <q-card-section style="width: 50%">
           <q-input
+            v-if="psychPlatformRequireCredentials"
             light
             outlined
             color="black"
             v-model="userNameForPsychTests"
             label="Nombre"
             label-color="black"
-            readonly
+            lazy-rules
+            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
             style="width: 100%"
-            class="q-mb-md"
           />
           <q-input
+            v-if="psychPlatformRequireCredentials"
             light
             outlined
             color="black"
             v-model="passwordForPsychTest"
             label="Contraseña"
             label-color="black"
-            readonly=""
+            lazy-rules
+            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
             style="width: 100%"
+          />
+        </q-card-section>
+      </q-card-section>
+
+      <q-card-section
+        v-if="sendLink"
+        style="width: 550px; max-width: 90vw; max-height: 50vh"
+        class="justify-between"
+        horizontal
+      >
+        <q-card-section style="width: 100%">
+          <q-input
+            light
+            outlined
+            color="black"
+            v-model="testLink"
+            label="Link del formulario"
+            label-color="black"
+            lazy-rules
+            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
           />
         </q-card-section>
       </q-card-section>
@@ -210,19 +286,103 @@
 
       <q-card-actions class="justify-end q-pa-md">
         <q-btn
-          v-if="selectedUser.prueba_psicometrica"
-          icon="check"
-          label="Ver resultados"
+          flat
+          label="Cancelar"
           v-close-popup
-          class="q-mr-sm absolute-bottom-left q-mb-md q-ml-md"
+          class="text-red-8 q-mr-sm"
           style="border-radius: 8px"
-          @click.prevent="downloadDocument(selectedUser.prueba_psicometrica)"
+          @click.prevent="resetPsychTestInformation()"
         />
+        <q-btn
+          flat
+          icon="send"
+          label="Enviar"
+          class="text-white"
+          :class="disableSendPsychTestButton ? 'bg-grey-5' : 'bg-green-13'"
+          style="border-radius: 8px"
+          @click.prevent="sendPsychTestInformation()"
+          :disable="disableSendPsychTestButton"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+
+  <q-dialog v-model="openSeeDataPsychTest">
+    <q-card style="width: 900px">
+      <q-card-section>
+        <div class="text-h6">Historial de evaluaciones psicométricas</div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section
+        class="full-width"
+        style="height: fit-content; max-height: fit-content"
+      >
+        <div
+          v-for="(item, index) in candidatesPsychData"
+          :key="index"
+          class="full-width row justify-start items-center"
+        >
+          <q-input
+            v-if="candidatesPsychData[index].psychPlatformName != null"
+            light
+            outlined
+            color="black"
+            v-model="candidatesPsychData[index].psychPlatformName"
+            label="Plataforma"
+            label-color="black"
+            readonly
+            class="q-pa-sm"
+            style="width: 35%; max-width: 35%"
+          />
+          <q-input
+            v-if="candidatesPsychData[index].psychPlatformLink != null"
+            light
+            outlined
+            color="black"
+            v-model="candidatesPsychData[index].psychPlatformLink"
+            label="Link"
+            label-color="black"
+            readonly
+            class="q-pa-sm"
+            style="width: 35%; max-width: 35%"
+          />
+          <q-btn
+            v-if="candidatesPsychData[index].requiredCredentials == '1'"
+            dense
+            icon="visibility"
+            label="Ver Credenciales"
+            color="white"
+            class="text-black"
+            style="height: fit-content; border-radius: 7px; width: 30%"
+          >
+            <q-tooltip class="bg-red-5 text-body1" :offset="[10, 10]">
+              <div class="row">
+                <strong>Usuario:</strong>
+                <div>
+                  {{ candidatesPsychData[index].psychPlatformUserName }}
+                </div>
+              </div>
+              <div class="row">
+                <strong>Contraseña:</strong>
+                <div>
+                  {{ candidatesPsychData[index].psychPlatformPassword }}
+                </div>
+              </div>
+            </q-tooltip>
+          </q-btn>
+        </div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-actions class="justify-end q-pa-md">
         <q-btn
           flat
           label="Cerrar"
           v-close-popup
-          class="text-red-8 q-mr-sm"
+          class="text-white bg-red q-mr-sm"
           style="border-radius: 8px"
           @click.prevent="resetPsychTestInformation()"
         />
@@ -232,7 +392,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
@@ -250,9 +410,20 @@ import {
   getUserApplicationById,
   getUserApplicationNotesById,
 } from "src/services/userApplication";
-import { getPsychometricPlatforms } from "src/services/user";
+import {
+  postUserPsychTestData,
+  putUserPsychTestData,
+  getPsychometricPlatforms,
+} from "src/services/user";
 import { getSelectedCandidates } from "src/services/candidates";
 import FileUploader from "src/components/FileUploader.vue";
+import {
+  sendPsychometricTestEmail
+} from "src/services/mail";
+import {
+  sendPsychTestMessage,
+  sendLinkMessage,
+} from "src/services/whatsApp";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -295,11 +466,26 @@ const resumeViewLink = ref(resumeSrc.value);
 const showResume = ref(false);
 
 const selectedUser = ref();
+const selectedCandidate = ref(0);
+
+//Variables to store the data of one of the registered selected platform
+const psychTestPlatforms = ref([]); //Saves the list of psych platforms available
 const selectedPsychTestPlatform = ref("");
-const userNameForPsychTests = ref("");
-const passwordForPsychTest = ref("");
-const psychTestPlatforms = ref([]);
-const testLink = ref("");
+const psychTestPlatformId = ref(""); //TODO: I´m using this variable to see if a platform was selected insted of free link and also to save the id of the selected platform
+const psychPlatformRequireCredentials = ref(false);
+
+//Variables to store the data when sending a free link
+const sendLink = ref(false); //To see if the user is going to send a free link
+const testLink = ref(""); //stores the free link from the input field
+
+//Variables to store the data when wants to send a registered psych platform
+const psychPlatformLink = ref(""); //stores the link from a selected platform from the list
+const candidatesPsychData = ref([]); //Stores the user psych data, To see the list of psych platfor tests sended to the user in the "historial de test psicometricos"
+const userNameForPsychTests = ref(""); //stores the user name for the psych test
+const passwordForPsychTest = ref(""); // stores the user password for the psych test
+
+const dropdownContentClass = "flexible-width";
+const openPsicometricTestDialog = ref(false);
 const openSeeDataPsychTest = ref(false);
 
 const openFileUploader = ref(false);
@@ -308,7 +494,7 @@ onMounted(() => {
   viewAllRequisitions.value = false;
   viewAllSelectedCandidates.value = true;
   fetchSelectedApplicants();
-  getPsychometricPlatformsData();
+  getPsychPlatformsData();
 });
 
 const uploadTestResults = async (file) => {
@@ -316,7 +502,6 @@ const uploadTestResults = async (file) => {
     $q.loading.show();
 
     let newFile;
-
 
     if (selectedUser.value.psychometricTestUUID) {
       newFile = await updateFile(
@@ -327,10 +512,7 @@ const uploadTestResults = async (file) => {
 
       console.log("Tryiing to update file");
     } else {
-      newFile = await uploadFile(
-        file,
-        getUserDocumentsPath
-      );
+      newFile = await uploadFile(file, getUserDocumentsPath);
 
       console.log("Trying to upload file");
     }
@@ -372,7 +554,7 @@ const updateRow = (row) => {
 
 const openFileUploaderDialog = (row) => {
   openFileUploader.value = true;
-  selectedUser.value = row
+  selectedUser.value = row;
   console.log(selectedUser.value);
 };
 
@@ -380,7 +562,8 @@ const closeFileUploaderDialog = () => {
   openFileUploader.value = false;
 };
 
-const getPsychometricPlatformsData = async () => {
+//Psychometric Platform handling begins
+const getPsychPlatformsData = async () => {
   try {
     const request = await getPsychometricPlatforms();
     if (request) {
@@ -389,29 +572,360 @@ const getPsychometricPlatformsData = async () => {
   } catch (error) {}
 };
 
+//Method to send for the first time the psych data to the candidate------------------------------------------------------------------------------------------------
+const postUserPsychData = async () => {
+  try {
+    $q.loading.show(); //shows the loading indicator
+
+    //build the object to push in the local array
+    const data = {
+      psychPlatformId: psychTestPlatformId.value,
+      psychPlatformName: selectedPsychTestPlatform.value,
+      psychPlatformLink: psychPlatformLink.value,
+      psychPlatformUserName: userNameForPsychTests.value,
+      psychPlatformPassword: passwordForPsychTest.value,
+      requiredCredentials: psychPlatformRequireCredentials.value,
+    };
+
+    //TODO: this is useless
+    //NOTA Esquire: a
+    let userPsychPlatformStatus = "";
+    if (
+      selectedCandidate.value.psychTestStatus == null ||
+      selectedCandidate.value.psychTestStatus == ""
+    ) {
+      userPsychPlatformStatus = "P";
+    } else if (selectedCandidate.value.psychTestStatus == "E") {
+      userPsychPlatformStatus = "E";
+    }
+
+    const response = await postUserPsychTestData(
+      selectedCandidate.value.userId,
+      psychTestPlatformId.value,
+      userNameForPsychTests.value,
+      passwordForPsychTest.value,
+      userPsychPlatformStatus
+    ); //call to method post that sends the data to the endpoint
+
+    if (response == true) {
+      selectedCandidate.value.psychTestStatus = "E";
+      selectedCandidate.value.candidatePsychData.push(data);
+    }
+    updateRow(selectedCandidate.value);
+
+    //sends the data via email
+    const sendedEmail = await sendPsychometricTestEmail(
+      selectedCandidate.value.email,
+      selectedCandidate.value.name,
+      userNameForPsychTests.value,
+      passwordForPsychTest.value
+    );
+
+    if (sendedEmail) {
+      // If the email was sended succesfully then we send the whatsApp
+      const sendedMessage = await sendPsychTestMessage(
+        selectedCandidate.value.phoneNumber,
+        selectedCandidate.value.name,
+        userNameForPsychTests.value,
+        passwordForPsychTest.value
+      );
+      if (sendedMessage) {
+        $q.notify(notifyPositive("Enviada prueba psicométrica correctamente"));
+      }
+    }
+    testLink.value = ""; //cleans the input field that retrieves the free link
+    sendLink.value = false; //Returns to default state the send link variable which is the v-model of the checkbox for send free links
+    resetPsychTestInformation(); //cleans the variables
+  } catch (error) {
+    console.log(error);
+  } finally {
+    openPsicometricTestDialog.value = false;
+    $q.loading.hide();
+  }
+};
+
+//POST NON CREDENTIAL PSYCH PLATFORM DATA--------------------------------------------------------------------
+const postUserPsychFormsData = async () => {
+  try {
+    $q.loading.show(); //shows the loading indicator
+
+    //build the object to save in the database
+    const data = {
+      psychPlatformId: psychTestPlatformId.value,
+      psychPlatformName: selectedPsychTestPlatform.value,
+      psychPlatformLink: psychPlatformLink.value,
+      psychPlatformUserName: "",
+      psychPlatformPassword: "",
+      requiredCredentials: psychPlatformRequireCredentials.value,
+    };
+
+    let userPsychPlatformStatus = "";
+    if (
+      selectedCandidate.value.psychTestStatus == null ||
+      selectedCandidate.value.psychTestStatus == ""
+    ) {
+      userPsychPlatformStatus = "P";
+    } else if (selectedCandidate.value.psychTestStatus == "E") {
+      userPsychPlatformStatus = "E";
+    }
+
+    const response = await postUserPsychTestData(
+      selectedCandidate.value.userId,
+      psychTestPlatformId.value,
+      "",
+      "",
+      userPsychPlatformStatus
+    ); //call to method post that sends the data to the endpoint
+
+    if (response == true) {
+      selectedCandidate.value.psychTestStatus = "E";
+      selectedCandidate.value.candidatePsychData.push(data);
+    }
+
+    updateRow(selectedCandidate.value);
+
+    //TODO: sends the data via WhatsApp
+    const sendedMessage = await sendLinkMessage(
+      selectedCandidate.value.phoneNumber,
+      selectedCandidate.value.name,
+      psychPlatformLink.value
+    );
+    if (sendedMessage) {
+      $q.notify(notifyPositive("Enviado link correctamente"));
+    }
+
+    testLink.value = ""; //cleans the input field that retrieves the free link
+    sendLink.value = false; //Returns to default state the send link variable which is the v-model of the checkbox for send free links
+    resetPsychTestInformation(); //cleans the variables
+  } catch (error) {
+    console.log(error);
+  } finally {
+    openPsicometricTestDialog.value = false;
+    $q.loading.hide();
+  }
+};
+
+//UPDATE PSYCH DATA--------------------------------------------------------------------
+const putUserPsychData = async () => {
+  try {
+    $q.loading.show(); //shows the loading indicator
+
+    //build the object to save in the database
+    const data = {
+      psychPlatformId: psychTestPlatformId.value,
+      psychPlatformName: selectedPsychTestPlatform.value,
+      psychPlatformLink: psychPlatformLink.value,
+      psychPlatformUserName: userNameForPsychTests.value,
+      psychPlatformPassword: passwordForPsychTest.value,
+      requiredCredentials: psychPlatformRequireCredentials.value,
+    };
+
+    const response = await putUserPsychTestData(
+      userNameForPsychTests.value,
+      passwordForPsychTest.value,
+      selectedCandidate.value.userId,
+      psychTestPlatformId.value
+    ); //call to method post that sends the data to the endpoint
+
+    if (response == true) {
+      const candidateIndex =
+        selectedCandidate.value.candidatePsychData.findIndex(
+          (candidate) => candidate.psychPlatformId === psychTestPlatformId.value
+        );
+      selectedCandidate.value.candidatePsychData[candidateIndex] = data;
+    }
+
+    updateRow(selectedCandidate.value);
+
+    //sends the data via email
+    const sendedEmail = await sendPsychometricTestEmail(
+      selectedCandidate.value.email,
+      selectedCandidate.value.name,
+      userNameForPsychTests.value,
+      passwordForPsychTest.value
+    );
+
+    if (sendedEmail) {
+      // If the email was sended succesfully then we send the whatsApp
+      const sendedMessage = await sendPsychTestMessage(
+        selectedCandidate.value.phoneNumber,
+        selectedCandidate.value.name,
+        userNameForPsychTests.value,
+        passwordForPsychTest.value
+      );
+      if (sendedMessage) {
+        $q.notify(notifyPositive("Enviada prueba psicométrica correctamente"));
+      }
+    }
+    testLink.value = ""; //cleans the input field that retrieves the free link
+    sendLink.value = false; //Returns to default state the send link variable which is the v-model of the checkbox for send free links
+    resetPsychTestInformation(); //cleans the variables
+  } catch (error) {
+    console.log(error);
+  } finally {
+    openPsicometricTestDialog.value = false;
+    $q.loading.hide();
+  }
+};
+
+//------------------------------------------------------------------------------------------------------
+
+//Sends the psych data through a whatsApp message
+const sendPsychTestLink = async () => {
+  try {
+    $q.loading.show();
+
+    const sendedMessage = await sendLinkMessage(
+      selectedCandidate.value.phoneNumber,
+      selectedCandidate.value.name,
+      testLink.value
+    );
+
+    console.log(" candidate phone number - name - link");
+    console.log(selectedCandidate.value.phoneNumber,
+      selectedCandidate.value.name,
+      testLink.value);
+
+    if (sendedMessage) {
+      $q.notify(notifyPositive("Enviado link correctamente"));
+      testLink.value = ""; //cleans the input field that retrieves the free link
+      sendLink.value = false; //Returns to default state the send link variable which is the v-model of the checkbox for send free links
+      resetPsychTestInformation();
+    }
+  } catch (error) {
+    console.log(error);
+  } finally {
+    openPsicometricTestDialog.value = false;
+    $q.loading.hide();
+  }
+};
+
+//Function to excecute the selected procedure to send the psych data to the candidate
+const sendPsychTestInformation = async () => {
+  if (sendLink.value) {
+    
+    await sendPsychTestLink();
+  }
+  if (
+    psychTestPlatformId.value != "" &&
+    !sendLink.value &&
+    psychPlatformRequireCredentials.value
+  ) {
+    let candidateIndex = selectedCandidate.value.candidatePsychData.findIndex(
+      (candidate) => candidate.psychPlatformId === psychTestPlatformId.value
+    );
+
+    if (candidateIndex < 0) {
+      postUserPsychData();
+    } else if (candidateIndex >= 0) {
+      putUserPsychData();
+    }
+  }
+  if (
+    psychTestPlatformId.value != "" &&
+    !sendLink.value &&
+    !psychPlatformRequireCredentials.value
+  ) {
+    let candidateIndex = selectedCandidate.value.candidatePsychData.findIndex(
+      (candidate) => candidate.psychPlatformId === psychTestPlatformId.value
+    );
+
+    if (candidateIndex < 0) {
+      postUserPsychFormsData();
+    } else if (candidateIndex >= 0) {
+      $q.notify(notifyNegative("El link ya ha sido enviado"));
+    }
+  }
+};
+
+//Psych tests history of the candidate
+const seePsychTestData = (row) => {
+  candidatesPsychData.value = row.candidatePsychData; //All the test that the candididate has received
+  console.log("USER PSYCH HISTORY"); //TODO: CHECK THIS TO SEE THE HISTORY IN A RIGHT WAY
+  console.log(candidatesPsychData.value);
+
+  openSeeDataPsychTest.value = true; //Open the dialog
+  userNameForPsychTests.value = row.userNameForPsychPlatform; //To see the username for the test asigned to the candidate
+  passwordForPsychTest.value = row.userPasswordForPsychPlatform; //To see the password for the test asigned to the candidate
+  setSelectedPsychPlatform(row.psychPlatformID); //Set the id of the platform assigned to the candidate
+};
+
+//Reset the variables that retrieve the psych data needed
 const resetPsychTestInformation = () => {
   selectedPsychTestPlatform.value = "";
   userNameForPsychTests.value = "";
   passwordForPsychTest.value = "";
-  testLink.value = "";
+  psychPlatformRequireCredentials.value = false;
+  psychTestPlatformId.value = ""; //Saves the id of the selected platform
 };
 
-const seePsychTestData = (row) => {
-  selectedUser.value = row;
-  openSeeDataPsychTest.value = true;
-  userNameForPsychTests.value = row.userNameForPsychPlatform;
-  passwordForPsychTest.value = row.userPasswordForPsychPlatform;
-  setSelectedPsychPlatform(row.userPsychPlatformID);
-};
+//Disables the button to send the psych data to the candidate
+const disableSendPsychTestButton = computed(() => {
+  if (
+    psychTestPlatformId.value != "" &&
+    psychPlatformRequireCredentials.value === false &&
+    sendLink.value === false
+  ) {
+    // checks if the send free link is NOT selected to avoid issues with the activation of the button
+    return false;
+  }
+  if (
+    psychTestPlatformId.value != "" &&
+    psychPlatformRequireCredentials.value === true &&
+    sendLink.value === false
+  ) {
+    // checks if the send free link is NOT selected to avoid issues with the activation of the button
+    return selectedPsychTestPlatform.value === "" ||
+      userNameForPsychTests.value === "" ||
+      passwordForPsychTest.value === ""
+      ? true
+      : false;
+  }
+  if (sendLink.value) {
+    //Even if the user did select a platform the return value is not going to enter in those options, just considering this one(sendLink == true)
+    return testLink.value === "" ? true : false;
+  } else {
+    return true;
+  }
+});
 
+//TODO: CHECK THIS ONE
 const setSelectedPsychPlatform = (id) => {
-  console.log(psychTestPlatforms.value);
   psychTestPlatforms.value.forEach((element) => {
     if (element.id === id) {
       selectedPsychTestPlatform.value = element.psychPlatformName;
     }
   });
 };
+
+//TODO: CHECK THIS ONE ----------------------------------------------------------
+
+const selectPsychPlatform = (data) => {
+  console.log("row data: " , data);
+
+  psychTestPlatformId.value = data.id;
+  selectedPsychTestPlatform.value = data.psychPlatformName;
+  psychPlatformLink.value = data.link;
+
+  if (data.requireCredentials == 1) {
+    psychPlatformRequireCredentials.value = true;
+    sendLink.value = false; // if you are selecting a psych platform option then the status of the send free links will return to the default status(false)
+  } else {
+    psychPlatformRequireCredentials.value = false;
+  }
+};
+
+const setSelectedCandidate = (
+  row,
+  openSendPsychTestDialog = false
+) => {
+  selectedCandidate.value = row;
+  console.log("Candidate data:", selectedCandidate.value);
+  openPsicometricTestDialog.value = openSendPsychTestDialog;
+  resetPsychTestInformation();
+};
+
+//TODO: END OF THE PSYCH FUNCTIONALITY
 
 const fetchSelectedApplicants = async () => {
   try {
@@ -420,6 +934,7 @@ const fetchSelectedApplicants = async () => {
 
     if (totalApplicants) {
       currentSelectedApplicants.value = totalApplicants;
+      console.log("ALL USERS ",currentSelectedApplicants.value)
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
