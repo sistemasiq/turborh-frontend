@@ -807,7 +807,7 @@ const sendPsychTestInformation = async () => {
 const seePsychTestData = (row) => {
   candidatesPsychData.value = row.candidatePsychData; //All the test that the candididate has received
   console.log("USER PSYCH HISTORY"); //TODO: CHECK THIS TO SEE THE HISTORY IN A RIGHT WAY
-  console.log(candidatesPsychData.value);
+  console.log(row);
 
   openSeeDataPsychTest.value = true; //Open the dialog
   userNameForPsychTests.value = row.userNameForPsychPlatform; //To see the username for the test asigned to the candidate

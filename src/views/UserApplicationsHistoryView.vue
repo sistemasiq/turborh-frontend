@@ -98,15 +98,6 @@
           <Tooltip :text="'Descargar currículum'" />
         </q-btn>
 
-        <FileUploader
-          :button-text="'Subir resultados'"
-          :dialog-text="'Subir resultados de la prueba psicometrica'"
-          :open-dialog="openFileUploader"
-          :file-selector-label="'Seleccionar archivo'"
-          @on-open-dialog="openFileUploaderDialog(row)"
-          @on-close="closeFileUploaderDialog"
-          @on-upload="uploadTestResults"
-        />
         <q-btn
           class="q-ma-lg text-black"
           rounded
@@ -359,15 +350,6 @@
 
       <q-card-actions class="justify-end q-pa-md">
         <q-btn
-          v-if="selectedUser.prueba_psicometrica"
-          icon="check"
-          label="Ver resultados"
-          v-close-popup
-          class="q-mr-sm absolute-bottom-left q-mb-md q-ml-md"
-          style="border-radius: 8px"
-          @click.prevent="downloadDocument(selectedUser.prueba_psicometrica)"
-        />
-        <q-btn
           flat
           label="Cerrar"
           v-close-popup
@@ -405,13 +387,9 @@ import { sendPsychTestMessage, sendLinkMessage } from "src/services/whatsApp";
 import { sendPsychometricTestEmail } from "src/services/mail";
 import {
   updatePsychTestCredentials,
-  getPsychometricPlatforms,
-  updateUserPsychometricTest,
-  updateUserPsychometricTestByApplicationId
+  getPsychometricPlatforms
 } from "src/services/user";
-import { updateFile, uploadFile } from "src/services/files";
 import UserApplicationHistoryFilter from "src/components/UserApplicationHistoryFilter.vue";
-import FileUploader from "src/components/FileUploader.vue";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -428,12 +406,10 @@ const { viewAllRequisitions, viewAllSelectedCandidates } = storeToRefs(
 const noDataLabel = ref("No hay solicitantes para este puesto...");
 const loading = ref(false);
 
-const openUploadResults = ref(false);
 const { viewingApplication, savedApplication } = storeToRefs(useRequest);
 
 const filters = ref({});
 
-const openFileUploader = ref(false);
 
 const {
   notesFrontPage,
@@ -476,15 +452,6 @@ onMounted(() => {
   fetchApplicants();
   getPsychometricPlatformsData();
 });
-
-const openFileUploaderDialog = (row) => {
-  openFileUploader.value = true;
-  selectedUser.value = row;
-};
-
-const closeFileUploaderDialog = () => {
-  openFileUploader.value = false;
-};
 
 const getPsychometricPlatformsData = async () => {
   try {
@@ -636,11 +603,10 @@ const selectPsychPlatform = (data) => {
   psychTestPlatformId.value = data.id;
 };
 
-const setSelectedUser = (row, openUploadResultsDialog = false) => {
+const setSelectedUser = (row) => {
   selectedUser.value = row;
   console.log(selectedUser.value);
-  openPsicometricTestDialog.value = openUploadResultsDialog ? false : true;
-  openUploadResults.value = openUploadResultsDialog;
+  openPsicometricTestDialog.value = true;
 };
 
 const resetPsychTestInformation = () => {
@@ -670,56 +636,6 @@ const sendPsychTestInformation = async () => {
   }
 };
 
-const uploadTestResults = async (file) => {
-  try {
-    $q.loading.show();
-
-    let newFile;
-
-    console.log("UUID TEST: "+selectedUser.value.prueba_psicometrica);
-
-    if (selectedUser.value.prueba_psicometrica) {
-      newFile = await updateFile(
-        selectedUser.value.prueba_psicometrica,
-        file,
-        getUserDocumentsPath
-      );
-
-
-      console.log("Trying to update file "+newFile);
-    } else {
-      newFile = await uploadFile(file, getUserDocumentsPath);
-
-      console.log("Trying to upload file");
-    }
-
-    if (newFile) {
-      const updatedTest = await updateUserPsychometricTestByApplicationId(
-        selectedUser.value.solicitud_id,
-        newFile
-      );
-
-      if (updatedTest) {
-        selectedUser.value.prueba_psicometrica = newFile;
-        updateRow(selectedUser.value);
-        $q.notify(
-          notifyPositive(
-            "Resultados de la prueba psicometrica subidos correctamente"
-          )
-        );
-      }
-    }
-  } catch (error) {
-    $q.notify(
-      notifyNegative(
-        "Hubo un error al subir los resultados de la prueba psicometrica"
-      )
-    );
-  } finally {
-    $q.loading.hide();
-    openFileUploader.value = false;
-  }
-};
 
 const sendPsychTestCredentials = async () => {
   try {

@@ -6,20 +6,18 @@ import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from "pinia";
 
 const useLocalStorage = useLocalStorageStore();
-const useAuth = useAuthStore()
+const useAuth = useAuthStore();
 const useRequisition = useRequisitionStore();
 
 const { user, logged } = storeToRefs(useAuth);
 
-
-export const removeHeaderAuthorization = () =>{
-
+export const removeHeaderAuthorization = () => {
   delete axios.defaults.headers.common["Authorization"];
-}
+};
 
 export const setHeaderAuthorization = (token) => {
-  axios.defaults.headers.common['Authorization'] = token;
-}
+  axios.defaults.headers.common["Authorization"] = token;
+};
 
 export const logOut = () => {
   useLocalStorage.remove("user");
@@ -40,10 +38,10 @@ export const logUser = async (userName, password) => {
     const request = await axios.post(`users/login`, body);
 
     if (requestSuccessfull(request.status)) {
-      setHeaderAuthorization(request.data.token)
+      setHeaderAuthorization(request.data.token);
       return request.data;
     } else {
-      console.log("ERROR: ", request.status )
+      console.log("ERROR: ", request.status);
       return null;
     }
   } catch (error) {
@@ -113,7 +111,7 @@ export const createUser = async (userName, email, curp, password) => {
 
     if (requestSuccessfull(request.status)) {
       newUserData = request.data;
-      setHeaderAuthorization()
+      setHeaderAuthorization();
       return newUserData;
     } else {
       return null;
@@ -127,6 +125,48 @@ export const createUser = async (userName, email, curp, password) => {
 export const updateUserImage = async (userId, imageUUID) => {
   try {
     const request = await axios.put(`users/${userId}/image/${imageUUID}`);
+
+    if (requestSuccessfull(request.status)) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+export const addNewTestResults = async (userId, platformId, fileUUID) => {
+  const testResultsData = {
+    userId: userId,
+    platformId: platformId,
+    fileUUID: fileUUID,
+  };
+  try {
+    const request = await axios.post("users/test-results", testResultsData);
+
+    if (requestSuccessfull(request.status)) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+export const updateTestResults = async (userId, platformId, fileUUID) => {
+  const testResultsData = {
+    userId: userId,
+    platformId: platformId,
+    fileUUID: fileUUID,
+  };
+
+  console.log("TEST RESULTS DATA " + testResultsData);
+
+  try {
+    const request = await axios.put("users/test-results", testResultsData);
 
     if (requestSuccessfull(request.status)) {
       return true;
@@ -156,7 +196,10 @@ export const updateUserPsychometricTest = async (userId, uuid) => {
   }
 };
 
-export const updateUserPsychometricTestByApplicationId = async (applicationId, uuid) => {
+export const updateUserPsychometricTestByApplicationId = async (
+  applicationId,
+  uuid
+) => {
   try {
     const request = await axios.put(
       `users/${applicationId}/psychometric-test-by-application-id/${uuid}`
@@ -236,57 +279,72 @@ export const updatePsychTestCredentials = async (
   try {
     const request = await axios.put("/users/psych-data", data);
 
-    if(requestSuccessfull(request.status)){
+    if (requestSuccessfull(request.status)) {
       return true;
-    }else{{
-      return false;
-    }}
-
+    } else {
+      {
+        return false;
+      }
+    }
   } catch (error) {
     return false;
   }
 };
 
-
-export const postUserPsychTestData = async (userId, psychPlatformId, psychPlatformUserName, psychPlatformPassword, userPsychPlatformStatus) => {
+export const postUserPsychTestData = async (
+  userId,
+  psychPlatformId,
+  psychPlatformUserName,
+  psychPlatformPassword,
+  userPsychPlatformStatus
+) => {
   const data = {
     userId: userId,
     psychPlatformId: psychPlatformId,
     psychPlatformUserName: psychPlatformUserName,
     psychPlatformPassword: psychPlatformPassword,
-    userPsychPlatformStatus: userPsychPlatformStatus
+    userPsychPlatformStatus: userPsychPlatformStatus,
   };
   console.log("POST OBJECT: ", data);
   try {
-    const request = await axios.post("/users/psych-data", data)
-    if(requestSuccessfull(request.status)){
+    const request = await axios.post("/users/psych-data", data);
+    if (requestSuccessfull(request.status)) {
       return true;
-    }else{{
-      return false;
-    }}
+    } else {
+      {
+        return false;
+      }
+    }
   } catch (error) {
     console.log(error);
     return false;
   }
-}
+};
 
-export const putUserPsychTestData = async(psychPlatformUserName, psychPlatformPassword, userId, psychPlatformId) => {
+export const putUserPsychTestData = async (
+  psychPlatformUserName,
+  psychPlatformPassword,
+  userId,
+  psychPlatformId
+) => {
   const data = {
     psychPlatformUserName: psychPlatformUserName,
     psychPlatformPassword: psychPlatformPassword,
     userId: userId,
-    psychPlatformId: psychPlatformId
-  }
+    psychPlatformId: psychPlatformId,
+  };
   console.log("PUT OBJECT: ", data);
   try {
-    const request = await axios.put("/users/psych-data", data)
-    if(requestSuccessfull(request.status)){
+    const request = await axios.put("/users/psych-data", data);
+    if (requestSuccessfull(request.status)) {
       return true;
-    }else{{
-      return false;
-    }}
+    } else {
+      {
+        return false;
+      }
+    }
   } catch (error) {
     console.log(error);
     return false;
   }
-}
+};
