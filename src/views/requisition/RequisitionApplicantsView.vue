@@ -534,7 +534,7 @@ const psychPlatformRequireCredentials = ref(false);
 const sendLink = ref(false); //To see if the user is going to send a free link
 const testLink = ref(""); //stores the free link from the input field
 
-//Variables to store the data when wants to send a registered psuch platform
+//Variables to store the data when wants to send a registered psych platform
 const psychPlatformLink = ref(""); //stores the link from a selected platform from the list
 const candidatesPsychData = ref([]); //Stores the user psych data, To see the list of psych platfor tests sended to the user in the "historial de test psicometricos"
 const userNameForPsychTests = ref(""); //stores the user name for the psych test
@@ -807,7 +807,7 @@ const sendPsychTestInformation = async () => {
 const seePsychTestData = (row) => {
   candidatesPsychData.value = row.candidatePsychData; //All the test that the candididate has received
   console.log("USER PSYCH HISTORY"); //TODO: CHECK THIS TO SEE THE HISTORY IN A RIGHT WAY
-  console.log(candidatesPsychData.value);
+  console.log(row);
 
   openSeeDataPsychTest.value = true; //Open the dialog
   userNameForPsychTests.value = row.userNameForPsychPlatform; //To see the username for the test asigned to the candidate

@@ -12,7 +12,7 @@
     row-key="name"
     separator="horizontal"
     rows-per-page-label="Puestos por página"
-    loading-label="Cargando solicitudes..."
+    loading-label="Cargando candidatos seleccionados..."
     no-results-label="No hay coincidencias con la busqueda..."
     :no-data-label="noDataLabel"
     :rows-per-page-options="[5, 10, 20, 30]"
@@ -67,8 +67,8 @@
     <template v-slot:body-cell-psychTestSended="{ row }">
       <q-td>
         <q-btn
-          v-if="row.psychometricTestResults || row.userPsychPlatformID"
           rounded
+          v-if="row.psychTestStatus === 'E'"
           icon="visibility"
           label="Ver datos"
           @click.prevent="seePsychTestData(row)"
@@ -102,11 +102,11 @@
           :dialog-text="'Subir resultados de la prueba psicometrica'"
           :open-dialog="openFileUploader"
           :file-selector-label="'Seleccionar archivo'"
+          :candidate-psych-data="row.candidatePsychData"
           @on-open-dialog="openFileUploaderDialog(row)"
           @on-close="closeFileUploaderDialog"
           @on-upload="uploadTestResults"
         />
-        
 
         <q-btn
           class="q-ml-lg"
@@ -158,71 +158,94 @@
   <q-dialog v-model="openSeeDataPsychTest">
     <q-card>
       <q-card-section>
-        <div class="text-h6">Datos del test psicometrico</div>
+        <div class="text-h6">Historial de evaluaciones psicométricas</div>
       </q-card-section>
 
       <q-separator />
 
       <q-card-section
-        style="width: 550px; max-width: 90vw; max-height: 50vh"
-        class="justify-between"
-        horizontal
+        class="full-width"
+        style="height: fit-content; max-height: fit-content"
       >
-        <q-card-section style="width: 50%">
+        <div
+          v-for="(item, index) in candidatesPsychData"
+          :key="index"
+          class="full-width row justify-start items-center"
+        >
           <q-input
+            v-if="candidatesPsychData[index].psychPlatformName != null"
             light
             outlined
             color="black"
-            v-model="selectedPsychTestPlatform"
+            v-model="candidatesPsychData[index].psychPlatformName"
             label="Plataforma"
             label-color="black"
             readonly
-            style="width: 100%"
+            class="q-pa-sm"
+            style="width: 35%; max-width: 35%"
           />
-        </q-card-section>
-
-        <q-card-section style="width: 50%">
           <q-input
+            v-if="candidatesPsychData[index].psychPlatformLink != null"
             light
             outlined
             color="black"
-            v-model="userNameForPsychTests"
-            label="Nombre"
+            v-model="candidatesPsychData[index].psychPlatformLink"
+            label="Link"
             label-color="black"
             readonly
-            style="width: 100%"
-            class="q-mb-md"
+            class="q-pa-sm"
+            style="width: 35%; max-width: 35%"
           />
-          <q-input
-            light
-            outlined
-            color="black"
-            v-model="passwordForPsychTest"
-            label="Contraseña"
-            label-color="black"
-            readonly=""
-            style="width: 100%"
+          <q-btn
+            v-if="candidatesPsychData[index].requiredCredentials == '1'"
+            dense
+            icon="visibility"
+            label="Ver Credenciales"
+            color="white"
+            class="text-black"
+            style="height: fit-content; border-radius: 7px; width: 30%"
+          >
+            <q-tooltip class="bg-red-5 text-body1" :offset="[10, 10]">
+              <div class="row">
+                <strong>Usuario:</strong>
+                <div>
+                  {{ candidatesPsychData[index].psychPlatformUserName }}
+                </div>
+              </div>
+              <div class="row">
+                <strong>Contraseña:</strong>
+                <div>
+                  {{ candidatesPsychData[index].psychPlatformPassword }}
+                </div>
+              </div>
+            </q-tooltip>
+          </q-btn>
+          <q-btn
+            v-if="hasTestResultsOf(candidatesPsychData[index].psychPlatformId)"
+            icon="check"
+            label="Ver resultados"
+            v-close-popup
+            class="q-mr-sm q-mb-md q-ml-md"
+            style="border-radius: 8px"
+            @click.prevent="
+              downloadDocument(
+                getTestResultsFileUUID(
+                  candidatesPsychData[index].psychPlatformId
+                )
+              )
+            "
           />
-        </q-card-section>
+        </div>
       </q-card-section>
 
       <q-separator />
 
       <q-card-actions class="justify-end q-pa-md">
         <q-btn
-          v-if="selectedUser.prueba_psicometrica"
-          icon="check"
-          label="Ver resultados"
-          v-close-popup
-          class="q-mr-sm absolute-bottom-left q-mb-md q-ml-md"
-          style="border-radius: 8px"
-          @click.prevent="downloadDocument(selectedUser.prueba_psicometrica)"
-        />
-        <q-btn
           flat
           label="Cerrar"
           v-close-popup
-          class="text-red-8 q-mr-sm"
+          class="text-white bg-red q-mr-sm"
           style="border-radius: 8px"
           @click.prevent="resetPsychTestInformation()"
         />
@@ -239,18 +262,22 @@ import { storeToRefs } from "pinia";
 import { getUserImagesPath, getUserDocumentsPath } from "src/utils/folderPaths";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { useQuasar } from "quasar";
-import { notifyNegative } from "src/utils/notifies";
+import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { useRequestUser } from "src/stores/requestUser";
 import { useNotesStore } from "src/stores/notes";
 import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
 import router from "src/router";
-import { downloadFile, uploadFile } from "src/services/files";
+import { downloadFile, uploadFile, updateFile } from "src/services/files";
 import {
   getUserApplicationById,
   getUserApplicationNotesById,
 } from "src/services/userApplication";
-import { getPsychometricPlatforms } from "src/services/user";
+import {
+  getPsychometricPlatforms,
+  addNewTestResults,
+  updateTestResults,
+} from "src/services/user";
 import { getSelectedCandidates } from "src/services/candidates";
 import FileUploader from "src/components/FileUploader.vue";
 
@@ -266,7 +293,7 @@ const { viewAllRequisitions, viewAllSelectedCandidates } = storeToRefs(
   useRequisitionDetails
 );
 
-const noDataLabel = ref("No hay solicitantes para este puesto...");
+const noDataLabel = ref("No hay candidatos seleccionados...");
 const loading = ref(false);
 
 const { viewingApplication, savedApplication } = storeToRefs(useRequest);
@@ -295,11 +322,17 @@ const resumeViewLink = ref(resumeSrc.value);
 const showResume = ref(false);
 
 const selectedUser = ref();
+
+//Variables to store the data of one of the registered selected platform
+const psychTestPlatforms = ref([]); //Saves the list of psych platforms available
 const selectedPsychTestPlatform = ref("");
-const userNameForPsychTests = ref("");
-const passwordForPsychTest = ref("");
-const psychTestPlatforms = ref([]);
-const testLink = ref("");
+const psychTestPlatformId = ref(""); //TODO: I´m using this variable to see if a platform was selected insted of free link and also to save the id of the selected platform
+const psychPlatformRequireCredentials = ref(false);
+
+const candidatesPsychData = ref([]); //Stores the user psych data, To see the list of psych platfor tests sended to the user in the "historial de test psicometricos"
+const userNameForPsychTests = ref(""); //stores the user name for the psych test
+const passwordForPsychTest = ref(""); // stores the user password for the psych test
+
 const openSeeDataPsychTest = ref(false);
 
 const openFileUploader = ref(false);
@@ -308,50 +341,62 @@ onMounted(() => {
   viewAllRequisitions.value = false;
   viewAllSelectedCandidates.value = true;
   fetchSelectedApplicants();
-  getPsychometricPlatformsData();
+  getPsychPlatformsData();
 });
 
-const uploadTestResults = async (file) => {
+const uploadTestResults = async (file, platformId) => {
   try {
     $q.loading.show();
 
     let newFile;
 
-
-    if (selectedUser.value.psychometricTestUUID) {
+    if (hasTestResultsOf(platformId)) {
+      console.log("Trying to update file");
       newFile = await updateFile(
-        selectedUser.value.psychometricTestUUID,
+        getTestResultsFileUUID(platformId),
         file,
         getUserDocumentsPath
       );
 
-      console.log("Tryiing to update file");
-    } else {
-      newFile = await uploadFile(
-        file,
-        getUserDocumentsPath
-      );
-
-      console.log("Trying to upload file");
-    }
-
-    if (newFile) {
-      const updatedTest = await updateUserPsychometricTestByApplicationId(
-        selectedUser.value.userApplicationID,
-        newFile
-      );
-
-      if (updatedTest) {
-        selectedUser.value.psychometricTestUUID = newFile;
-        updateRow(selectedUser.value);
-        $q.notify(
-          notifyPositive(
-            "Resultados de la prueba psicometrica subidos correctamente"
-          )
+      if (newFile) {
+        const updatedTestResults = await updateTestResults(
+          selectedUser.value.userId,
+          platformId,
+          newFile
         );
+
+        if (updatedTestResults) {
+          updateFileUUID(platformId, newFile);
+          $q.notify(
+            notifyPositive(
+              "Resultados de la prueba psicometrica actualizados correctamente"
+            )
+          );
+        }
+      }
+
+    } else if (!hasTestResultsOf(platformId)) {
+      newFile = await uploadFile(file, getUserDocumentsPath);
+
+      if (newFile) {
+        const addedNewTestResults = await addNewTestResults(
+          selectedUser.value.userId,
+          platformId,
+          newFile
+        );
+
+        if (addedNewTestResults) {
+          updateFileUUID(platformId, newFile);
+          $q.notify(
+            notifyPositive(
+              "Resultados de la prueba psicometrica subidos correctamente"
+            )
+          );
+        }
       }
     }
   } catch (error) {
+    console.log("ERROR al subir resultados " + error);
     $q.notify(
       notifyNegative(
         "Hubo un error al subir los resultados de la prueba psicometrica"
@@ -360,6 +405,47 @@ const uploadTestResults = async (file) => {
   } finally {
     $q.loading.hide();
   }
+};
+
+const hasTestResultsOf = (platformId) => {
+  return selectedUser.value.testResults.some((element) => {
+    return element.platformId === platformId;
+  });
+};
+
+const getTestResultsFileUUID = (platformId) => {
+  if (selectedUser.value.testResults === null) return null;
+
+  const result = selectedUser.value.testResults.find(
+    (element) => element.platformId === platformId
+  );
+
+  if (result) {
+    return result.fileUUID;
+  }
+
+  return null;
+};
+
+const updateFileUUID = (platformId, newUUID) => {
+
+  let foundMatch = false
+  selectedUser.value.testResults.forEach((element) => {
+    if (element.platformId === platformId) {
+      element.fileUUID = newUUID;
+      foundMatch = true;
+    }
+  });
+
+  if(!foundMatch){
+    selectedUser.value.testResults.push({
+      userId: selectedUser.value.userId,
+      platformId: platformId,
+      fileUUID: newUUID,
+    });
+  }
+
+  updateRow(selectedUser.value);
 };
 
 const updateRow = (row) => {
@@ -372,7 +458,7 @@ const updateRow = (row) => {
 
 const openFileUploaderDialog = (row) => {
   openFileUploader.value = true;
-  selectedUser.value = row
+  selectedUser.value = row;
   console.log(selectedUser.value);
 };
 
@@ -380,7 +466,8 @@ const closeFileUploaderDialog = () => {
   openFileUploader.value = false;
 };
 
-const getPsychometricPlatformsData = async () => {
+//Psychometric Platform handling begins
+const getPsychPlatformsData = async () => {
   try {
     const request = await getPsychometricPlatforms();
     if (request) {
@@ -389,29 +476,37 @@ const getPsychometricPlatformsData = async () => {
   } catch (error) {}
 };
 
+//Psych tests history of the candidate
+const seePsychTestData = (row) => {
+  candidatesPsychData.value = row.candidatePsychData; //All the test that the candidate has received
+  console.log("USER PSYCH HISTORY"); //TODO: CHECK THIS TO SEE THE HISTORY IN A RIGHT WAY
+  console.log(row);
+  selectedUser.value = row;
+  openSeeDataPsychTest.value = true; //Open the dialog
+  userNameForPsychTests.value = row.userNameForPsychPlatform; //To see the username for the test asigned to the candidate
+  passwordForPsychTest.value = row.userPasswordForPsychPlatform; //To see the password for the test asigned to the candidate
+  setSelectedPsychPlatform(row.psychPlatformID); //Set the id of the platform assigned to the candidate
+};
+
+//Reset the variables that retrieve the psych data needed
 const resetPsychTestInformation = () => {
   selectedPsychTestPlatform.value = "";
   userNameForPsychTests.value = "";
   passwordForPsychTest.value = "";
-  testLink.value = "";
+  psychPlatformRequireCredentials.value = false;
+  psychTestPlatformId.value = ""; //Saves the id of the selected platform
 };
 
-const seePsychTestData = (row) => {
-  selectedUser.value = row;
-  openSeeDataPsychTest.value = true;
-  userNameForPsychTests.value = row.userNameForPsychPlatform;
-  passwordForPsychTest.value = row.userPasswordForPsychPlatform;
-  setSelectedPsychPlatform(row.userPsychPlatformID);
-};
-
+//TODO: CHECK THIS ONE
 const setSelectedPsychPlatform = (id) => {
-  console.log(psychTestPlatforms.value);
   psychTestPlatforms.value.forEach((element) => {
     if (element.id === id) {
       selectedPsychTestPlatform.value = element.psychPlatformName;
     }
   });
 };
+
+//TODO: END OF THE PSYCH FUNCTIONALITY
 
 const fetchSelectedApplicants = async () => {
   try {
@@ -431,6 +526,7 @@ const fetchSelectedApplicants = async () => {
 const downloadDocument = async (uuid) => {
   try {
     $q.loading.show();
+    console.log("TRYING TO DOWNLOAD " + uuid);
     const fileDownloaded = await downloadFile(uuid, getUserDocumentsPath);
     if (fileDownloaded) {
       resumeSrc.value = fileDownloaded;
