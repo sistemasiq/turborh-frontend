@@ -68,7 +68,7 @@
     <template v-slot:body-cell-psychTestSended="{ row }">
       <q-td>
         <q-btn
-          v-if="row.test_psicometrico_estado === 'E' || row.prueba_psicometrica"
+          v-if="row.test_psicometrico_estado === 'E'"
           rounded
           icon="visibility"
           label="Ver datos"
@@ -296,54 +296,87 @@
   </q-dialog>
 
   <q-dialog v-model="openSeeDataPsychTest">
-    <q-card>
+    <q-card style="width: 900px">
       <q-card-section>
-        <div class="text-h6">Datos del test psicometrico</div>
+        <div class="text-h6">Historial de evaluaciones psicométricas</div>
       </q-card-section>
 
       <q-separator />
 
       <q-card-section
-        style="width: 550px; max-width: 90vw; max-height: 50vh"
-        class="justify-between"
-        horizontal
+        class="full-width"
+        style="height: fit-content; max-height: fit-content"
       >
-        <q-card-section style="width: 50%">
+        <div
+          v-for="(item, index) in candidatesPsychData"
+          :key="index"
+          class="full-width row justify-start items-center"
+        >
           <q-input
+            v-if="candidatesPsychData[index].psychPlatformName != null"
             light
             outlined
             color="black"
-            v-model="selectedPsychTestPlatform"
+            v-model="candidatesPsychData[index].psychPlatformName"
             label="Plataforma"
             label-color="black"
             readonly
-            style="width: 100%"
+            class="q-pa-sm"
+            style="width: 35%; max-width: 35%"
           />
-        </q-card-section>
-
-        <q-card-section style="width: 50%">
           <q-input
+            v-if="candidatesPsychData[index].psychPlatformLink != null"
             light
             outlined
             color="black"
-            v-model="userNameForPsychTests"
-            label="Nombre"
+            v-model="candidatesPsychData[index].psychPlatformLink"
+            label="Link"
             label-color="black"
             readonly
-            style="width: 100%"
-            class="q-mb-md"
+            class="q-pa-sm"
+            style="width: 35%; max-width: 35%"
           />
-          <q-input
-            light
-            outlined
-            color="black"
-            v-model="passwordForPsychTest"
-            label="Contraseña"
-            label-color="black"
-            readonly=""
-            style="width: 100%"
+          <q-btn
+            v-if="candidatesPsychData[index].requiredCredentials == '1'"
+            dense
+            icon="visibility"
+            label="Ver Credenciales"
+            color="white"
+            class="text-black"
+            style="height: fit-content; border-radius: 7px; width: 30%"
+          >
+            <q-tooltip class="bg-red-5 text-body1" :offset="[10, 10]">
+              <div class="row">
+                <strong>Usuario:</strong>
+                <div>
+                  {{ candidatesPsychData[index].psychPlatformUserName }}
+                </div>
+              </div>
+              <div class="row">
+                <strong>Contraseña:</strong>
+                <div>
+                  {{ candidatesPsychData[index].psychPlatformPassword }}
+                </div>
+              </div>
+            </q-tooltip>
+          </q-btn>
+
+          <q-btn
+            v-if="hasTestResultsOf(candidatesPsychData[index].psychPlatformId)"
+            icon="check"
+            label="Ver resultados"
+            v-close-popup
+            class="q-mr-sm q-mb-md q-ml-md"
+            style="border-radius: 8px"
+            @click.prevent="
+              downloadDocument(
+                getTestResultsFileUUID(
+                  candidatesPsychData[index].psychPlatformId
+                )
+              )
+            "
           />
-        </q-card-section>
+        </div>
       </q-card-section>
 
       <q-separator />
@@ -353,7 +386,7 @@
           flat
           label="Cerrar"
           v-close-popup
-          class="text-red-8 q-mr-sm"
+          class="text-white bg-red q-mr-sm"
           style="border-radius: 8px"
           @click.prevent="resetPsychTestInformation()"
         />
@@ -445,6 +478,7 @@ const psychTestPlatformId = ref(0);
 const sendLink = ref(false);
 const testLink = ref("");
 const openSeeDataPsychTest = ref(false);
+const candidatesPsychData = ref([]);
 
 onMounted(() => {
   viewAllRequisitions.value = true;
@@ -616,6 +650,27 @@ const resetPsychTestInformation = () => {
   testLink.value = "";
 };
 
+const hasTestResultsOf = (platformId) => {
+  return selectedUser.value.testResults.some((element) => {
+    return element.platformId === platformId;
+  });
+};
+
+const getTestResultsFileUUID = (platformId) => {
+  if (selectedUser.value.testResults === null) return null;
+
+  const result = selectedUser.value.testResults.find(
+    (element) => element.platformId === platformId
+  );
+
+  if (result) {
+    return result.fileUUID;
+  }
+
+  return null;
+};
+
+
 const disableSendPsychTestButton = computed(() => {
   if (sendLink.value) {
     return testLink.value === "" ? true : false;
@@ -709,6 +764,8 @@ const sendPsychTestLink = async () => {
 
 const seePsychTestData = (row) => {
   selectedUser.value = row;
+  console.log(row);
+  candidatesPsychData.value = row.candidatePsychData;
   openSeeDataPsychTest.value = true;
   userNameForPsychTests.value = row.test_psicometrico_nombre_usuario;
   passwordForPsychTest.value = row.test_psicometrico_password;
