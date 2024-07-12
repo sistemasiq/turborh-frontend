@@ -130,16 +130,25 @@
         />
         <!-- Aqui esta la variable del backend que sirve como vmodel
         Si se encuentra una mejor manera, adelante -->
-        <div class="row">
+        <q-card-section class="row justify-start">
           <q-btn
-            class="q-ma-lg q-pa-md text-black"
-            style="height: fit-content"
+            class="text-black col-12"
             rounded
             icon="link"
             label="Enviar test psicométrico"
             @click.prevent="setSelectedCandidate(row, false, true)"
           />
-        </div>
+          <FileUploader
+            :button-text="'Subir resultados'"
+            :dialog-text="'Subir resultados de la prueba psicometrica'"
+            :open-dialog="openFileUploader"
+            :file-selector-label="'Seleccionar archivo'"
+            :candidate-psych-data="row.candidatePsychData"
+            @on-open-dialog="openFileUploaderDialog(row)"
+            @on-close="closeFileUploaderDialog"
+            @on-upload="uploadTestResults"
+          />
+        </q-card-section>
       </q-td>
     </template>
   </q-table>
@@ -254,7 +263,7 @@
                     :icon="
                       item.psychPlatformName != 'Grupo Arhca'
                         ? 'list'
-                        : 'Google Meet'
+                        : 'group'
                     "
                     :color="
                       item.psychPlatformName === 'Grupo Arhca'
@@ -410,6 +419,22 @@
               </div>
             </q-tooltip>
           </q-btn>
+
+          <q-btn
+            v-if="hasTestResultsOf(candidatesPsychData[index].psychPlatformId)"
+            icon="check"
+            label="Ver resultados"
+            v-close-popup
+            class="q-mr-sm q-mb-md q-ml-md"
+            style="border-radius: 8px"
+            @click.prevent="
+              downloadDocument(
+                getTestResultsFileUUID(
+                  candidatesPsychData[index].psychPlatformId
+                )
+              )
+            "
+          />
         </div>
       </q-card-section>
 
@@ -455,7 +480,8 @@ import {
   getUserApplicationNotesById,
 } from "src/services/userApplication";
 import {
-  updateUserPsychometricTest,
+  updateTestResults,
+  addNewTestResults,
   getPsychometricPlatforms,
 } from "src/services/user";
 import { completeRequisition } from "src/services/requisition";
@@ -470,10 +496,8 @@ import {
   sendUserSelectedMessage,
   sendLinkMessage,
 } from "src/services/whatsApp";
-import {
-  postUserPsychTestData,
-  putUserPsychTestData,
-} from "src/services/user";
+import { postUserPsychTestData, putUserPsychTestData } from "src/services/user";
+import FileUploader from "src/components/FileUploader.vue";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -542,6 +566,120 @@ const passwordForPsychTest = ref(""); // stores the user password for the psych 
 
 const tableJobName = ref("");
 const openSeeDataPsychTest = ref(false);
+
+const openFileUploader = ref(false);
+
+const openFileUploaderDialog = (row) => {
+  openFileUploader.value = true;
+  selectedCandidate.value = row;
+  console.log(selectedCandidate.value);
+};
+
+const closeFileUploaderDialog = () => {
+  openFileUploader.value = false;
+};
+
+const uploadTestResults = async (file, platformId) => {
+  try {
+    $q.loading.show();
+
+    let newFile;
+
+    if (hasTestResultsOf(platformId)) {
+      console.log("Trying to update file");
+      newFile = await updateFile(
+        getTestResultsFileUUID(platformId),
+        file,
+        getUserDocumentsPath
+      );
+
+      if (newFile) {
+        const updatedTestResults = await updateTestResults(
+          selectedCandidate.value.userId,
+          platformId,
+          newFile
+        );
+
+        if (updatedTestResults) {
+          updateFileUUID(platformId, newFile);
+          $q.notify(
+            notifyPositive(
+              "Resultados de la prueba psicometrica actualizados correctamente"
+            )
+          );
+        }
+      }
+    } else if (!hasTestResultsOf(platformId)) {
+      newFile = await uploadFile(file, getUserDocumentsPath);
+
+      if (newFile) {
+        const addedNewTestResults = await addNewTestResults(
+          selectedCandidate.value.userId,
+          platformId,
+          newFile
+        );
+
+        if (addedNewTestResults) {
+          updateFileUUID(platformId, newFile);
+          $q.notify(
+            notifyPositive(
+              "Resultados de la prueba psicometrica subidos correctamente"
+            )
+          );
+        }
+      }
+    }
+  } catch (error) {
+    console.log("ERROR al subir resultados " + error);
+    $q.notify(
+      notifyNegative(
+        "Hubo un error al subir los resultados de la prueba psicometrica"
+      )
+    );
+  } finally {
+    $q.loading.hide();
+  }
+};
+
+const hasTestResultsOf = (platformId) => {
+  return selectedCandidate.value.testResults.some((element) => {
+    return element.platformId === platformId;
+  });
+};
+
+const getTestResultsFileUUID = (platformId) => {
+  if (selectedCandidate.value.testResults === null) return null;
+
+  const result = selectedCandidate.value.testResults.find(
+    (element) => element.platformId === platformId
+  );
+
+  if (result) {
+    return result.fileUUID;
+  }
+
+  return null;
+};
+
+const updateFileUUID = (platformId, newUUID) => {
+  let foundMatch = false;
+  selectedCandidate.value.testResults.forEach((element) => {
+    if (element.platformId === platformId) {
+      element.fileUUID = newUUID;
+      foundMatch = true;
+    }
+  });
+
+  if (!foundMatch) {
+    selectedCandidate.value.testResults.push({
+      userId: selectedCandidate.value.userId,
+      platformId: platformId,
+      fileUUID: newUUID,
+    });
+  }
+
+  updateRow(selectedCandidate.value);
+};
 
 //Method to send for the first time the psych data to the candidate------------------------------------------------------------------------------------------------
 const postUserPsychData = async () => {
@@ -805,6 +943,7 @@ const sendPsychTestInformation = async () => {
 
 //Psych tests history of the candidate
 const seePsychTestData = (row) => {
+  selectedCandidate.value = row;
   candidatesPsychData.value = row.candidatePsychData; //All the test that the candididate has received
   console.log("USER PSYCH HISTORY"); //TODO: CHECK THIS TO SEE THE HISTORY IN A RIGHT WAY
   console.log(row);
@@ -826,6 +965,13 @@ const resetPsychTestInformation = () => {
 
 //Disables the button to send the psych data to the candidate
 const disableSendPsychTestButton = computed(() => {
+  if (
+    selectedCandidate.value.candidatePsychData.some(
+      (candidate) => candidate.psychPlatformId === psychTestPlatformId.value
+    )
+  ) {
+    return true;
+  }
   if (
     psychTestPlatformId.value != "" &&
     psychPlatformRequireCredentials.value === false &&
@@ -998,8 +1144,6 @@ const downloadDocument = async (uuid) => {
     $q.loading.hide();
   }
 };
-
-
 
 const updateRow = (row, requisitionHasBeenCompleted = false) => {
   currentApplicants.value.forEach((element) => {

@@ -66,7 +66,7 @@
                     :icon="
                       item.psychPlatformName != 'Grupo Arhca'
                         ? 'list'
-                        : 'Google Meet'
+                        : 'group'
                     "
                     :color="
                       item.psychPlatformName === 'Grupo Arhca'

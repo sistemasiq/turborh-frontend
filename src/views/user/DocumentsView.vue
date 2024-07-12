@@ -59,12 +59,6 @@
               label="Número de IMSS (NSS) *"
               label-color="white"
               mask="###########"
-              lazy-rules
-              :rules="[
-                (value) => !!value || 'El IMSS es requerido',
-                (value) =>
-                  /^[0-9]{11}$/.test(value) || 'El IMSS debe ser válido',
-              ]"
               :readonly="viewingApplication"
               class="input-brand"
               @update:model-value="updateStore()"
