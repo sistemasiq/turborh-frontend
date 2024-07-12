@@ -130,9 +130,9 @@
         />
         <!-- Aqui esta la variable del backend que sirve como vmodel
         Si se encuentra una mejor manera, adelante -->
-        <q-card-section class="row justify-start">
+        <q-card-section class="q-mt-md" horizontal>
           <q-btn
-            class="text-black col-12"
+            class="text-black"
             rounded
             icon="link"
             label="Enviar test psicométrico"
