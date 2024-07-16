@@ -1,6 +1,6 @@
 //true = dev mode
 //false = production mode
-const dev = true;
+const dev = false;
 
 export const getAxiosBaseUrl = () => {
   return dev ? "http://localhost:5000" : "https://backendrh.turbomaquinas.mx";

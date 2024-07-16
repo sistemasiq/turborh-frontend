@@ -77,6 +77,24 @@
       </q-td>
     </template>
 
+    <template v-slot:body-cell-applicationHistory="{ row }">
+      <q-td>
+        <q-btn
+          v-if="row.userApplicationHistory.length > 0"
+          rounded
+          icon="visibility"
+          label="Ver postulaciones"
+          @click.prevent="
+            seeUserApplicationHistory(
+              row.userApplicationHistory,
+              row.nombre,
+              row.apellido_paterno,
+              row.apellido_materno
+            )
+          "
+        />
+      </q-td>
+    </template>
     <template v-slot:body-cell-options="{ row }">
       <q-td>
         <q-btn
@@ -122,7 +140,7 @@
   <q-dialog maximized v-model="showReport">
     <q-card class="no-scroll">
       <q-card-actions align="right">
-        <q-btn flat label="Cerrar" color="red" v-close-popup />
+        <q-btn flat label="Cerrar" color="red" v-close-popup/>
       </q-card-actions>
       <object
         height="100%"
@@ -393,6 +411,50 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="openUserApplicationHistoryDialog">
+    <q-card class="col-12">
+      <q-card-section>
+        <div class="text-h6">Historial de postulaciones: {{ userName }}</div>
+      </q-card-section>
+      <q-separator />
+      <q-card-section class="row justify-center items-center">
+        <div
+          v-if="userApplicationHistory.length < 1"
+          class="text-center items-center q-pa-md"
+        >
+          <q-icon name="sentiment_dissatisfied" color="grey" size="4rem" />
+          <div class="text-body1">Usuario sin postulaciones</div>
+        </div>
+        <div v-if="userApplicationHistory.length > 0" class="bg-yellow">
+          <q-table
+            flat
+            bordered
+            :rows="userApplicationHistory"
+            :columns="applicationHistoryColumns"
+            row-key="name"
+            hide-bottom
+            style="max-height: 300px"
+            virtual-scroll
+            v-model:pagination="pagination"
+            class="my-sticky-virtscroll-table"
+          />
+        </div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-actions align="right">
+        <q-btn
+          flat
+          label="Cerrar"
+          @click="resetUserApplicationHistory"
+          class="text-white bg-red q-mr-sm"
+          style="border-radius: 8px"
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
@@ -420,9 +482,11 @@ import { sendPsychTestMessage, sendLinkMessage } from "src/services/whatsApp";
 import { sendPsychometricTestEmail } from "src/services/mail";
 import {
   updatePsychTestCredentials,
-  getPsychometricPlatforms
+  getPsychometricPlatforms,
 } from "src/services/user";
 import UserApplicationHistoryFilter from "src/components/UserApplicationHistoryFilter.vue";
+import { formatDate } from "src/utils/formatDates.js";
+import { andOperation } from "src/utils/logicGatesOperations.js";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -430,6 +494,7 @@ const useLocalStorage = useLocalStorageStore();
 const useNotes = useNotesStore();
 const useRequest = useRequestUser();
 const filter = ref("");
+const pagination = ref({ rowsPerPage: 0 });
 
 const currentApplicants = ref([]);
 const { viewAllRequisitions, viewAllSelectedCandidates } = storeToRefs(
@@ -442,7 +507,6 @@ const loading = ref(false);
 const { viewingApplication, savedApplication } = storeToRefs(useRequest);
 
 const filters = ref({});
-
 
 const {
   notesFrontPage,
@@ -670,7 +734,6 @@ const getTestResultsFileUUID = (platformId) => {
   return null;
 };
 
-
 const disableSendPsychTestButton = computed(() => {
   if (sendLink.value) {
     return testLink.value === "" ? true : false;
@@ -690,7 +753,6 @@ const sendPsychTestInformation = async () => {
     await sendPsychTestCredentials();
   }
 };
-
 
 const sendPsychTestCredentials = async () => {
   try {
@@ -795,7 +857,7 @@ const fetchApplicants = async () => {
 
     if (totalApplicants) {
       currentApplicants.value = totalApplicants;
-      console.log(currentApplicants.value);
+      console.log("Current Applicants ", currentApplicants.value);
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);
@@ -888,6 +950,30 @@ const fetchUserApplicationNotes = async (applicationId) => {
   } catch (error) {}
 };
 
+const userApplicationHistory = ref([]);
+const openUserApplicationHistoryDialog = ref(false);
+const userName = ref("");
+
+const seeUserApplicationHistory = (
+  applicationHistory,
+  name,
+  fatherLastName,
+  motherLastName
+) => {
+  userApplicationHistory.value = applicationHistory;
+  userName.value = name + " " + fatherLastName + " " + motherLastName;
+
+  openUserApplicationHistoryDialog.value = true;
+};
+
+const resetUserApplicationHistory = () => {
+  console.log("before", userApplicationHistory.value);
+  userApplicationHistory.value = "";
+  userName.value = "";
+  openUserApplicationHistoryDialog.value = false;
+  console.log("after",userApplicationHistory.value);
+}
+
 const columns = [
   {
     name: "applicantName",
@@ -943,12 +1029,54 @@ const columns = [
     field: (row) => (row.test_psicometrico_estado === "E" ? "Enviado" : ""),
     sortable: true,
   },
+
+  {
+    name: "applicationHistory",
+    label: "Historial de postulaciones",
+    required: true,
+    align: "left",
+    field: (row) => row,
+  },
+
   {
     name: "options",
     label: "Opciones",
     required: true,
     align: "center",
     field: "options",
+  },
+];
+
+const applicationHistoryColumns = [
+  {
+    name: "requisitionNumber",
+    required: true,
+    label: "Folio de requisición",
+    align: "center",
+    field: (row) => row.requisitionId,
+    sortable: true,
+  },
+  {
+    name: "jobName",
+    required: true,
+    label: "Puesto",
+    align: "left",
+    field: (row) => row.jobName,
+  },
+  {
+    name: "applicationDate",
+    required: true,
+    label: "Fecha de postulación",
+    align: "center",
+    field: (row) => formatDate(row.applicationDate),
+    sortable: true,
+  },
+  {
+    name: "applicationStatus",
+    required: true,
+    label: "Estado de postulación",
+    align: "center",
+    field: (row) => andOperation(row.applicationStatus, row.requisitionStatus)
   },
 ];
 </script>
@@ -1018,4 +1146,28 @@ const columns = [
     position: sticky
     left: 0
     z-index: 1
+
+.my-sticky-virtscroll-table
+    /* height or max-height is important */
+    height: 410px
+
+    .q-table__top,
+    .q-table__bottom,
+    thead tr:first-child th /* bg color is important for th; just specify one */
+      background-color: #ffffff
+
+    thead tr th
+      position: sticky
+      z-index: 1
+    /* this will be the loading indicator */
+    thead tr:last-child th
+      /* height of all previous header rows */
+      top: 48px
+    thead tr:first-child th
+      top: 0
+
+    /* prevent scrolling behind sticky top row on focus */
+    tbody
+      /* height of all previous header rows */
+      scroll-margin-top: 48px
 </style>
