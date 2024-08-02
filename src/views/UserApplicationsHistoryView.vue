@@ -140,7 +140,7 @@
   <q-dialog maximized v-model="showReport">
     <q-card class="no-scroll">
       <q-card-actions align="right">
-        <q-btn flat label="Cerrar" color="red" v-close-popup/>
+        <q-btn flat label="Cerrar" color="red" v-close-popup />
       </q-card-actions>
       <object
         height="100%"
@@ -245,6 +245,7 @@
 
         <q-card-section style="width: 50%">
           <q-input
+            v-if="psychPlatformRequireCredentials"
             light
             outlined
             color="black"
@@ -256,6 +257,7 @@
             style="width: 100%"
           />
           <q-input
+            v-if="psychPlatformRequireCredentials"
             light
             outlined
             color="black"
@@ -543,6 +545,7 @@ const sendLink = ref(false);
 const testLink = ref("");
 const openSeeDataPsychTest = ref(false);
 const candidatesPsychData = ref([]);
+const psychPlatformRequireCredentials = ref(false);
 
 onMounted(() => {
   viewAllRequisitions.value = true;
@@ -971,8 +974,8 @@ const resetUserApplicationHistory = () => {
   userApplicationHistory.value = "";
   userName.value = "";
   openUserApplicationHistoryDialog.value = false;
-  console.log("after",userApplicationHistory.value);
-}
+  console.log("after", userApplicationHistory.value);
+};
 
 const columns = [
   {
@@ -1076,7 +1079,7 @@ const applicationHistoryColumns = [
     required: true,
     label: "Estado de postulación",
     align: "center",
-    field: (row) => andOperation(row.applicationStatus, row.requisitionStatus)
+    field: (row) => andOperation(row.applicationStatus, row.requisitionStatus),
   },
 ];
 </script>

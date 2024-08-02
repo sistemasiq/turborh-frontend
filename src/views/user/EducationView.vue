@@ -59,7 +59,8 @@
                 color="cyan-1"
                 v-model="secondary"
                 label="Nombre *"
-                label-color="grey-8"                class="input-brand"
+                label-color="grey-8"
+                class="input-brand"
                 style="width: 100%"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
@@ -77,7 +78,8 @@
                 color="cyan-1"
                 v-model="secondarySpeciality"
                 label="Especificar"
-                label-color="grey-8"                class="input-brand"
+                label-color="grey-8"
+                class="input-brand"
                 style="width: 100%"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
@@ -99,9 +101,6 @@
                 <q-input
                   filled
                   v-model="dateStartSecondary"
-                  mask="####-##-##"
-                  lazy-rules
-                  :rules="[dateRule]"
                   label="AAAA/MM/DD *"
                   light
                   outlined
@@ -118,6 +117,8 @@
                         transition-hide="scale"
                       >
                         <q-date
+                          locale="es"
+                          mask="YYYY-MM-DD"
                           v-model="dateStartSecondary"
                           :readonly="viewingApplication"
                           @update:model-value="updateStore()"
@@ -125,7 +126,7 @@
                           <div class="row items-center justify-end">
                             <q-btn
                               v-close-popup
-                              label="Close"
+                              label="Cerrar"
                               color="primary"
                               flat
                             />
@@ -139,9 +140,6 @@
                 <q-input
                   filled
                   v-model="dateEndSecondary"
-                  mask="####-##-##"
-                  lazy-rules
-                  :rules="[dateRule]"
                   label="AAAA/MM/DD *"
                   ligth
                   outlined
@@ -158,6 +156,8 @@
                         transition-hide="scale"
                       >
                         <q-date
+                          locale="es"
+                          mask="YYYY-MM-DD"
                           v-model="dateEndSecondary"
                           :readonly="viewingApplication"
                           @update:model-value="updateStore()"
@@ -165,7 +165,7 @@
                           <div class="row items-center justify-end">
                             <q-btn
                               v-close-popup
-                              label="Close"
+                              label="Cerrar"
                               color="primary"
                               flat
                             />
@@ -245,7 +245,8 @@
                 color="cyan-1"
                 v-model="highSchool"
                 label="Nombre"
-                label-color="grey-8"                class="input-brand"
+                label-color="grey-8"
+                class="input-brand"
                 style="width: 100%"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
@@ -263,7 +264,8 @@
                 color="cyan-1"
                 v-model="highSchoolSpeciality"
                 label="Especificar"
-                label-color="grey-8"                class="input-brand"
+                label-color="grey-8"
+                class="input-brand"
                 style="width: 100%"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
@@ -284,9 +286,6 @@
                 <q-input
                   filled
                   v-model="dateStartHighSchool"
-                  mask="####-##-##"
-                  lazy-rules
-                  :rules="[dateRule]"
                   label="AAAA/MM/DD"
                   ligth
                   outlined
@@ -303,6 +302,8 @@
                         transition-hide="scale"
                       >
                         <q-date
+                          locale="es"
+                          mask="YYYY-MM-DD"
                           v-model="dateStartHighSchool"
                           :readonly="viewingApplication"
                           @update:model-value="updateStore()"
@@ -310,7 +311,7 @@
                           <div class="row items-center justify-end">
                             <q-btn
                               v-close-popup
-                              label="Close"
+                              label="Cerrar"
                               color="primary"
                               flat
                             />
@@ -324,9 +325,6 @@
                 <q-input
                   filled
                   v-model="dateEndHighSchool"
-                  mask="####-##-##"
-                  lazy-rules
-                  :rules="[dateRule]"
                   label="AAAA/MM/DD"
                   ligth
                   outlined
@@ -343,6 +341,8 @@
                         transition-hide="scale"
                       >
                         <q-date
+                          locale="es"
+                          mask="YYYY-MM-DD"
                           v-model="dateEndHighSchool"
                           :readonly="viewingApplication"
                           @update:model-value="updateStore()"
@@ -350,7 +350,7 @@
                           <div class="row items-center justify-end">
                             <q-btn
                               v-close-popup
-                              label="Close"
+                              label="Cerrar"
                               color="primary"
                               flat
                             />
@@ -429,7 +429,8 @@
                 color="cyan-1"
                 v-model="professional"
                 label="Nombre"
-                label-color="grey-8"                class="input-brand"
+                label-color="grey-8"
+                class="input-brand"
                 style="width: 100%"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
@@ -467,9 +468,6 @@
                 <q-input
                   filled
                   v-model="dateStartProfessional"
-                  mask="####-##-##"
-                  lazy-rules
-                  :rules="[dateRule]"
                   label="AAAA/MM/DD"
                   ligth
                   outlined
@@ -486,6 +484,8 @@
                         transition-hide="scale"
                       >
                         <q-date
+                          locale="es"
+                          mask="YYYY-MM-DD"
                           v-model="dateStartProfessional"
                           :readonly="viewingApplication"
                           @update:model-value="updateStore()"
@@ -493,7 +493,7 @@
                           <div class="row items-center justify-end">
                             <q-btn
                               v-close-popup
-                              label="Close"
+                              label="Cerrar"
                               color="primary"
                               flat
                             />
@@ -507,9 +507,6 @@
                 <q-input
                   filled
                   v-model="dateEndProfessional"
-                  mask="####-##-##"
-                  lazy-rules
-                  :rules="[dateRule]"
                   label="AAAA/MM/DD"
                   ligth
                   outlined
@@ -526,6 +523,8 @@
                         transition-hide="scale"
                       >
                         <q-date
+                          locale="es"
+                          mask="YYYY-MM-DD"
                           v-model="dateEndProfessional"
                           :readonly="viewingApplication"
                           @update:model-value="updateStore()"
@@ -533,7 +532,7 @@
                           <div class="row items-center justify-end">
                             <q-btn
                               v-close-popup
-                              label="Close"
+                              label="Cerrar"
                               color="primary"
                               flat
                             />
@@ -611,7 +610,8 @@
                 color="cyan-1"
                 v-model="master"
                 label="Institución"
-                label-color="grey-8"                class="input-brand"
+                label-color="grey-8"
+                class="input-brand"
                 style="width: 100%"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
@@ -629,7 +629,8 @@
                 color="cyan-1"
                 v-model="masterSpeciality"
                 label="Especificar"
-                label-color="grey-8"                class="input-brand"
+                label-color="grey-8"
+                class="input-brand"
                 style="width: 100"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
@@ -650,9 +651,6 @@
                 <q-input
                   filled
                   v-model="dateStartMaster"
-                  mask="####-##-##"
-                  lazy-rules
-                  :rules="[dateRule]"
                   label="AAAA/MM/DD"
                   ligth
                   outlined
@@ -669,6 +667,8 @@
                         transition-hide="scale"
                       >
                         <q-date
+                          locale="es"
+                          mask="YYYY-MM-DD"
                           v-model="dateStartMaster"
                           :readonly="viewingApplication"
                           @update:model-value="updateStore()"
@@ -676,7 +676,7 @@
                           <div class="row items-center justify-end">
                             <q-btn
                               v-close-popup
-                              label="Close"
+                              label="Cerrar"
                               color="primary"
                               flat
                             />
@@ -690,9 +690,6 @@
                 <q-input
                   filled
                   v-model="dateEndMaster"
-                  mask="####-##-##"
-                  lazy-rules
-                  :rules="[dateRule]"
                   label="AAAA/MM/DD"
                   ligth
                   outlined
@@ -709,6 +706,8 @@
                         transition-hide="scale"
                       >
                         <q-date
+                          locale="es"
+                          mask="YYYY-MM-DD"
                           v-model="dateEndMaster"
                           :readonly="viewingApplication"
                           @update:model-value="updateStore()"
@@ -716,7 +715,7 @@
                           <div class="row items-center justify-end">
                             <q-btn
                               v-close-popup
-                              label="Close"
+                              label="Cerrar"
                               color="primary"
                               flat
                             />
@@ -794,7 +793,8 @@
                 color="cyan-1"
                 v-model="other"
                 label="Institución"
-                label-color="grey-8"                class="input-brand"
+                label-color="grey-8"
+                class="input-brand"
                 style="width: 100%"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
@@ -812,7 +812,8 @@
                 color="cyan-1"
                 v-model="otherSpeciality"
                 label="Especificar"
-                label-color="grey-8"                class="input-brand"
+                label-color="grey-8"
+                class="input-brand"
                 style="width: 100%"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
@@ -833,9 +834,6 @@
                 <q-input
                   filled
                   v-model="dateStartOther"
-                  mask="####-##-##"
-                  lazy-rules
-                  :rules="[dateRule]"
                   label="AAAA/MM/DD"
                   ligth
                   outlined
@@ -852,6 +850,8 @@
                         transition-hide="scale"
                       >
                         <q-date
+                          locale="es"
+                          mask="YYYY-MM-DD"
                           v-model="dateStartOther"
                           :readonly="viewingApplication"
                           @update:model-value="updateStore()"
@@ -859,7 +859,7 @@
                           <div class="row items-center justify-end">
                             <q-btn
                               v-close-popup
-                              label="Close"
+                              label="Cerrar"
                               color="primary"
                               flat
                             />
@@ -873,9 +873,6 @@
                 <q-input
                   filled
                   v-model="dateEndOther"
-                  mask="####-##-##"
-                  lazy-rules
-                  :rules="[dateRule]"
                   label="AAAA/MM/DD"
                   ligth
                   outlined
@@ -892,6 +889,8 @@
                         transition-hide="scale"
                       >
                         <q-date
+                          locale="es"
+                          mask="YYYY-MM-DD"
                           v-model="dateEndOther"
                           :readonly="viewingApplication"
                           @update:model-value="updateStore()"
@@ -899,7 +898,7 @@
                           <div class="row items-center justify-end">
                             <q-btn
                               v-close-popup
-                              label="Close"
+                              label="Cerrar"
                               color="primary"
                               flat
                             />
@@ -1068,58 +1067,74 @@
 
           <!-- STUDING NOW DAYS -->
           <div style="display: flex; flex-grow: 1; margin-left: 1%">
-            <q-card-section vertical style="width: 20%" v-if="currentlyStudying">
+            <q-card-section
+              vertical
+              style="width: 20%"
+              v-if="currentlyStudying"
+            >
               <div class="q-mb-md text-body1 text-weight-medium">
                 ¿En qué institución?
               </div>
-            <q-input
-              outlined
-              color="cyan-1"
-              v-model="currentInstitution"
-              label="Institución"
-              label-color="grey-8"
-              class="input-brand"
-              style="width: 100%"
-              :readonly="viewingApplication"
-              @update:model-value="updateStore()"
-            />
-              </q-card-section>
+              <q-input
+                outlined
+                color="cyan-1"
+                v-model="currentInstitution"
+                label="Institución"
+                label-color="grey-8"
+                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
 
-              <q-card-section vertical style="width: 30%" v-if="currentlyStudying">
+            <q-card-section
+              vertical
+              style="width: 30%"
+              v-if="currentlyStudying"
+            >
               <div class="q-mb-md text-body1 text-weight-medium">
                 ¿Qué estudia?
               </div>
-            <q-input
-              outlined
-              color="cyan-1"
-              v-model="currentSpeciality"
-              label="Nombre de la carrera, oficio u otro"
-              label-color="grey-8"
-              class="input-brand"
-              style="width: 100%"
-              :readonly="viewingApplication"
-              @update:model-value="updateStore()"
-            />
-             </q-card-section>
+              <q-input
+                outlined
+                color="cyan-1"
+                v-model="currentSpeciality"
+                label="Nombre de la carrera, oficio u otro"
+                label-color="grey-8"
+                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
 
-             <q-card-section vertical style="width: 30%" v-if="currentlyStudying">
+            <q-card-section
+              vertical
+              style="width: 30%"
+              v-if="currentlyStudying"
+            >
               <div class="q-mb-md text-body1 text-weight-medium">
                 Horario de asistencia
               </div>
-            <q-input
-              outlined
-              color="cyan-1"
-              v-model="schedules"
-              label="Horarios"
-              label-color="grey-8"
-              class="input-brand"
-              style="width: 100%"
-              :readonly="viewingApplication"
-              @update:model-value="updateStore()"
-            />
-              </q-card-section>
+              <q-input
+                outlined
+                color="cyan-1"
+                v-model="schedules"
+                label="Horarios"
+                label-color="grey-8"
+                class="input-brand"
+                style="width: 100%"
+                :readonly="viewingApplication"
+                @update:model-value="updateStore()"
+              />
+            </q-card-section>
 
-              <q-card-section vertical style="width: 20%" v-if="currentlyStudying">
+            <q-card-section
+              vertical
+              style="width: 20%"
+              v-if="currentlyStudying"
+            >
               <div
                 class="q-mb-md text-body1 flex flex-center text-weight-medium"
               >
@@ -1130,21 +1145,21 @@
                 style="width: 100%"
                 class="row justify-around"
               >
-              <q-checkbox
-                v-model="isPublicCurrent"
-                color="cyan"
-                unchecked-icon="radio_button_unchecked"
-                checked-icon="radio_button_checked"
-                size="lg"
-                class="checkbox"
-                label="Esta institución es publica"
-                style="color: rgb(0, 0, 0)"
-                :disable="viewingApplication"
-                @update:model-value="updateStore()"
-              />
+                <q-checkbox
+                  v-model="isPublicCurrent"
+                  color="cyan"
+                  unchecked-icon="radio_button_unchecked"
+                  checked-icon="radio_button_checked"
+                  size="lg"
+                  class="checkbox"
+                  label="Esta institución es publica"
+                  style="color: rgb(0, 0, 0)"
+                  :disable="viewingApplication"
+                  @update:model-value="updateStore()"
+                />
+              </q-card-section>
             </q-card-section>
-            </q-card-section>
-        </div>
+          </div>
 
           <div class="column">
             <q-btn
@@ -1612,19 +1627,6 @@ const loadLocalStore = () => {
   const localStoreData = useLocalStorage.load("educationData");
 
   if (localStoreData) educationData.value = localStoreData;
-};
-
-const dateRule = (value) => {
-  const dateValid = /^\d{4}\/\d{2}\/\d{2}$/.test(value);
-  const requiredValid = !!value;
-
-  if (!dateValid) {
-    return "Ingresa una fecha válida";
-  } else if (!requiredValid) {
-    return "Este campo es requerido";
-  }
-
-  return true; // La validación pasa
 };
 </script>
 

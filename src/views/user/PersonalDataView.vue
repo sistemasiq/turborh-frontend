@@ -130,11 +130,10 @@
 
               <q-input
                 class="full-width q-pl-md"
-                hint="AAAA/MM/DD"
+                hint="AAAA-MM-DD"
                 hide-hint
                 label="Fecha de nacimiento *"
                 v-model="birthDate"
-                mask="####-##-##"
                 dark
                 outlined
                 color="cyan-1"
@@ -154,6 +153,7 @@
                         color="cyan"
                         v-model="birthDate"
                         @update:model-value="updateStore()"
+                        mask="YYYY-MM-DD"
                       >
                         <div class="row items-center justify-end">
                           <q-btn
