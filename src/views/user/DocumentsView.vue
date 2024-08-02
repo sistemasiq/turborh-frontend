@@ -56,7 +56,7 @@
               color="cyan-1"
               v-model="imss"
               type="text"
-              label="Número de IMSS (NSS) *"
+              label="Número de IMSS/ISSSTE *"
               label-color="white"
               mask="###########"
               :readonly="viewingApplication"
@@ -100,15 +100,8 @@
             <BadgeOptional></BadgeOptional>
             </q-input>
 
-            <div
-              style="
-                padding-left: 5px;
-                position: relative;
-                display: flex;
-                align-items: center;
-              "
-            >
               <q-file
+              style="width: 20%"
               :disable="viewingApplication"
                 v-model="curriculumStored"
                 max-files="1"
@@ -118,7 +111,7 @@
                 label-color="white"
                 use-chips
                 @rejected="onRejectedFile"
-                :label="curriculumStored ? 'Curriculum adjuntado' : 'Adjuntar curriculum  *'"
+                :label="curriculumStored ? 'Curriculum adjuntado' : 'Adjuntar curriculum (MAX 5MB) *'"
                 class="q-mb-md"
               >
                 <template v-slot:prepend>
@@ -138,7 +131,6 @@
                 ¿Cambiar curriculum adjuntado?
               </q-tooltip>
               </q-file>
-            </div>
           </q-form>
         <TableDriverLicenses/>
         </div>

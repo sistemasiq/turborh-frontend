@@ -64,6 +64,7 @@
 
       <template v-slot:body-cell-isLicencePermanent="{ row }">
         <q-checkbox
+          :disable="viewingApplication"
           class="q-mt-md"
           checked-icon="radio_button_checked"
           unchecked-icon="radio_button_unchecked"
