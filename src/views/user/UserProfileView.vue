@@ -64,7 +64,7 @@
                   <q-file
                     class="q-mr-xl"
                     max-file-size="5242880"
-                    accept=".jpg, image/*"
+                    accept=".jpg, .jpeg, .png"
                     v-model="selectedImage"
                     clearable
                     borderless

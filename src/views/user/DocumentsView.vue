@@ -105,6 +105,7 @@
               :disable="viewingApplication"
                 v-model="curriculumStored"
                 max-files="1"
+                max-file-size="5242880"
                 accept=".pdf"
                 filled
                 bg-color="teal-14"
@@ -207,7 +208,7 @@ const updateStore = () => {
 
 
 const onRejectedFile = () => {
-  $q.notify(notifyNegative("Solo se aceptan archivos .pdf"));
+  $q.notify(notifyNegative("Solo se aceptan archivos .pdf y tamaño max 5 Mb"));
 };
 
 

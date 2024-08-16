@@ -128,7 +128,7 @@
                         flat
                         class="text-white"
                         @click="toRestorePassword()"
-                        >¿Has olvidado tu contraseña?</q-btn
+                        >¿Has olvidado tu usuario o contraseña?</q-btn
                       >
                     </div>
                   </q-card-actions>
