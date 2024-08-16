@@ -39,10 +39,7 @@
               label-color="white"
               lazy-rules
               :rules="[
-                (value) => !!value || 'La clave RFC es requerida',
-                (value) =>
-                  /^[A-ZÑ&]{3,4}(\d{6})[A-Z\d]{3}$/.test(value) ||
-                  'La clave RFC debe ser válida',
+                (value) => !!value || 'La clave RFC es requerida'
               ]"
               :readonly="viewingApplication"
               class="input-brand"
@@ -105,6 +102,7 @@
               :disable="viewingApplication"
                 v-model="curriculumStored"
                 max-files="1"
+                max-file-size="5242880"
                 accept=".pdf"
                 filled
                 bg-color="teal-14"
@@ -207,7 +205,7 @@ const updateStore = () => {
 
 
 const onRejectedFile = () => {
-  $q.notify(notifyNegative("Solo se aceptan archivos .pdf"));
+  $q.notify(notifyNegative("Solo se aceptan archivos .pdf y tamaño max 5 Mb"));
 };
 
 
