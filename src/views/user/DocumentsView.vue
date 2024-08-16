@@ -39,10 +39,7 @@
               label-color="white"
               lazy-rules
               :rules="[
-                (value) => !!value || 'La clave RFC es requerida',
-                (value) =>
-                  /^[A-ZÑ&]{3,4}(\d{6})[A-Z\d]{3}$/.test(value) ||
-                  'La clave RFC debe ser válida',
+                (value) => !!value || 'La clave RFC es requerida'
               ]"
               :readonly="viewingApplication"
               class="input-brand"
