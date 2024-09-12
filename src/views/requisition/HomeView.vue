@@ -202,6 +202,7 @@ import { ref, computed, watch, onBeforeMount } from "vue";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { useAuthStore } from "src/stores/auth";
 import { useLocalStorageStore } from "src/stores/localStorage";
+import { getSessionStorageItem } from "src/stores/sessionStorage.js";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { storeToRefs } from "pinia";
 import { getAdminImagesPath, getAssetsPath } from "src/utils/folderPaths";
@@ -243,11 +244,15 @@ const getLogoImage = computed(() =>
 );
 
 const loadLocalStorage = () => {
-  const userStored = useLocalStorage.load("user");
-  const loggedStored = useLocalStorage.load("logged");
+  //Retrieve and assign the user session values from the session storage
+  const userStored = JSON.parse(getSessionStorageItem("user"));
+  const loggedStored = Number(getSessionStorageItem("logged"));
 
-  if (userStored) {
+  //if the user session information is correct, then it assigns the user session information to the store and needed data to the local variables
+  if (userStored && loggedStored) {
     user.value = userStored;
+    logged.value = loggedStored;
+
     userName.value = user.value.userName;
     photoUUID.value =
       user.value.photoUUID === null || user.value.photoUUID === ""
@@ -255,9 +260,22 @@ const loadLocalStorage = () => {
         : user.value.photoUUID;
     setHeaderAuthorization(userStored.token);
     settedHeaderAuthorization.value = true;
+  } else {
+    //If the user session information is incorrect, then it shows a dialog with the error message and sends the user to the login
+    $q.dialog({
+        title: 'Oops! Hubo un problema con tu sesión',
+        message: 'Por favor, vuelve a iniciar sesión',
+        persistent: true,
+        ok: {
+          push: true,
+          color: 'positive',
+          label: 'Iniciar Sesión',
+        },
+      }).onOk(() => {
+        router.replace("/")
+      })
   }
 
-  if (loggedStored) logged.value = loggedStored;
 };
 
 const onNewRequisitionClicked = () => {

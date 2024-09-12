@@ -153,6 +153,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { useAuthStore } from "src/stores/auth";
+import { setSessionStorageItem } from "src/stores/sessionStorage.js";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
@@ -185,6 +186,7 @@ const getLogoImage = computed(() =>
 );
 
 const { savedApplication } = storeToRefs(useRequest);
+
 const { user, logged, isUser } = storeToRefs(useAuth);
 
 const changePasswordVisibility = () => {
@@ -216,6 +218,9 @@ const onLoginClick = async () => {
       logged.value = 1;
       useLocalStorage.save("user", user.value);
       useLocalStorage.save("logged", logged.value);
+
+      setSessionStorageItem("user", user.value);
+      setSessionStorageItem("logged", logged.value);
 
       if (user.value.role != "u") {
         router.replace(getAdminRoute());

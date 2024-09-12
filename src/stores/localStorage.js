@@ -1,6 +1,4 @@
 import { defineStore } from "pinia";
-import { useQuasar } from "quasar";
-
 
 export const useLocalStorageStore = defineStore("localStorage", () => {
   
