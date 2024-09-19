@@ -6,7 +6,7 @@
     <q-card>
       <q-card-section class="tittle"> Medios de reclutamiento </q-card-section>
       <q-card-section>
-        <pagination-application :page="5" :required-fields="requiredFieldsOnThisPage"></pagination-application>
+        <pagination-application :page="5" :required-fields="requiredFieldsOnThisPage" @on-field-validation="validateRequiredFields"></pagination-application>
 
         <div style="margin-top: 6%">
 
@@ -30,6 +30,7 @@
 
           <q-form class="q-gutter-md">
             <q-input
+              ref="mediumRef"
               dark
               outlined
               color="cyan-1"
@@ -38,9 +39,7 @@
               label="Por qué medio o persona llegó a solicitarnos empleo *"
               label-color="white"
               lazy-rules
-              :rules="[
-                (value) => !!value || 'Este campo no puede estar vacío.',
-              ]"
+              :rules="[ruleFieldRequired]"
               :readonly="viewingApplication"
               class="input-brand"
               @update:model-value="updateStore()"
@@ -160,6 +159,7 @@ import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue"
 import BadgeRequired from "src/components/BadgeRequired.vue";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
+import { ruleFieldRequired } from "src/utils/fieldRules";
 
 const $q = useQuasar();
 const useRequest = useRequestUser();
@@ -180,6 +180,12 @@ const {
   updatingApplication,
 } = storeToRefs(useRequest);
 
+const mediumRef = ref(null);
+
+// Method to validate the 'medium' field
+const validateRequiredFields = () => {
+  mediumRef.value.validate();
+};
 
 const requiredFieldsOnThisPage = computed(() => [medium.value])
 
@@ -236,8 +242,8 @@ const clean = () => {
 };
 
 const saveLocalStore = () => {
-  useLocalStorage.save("recruitingMeansData", recruitingMeansData.value);
   if (!viewingApplication.value && !updatingApplication.value) {
+    useLocalStorage.save("recruitingMeansData", recruitingMeansData.value);
     $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
   }
 };

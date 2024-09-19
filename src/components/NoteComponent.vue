@@ -1,5 +1,6 @@
 <template>
   <q-card
+    v-draggable
     v-on:vnode-unmounted="saveNote(currentRoute)"
     flat
     bordered
@@ -16,18 +17,20 @@
       />
     </q-card-section>
     <q-card-section>
-
-
       <div v-for="(item, index) in noteItems">
         <q-chat-message
-        v-if="item.timestamp != '' && item.content != 'null' && item.content != null"
-        :key="index"
-        :name="item.name"
-        :text="[item.content]"
-        :stamp="item.timestamp"
-        bg-color="cyan-1"
-      />
-        </div>
+          v-if="
+            item.timestamp != '' &&
+            item.content != 'null' &&
+            item.content != null
+          "
+          :key="index"
+          :name="item.name"
+          :text="[item.content]"
+          :stamp="item.timestamp"
+          bg-color="cyan-1"
+        />
+      </div>
 
       <q-input
         class="text-body2"
@@ -35,6 +38,7 @@
         autogrow
         autofocus
         borderless
+        filled
       />
     </q-card-section>
   </q-card>
@@ -50,6 +54,8 @@ import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { updateUserApplicationNotes } from "src/services/userApplication";
 import { useAuthStore } from "src/stores/auth";
 
+import { vDraggable } from "src/directives/draggable"; // Adjust the path if necessary
+
 const $q = useQuasar();
 const useNotes = useNotesStore();
 const useRequest = useRequestUser();
@@ -58,6 +64,7 @@ const useAuth = useAuthStore();
 const props = defineProps(["closeNote", "currentRoute"]);
 const note = ref("");
 const previousNote = ref("");
+
 
 onMounted(() => {
   previousNote.value = note.value;
@@ -83,7 +90,7 @@ const { user } = storeToRefs(useAuth);
 const { savedApplication } = storeToRefs(useRequest);
 
 const noteStoreMapping = {
-  'Presentacion Personal y Salario Deseado': notesFrontPage,
+  "Presentacion Personal y Salario Deseado": notesFrontPage,
   "Datos Personales y Aspiraciones": notesPersonalData,
   "Informacion Medica y Situacion Socioeconomica": notesPersonalDataTwo,
   Documentos: notesDocuments,
@@ -97,7 +104,7 @@ const noteStoreMapping = {
 };
 
 const noteContentMapping = {
-  'Presentacion Personal y Salario Deseado': notesFrontPage.value,
+  "Presentacion Personal y Salario Deseado": notesFrontPage.value,
   "Datos Personales y Aspiraciones": notesPersonalData.value,
   "Informacion Medica y Situacion Socioeconomica": notesPersonalDataTwo.value,
   Documentos: notesDocuments.value,
@@ -118,67 +125,55 @@ const noteItems = computed(() => {
   for (let i = 0; i < noteSegments.length; i++) {
     let contentSegmentIndex = i - 1;
 
-    if(contentSegmentIndex < 0 ){
-      contentSegmentIndex = 0
+    if (contentSegmentIndex < 0) {
+      contentSegmentIndex = 0;
     }
 
     const authorSegment = noteSegments[i];
     const contentSegment = noteSegments[contentSegmentIndex];
     let newNoteItem = {
-      name:"",
-      timestamp:"",
-      content: ""
-    }
+      name: "",
+      timestamp: "",
+      content: "",
+    };
 
-    console.log(" AUTHOR "+authorSegment);
-    console.log(" CONTENT "+contentSegment);
+    console.log(" AUTHOR " + authorSegment);
+    console.log(" CONTENT " + contentSegment);
 
     if (authorSegment.startsWith("Nota hecha por: ")) {
-
       const [, author] = authorSegment.split(": ");
 
       const [name, timestamp] = author.split(" el ");
       newNoteItem.name = name;
       newNoteItem.timestamp = timestamp;
 
-
-      if(contentSegment != "" && contentSegment != "null"){
+      if (contentSegment != "" && contentSegment != "null") {
         newNoteItem.content = contentSegment;
       }
-
-
     }
 
-    newNoteItem = checkNoteItem(newNoteItem)
+    newNoteItem = checkNoteItem(newNoteItem);
 
     noteItems.push(newNoteItem);
-
   }
   console.log(noteItems);
   return noteItems;
 });
 
 const checkNoteItem = (noteItem) => {
- if(noteItem.name === ''){
-  noteItem.name = user.value.userName;
- }
- if(noteItem.timestamp === ''){
-  noteItem.timestamp = null
- }
+  if (noteItem.name === "") {
+    noteItem.name = user.value.userName;
+  }
+  if (noteItem.timestamp === "") {
+    noteItem.timestamp = null;
+  }
 
- if(noteItem.content === ''){
-  noteItem.content = null
- }
+  if (noteItem.content === "") {
+    noteItem.content = null;
+  }
 
-
- return noteItem
-}
-
-
-const noteItemFull = (noteItem) => {
-return noteItem.name != "" && noteItem.timestamp != "" && noteItem.content != "";
-}
-
+  return noteItem;
+};
 
 const saveNote = async (currentRoute) => {
   const noteStore = noteStoreMapping[currentRoute];
@@ -191,9 +186,9 @@ const saveNote = async (currentRoute) => {
   const userName = user.value?.userName || "Unknown User";
   const updatedNote = `${note.value}\nNota hecha por: ${userName} el ${currentDate}\n`;
 
-  if(noteStore.value === ""){
+  if (noteStore.value === "") {
     noteStore.value = updatedNote;
-  }else{
+  } else {
     noteStore.value += `${updatedNote}`;
   }
 
@@ -204,17 +199,53 @@ const saveNote = async (currentRoute) => {
 
     const notes = {
       applicationId: savedApplication.value.solicitud_id,
-      noteFrontPage: notesFrontPage.value === 'null' || notesFrontPage.value === null? '' : notesFrontPage.value,
-      notePersonalData: notesPersonalData.value === 'null' || notesPersonalData.value === null? '' : notesPersonalData.value,
-      notePersonalDataTwo: notesPersonalDataTwo.value === 'null' || notesPersonalDataTwo.value === null ? '' : notesPersonalDataTwo.value,
-      noteRecruitingMeans: notesRecruitingMeans.value === 'null' || notesRecruitingMeans.value === null ? '' : notesRecruitingMeans.value,
-      noteDocuments: notesDocuments.value === 'null' || notesDocuments.value === null ? '' : notesDocuments.value,
-      noteEducation: notesEducation.value === 'null' || notesEducation.value === null ? '' : notesEducation.value,
-      noteReferences: notesReferences.value === 'null' || notesReferences.value === null ? '' : notesReferences.value,
-      noteFamilyData: notesFamily.value === 'null' ||  notesFamily.value === null? '' : notesFamily.value,
-      noteMachinery: notesMachinery.value === 'null' || notesMachinery.value === null? '' : notesMachinery.value,
-      noteSkills: notesOffices.value === 'null' || notesOffices.value === null? '' : notesOffices.value,
-      noteLaboralExperience: notesLaboralExperience.value === 'null' || notesLaboralExperience.value === null? '' : notesLaboralExperience.value,
+      noteFrontPage:
+        notesFrontPage.value === "null" || notesFrontPage.value === null
+          ? ""
+          : notesFrontPage.value,
+      notePersonalData:
+        notesPersonalData.value === "null" || notesPersonalData.value === null
+          ? ""
+          : notesPersonalData.value,
+      notePersonalDataTwo:
+        notesPersonalDataTwo.value === "null" ||
+        notesPersonalDataTwo.value === null
+          ? ""
+          : notesPersonalDataTwo.value,
+      noteRecruitingMeans:
+        notesRecruitingMeans.value === "null" ||
+        notesRecruitingMeans.value === null
+          ? ""
+          : notesRecruitingMeans.value,
+      noteDocuments:
+        notesDocuments.value === "null" || notesDocuments.value === null
+          ? ""
+          : notesDocuments.value,
+      noteEducation:
+        notesEducation.value === "null" || notesEducation.value === null
+          ? ""
+          : notesEducation.value,
+      noteReferences:
+        notesReferences.value === "null" || notesReferences.value === null
+          ? ""
+          : notesReferences.value,
+      noteFamilyData:
+        notesFamily.value === "null" || notesFamily.value === null
+          ? ""
+          : notesFamily.value,
+      noteMachinery:
+        notesMachinery.value === "null" || notesMachinery.value === null
+          ? ""
+          : notesMachinery.value,
+      noteSkills:
+        notesOffices.value === "null" || notesOffices.value === null
+          ? ""
+          : notesOffices.value,
+      noteLaboralExperience:
+        notesLaboralExperience.value === "null" ||
+        notesLaboralExperience.value === null
+          ? ""
+          : notesLaboralExperience.value,
     };
 
     const notesUpdated = await updateUserApplicationNotes(notes);
@@ -230,7 +261,6 @@ const saveNote = async (currentRoute) => {
     $q.loading.hide();
   }
 };
-
 </script>
 
 <style scoped>

@@ -222,7 +222,9 @@ const deleteLastRelative = () => {
 };
 
 const saveLocalStore = () => {
-  useLocalStorage.save("familySonsData", familySonsData.value);
+  if(!viewingApplication.value && !updatingApplication.value){
+    useLocalStorage.save("familySonsData", familySonsData.value);
+  }
 };
 
 const loadLocalStore = () => {

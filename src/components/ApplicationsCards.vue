@@ -108,7 +108,6 @@ import { useQuasar } from "quasar";
 import { getS3FileUrl } from "src/services/profiles.js";
 import {
   getDefaultJobUUID,
-  getDefaultPath,
   getJobImagesPath,
 } from "src/utils/folderPaths";
 import { useLocalStorageStore } from "src/stores/localStorage";
@@ -172,6 +171,7 @@ const fetchApplications = async () => {
           currentApplications.value.push(candidateJobs[i]);
         }
       }
+      console.log("CURRENT APPLICATIONS")
       console.log(currentApplications.value)
     }
   } catch (error) {

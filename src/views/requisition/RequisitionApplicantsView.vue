@@ -6,7 +6,7 @@
     style="background: rgb(234, 237, 249)"
     :title="'Solicitudes para el puesto: ' + tableJobName"
     :columns="columns"
-    :rows="currentApplicants"
+    :rows="filteredApplicants"
     :loading="loading"
     :filter="filter"
     row-key="name"
@@ -18,6 +18,7 @@
     :rows-per-page-options="[5, 10, 20, 30]"
   >
     <template v-slot:top-right>
+      <UserApplicationHistoryFilter @filters-changed="applyFilters" />
       <q-card-actions horizontal align="center">
         <q-checkbox
           unchecked-icon="remove_circle_outline"
@@ -209,150 +210,12 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="openPsicometricTestDialog">
-    <q-card>
-      <q-card-section>
-        <div class="text-h6">Enviar test psicometrico</div>
-        <q-checkbox
-          class="absolute-right q-mr-xl"
-          v-model="sendLink"
-          label="Enviar link"
-          @update:model-value="resetPsychTestInformation()"
-        />
-      </q-card-section>
-
-      <q-separator />
-
-      <q-card-section
-        v-if="!sendLink"
-        style="width: 550px; max-width: 90vw; max-height: 50vh"
-        class="justify-between"
-        horizontal
-      >
-        <q-card-section style="width: 50%">
-          <q-btn-dropdown
-            flat
-            auto-close
-            color="white"
-            text-color="grey-9"
-            :icon="
-              selectedPsychTestPlatform === ''
-                ? 'list'
-                : selectedPsychTestPlatform === 'Grupo Arhca'
-                ? 'group'
-                : 'list'
-            "
-            :label="
-              selectedPsychTestPlatform != ''
-                ? selectedPsychTestPlatform
-                : 'plataforma'
-            "
-            class="text-weight-regular"
-            :dropdown-content-class="dropdownContentClass"
-          >
-            <q-list>
-              <q-item
-                v-for="(item, index) in psychTestPlatforms"
-                :key="index"
-                clickable
-                v-close-popup
-                @click.prevent="selectPsychPlatform(item)"
-              >
-                <q-item-section avatar>
-                  <q-avatar
-                    :icon="
-                      item.psychPlatformName != 'Grupo Arhca'
-                        ? 'list'
-                        : 'group'
-                    "
-                    :color="
-                      item.psychPlatformName === 'Grupo Arhca'
-                        ? 'purple-4'
-                        : 'grey-4'
-                    "
-                    text-color="white"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>{{ item.psychPlatformName }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-btn-dropdown>
-        </q-card-section>
-
-        <q-card-section style="width: 50%">
-          <q-input
-            v-if="psychPlatformRequireCredentials"
-            light
-            outlined
-            color="black"
-            v-model="userNameForPsychTests"
-            label="Nombre"
-            label-color="black"
-            lazy-rules
-            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
-            style="width: 100%"
-          />
-          <q-input
-            v-if="psychPlatformRequireCredentials"
-            light
-            outlined
-            color="black"
-            v-model="passwordForPsychTest"
-            label="Contraseña"
-            label-color="black"
-            lazy-rules
-            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
-            style="width: 100%"
-          />
-        </q-card-section>
-      </q-card-section>
-
-      <q-card-section
-        v-if="sendLink"
-        style="width: 550px; max-width: 90vw; max-height: 50vh"
-        class="justify-between"
-        horizontal
-      >
-        <q-card-section style="width: 100%">
-          <q-input
-            light
-            outlined
-            color="black"
-            v-model="testLink"
-            label="Link del formulario"
-            label-color="black"
-            lazy-rules
-            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
-          />
-        </q-card-section>
-      </q-card-section>
-
-      <q-separator />
-
-      <q-card-actions class="justify-end q-pa-md">
-        <q-btn
-          flat
-          label="Cancelar"
-          v-close-popup
-          class="text-red-8 q-mr-sm"
-          style="border-radius: 8px"
-          @click.prevent="resetPsychTestInformation()"
-        />
-        <q-btn
-          flat
-          icon="send"
-          label="Enviar"
-          class="text-white"
-          :class="disableSendPsychTestButton ? 'bg-grey-5' : 'bg-green-13'"
-          style="border-radius: 8px"
-          @click.prevent="sendPsychTestInformation()"
-          :disable="disableSendPsychTestButton"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+  <PsychometricTestDialog
+    :open="openPsicometricTestDialog"
+    :selected-candidate="selectedCandidate"
+    @update:open="openPsicometricTestDialog = $event"
+    @update:selectedCandidate="updateRow"
+  />
 
   <q-dialog v-model="openSeeDataPsychTest">
     <q-card style="width: 900px">
@@ -456,6 +319,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import PsychometricTestDialog from "src/components/PsychometricTestDialog.vue";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
@@ -498,6 +362,7 @@ import {
 } from "src/services/whatsApp";
 import { postUserPsychTestData, putUserPsychTestData } from "src/services/user";
 import FileUploader from "src/components/FileUploader.vue";
+import UserApplicationHistoryFilter from "src/components/UserApplicationHistoryFilter.vue";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -568,6 +433,134 @@ const tableJobName = ref("");
 const openSeeDataPsychTest = ref(false);
 
 const openFileUploader = ref(false);
+
+const filters = ref({});
+
+const applyFilters = (newFilters) => {
+  filters.value = newFilters;
+};
+
+const filteredApplicants = computed(() => {
+  return currentApplicants.value.filter((applicant) => {
+    if (filters.value.gender && applicant.gender !== filters.value.gender) {
+      return false;
+    }
+
+    // Age filter
+    if (filters.value.ageRange) {
+      const age = getAge(applicant.birthDate); // Implement this function
+      if (
+        age < filters.value.ageRange.min ||
+        age > filters.value.ageRange.max
+      ) {
+        return false;
+      }
+    }
+
+    // Salary filter
+    if (filters.value.salaryRange) {
+      const salary = Number(applicant.wishedSalary);
+      if (
+        salary < filters.value.salaryRange.min ||
+        salary > filters.value.salaryRange.max
+      ) {
+        return false;
+      }
+    }
+
+    // Civil status filter
+    if (
+      filters.value.civilStatus &&
+      applicant.civilStatus !== filters.value.civilStatus
+    ) {
+      return false;
+    }
+
+    // License types filter
+    if (filters.value.licenceTypes && filters.value.licenceTypes.length > 0) {
+      const applicantLicenceTypes = applicant.driverLicenses.map(
+        (lt) => lt.type
+      );
+
+      if (
+        !filters.value.licenceTypes.every((lt) =>
+          applicantLicenceTypes.includes(lt)
+        )
+      ) {
+        return false;
+      }
+    }
+
+    // Scholarity filter
+    if (filters.value.scholarity) {
+      switch (filters.value.scholarity) {
+        case "Secundaria":
+          if (applicant.edSecond.length === 0) return false;
+
+          break;
+        case "Bachillerato":
+          if (applicant.edBach.length === 0) return false;
+          break;
+        case "Profesional":
+          if (applicant.edProf.length === 0) return false;
+          break;
+        case "Maestria":
+          if (applicant.edMae.length === 0) return false;
+          break;
+        case "Otro":
+          if (applicant.edOther.length === 0) return false;
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    // Machinery use filter
+    if (filters.value.machineryUse && filters.value.machineryUse.length > 0) {
+      const applicantMachineryUse = applicant.machinery.map(
+        (machinery) => machinery.name
+      );
+      const applicantToolUse = applicant.machinery.map(
+        (machinery) => machinery.toolName
+      );
+      const applicantMeasuringInstrumentsUse = applicant.machinery.map(
+        (machinery) => machinery.measuringInstrumentName
+      );
+      const applicantOthersUse = applicant.machinery.map(
+        (machinery) => machinery.otherToolName
+      );
+
+      const totalApplicantMachineryUse = applicantMachineryUse.concat(
+        applicantToolUse,
+        applicantMeasuringInstrumentsUse,
+        applicantOthersUse
+      );
+      console.log(totalApplicantMachineryUse);
+
+      if (
+        !filters.value.machineryUse.every((machinery) =>
+          totalApplicantMachineryUse.includes(machinery)
+        )
+      ) {
+        return false;
+      }
+    }
+
+    // Skills filter
+    if (filters.value.skills && filters.value.skills.length > 0) {
+      const applicantSkills = applicant.skills.map((skill) => skill.name);
+
+      if (
+        !filters.value.skills.every((skill) => applicantSkills.includes(skill))
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+});
 
 const openFileUploaderDialog = (row) => {
   openFileUploader.value = true;
@@ -681,6 +674,7 @@ const updateFileUUID = (platformId, newUUID) => {
   updateRow(selectedCandidate.value);
 };
 
+//NOTE: Make this component -- start here
 //Method to send for the first time the psych data to the candidate------------------------------------------------------------------------------------------------
 const postUserPsychData = async () => {
   try {
@@ -1000,6 +994,37 @@ const disableSendPsychTestButton = computed(() => {
   }
 });
 
+const getPsychPlatformsData = async () => {
+  try {
+    const request = await getPsychometricPlatforms();
+    if (request) {
+      psychTestPlatforms.value = request;
+    }
+  } catch (error) {}
+};
+
+const setSelectedPsychPlatform = (id) => {
+  psychTestPlatforms.value.forEach((element) => {
+    if (element.id === id) {
+      selectedPsychTestPlatform.value = element.psychPlatformName;
+    }
+  });
+};
+
+const selectPsychPlatform = (data) => {
+  psychTestPlatformId.value = data.id;
+  selectedPsychTestPlatform.value = data.psychPlatformName;
+  psychPlatformLink.value = data.link;
+
+  if (data.requireCredentials == 1) {
+    psychPlatformRequireCredentials.value = true;
+    sendLink.value = false; // if you are selecting a psych platform option then the status of the send free links will return to the default status(false)
+  } else {
+    psychPlatformRequireCredentials.value = false;
+  }
+};
+
+//NOTE: Make this component -- end here
 //TODO: END OF THE PSYCH FUNCTIONALITY
 
 onMounted(() => {
@@ -1019,39 +1044,6 @@ const loadLocalStore = () => {
 
   if (idRequisitionStored) {
     idRequisitionDetails.value = idRequisitionStored;
-  }
-};
-
-const getPsychPlatformsData = async () => {
-  try {
-    const request = await getPsychometricPlatforms();
-    if (request) {
-      psychTestPlatforms.value = request;
-    }
-  } catch (error) {}
-};
-
-//TODO: CHECK THIS ONE
-const setSelectedPsychPlatform = (id) => {
-  psychTestPlatforms.value.forEach((element) => {
-    if (element.id === id) {
-      selectedPsychTestPlatform.value = element.psychPlatformName;
-    }
-  });
-};
-
-//TODO: CHECK THIS ONE ----------------------------------------------------------
-
-const selectPsychPlatform = (data) => {
-  psychTestPlatformId.value = data.id;
-  selectedPsychTestPlatform.value = data.psychPlatformName;
-  psychPlatformLink.value = data.link;
-
-  if (data.requireCredentials == 1) {
-    psychPlatformRequireCredentials.value = true;
-    sendLink.value = false; // if you are selecting a psych platform option then the status of the send free links will return to the default status(false)
-  } else {
-    psychPlatformRequireCredentials.value = false;
   }
 };
 
@@ -1090,7 +1082,7 @@ const selectCandidateById = async () => {
         if (sendedEmails && sendedMessages) {
           $q.notify(
             notifyPositive(
-              "Se han notificado a los candidato a los demás candidatos",
+              "Se han notificado a los demás candidatos",
               3000
             )
           );

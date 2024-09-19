@@ -6,6 +6,7 @@
         <PaginationApplication
           :page="6"
           :required-fields="requiredFieldsOnThisPage"
+          @on-field-validation="validateRequiredFields"
         ></PaginationApplication>
 
         <div v-if="!viewingApplication" style="margin-top: 6%">
@@ -44,10 +45,10 @@
             padding-top: 2%;
           "
         >
-          Datos de Padres y Esposa(o)
-          * Es obligatorio ingresar mínimo 2 personas *
+          Datos de Padres y Esposa(o) * Es obligatorio ingresar mínimo 2
+          personas *
         </p>
-        <FamilyFathers class="table-position" />
+        <FamilyFathers ref="familyFathersDataRef" class="table-position" />
         <br />
         <p
           style="
@@ -71,7 +72,7 @@
 
 <!-- SCRIPT BEGGINS ............................................................................................................................ -->
 <script setup>
-import { computed, onBeforeMount } from "vue";
+import { computed, onBeforeMount, ref } from "vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
 import FamilyFathers from "src/components/TableFamilyData.vue";
@@ -79,14 +80,22 @@ import FamilySons from "src/components/TableFamilyData2.vue";
 import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
 import { useLocalStorageStore } from "src/stores/localStorage";
+import { notifyNegativeField } from "src/utils/notifies";
+import { useQuasar } from "quasar";
 
+const $q = useQuasar()
 const useLocalStorage = useLocalStorageStore();
 const useApplication = useRequestUser();
 
+const familyFathersDataRef = ref(null);
 
-const { updatingApplication, familyFathersData, viewingApplication, savedApplication } =
-  storeToRefs(useApplication);
 
+
+const {
+  updatingApplication,
+  familyFathersData,
+  viewingApplication
+} = storeToRefs(useApplication);
 
 const requiredFieldsOnThisPage = computed(() => {
   if (familyFathersData.value[0] && familyFathersData.value[1]) {
@@ -105,18 +114,55 @@ const requiredFieldsOnThisPage = computed(() => {
   }
 });
 
+const validateRequiredFields = () => {
+  if(familyFathersData.value.length === 3)
+  return;
+
+  let missingFields = [];
+
+  for (let index = 0; index < familyFathersData.value.length; index++) {
+    let rowMissingFields = [];
+
+    // Check each field in the current row
+    if (!familyFathersData.value[index].relationship) {
+      rowMissingFields.push("Parentesco");
+    }
+    if (!familyFathersData.value[index].name) {
+      rowMissingFields.push("Nombre");
+    }
+    if (!familyFathersData.value[index].birthdate) {
+      rowMissingFields.push("Fecha de nacimiento");
+    }
+    if (!familyFathersData.value[index].job) {
+      rowMissingFields.push("Trabajo");
+    }
+    if (!familyFathersData.value[index].jobAddress) {
+      rowMissingFields.push("Dirección de su trabajo");
+    }
+
+    // If there are missing fields for this row, add them to the missingFields array
+    if (rowMissingFields.length > 0) {
+      missingFields.push(`Fila ${index + 1}: ${rowMissingFields.join(", ")}`);
+    }
+  }
+
+  // Construct the notification message
+  if (missingFields.length > 0) {
+    let message = `Campos faltantes:\n\n${missingFields.join("\n\n")}`;
+    $q.notify(notifyNegativeField(message));
+  }
+};
+
 onBeforeMount(() => {
   loadLocalStore();
-})
-
+});
 
 const loadLocalStore = () => {
   const localStoreData = useLocalStorage.load("familyFathersData");
 
-  if (localStoreData && !viewingApplication.value && !updatingApplication.value
-  ) familyFathersData.value = localStoreData;
+  if (localStoreData && !viewingApplication.value && !updatingApplication.value)
+    familyFathersData.value = localStoreData;
 };
-
 </script>
 
 <!-- STYLE BEGGINS ............................................................................................................................ -->

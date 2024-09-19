@@ -122,6 +122,26 @@ export const createUser = async (userName, email, curp, password) => {
   }
 };
 
+export const updateUser = async (userName, email, curp, id) => {
+  const newUserData = {
+    id: id,
+    userName: userName,
+    email: email,
+    curp: curp
+  }
+  try {
+    const request = await axios.put(`users`, newUserData)
+    if(requestSuccessfull(request.status)){
+      return true;
+    }else{
+      return false;
+    }
+  } catch (error) {
+    console.log(error.message)
+    return false;
+  }
+}
+
 export const updateUserImage = async (userId, imageUUID) => {
   try {
     const request = await axios.put(`users/${userId}/image/${imageUUID}`);

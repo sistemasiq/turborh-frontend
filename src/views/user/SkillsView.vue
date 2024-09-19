@@ -9,7 +9,14 @@
       </q-card-section>
       <q-card-section class="content">
         <pagination-application :page="9"></pagination-application>
-        <div style="margin-top: 6%">
+        <p
+          class="text-h5 text-center q-mt-xl text-white"
+          v-if="hasNoSkillsRegistered"
+        >
+          Sin oficios registrados
+        </p>
+        <div v-if="!hasNoSkillsRegistered" style="margin-top: 6%">
+
           <div class="q-mt-xl">
             <q-btn-dropdown
               v-if="!viewingApplication"
@@ -104,6 +111,7 @@ import { notifyPositive } from "src/utils/notifies";
 const $q = useQuasar();
 const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();
+const hasNoSkillsRegistered = ref(false);
 
 const {
   officesData,
@@ -140,6 +148,7 @@ onMounted(() => {
 
 const setSavedStoredValues = () => {
   officesData.value = savedApplication.value.conocimientos_oficios;
+  hasNoSkillsRegistered.value = officesData.value.length === 0
 };
 
 const setStoredValues = () => {
@@ -180,8 +189,8 @@ const removeOffice = (item) => {
 };
 
 const saveLocalStore = () => {
-  useLocalStorage.save("officesData", officesData.value);
   if (!viewingApplication.value && !updatingApplication.value) {
+    useLocalStorage.save("officesData", officesData.value);
     $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
   }
 };

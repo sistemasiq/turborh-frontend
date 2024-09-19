@@ -335,8 +335,13 @@ const addUser = async () => {
   try {
 
     $q.loading.show();
-    const newUserData = await createUser(userName.value, email.value, curp.value, password.value)
+    const trimmedUserName = userName.value.trim();
+    const trimmedEmail = email.value.trim();
+    const trimmedCurp = curp.value.trim();
+    const trimmedPassword = password.value.trim();
 
+    // Pass the trimmed values to the createUser function
+    const newUserData = await createUser(trimmedUserName, trimmedEmail, trimmedCurp, trimmedPassword);
     if (newUserData) {
       logged.value = 1;
       user.value = newUserData;

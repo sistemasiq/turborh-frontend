@@ -499,6 +499,9 @@ const onNumberTypePaste = (event) => {
 };
 
 const setDefaultJobValues = () => {
+  if(!jobData.value)
+  return;
+
   if (!showingDetails.value && !updatingRequisition.value) {
     console.log("set default value: ", jobData.value);
     travelAvailabilityRequired.value =

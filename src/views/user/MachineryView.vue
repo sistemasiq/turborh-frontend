@@ -9,7 +9,15 @@
       </q-card-section>
       <q-card-section class="handling-content">
         <pagination-application :page="8" />
+
+        <p
+          class="text-h5 text-center q-mt-xl text-white"
+          v-if="hasNoMachineryRegistered"
+        >
+          Sin maquinaría registrada
+        </p>
         <div v-if="!viewingApplication" style="margin-top: 4%">
+          <p>Maquinaria y herramientas que manejas</p>
           <q-btn-dropdown
             :disable="machinery.length === 0"
             class="q-mb-md button-dropdown"
@@ -284,7 +292,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
@@ -316,11 +324,12 @@ const measuringInstruments = ref([]);
 
 const otherTools = ref([]);
 
-onMounted(() => {
+const hasNoMachineryRegistered = ref(false);
 
+onMounted(() => {
   fillCatalog();
 
-  if(!viewingApplication.value && !updatingApplication.value){
+  if (!viewingApplication.value && !updatingApplication.value) {
     loadLocalStore();
   }
 
@@ -335,41 +344,36 @@ onMounted(() => {
 });
 
 const fillCatalog = async () => {
-
-  if(viewingApplication.value)
-  return;
+  if (viewingApplication.value) return;
 
   try {
-    const catalog = await getAllMachineryActive()
+    const catalog = await getAllMachineryActive();
 
-    if(catalog) {
-      catalog.forEach(element => {
+    if (catalog) {
+      catalog.forEach((element) => {
         switch (element.type) {
           case "MA":
-
             machinery.value.push(element.name);
             break;
           case "HE":
-            tools.value.push(element.name); // Assuming tools is a ref
+            tools.value.push(element.name);
             break;
           case "IN":
-            measuringInstruments.value.push(element.name); // Assuming measuringInstruments is a ref
-            break;
+            measuringInstruments.value.push(element.name);
           case "OT":
-
-          otherTools.value.push(element.name);
+            otherTools.value.push(element.name);
             break;
           default:
             break;
         }
-      })
-
+      });
     }
-  } catch (error) {
 
-  }
 
-}
+  } catch (error) {}
+};
+
+
 
 const setSavedStoredValues = () => {
   if (machineryData.value.length === 0) {
@@ -403,6 +407,9 @@ const setSavedStoredValues = () => {
       }
     });
   }
+
+  hasNoMachineryRegistered.value = machineryData.value.length === 0 && toolsData.value.length === 0 && measuringInstrumentsData.value.length === 0 && otherToolsData.value.length === 0;
+
 };
 
 const setStoredValues = () => {
@@ -416,7 +423,6 @@ const setStoredValues = () => {
     removeRepeatedMeasuringInstrument(element.measuringInstrumentName);
   });
   otherToolsData.value.forEach((element) => {
-
     removeRepeatedOtherTool(element.otherToolName);
   });
 };
@@ -543,9 +549,7 @@ const sortAlphabetical = (array) => {
 };
 
 const saveLocalStore = () => {
-
-  if(viewingApplication.value || updatingApplication.value)
-  return;
+  if (viewingApplication.value || updatingApplication.value) return;
 
   useLocalStorage.save("machineryData", machineryData.value);
   useLocalStorage.save("toolsData", toolsData.value);
@@ -554,10 +558,7 @@ const saveLocalStore = () => {
     "measuringInstrumentsData",
     measuringInstrumentsData.value
   );
-
-  if (!viewingApplication.value && !updatingApplication.value) {
-    $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
-  }
+  $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
 };
 
 const loadLocalStore = () => {

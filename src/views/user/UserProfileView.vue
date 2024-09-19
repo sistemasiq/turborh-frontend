@@ -130,6 +130,13 @@
             <p v-if="age !== '' && age !== 0" class="text-h6">
               Edad: {{ age }}
             </p>
+            <q-btn
+              class="text-black"
+              color="white"
+              icon="edit"
+              label="Editar información"
+              @click.prevent="openEditInfo = true"
+            />
           </q-card-section>
         </div>
 
@@ -147,6 +154,37 @@
       </q-page>
     </q-page-container>
   </q-layout>
+
+  <q-dialog v-model="openEditInfo" persistent>
+    <q-card style="width: 100%">
+      <q-card-section class="column items-left q-pa-md">
+        <q-input
+          outlined
+          v-model="userNameEdit"
+          type="text"
+          label="Nombre de usuario"
+        />
+        <q-input
+          outlined
+          class="q-mt-md"
+          v-model="curpEdit"
+          type="text"
+          label="CURP"
+        />
+        <q-input
+          outlined
+          class="q-mt-md"
+          v-model="emailEdit"
+          type="text"
+          label="Correo electrónico"
+        />
+      </q-card-section>
+      <q-card-actions align="right">
+        <q-btn flat label="Cancelar" color="primary" v-close-popup />
+        <q-btn label="Editar" color="primary" @click.prevent="updateUserData" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
@@ -159,9 +197,10 @@ import { ref, onMounted, computed, watch, onUnmounted } from "vue";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { getUserImagesPath } from "src/utils/folderPaths";
 import { getAge } from "src/utils/operations";
-import { updateUserImage } from "src/services/user";
+import { updateUserImage, updateUser } from "src/services/user";
 import { uploadFile, updateFile } from "src/services/files";
 import { useQuasar } from "quasar";
+import { notifyNegative, notifyPositive } from "src/utils/notifies";
 
 const $q = useQuasar();
 const useLocalStorage = useLocalStorageStore();
@@ -169,6 +208,12 @@ const useRequest = useRequestUser();
 const useAuth = useAuthStore();
 const selectedImage = ref();
 const newImage = ref();
+
+const userNameEdit = ref("");
+const curpEdit = ref("");
+const emailEdit = ref("");
+
+const openEditInfo = ref(false);
 
 const { user, getUserPhotoUUID } = storeToRefs(useAuth);
 const { savedApplication } = storeToRefs(useRequest);
@@ -189,6 +234,32 @@ const selectedImageURL = ref("");
 onMounted(() => {
   setUserInfo();
 });
+
+const updateUserData = async () => {
+  try {
+    $q.loading.show();
+    const updated = await updateUser(
+      userNameEdit.value,
+      emailEdit.value,
+      curpEdit.value,
+      user.value.id
+    );
+    if (updated) {
+      openEditInfo.value = false;
+      user.value.userName = userNameEdit.value
+      user.value.email = emailEdit.value;
+      user.value.curp = curpEdit.value;
+      userName.value = userNameEdit.value;
+      useLocalStorage.save("user", user.value)
+      $q.notify(notifyPositive("Tu información ha sido actualizada"))
+    }
+  } catch (error) {
+    console.log(error);
+    $q.notify(notifyNegative("Hubo un problema al actualizar tu información"))
+  } finally{
+    $q.loading.hide();
+  }
+};
 
 const updateSelectedImageURL = () => {
   if (!selectedImage.value) {
@@ -232,6 +303,10 @@ const setUserInfo = () => {
 
   if (userStored) {
     user.value = userStored;
+    console.log(user.value);
+    userNameEdit.value = user.value.userName;
+    curpEdit.value = user.value.curp;
+    emailEdit.value = user.value.email;
   }
 
   if (applicationStored) {

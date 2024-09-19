@@ -275,8 +275,7 @@ import {
   computed,
   onBeforeMount,
   watch,
-  onBeforeUnmount,
-  onMounted,
+  onBeforeUnmount
 } from "vue";
 import { getSessionStorageItem } from "src/stores/sessionStorage.js";
 import { useAuthStore } from "src/stores/auth";
@@ -298,6 +297,7 @@ import {
   initInterceptors,
 } from "src/services/setupInterceptors";
 import ApplicationModifications from "src/components/ApplicationModifications.vue";
+
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
@@ -332,6 +332,7 @@ const {
   userHasApplication,
 } = storeToRefs(useRequest);
 
+
 const openNote = ref(false);
 
 const activeApplication = ref(false);
@@ -359,6 +360,8 @@ onBeforeUnmount(() => {
 const removeUserApplicationOnAdminUser = () => {
   if (!isRh.value && !isAdmin.value && !isBoss.value) return;
 
+  savedApplication.value = {}
+  useRequest.clearMachinery()
   useLocalStorage.remove("savedApplication");
   useLocalStorage.remove("addingNotesApplicationId");
 };
@@ -435,7 +438,15 @@ const loadLocalStorage = () => {
 };
 
 const goToRequisitionApplicants = () => {
-  router.back();
+  if (viewAllRequisitions.value) {
+    router.replace("/home/historial-solicitudes");
+    return;
+  }
+  if (viewAllSelectedCandidates.value) {
+    router.replace("/home/candidatos-seleccionados");
+    return;
+  }
+  router.replace("/home/historial-requisiciones-solicitudes");
 };
 
 const redirectToLogin = () => {

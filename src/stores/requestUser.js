@@ -147,6 +147,14 @@ export const useRequestUser = defineStore("requestUser", () => {
     )
   );
 
+  const clearMachinery = () => {
+
+    machineryData.value = []
+    toolsData.value = []
+    measuringInstrumentsData.value = []
+    otherToolsData.value = []
+  }
+
   const officesData = ref([]);
 
   const laboralExperienceData = ref([
@@ -159,6 +167,7 @@ export const useRequestUser = defineStore("requestUser", () => {
       lastBossPosition: "",
       startDate: "",
       endDate: "",
+      currentlyWorking: false,
       startingPosition: "",
       endingPosition: "",
       startMontlySalary: "",
@@ -214,6 +223,7 @@ export const useRequestUser = defineStore("requestUser", () => {
     updatingApplication,
     fullName,
     userHasApplication,
-    curriculumStored
+    curriculumStored,
+    clearMachinery
   };
 });

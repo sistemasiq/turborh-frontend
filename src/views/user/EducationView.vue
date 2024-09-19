@@ -9,6 +9,7 @@
         <PaginationApplication
           :page="7"
           :required-fields="requiredFieldsOnThisPage"
+          @on-field-validation="validateRequiredFields"
         ></PaginationApplication>
       </q-card-section>
 
@@ -54,6 +55,7 @@
                 Secundaria
               </div>
               <q-input
+                ref="secondaryRef"
                 ligth
                 outlined
                 color="cyan-1"
@@ -63,6 +65,7 @@
                 class="input-brand"
                 style="width: 100%"
                 :readonly="viewingApplication"
+                :rules="[ruleFieldRequired]"
                 @update:model-value="updateStore()"
               >
               </q-input>
@@ -73,6 +76,7 @@
                 ¿Qué estudió?
               </div>
               <q-input
+                ref="secondarySpecialityRef"
                 ligth
                 outlined
                 color="cyan-1"
@@ -81,6 +85,7 @@
                 label-color="grey-8"
                 class="input-brand"
                 style="width: 100%"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
               >
@@ -99,17 +104,19 @@
                 class="row justify-between"
               >
                 <q-input
+                  ref="dateStartSecondaryRef"
                   filled
                   v-model="dateStartSecondary"
                   label="AAAA/MM/DD *"
                   light
                   outlined
+                  :rules="[ruleFieldRequired]"
                   color="grey-7"
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
                 >
-                  <template v-slot:append>
+                  <template v-if="!viewingApplication" v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy
                         cover
@@ -138,17 +145,19 @@
                 </q-input>
 
                 <q-input
+                  ref="dateEndSecondaryRef"
                   filled
                   v-model="dateEndSecondary"
                   label="AAAA/MM/DD *"
                   ligth
                   outlined
                   color="grey-7"
+                  :rules="[ruleFieldRequired]"  
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
                 >
-                  <template v-slot:append>
+                  <template v-if="!viewingApplication" v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy
                         cover
@@ -294,7 +303,7 @@
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
                 >
-                  <template v-slot:append>
+                  <template v-if="!viewingApplication" v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy
                         cover
@@ -333,7 +342,7 @@
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
                 >
-                  <template v-slot:append>
+                  <template v-if="!viewingApplication" v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy
                         cover
@@ -476,7 +485,7 @@
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
                 >
-                  <template v-slot:append>
+                  <template v-if="!viewingApplication" v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy
                         cover
@@ -515,7 +524,7 @@
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
                 >
-                  <template v-slot:append>
+                  <template v-if="!viewingApplication" v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy
                         cover
@@ -659,7 +668,7 @@
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
                 >
-                  <template v-slot:append>
+                  <template v-if="!viewingApplication" v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy
                         cover
@@ -698,7 +707,7 @@
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
                 >
-                  <template v-slot:append>
+                  <template v-if="!viewingApplication" v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy
                         cover
@@ -842,7 +851,7 @@
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
                 >
-                  <template v-slot:append>
+                  <template v-if="!viewingApplication" v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy
                         cover
@@ -881,7 +890,7 @@
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
                 >
-                  <template v-slot:append>
+                  <template v-if="!viewingApplication" v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
                       <q-popup-proxy
                         cover
@@ -1192,6 +1201,7 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
+import { ruleFieldRequired } from "src/utils/fieldRules";
 
 const $q = useQuasar();
 const useRequest = useRequestUser();
@@ -1282,6 +1292,18 @@ const careers = [
   "Relaciones Internacionales",
   "Carreras afines u otras",
 ];
+
+const secondaryRef = ref(null);
+const secondarySpecialityRef = ref(null);
+const dateStartSecondaryRef = ref(null);
+const dateEndSecondaryRef = ref(null);
+
+const validateRequiredFields = () => {
+  secondaryRef.value.validate();
+  secondarySpecialityRef.value.validate();
+  dateEndSecondaryRef.value.validate();
+  dateStartSecondaryRef.value.validate();
+};
 
 const requiredFieldsOnThisPage = computed(() => [
   secondary.value,
@@ -1617,8 +1639,8 @@ const clean = () => {
 };
 
 const saveLocalStore = () => {
-  useLocalStorage.save("educationData", educationData.value);
   if (!viewingApplication.value && !updatingApplication.value) {
+    useLocalStorage.save("educationData", educationData.value);
     $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
   }
 };

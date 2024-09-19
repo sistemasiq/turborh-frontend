@@ -7,31 +7,46 @@
       <q-card-section class="title"> {{ pageTitle }} </q-card-section>
 
       <q-card-section class="content" style="max-width: 100%">
-        <pagination-application :page="1" :required-fields="requiredFieldsOnThisPage"/>
+        <pagination-application
+          :page="1"
+          :required-fields="requiredFieldsOnThisPage"
+          @on-field-validation="validateRequiredFields"
+        />
 
         <div style="margin-top: 6%">
-        <q-card flat bordered text-color="white"
-  class="q-mb-lg"
-  style="margin-left: 0%; border-color: rgb(255, 248, 43);
-  background-color: transparent; color: white; width: 100%; height: 80px;"
-  v-if="!viewingApplication"
->
-  <q-card-section>
-    <div class="text-body1 text-weight-medium row">
-      <q-icon name="warning" class="q-mr-md q-mt-xs" />
-      Nota
-    </div>
-    <p class="text-body2">
-     Todos los campos de esta pantalla son requeridos para avanzar a la siguiente
-    </p>
-  </q-card-section>
-</q-card>
-</div>
+          <q-card
+            flat
+            bordered
+            text-color="white"
+            class="q-mb-lg"
+            style="
+              margin-left: 0%;
+              border-color: rgb(255, 248, 43);
+              background-color: transparent;
+              color: white;
+              width: 100%;
+              height: 80px;
+            "
+            v-if="!viewingApplication"
+          >
+            <q-card-section>
+              <div class="text-body1 text-weight-medium row">
+                <q-icon name="warning" class="q-mr-md q-mt-xs" />
+                Nota
+              </div>
+              <p class="text-body2">
+                Todos los campos de esta pantalla son requeridos para avanzar a
+                la siguiente
+              </p>
+            </q-card-section>
+          </q-card>
+        </div>
 
         <div class="inputs q-mt-sm" align="center" style="width: 100%">
           <div class="row">
             <q-form class="q-mt-xl q-mr-lg" style="width: 40%; height: 100%">
               <q-input
+                ref="nameRef"
                 dark
                 outlined
                 color="cyan-1"
@@ -39,9 +54,7 @@
                 type="text"
                 label="Nombre(s) *"
                 label-color="white"
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 @update:modelValue="updateStore()"
                 class="input-brand"
@@ -49,6 +62,7 @@
               </q-input>
 
               <q-input
+              ref="firstLastNameRef"
                 dark
                 outlined
                 color="cyan-1"
@@ -56,9 +70,7 @@
                 type="text"
                 label="Apellido paterno *"
                 label-color="white"
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 @update:modelValue="updateStore()"
                 :readonly="viewingApplication"
                 class="input-brand"
@@ -66,6 +78,7 @@
               </q-input>
 
               <q-input
+              ref="secondLastNameRef"
                 dark
                 outlined
                 color="cyan-1"
@@ -73,15 +86,14 @@
                 type="text"
                 label="Apellido materno *"
                 label-color="white"
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 @update:modelValue="updateStore()"
                 class="input-brand"
               >
               </q-input>
               <q-input
+                ref="wantedSalaryRef"
                 prefix="$ MXN"
                 dark
                 outlined
@@ -92,16 +104,16 @@
                 label="Sueldo mensual deseado *"
                 label-color="white"
                 lazy-rules
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 @update:modelValue="updateStore()"
                 :readonly="viewingApplication"
                 class="input-brand"
               >
               </q-input>
               <div style="margin-left: 20%" class="row q-ml-lg q-mt-sm">
-                <p style="color: white" class="q-mt-md q-mr-lg q-ml-lg">Sexo *</p>
+                <p style="color: white" class="q-mt-md q-mr-lg q-ml-lg">
+                  Sexo *
+                </p>
                 <q-radio
                   color="cyan"
                   unchecked-icon="radio_button_unchecked"
@@ -141,7 +153,6 @@
                   :disable="viewingApplication"
                   @update:modelValue="updateStore()"
                 />
-
               </div>
             </q-form>
             <div
@@ -156,7 +167,6 @@
           </div>
         </div>
 
-
         <q-btn
           v-if="!viewingApplication && !updatingApplication"
           class="btn-clean q-mt-xl"
@@ -167,22 +177,25 @@
           icon="cleaning_services"
           @click.prevent="clean"
         />
-
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPage"/>
+    <ButtonApplicationStatus
+      v-if="updatingApplication"
+      :required-fields="requiredFieldsOnThisPage"
+    />
   </q-layout>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import { ruleFieldRequired } from "src/utils/fieldRules";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
 import PaginationApplication from "src/components/PaginationApplication.vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { useLocalStorageStore } from "src/stores/localStorage";
-import { notifyPositive } from "src/utils/notifies";
+import { notifyNegativeField, notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 import { getUserImagesPath } from "src/utils/folderPaths";
 import { useAuthStore } from "src/stores/auth";
@@ -194,9 +207,13 @@ const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();
 
 const name = ref("");
+const nameRef = ref(null);
 const firstLastName = ref("");
+const firstLastNameRef = ref(null);
 const secondLastName = ref("");
+const secondLastNameRef = ref(null)
 const wantedSalary = ref(0);
+const wantedSalaryRef = ref(null)
 const genderChoosed = ref();
 const photoUUID = ref("");
 
@@ -255,6 +272,18 @@ onMounted(() => {
     setStoredValues();
   }
 });
+
+const validateRequiredFields = () => {
+  nameRef.value.validate()
+  firstLastNameRef.value.validate()
+  secondLastNameRef.value.validate()
+  wantedSalaryRef.value.validate()
+
+  if(!genderChoosed.value){
+    $q.notify(notifyNegativeField("Selecciona tu sexo por favor"))
+  }
+
+};
 
 //JAJAJA SPANGLISH
 //He llegado a un punto que no quiero ni refactorizar el JSON del stored procedure
@@ -432,13 +461,14 @@ const setFilesJsonSavedValues = () => {
   commercialReferencesData.value =
     savedApplication.value.referencias_comerciales;
 
-  if (familyFathersData.value.length === 0) {
+    familyFathersData.value = [];
     savedApplication.value.datos_familiares.forEach((element) => {
       if (element.job != null) {
         familyFathersData.value.push(element);
       }
     });
-  }
+
+
 
   if (familySonsData.value.length === 0) {
     savedApplication.value.datos_familiares.forEach((element) => {
@@ -516,8 +546,8 @@ const clean = () => {
 
 
 const saveLocalStore = () => {
-  useLocalStorage.save("frontpage", frontPageData.value);
   if(!viewingApplication.value && !updatingApplication.value){
+    useLocalStorage.save("frontpage", frontPageData.value);
     $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
   }
 };

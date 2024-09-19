@@ -274,9 +274,10 @@ const clean = () => {
 };
 
 const saveLocalStore = () => {
-  useLocalStorage.save("personalData", personalData.value);
+
 
   if (!viewingApplication.value && !updatingApplication.value) {
+    useLocalStorage.save("personalData", personalData.value);
     $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
   }
 };

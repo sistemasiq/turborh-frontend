@@ -1,37 +1,38 @@
 <template>
   <q-layout v-on:vnode-unmounted="saveLocalStore()">
     <div style="margin-top: 6%">
-        <div
-          style="display: flex; flex-grow: 1; margin-left: 2%; margin-right: 2%"
+      <div
+        style="display: flex; flex-grow: 1; margin-left: 2%; margin-right: 2%"
+      >
+        <q-card
+          flat
+          bordered
+          rounded
+          text-color="white"
+          class="q-mb-lg"
+          style="
+            margin-left: 0%;
+            border-color: rgb(255, 248, 43);
+            background-color: transparent;
+            color: white;
+            width: 100%;
+            height: 80px;
+          "
+          v-if="!viewingApplication"
         >
-          <q-card
-            flat
-            bordered
-            rounded
-            text-color="white"
-            class="q-mb-lg"
-            style="
-              margin-left: 0%;
-              border-color: rgb(255, 248, 43);
-              background-color: transparent;
-              color: white;
-              width: 100%;
-              height: 80px;
-            "
-            v-if="!viewingApplication"
-          >
-            <q-card-section>
-              <div class="text-body1 text-weight-medium row">
-                <q-icon name="warning" class="q-mr-md q-mt-xs" />
-                Nota
-              </div>
-              <p class="text-body2">
-                Ordena tu experiencia laboral comenzando por añadir tu último empleo que tuviste hasta el primero
-              </p>
-            </q-card-section>
-          </q-card>
-        </div>
+          <q-card-section>
+            <div class="text-body1 text-weight-medium row">
+              <q-icon name="warning" class="q-mr-md q-mt-xs" />
+              Nota
+            </div>
+            <p class="text-body2">
+              Ordena tu experiencia laboral comenzando por añadir tu último
+              empleo que tuviste hasta el primero
+            </p>
+          </q-card-section>
+        </q-card>
       </div>
+    </div>
     <q-expansion-item
       v-for="(item, index) in laboralExperienceData"
       :key="index"
@@ -104,7 +105,7 @@
             outlined
             v-model="item.lastBossName"
             color="cyan-1"
-            style="width: 30%"
+            style="width: 25%"
             inline
             lazy-rules
             :rules="[lettersRule]"
@@ -119,7 +120,7 @@
             outlined
             v-model="item.lastBossPosition"
             color="cyan-1"
-            style="width: 30%"
+            style="width: 25%"
             inline
             lazy-rules
             :rules="[positionRule]"
@@ -141,10 +142,10 @@
             dark
             outlined
             color="cyan-1"
-            style="width: 18%"
+            style="width: 17%"
             label="Fecha de inicio"
           >
-            <template v-slot:append>
+            <template v-if="!viewingApplication" v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
                   cover
@@ -169,6 +170,7 @@
             </template>
           </q-input>
           <q-input
+            v-if="!item.currentlyWorking"
             v-model="item.endDate"
             filled
             hint="AAAA/MM/DD"
@@ -180,10 +182,10 @@
             dark
             outlined
             color="cyan-1"
-            style="width: 18%"
+            style="width: 17%"
             label="Fecha de fin"
           >
-            <template v-slot:append>
+            <template v-if="!viewingApplication" v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
                   cover
@@ -204,6 +206,15 @@
               </q-icon>
             </template>
           </q-input>
+          <q-checkbox
+            :disable="viewingApplication"
+            dark
+            color="cyan"
+            v-model="item.currentlyWorking"
+            label="Aún trabajo aquí"
+            class="text-white"
+            @update:model-value="onCurrentlyWorking(item.currentlyWorking, item)"
+          />
         </div>
 
         <div
@@ -309,10 +320,7 @@
         </q-input>
       </q-card>
     </q-expansion-item>
-    <div
-      v-if="!viewingApplication"
-      class="full-width row justify-end"
-    >
+    <div v-if="!viewingApplication" class="full-width row justify-end">
       <q-btn
         v-if="!viewingApplication"
         flat
@@ -338,7 +346,7 @@
         :disable="laboralExperienceData.length === 1"
       />
     </div>
-    <ButtonApplicationStatus v-if="updatingApplication"/>
+    <ButtonApplicationStatus v-if="updatingApplication" />
   </q-layout>
 </template>
 
@@ -348,7 +356,7 @@
 
 <script setup>
 import ButtonApplicationStatus from "./ButtonApplicationStatus.vue";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, readonly } from "vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
@@ -378,12 +386,26 @@ onMounted(() => {
     }
   } else {
     setCurrentIndex();
-
   }
 });
 
+const onCurrentlyWorking = (currentlyWorking, item) => {
+  if (currentlyWorking) {
+    item.endDate = "";
+  }
+};
+
+const onEndDateEmpty = (item) => {
+
+  item.currentlyWorking = item.endDate === "" ? true: false;
+}
+
 const setSavedStoredValues = () => {
   laboralExperienceData.value = savedApplication.value.experiencia_laboral;
+
+  laboralExperienceData.value.forEach((item) => {
+    onEndDateEmpty(item);
+  })
 };
 
 //TODO: Encontrar una mejor manera para checar cada campo del objeto en el arreglo
@@ -420,7 +442,7 @@ const addLaboralExperience = () => {
     startMontlySalary: "",
     endingMontlySalary: "",
     functionsPerformed: "",
-    separationCause: ""
+    separationCause: "",
   });
   laboralExperienceData.value[currentIndex.value].expanded = false;
   currentIndex.value++;
@@ -432,11 +454,10 @@ const removeLaboralExperience = () => {
 };
 
 const setCurrentIndex = () => {
-
-  if(laboralExperienceData.value.length > 0){
+  if (laboralExperienceData.value.length > 0) {
     currentIndex.value = laboralExperienceData.value.length - 1;
   }
-}
+};
 
 /* INPUTS KEY - VALUE - RULES -------------------------------------- */
 
@@ -538,8 +559,8 @@ const dateRule = (value) => {
 };
 
 const saveLocalStore = () => {
-  useLocalStorage.save("laboralExperienceData", laboralExperienceData.value);
   if (!viewingApplication.value && !updatingApplication.value) {
+    useLocalStorage.save("laboralExperienceData", laboralExperienceData.value);
     $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
   }
 };
@@ -548,7 +569,6 @@ const loadLocalStore = () => {
   const localStoreData = useLocalStorage.load("laboralExperienceData");
 
   if (localStoreData) laboralExperienceData.value = localStoreData;
-
 };
 </script>
 
@@ -562,5 +582,4 @@ const loadLocalStore = () => {
   border-radius: 10px;
   background: rgb(30, 30, 30);
 }
-
 </style>

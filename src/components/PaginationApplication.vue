@@ -10,7 +10,7 @@
     />
   </div>
   <div class="absolute-right q-mt-md q-mr-md q-mb-xl">
-    <q-btn v-if="currentPage > 1" class="q-mr-sm" color="cyan" round icon="home" @click.prevent="goToFrontPage">
+    <q-btn v-if="currentPage > 1" class="q-mr-sm" color="cyan" round icon="home" @click.prevent="goToFirstPage">
       <q-tooltip class="text-body2"
               transition-show="scale"
               transition-hide="scale" anchor="top middle"  self="bottom middle" :offset="[10, 10]">
@@ -24,14 +24,14 @@
           Anterior
         </q-tooltip>
     </q-btn>
-    <q-btn :disable="disableNextButton" v-if="currentPage < maxPages" class="q-mr-sm" color="cyan" round icon="navigate_next" @click.prevent="nextPage">
+    <q-btn v-if="currentPage < maxPages" class="q-mr-sm" color="cyan" round icon="navigate_next" @click.prevent="nextPage">
       <q-tooltip class="text-body2"
               transition-show="scale"
               transition-hide="scale" anchor="top middle"  self="bottom middle" :offset="[10, 10]">
-          {{ disableNextButton ? 'Llena primero los campos necesarios' : 'Siguiente' }}
+              Siguiente
         </q-tooltip>
     </q-btn>
-    <q-btn :disable="disableNextButton" v-if="currentPage < 11 && (viewingApplication || updatingApplication)" color="cyan" round icon="done" @click.prevent="goToLaboralExperience">
+    <q-btn :disable="disableNextButton" v-if="currentPage < 11 && (viewingApplication || updatingApplication)" color="cyan" round icon="done" @click.prevent="goToEndPage">
       <q-tooltip class="text-body2"
               transition-show="scale"
               transition-hide="scale" anchor="top middle"  self="bottom middle" :offset="[10, 10]">
@@ -51,6 +51,7 @@ import { storeToRefs } from "pinia";
 const useRequest = useRequestUser();
 const router = useRouter();
 const props = defineProps(["page", "requiredFields"]);
+const emit = defineEmits(["onFieldValidation"])
 
 const currentPage = ref(0);
 
@@ -85,6 +86,11 @@ watch(props, (newProps) => {
 });
 
 const nextPage = () => {
+  emit("onFieldValidation");
+
+  if(disableNextButton.value)
+  return;
+
   const nextPageIndex = currentPage.value + 1;
   router.push(`/userHome/solicitud-${nextPageIndex}`);
 }
@@ -93,11 +99,11 @@ const previousPage = () => {
   router.push(`/userHome/solicitud-${previousPageIndex}`);
 }
 
-const goToFrontPage = () => {
+const goToFirstPage = () => {
   router.push("/userHome/solicitud-1");
 }
 
-const goToLaboralExperience = () => {
+const goToEndPage = () => {
   router.push("/userHome/solicitud-11");
 }
 
