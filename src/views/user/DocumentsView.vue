@@ -212,10 +212,13 @@ const rfcRef = ref(null);
 const imssRef = ref(null);
 
 const validateRequiredFields = () => {
+  if(viewingApplication.value)
+  return;
+
   rfcRef.value.validate();
   imssRef.value.validate();
 
-  if(!curriculumStored.value){
+  if(!curriculumStored.value && !updatingApplication.value){
     $q.notify(notifyNegativeField("Sube tu curriculum por favor"))
   }
 };

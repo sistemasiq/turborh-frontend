@@ -146,12 +146,13 @@ const noteItems = computed(() => {
       const [name, timestamp] = author.split(" el ");
       newNoteItem.name = name;
       newNoteItem.timestamp = timestamp;
-
       if (contentSegment != "" && contentSegment != "null") {
         newNoteItem.content = contentSegment;
       }
     }
 
+    const filteredContent = newNoteItem.content.replace(/null/g, "")
+    newNoteItem.content = filteredContent
     newNoteItem = checkNoteItem(newNoteItem);
 
     noteItems.push(newNoteItem);

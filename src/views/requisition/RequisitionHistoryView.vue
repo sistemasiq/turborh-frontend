@@ -310,7 +310,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
@@ -626,6 +626,11 @@ const disableRequisition = async (requisition) => {
 onMounted(() => {
   fetchRequisitions();
 });
+
+onUnmounted(() => {
+  useLocalStorage.remove("idRequisitionDetails");
+  useLocalStorage.remove("numRequisitionDetails");
+})
 
 const getDesignStatusRequisition = (item) => {
   return {

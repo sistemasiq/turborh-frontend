@@ -198,7 +198,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
-import { ref, computed, watch, onBeforeMount } from "vue";
+import { ref, computed, watch, onBeforeMount, onUnmounted} from "vue";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { useAuthStore } from "src/stores/auth";
 import { useLocalStorageStore } from "src/stores/localStorage";
@@ -230,7 +230,6 @@ onBeforeMount(() => {
   loadLocalStorage();
   initInterceptors(router);
 })
-
 
 const selectedImage = ref();
 

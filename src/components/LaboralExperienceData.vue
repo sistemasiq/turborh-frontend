@@ -418,7 +418,7 @@ const disableAddButton = computed(() => {
     !laboralExperienceData.value[currentIndex.value].lastBossName ||
     !laboralExperienceData.value[currentIndex.value].lastBossPosition ||
     !laboralExperienceData.value[currentIndex.value].startDate ||
-    !laboralExperienceData.value[currentIndex.value].endDate ||
+    !(laboralExperienceData.value[currentIndex.value].endDate || laboralExperienceData.value[currentIndex.value].currentlyWorking) ||
     !laboralExperienceData.value[currentIndex.value].startingPosition ||
     !laboralExperienceData.value[currentIndex.value].endingPosition ||
     !laboralExperienceData.value[currentIndex.value].startMontlySalary ||

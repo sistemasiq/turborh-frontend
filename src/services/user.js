@@ -22,6 +22,8 @@ export const setHeaderAuthorization = (token) => {
 export const logOut = () => {
   useLocalStorage.remove("user");
   useLocalStorage.remove("logged");
+  useLocalStorage.remove("updatingApplication")
+  useLocalStorage.remove("viewingApplication")
   user.value = {};
   logged.value = false;
   removeHeaderAuthorization();

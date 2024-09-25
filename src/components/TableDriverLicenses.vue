@@ -216,6 +216,7 @@ const deleteLastReference = () => {
 };
 
 const saveLocalStore = () => {
+  if(!updatingApplication.value && !viewingApplication.value)
   useLocalStorage.save("drivingLicenceData", drivingLicenceData.value);
 };
 

@@ -11,11 +11,11 @@
         <pagination-application :page="9"></pagination-application>
         <p
           class="text-h5 text-center q-mt-xl text-white"
-          v-if="hasNoSkillsRegistered"
+          v-if="hasNoSkillsRegistered && viewingApplication"
         >
           Sin oficios registrados
         </p>
-        <div v-if="!hasNoSkillsRegistered" style="margin-top: 6%">
+        <div style="margin-top: 6%">
 
           <div class="q-mt-xl">
             <q-btn-dropdown
@@ -112,6 +112,7 @@ const $q = useQuasar();
 const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();
 const hasNoSkillsRegistered = ref(false);
+
 
 const {
   officesData,

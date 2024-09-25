@@ -167,7 +167,7 @@ const disableSendPsychTestButton = computed(() => {
   // Define the logic to disable/enable the send button
   if (
     props.selectedCandidate.candidatePsychData.some(
-      (candidate) => candidate.psychPlatformId === psychTestPlatformId.value
+      (candidate) => (candidate.psychPlatformId === psychTestPlatformId.value ) && candidate.psychPlatformId != 1
     )
   ) {
     return true;

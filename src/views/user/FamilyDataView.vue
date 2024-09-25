@@ -115,7 +115,7 @@ const requiredFieldsOnThisPage = computed(() => {
 });
 
 const validateRequiredFields = () => {
-  if(familyFathersData.value.length === 3)
+  if(familyFathersData.value.length === 3 || viewingApplication.value)
   return;
 
   let missingFields = [];

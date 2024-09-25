@@ -12,7 +12,7 @@
 
         <p
           class="text-h5 text-center q-mt-xl text-white"
-          v-if="hasNoMachineryRegistered"
+          v-if="hasNoMachineryRegistered && viewingApplication"
         >
           Sin maquinaría registrada
         </p>
