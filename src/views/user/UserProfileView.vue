@@ -19,7 +19,7 @@
             </q-img>
 
             <q-btn
-              @click="fixed = !fixed"
+              @click.prevent="fixed = !fixed"
               borderless
               rounded
               clearable
@@ -130,6 +130,13 @@
             <p v-if="age !== '' && age !== 0" class="text-h6">
               Edad: {{ age }}
             </p>
+            <q-btn
+              class="text-black"
+              color="white"
+              icon="edit"
+              label="Editar información"
+              @click.prevent="onEditDialog"
+            />
           </q-card-section>
         </div>
 
@@ -147,6 +154,44 @@
       </q-page>
     </q-page-container>
   </q-layout>
+
+  <q-dialog v-model="openEditInfo" persistent class="z-max">
+    <q-card style="width: 100%">
+      <q-card-section class="column items-left q-pa-md">
+        <q-input
+          outlined
+          v-model="userNameEdit"
+          type="text"
+          @blur="checkIfUserNameAlreadyExists"
+          :rules="[ruleFieldRequired, ruleFieldMinLength(6)]"
+          label="Nombre de usuario"
+        />
+        <q-input
+          outlined
+          class="q-mt-md"
+          v-model="curpEdit"
+          mask="AAAA######AAAAAAX#"
+          @blur="checkIfCurpAlreadyExists"
+          type="text"
+          :rules="[ruleFieldRequired]"
+          label="CURP"
+        />
+        <q-input
+          outlined
+          class="q-mt-md"
+          v-model="emailEdit"
+          @blur="checkIfEmailAlreadyExists"
+          type="text"
+          :rules="[ruleFieldRequired, ruleFieldIsEmail]"
+          label="Correo electrónico"
+        />
+      </q-card-section>
+      <q-card-actions align="right">
+        <q-btn flat label="Cancelar" color="primary" v-close-popup />
+        <q-btn label="Guardar" color="primary" @click.prevent="updateUserData" />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
@@ -159,9 +204,22 @@ import { ref, onMounted, computed, watch, onUnmounted } from "vue";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { getUserImagesPath } from "src/utils/folderPaths";
 import { getAge } from "src/utils/operations";
-import { updateUserImage } from "src/services/user";
+import { updateUserImage, updateUser } from "src/services/user";
 import { uploadFile, updateFile } from "src/services/files";
 import { useQuasar } from "quasar";
+import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import {
+  ruleFieldRequired,
+  ruleFieldMinLength,
+  ruleFieldIsEmail,
+  checkNonEmptyFields
+} from "src/utils/fieldRules";
+import {
+  getUserByUserName,
+  getUserByCurp,
+  getUserByEmail,
+} from "src/services/user";
+import { curpRegex, emailRegex } from "src/utils/fieldRegex";
 
 const $q = useQuasar();
 const useLocalStorage = useLocalStorageStore();
@@ -169,6 +227,12 @@ const useRequest = useRequestUser();
 const useAuth = useAuthStore();
 const selectedImage = ref();
 const newImage = ref();
+
+const userNameEdit = ref("");
+const curpEdit = ref("");
+const emailEdit = ref("");
+
+const openEditInfo = ref(false);
 
 const { user, getUserPhotoUUID } = storeToRefs(useAuth);
 const { savedApplication } = storeToRefs(useRequest);
@@ -186,9 +250,126 @@ const photoUUID = ref("");
 
 const selectedImageURL = ref("");
 
+const userNameValidation = ref(true);
+const curpValidation = ref(true);
+const emailValidation = ref(true);
+
 onMounted(() => {
   setUserInfo();
 });
+
+const onEditDialog = () => {
+  openEditInfo.value = true;
+  userNameEdit.value = user.value.userName;
+  curpEdit.value = user.value.curp;
+  emailEdit.value = user.value.email;
+
+}
+
+const checkIfUserNameAlreadyExists = async () => {
+  if (userNameEdit.value.length < 6) {
+    userNameValidation.value = false;
+    return;
+  }
+
+  const userExists = await getUserByUserName(userNameEdit.value);
+
+  userNameValidation.value =
+    userExists && user.value.userName !== userNameEdit.value ? false : true;
+  console.log("USER NAME VALIDATION ", userNameValidation.value);
+  console.log("EMAIL VALIDATION ", emailValidation.value);
+  console.log("CURP VALIDATION ", curpValidation.value);
+  if (!userNameValidation.value) {
+    $q.notify(notifyNegative("Este nombre de usuario ya esta registrado"));
+  }
+};
+
+const checkIfCurpAlreadyExists = async () => {
+  const curpFormattedCorrectly =
+    curpEdit.value.length === 18 && curpRegex.test(curpEdit.value);
+
+  if (!curpFormattedCorrectly) {
+    curpValidation.value = false;
+    return;
+  }
+
+  const curpExists = await getUserByCurp(curpEdit.value);
+
+  curpValidation.value =
+    curpExists && user.value.curp !== curpEdit.value ? false : true;
+
+  console.log("USER NAME VALIDATION ", userNameValidation.value);
+  console.log("EMAIL VALIDATION ", emailValidation.value);
+  console.log("CURP VALIDATION ", curpValidation.value);
+
+  if (!curpValidation.value) {
+    $q.notify(notifyNegative("La clave CURP ya está registrada"));
+  }
+};
+
+const checkIfEmailAlreadyExists = async () => {
+  if(!emailEdit.value){
+    return;
+  }
+  const emailExists = await getUserByEmail(emailEdit.value);
+
+  emailValidation.value =
+    emailExists && user.value.email !== emailEdit.value && emailRegex.test(emailEdit.value) ? false : true;
+    
+
+  if (!emailValidation.value) {
+    $q.notify(notifyNegative("Este correo electrónico ya está registrado"));
+  }
+};
+
+const updateUserData = async () => {
+
+  const areFieldsNotEmpty = checkNonEmptyFields([userNameEdit.value, curpEdit.value, emailEdit.value])
+
+  const isUserNameValid = checkIfUserNameAlreadyExists(userNameEdit.value);
+  const isCurpValid = curpRegex.test(curpEdit.value);
+  const isEmailValid = emailRegex.test(emailEdit.value);
+
+  if(isUserNameValid && isCurpValid && isEmailValid && areFieldsNotEmpty){
+    try {
+    $q.loading.show();
+
+    await checkIfCurpAlreadyExists();
+
+    await checkIfUserNameAlreadyExists();
+
+    await checkIfEmailAlreadyExists();
+
+    if(!userNameValidation.value || !curpValidation.value || !emailValidation.value)
+    return
+
+    const updated = await updateUser(
+      userNameEdit.value,
+      emailEdit.value,
+      curpEdit.value,
+      user.value.id
+    );
+    if (updated) {
+      openEditInfo.value = false;
+      user.value.userName = userNameEdit.value;
+      user.value.email = emailEdit.value;
+      user.value.curp = curpEdit.value;
+      userName.value = userNameEdit.value;
+      useLocalStorage.save("user", user.value);
+
+      $q.notify(notifyPositive("Tu información ha sido actualizada"));
+    }
+  } catch (error) {
+    console.log(error);
+    $q.notify(notifyNegative("Hubo un problema al actualizar tu información"));
+  } finally {
+    $q.loading.hide();
+  }
+  } else {
+    $q.notify(notifyNegative("Todos los campos deben ser llenados"));
+  }
+
+};
 
 const updateSelectedImageURL = () => {
   if (!selectedImage.value) {
@@ -232,6 +413,10 @@ const setUserInfo = () => {
 
   if (userStored) {
     user.value = userStored;
+    console.log(user.value);
+    userNameEdit.value = user.value.userName;
+    curpEdit.value = user.value.curp;
+    emailEdit.value = user.value.email;
   }
 
   if (applicationStored) {

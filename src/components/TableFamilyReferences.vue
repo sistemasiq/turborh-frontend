@@ -180,8 +180,8 @@ const setCurrentIndex = () => {
 };
 
 const saveLocalStore = () => {
-  useLocalStorage.save("familyReferencesData", familyReferencesData.value);
   if (!viewingApplication.value && !updatingApplication.value) {
+    useLocalStorage.save("familyReferencesData", familyReferencesData.value);
     $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
   }
 };

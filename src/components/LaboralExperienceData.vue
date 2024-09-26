@@ -1,9 +1,9 @@
 <template>
   <q-layout v-on:vnode-unmounted="saveLocalStore()">
     <div style="margin-top: 6%">
-        <div
-          style="display: flex; flex-grow: 1; margin-left: 2%; margin-right: 2%"
-        >
+      <div
+        style="display: flex; flex-grow: 1; margin-left: 2%; margin-right: 2%"
+      >
           <q-card
             flat
             bordered
@@ -26,7 +26,7 @@
                 Nota
               </div>
               <p class="text-body2">
-                Ordena tu experiencia laboral comenzando por añadir tu último empleo que tuviste hasta el primero
+                Ordena tu experiencia laboral comenzando por añadir tu último empleo que tuviste hasta el primero, <strong>si buscas tu primer empleo puedes saltar este paso</strong>
               </p>
             </q-card-section>
           </q-card>
@@ -104,7 +104,7 @@
             outlined
             v-model="item.lastBossName"
             color="cyan-1"
-            style="width: 30%"
+            style="width: 25%"
             inline
             lazy-rules
             :rules="[lettersRule]"
@@ -119,7 +119,7 @@
             outlined
             v-model="item.lastBossPosition"
             color="cyan-1"
-            style="width: 30%"
+            style="width: 25%"
             inline
             lazy-rules
             :rules="[positionRule]"
@@ -141,13 +141,14 @@
             dark
             outlined
             color="cyan-1"
-            style="width: 18%"
+            style="width: 17%"
             label="Fecha de inicio"
           >
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
-                  cover
+                v-if="!viewingApplication"  
+                cover
                   transition-show="scale"
                   transition-hide="scale"
                 >
@@ -169,6 +170,7 @@
             </template>
           </q-input>
           <q-input
+            v-if="!item.currentlyWorking"
             v-model="item.endDate"
             filled
             hint="AAAA/MM/DD"
@@ -180,13 +182,14 @@
             dark
             outlined
             color="cyan-1"
-            style="width: 18%"
+            style="width: 17%"
             label="Fecha de fin"
           >
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
-                  cover
+                v-if="!viewingApplication"  
+                cover
                   transition-show="scale"
                   transition-hide="scale"
                 >
@@ -204,6 +207,15 @@
               </q-icon>
             </template>
           </q-input>
+          <q-checkbox
+            :disable="viewingApplication"
+            dark
+            color="cyan"
+            v-model="item.currentlyWorking"
+            label="Aún trabajo aquí"
+            class="text-white"
+            @update:model-value="onCurrentlyWorking(item.currentlyWorking, item)"
+          />
         </div>
 
         <div
@@ -309,10 +321,7 @@
         </q-input>
       </q-card>
     </q-expansion-item>
-    <div
-      v-if="!viewingApplication"
-      class="full-width row justify-end"
-    >
+    <div v-if="!viewingApplication" class="full-width row justify-end">
       <q-btn
         v-if="!viewingApplication"
         flat
@@ -338,7 +347,7 @@
         :disable="laboralExperienceData.length === 1"
       />
     </div>
-    <ButtonApplicationStatus v-if="updatingApplication"/>
+    <ButtonApplicationStatus v-if="updatingApplication" />
   </q-layout>
 </template>
 
@@ -348,7 +357,7 @@
 
 <script setup>
 import ButtonApplicationStatus from "./ButtonApplicationStatus.vue";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, readonly } from "vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
@@ -378,12 +387,26 @@ onMounted(() => {
     }
   } else {
     setCurrentIndex();
-
   }
 });
 
+const onCurrentlyWorking = (currentlyWorking, item) => {
+  if (currentlyWorking) {
+    item.endDate = "";
+  }
+};
+
+const onEndDateEmpty = (item) => {
+
+  item.currentlyWorking = item.endDate === "" ? true: false;
+}
+
 const setSavedStoredValues = () => {
   laboralExperienceData.value = savedApplication.value.experiencia_laboral;
+
+  laboralExperienceData.value.forEach((item) => {
+    onEndDateEmpty(item);
+  })
 };
 
 //TODO: Encontrar una mejor manera para checar cada campo del objeto en el arreglo
@@ -396,7 +419,7 @@ const disableAddButton = computed(() => {
     !laboralExperienceData.value[currentIndex.value].lastBossName ||
     !laboralExperienceData.value[currentIndex.value].lastBossPosition ||
     !laboralExperienceData.value[currentIndex.value].startDate ||
-    !laboralExperienceData.value[currentIndex.value].endDate ||
+    !(laboralExperienceData.value[currentIndex.value].endDate || laboralExperienceData.value[currentIndex.value].currentlyWorking) ||
     !laboralExperienceData.value[currentIndex.value].startingPosition ||
     !laboralExperienceData.value[currentIndex.value].endingPosition ||
     !laboralExperienceData.value[currentIndex.value].startMontlySalary ||
@@ -420,7 +443,7 @@ const addLaboralExperience = () => {
     startMontlySalary: "",
     endingMontlySalary: "",
     functionsPerformed: "",
-    separationCause: ""
+    separationCause: "",
   });
   laboralExperienceData.value[currentIndex.value].expanded = false;
   currentIndex.value++;
@@ -432,11 +455,10 @@ const removeLaboralExperience = () => {
 };
 
 const setCurrentIndex = () => {
-
-  if(laboralExperienceData.value.length > 0){
+  if (laboralExperienceData.value.length > 0) {
     currentIndex.value = laboralExperienceData.value.length - 1;
   }
-}
+};
 
 /* INPUTS KEY - VALUE - RULES -------------------------------------- */
 
@@ -538,8 +560,8 @@ const dateRule = (value) => {
 };
 
 const saveLocalStore = () => {
-  useLocalStorage.save("laboralExperienceData", laboralExperienceData.value);
   if (!viewingApplication.value && !updatingApplication.value) {
+    useLocalStorage.save("laboralExperienceData", laboralExperienceData.value);
     $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
   }
 };
@@ -548,7 +570,6 @@ const loadLocalStore = () => {
   const localStoreData = useLocalStorage.load("laboralExperienceData");
 
   if (localStoreData) laboralExperienceData.value = localStoreData;
-
 };
 </script>
 
@@ -562,5 +583,4 @@ const loadLocalStore = () => {
   border-radius: 10px;
   background: rgb(30, 30, 30);
 }
-
 </style>

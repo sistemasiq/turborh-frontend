@@ -34,7 +34,7 @@
                     <q-card-section class="requisition-content">
                         <div class="pagination">
                             <router-link :to="{ path: '/home/nueva-requisicion-' + currentPage }">
-                                <q-pagination v-model="currentPage" color="cyan" :max="2" :max-pages="2" boundary-numbers />
+                                <q-pagination v-model="currentPage" color="cyan" :max="2" :max-pages="2" boundary-numbers :disable="job == 'Puesto solicitado' && !showingDetails && !updatingRequisition ? true : false"/>
                             </router-link>
 
                         </div>
@@ -144,16 +144,20 @@
 </template>
 
 <script setup>
+import { setSessionStorageItem, getSessionStorageItem, removeSessionStorageItem} from "src/stores/sessionStorage.js";
 import Tooltip from 'src/components/Tooltip.vue';
-import { ref, onMounted } from 'vue';
-import { useRequisitionStore } from 'src/stores/requisition';
-import { useRequisitionDetailsStore } from 'src/stores/requisitionDetails';
-import { useAuthStore } from 'src/stores/auth'
-import { useJobStore } from 'src/stores/job';
+import { ref, onMounted, onBeforeMount, onBeforeUnmount } from 'vue';
+import { useRequisitionStore } from 'src/stores/requisition'; //Requisition data store, used when creating a new requisition
+import { useRequisitionDetailsStore } from 'src/stores/requisitionDetails'; // Full requisition information store, used when showing the information
+import { useAuthStore } from 'src/stores/auth' //Auth data store, the user auth data needed
+import { useJobStore } from 'src/stores/job'; // Full information about the job store
 import { storeToRefs } from 'pinia';
 import NoteRequisitionComponent from 'src/components/NoteRequisitionComponent.vue';
 import { getPersonalByName, getPersonalById, getAllPersonal } from 'src/services/personal';
 import { getJobById, getJobsByPersonalId, getAllActiveJobs } from 'src/services/jobs';
+import { useRoute } from "vue-router";
+
+const route = useRoute();
 const useRequisition = useRequisitionStore();
 const useRequisitionDetails = useRequisitionDetailsStore();
 const useAuth = useAuthStore();
@@ -180,10 +184,14 @@ const note = ref("");
 
 
 const {  showingDetails, requisitionData, numRequisitionDetails, applicantDetails, jobDetails, updatingRequisition } = storeToRefs(useRequisitionDetails);
-const {  applicantId, applicant, job, vacancyNumbers, motiveCreation } = storeToRefs(useRequisition);
+const {  applicantId, applicant, job, vacancyNumbers, motiveCreation, gender, civilStatus, ageRequired } = storeToRefs(useRequisition);
 const { user, isRh, isAdmin, isBoss } = storeToRefs(useAuth);
 const { jobData, jobId, jobFunctions, jobSkills, englishLevel, educationRequired, experience, extraHours, travelAvailability, jobConditions, jobObservations } = storeToRefs(useJob);
 
+onBeforeMount(() => {
+    isJobSelected();
+    isRequisitionSelected();
+})
 
 onMounted(() => {
     vacancyNumbers.value = vacancyNumbers.value === 0 ? 1 : vacancyNumbers.value;
@@ -195,6 +203,34 @@ onMounted(() => {
 
 })
 
+onBeforeUnmount(() => {
+     // Check if the current route is different than '/home/nueva-requisicion-1 AND '/home/nueva-requisicion-1 and if it is true then removes the selectedJob and selectedJobData from the session storage'
+  if (route.path !== '/home/nueva-requisicion-1' && route.path !== '/home/nueva-requisicion-2' ) {
+    // Clear the session storage
+    removeSessionStorageItem("selectedJob");
+    removeSessionStorageItem("selectedJobData");
+    removeSessionStorageItem("requisitionInformation")
+     //restore the stores to the initial state
+    useJob.$reset();
+    useRequisition.clearStore();
+    useRequisitionDetails.$reset();
+  }
+})
+
+const isRequisitionSelected = () => {
+  if (getSessionStorageItem("requisitionInformation")) {
+    const requisitionInformation = JSON.parse(getSessionStorageItem(
+      "requisitionInformation"
+    ));
+    numRequisitionDetails.value = requisitionInformation.numRequisitionDetails;
+    applicantDetails.value = requisitionInformation.applicantDetails;
+    jobDetails.value = requisitionInformation.jobDetails;
+    showingDetails.value = requisitionInformation.showingDetails;
+    updatingRequisition.value = requisitionInformation.updatingRequisition;
+    requisitionData.value = requisitionInformation.requisitionData;
+    console.log(requisitionInformation)
+  }
+};
 const filteredJobs = () => {
 
   if(!searchJob.value){
@@ -222,8 +258,35 @@ const showRequisitionDetails = () => {
 }
 
 
+const isJobSelected = () => {
+   if( getSessionStorageItem("selectedJob") && getSessionStorageItem("selectedJobData") ) {
+    job.value = JSON.parse(getSessionStorageItem("selectedJob"));
+    const jobData = JSON.parse(getSessionStorageItem("selectedJobData"));
+    jobData.value = jobData;
+            jobId.value = jobData.id;
+            jobFunctions.value = jobData.functions;
+            jobSkills.value = jobData.skills;
+            jobObservations.value = jobData.observations;
+            jobConditions.value = jobData.conditions;
+
+            englishLevel.value = jobData.englishLevel;
+            extraHours.value = jobData.extraHours;
+            travelAvailability.value = jobData.travelAvailability;
+            educationRequired.value = jobData.education;
+            experience.value = jobData.experience;
+            gender.value = jobData.gender;
+            civilStatus.value = jobData.civilStatus;
+            ageRequired.value = jobData.ageRequired;
+
+            jobFunctionsRequired.value = jobData.functions;
+            jobSkillsRequired.value = jobData.skills;
+    console.log(jobData)
+   } 
+}
+
 const newCreation = () => {
     selectedApplicant.value = applicant.value;
+
     selectedJob.value = job.value;
 
     if (applicant.value === "") {
@@ -289,6 +352,8 @@ const fetchJobData = async (id) => {
     try {
         const job = await getJobById(id);
         if (job) {
+            console.log("the job data: ", job)
+            setSessionStorageItem("selectedJobData",job);
             jobData.value = job;
             jobId.value = job.id;
             jobFunctions.value = job.functions;
@@ -336,6 +401,10 @@ const resetJobData = () => {
     extraHours.value = 0;
     travelAvailability.value = 0;
 
+    gender.value = "";
+    civilStatus.value = "";
+    ageRequired.value = 18;
+
     jobSkillsRequired.value = "";
     jobFunctionsRequired.value = "";
 }
@@ -377,9 +446,11 @@ const handleSelectedApplicant = async (selectedItem) => {
 
 const handleSelectedJob = (selectedItem) => {
 
+
     selectedJob.value = selectedItem;
     job.value = selectedJob.value;
 
+    setSessionStorageItem("selectedJob",selectedJob.value);
     fetchJobData(selectedJob.value.id);
 }
 

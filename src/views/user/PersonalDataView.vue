@@ -11,83 +11,92 @@
         <pagination-application
           :page="2"
           :required-fields="requiredFieldsOnThisPage"
+          @on-field-validation="validateRequiredFields"
         ></pagination-application>
         <div style="margin-top: 6%">
-        <q-card flat bordered text-color="white"
-  class="q-mb-lg"
-  style="margin-left: 0%; border-color: rgb(255, 248, 43);
-  background-color: transparent; color: white; width: 100%; height: 80px;"
-  v-if="!viewingApplication"
->
-  <q-card-section>
-    <div class="text-body1 text-weight-medium row">
-      <q-icon name="warning" class="q-mr-md q-mt-xs" />
-      Nota
-    </div>
-    <p class="text-body2">
-     Todos los campos de esta pantalla son requeridos excepto los que tienen la etiqueta "Opcional"
-    </p>
-  </q-card-section>
-</q-card>
+          <q-card
+            flat
+            bordered
+            text-color="white"
+            class="q-mb-lg"
+            style="
+              margin-left: 0%;
+              border-color: rgb(255, 248, 43);
+              background-color: transparent;
+              color: white;
+              width: 100%;
+              height: 80px;
+            "
+            v-if="!viewingApplication"
+          >
+            <q-card-section>
+              <div class="text-body1 text-weight-medium row">
+                <q-icon name="warning" class="q-mr-md q-mt-xs" />
+                Nota
+              </div>
+              <p class="text-body2">
+                Todos los campos de esta pantalla son requeridos excepto los que
+                tienen la etiqueta "Opcional"
+              </p>
+            </q-card-section>
+          </q-card>
 
           <q-form class="q-gutter-md">
             <div style="display: flex; flex-grow: 1" class="q-ml-md">
               <q-input
-              dark
-              outlined
-              color="cyan-1"
-              v-model="homeAddress"
-              type="text"
-              label="Domicilio *"
-              label-color="white"
-              lazy-rules
-              :rules="[
-                (value) => !!value || 'Este campo no puede estar vacío.',
-              ]"
-              :readonly="viewingApplication"
-              class="full-width"
-              @update:model-value="updateStore()"
-            >
-            </q-input>
-            <q-input
-              dark
-              outlined
-              color="cyan-1"
-              v-model="colony"
-              type="text"
-              label="Colonia *"
-              label-color="white"
-              lazy-rules
-              :rules="[
-                (value) => !!value || 'Este campo no puede estar vacío.',
-              ]"
-              :readonly="viewingApplication"
-              class="full-width q-pl-md"
-              @update:model-value="updateStore()"
-            >
-            </q-input>
-            <q-input
-              dark
-              outlined
-              color="cyan-1"
-              v-model="zipcode"
-              type="text"
-              label="Código Postal *"
-              label-color="white"
-              mask="#####"
-              lazy-rules
-              :rules="[
-                (value) => !!value || 'Este campo no puede estar vacío.',
-              ]"
-              :readonly="viewingApplication"
-              class="col-1 q-pl-md"
-              @update:model-value="updateStore()"
-            >
-            </q-input>
+                ref="homeAddressRef"
+                dark
+                outlined
+                color="cyan-1"
+                v-model="homeAddress"
+                type="text"
+                label="Domicilio *"
+                label-color="white"
+                lazy-rules
+                :rules="[ruleFieldRequired]"
+                :readonly="viewingApplication"
+                class="full-width"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
+              <q-input
+                ref="colonyRef"
+                dark
+                outlined
+                color="cyan-1"
+                v-model="colony"
+                type="text"
+                label="Colonia *"
+                label-color="white"
+                lazy-rules
+                :rules="[ruleFieldRequired]"
+                :readonly="viewingApplication"
+                class="full-width q-pl-md"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
+              <q-input
+                ref="zipcodeRef"
+                dark
+                outlined
+                color="cyan-1"
+                v-model="zipcode"
+                type="text"
+                label="Código Postal *"
+                label-color="white"
+                mask="#####"
+                lazy-rules
+                :rules="[ruleFieldRequired]"
+                :readonly="viewingApplication"
+                class="col-1 q-pl-md"
+                @update:model-value="updateStore()"
+              >
+              </q-input>
             </div>
 
             <div style="display: flex; flex-grow: 1" class="q-ml-md">
               <q-select
+                ref="stateRef"
                 dark
                 outlined
                 v-model="state"
@@ -95,11 +104,13 @@
                 label="Estado *"
                 color="white"
                 class="full-width"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
               />
 
               <q-select
+                ref="cityRef"
                 dark
                 outlined
                 v-model="city"
@@ -107,11 +118,13 @@
                 label="Ciudad *"
                 color="white"
                 class="full-width q-pl-md"
+                :rules="[ruleFieldRequired]"
                 :readonly="!state || viewingApplication"
                 @update:model-value="updateStore()"
               />
 
               <q-input
+                ref="birthPlaceRef"
                 dark
                 outlined
                 color="cyan-1"
@@ -119,9 +132,7 @@
                 label="Lugar de nacimiento *"
                 label-color="white"
                 lazy-rules
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 class="full-width q-pl-md"
                 @update:model-value="updateStore()"
@@ -129,7 +140,9 @@
               </q-input>
 
               <q-input
+                ref="birthDateRef"
                 class="full-width q-pl-md"
+                mask="####-##-##"
                 hint="AAAA-MM-DD"
                 hide-hint
                 label="Fecha de nacimiento *"
@@ -137,18 +150,20 @@
                 dark
                 outlined
                 color="cyan-1"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
               >
                 <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy
+                      v-if="!viewingApplication"
                       cover
                       transition-show="scale"
                       transition-hide="scale"
                     >
                       <q-date
-                      locale="es"
+                        locale="es"
                         :readonly="viewingApplication"
                         color="cyan"
                         v-model="birthDate"
@@ -172,6 +187,7 @@
 
             <div style="display: flex; flex-grow: 1" class="q-ml-md">
               <q-input
+                ref="phoneRef"
                 dark
                 outlined
                 color="cyan-1"
@@ -180,9 +196,7 @@
                 label-color="white"
                 lazy-rules
                 mask="##########"
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 class="full-width"
                 @update:model-value="updateStore()"
@@ -190,6 +204,7 @@
               </q-input>
 
               <q-input
+                ref="heightRef"
                 dark
                 outlined
                 color="cyan-1"
@@ -197,9 +212,7 @@
                 label="Estatura(m) *"
                 label-color="white"
                 lazy-rules
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 class="full-width q-pl-md"
                 @update:model-value="updateStore()"
@@ -207,6 +220,7 @@
               </q-input>
 
               <q-input
+                ref="weightRef"
                 dark
                 outlined
                 color="cyan-1"
@@ -214,9 +228,7 @@
                 label="Peso(kg) *"
                 label-color="white"
                 lazy-rules
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 class="full-width q-pl-md"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
@@ -224,6 +236,7 @@
               </q-input>
 
               <q-input
+                ref="bloodTypeRef"
                 dark
                 outlined
                 color="cyan-1"
@@ -233,9 +246,7 @@
                 mask=""
                 len
                 lazy-rules
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 class="full-width q-pl-md"
                 @update:model-value="updateStore()"
@@ -245,6 +256,7 @@
 
             <div style="display: flex; flex-grow: 1" class="q-ml-md">
               <q-select
+                ref="currentCivilStatusRef"
                 :readonly="viewingApplication"
                 v-model="currentCivilStatus"
                 :options="civilStatus"
@@ -253,11 +265,13 @@
                 color="cyan-1"
                 label-color="white"
                 dark
+                :rules="[ruleFieldRequired]"
                 class="full-width"
                 @update:model-value="updateStore()"
               />
 
               <q-input
+                ref="roomieRef"
                 dark
                 outlined
                 color="cyan-1"
@@ -265,9 +279,7 @@
                 label="¿Con quién vive? *"
                 label-color="white"
                 lazy-rules
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 class="full-width q-pl-md"
                 @update:model-value="updateStore()"
@@ -288,7 +300,7 @@
                 class="full-width q-pl-md"
                 @update:model-value="updateStore()"
               >
-              <BadgeOptional></BadgeOptional>
+                <BadgeOptional class="self-center" />
               </q-input>
 
               <q-input
@@ -302,9 +314,7 @@
                 label="Parentesco"
                 label-color="white"
                 lazy-rules
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 class="full-width q-pl-md"
                 @update:model-value="updateStore()"
@@ -314,6 +324,7 @@
 
             <div style="display: flex; flex-grow: 1" class="q-ml-md">
               <q-select
+                ref="currentHomeStatusRef"
                 :readonly="viewingApplication"
                 v-model="currentHomeStatus"
                 :options="homeStatus"
@@ -322,6 +333,7 @@
                 color="cyan-1"
                 label-color="white"
                 dark
+                :rules="[ruleFieldRequired]"
                 style="width: 37%"
                 :style="
                   currentHomeStatus === 'Paga renta'
@@ -342,9 +354,7 @@
                 lazy-rules
                 mask="######"
                 prefix="$ MXN"
-                :rules="[
-                  (value) => !!value || 'Este campo no puede estar vacío.',
-                ]"
+                :rules="[ruleFieldRequired]"
                 :readonly="viewingApplication"
                 class="q-pl-md"
                 style="width: 15%"
@@ -363,11 +373,12 @@
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
               >
-              <BadgeOptional></BadgeOptional>
+                <BadgeOptional class="self-center" />
               </q-input>
             </div>
 
             <q-input
+              ref="goalInLifeRef"
               dark
               outlined
               color="cyan-1"
@@ -375,9 +386,7 @@
               label="Meta en la vida *"
               label-color="white"
               lazy-rules
-              :rules="[
-                (value) => !!value || 'Este campo no puede estar vacío.',
-              ]"
+              :rules="[ruleFieldRequired]"
               :readonly="viewingApplication"
               class="q-pb-md"
               @update:model-value="updateStore()"
@@ -400,7 +409,10 @@
         </div>
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPage"/>
+    <ButtonApplicationStatus
+      v-if="updatingApplication"
+      :required-fields="requiredFieldsOnThisPage"
+    />
   </q-layout>
 </template>
 
@@ -415,6 +427,7 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { useQuasar } from "quasar";
 import { notifyPositive } from "src/utils/notifies";
 import { states, cities } from "src/utils/citiesStates.js";
+import { ruleFieldRequired } from "src/utils/fieldRules";
 
 const $q = useQuasar();
 
@@ -445,6 +458,22 @@ const goalInLife = ref("");
 const colony = ref("");
 const zipcode = ref("");
 
+const homeAddressRef = ref(null);
+const colonyRef = ref(null);
+const zipcodeRef = ref(null);
+const stateRef = ref(null);
+const cityRef = ref(null);
+const birthPlaceRef = ref(null);
+const birthDateRef = ref(null);
+const phoneRef = ref(null);
+const heightRef = ref(null);
+const weightRef = ref(null);
+const bloodTypeRef = ref(null);
+const currentCivilStatusRef = ref(null);
+const roomieRef = ref(null);
+const currentHomeStatusRef = ref(null);
+const goalInLifeRef = ref(null);
+
 const {
   personalData,
   savedApplication,
@@ -469,6 +498,24 @@ const requiredFieldsOnThisPage = computed(() => [
   currentHomeStatus.value,
   goalInLife.value,
 ]);
+
+const validateRequiredFields = () => {
+  homeAddressRef.value.validate();
+  colonyRef.value.validate();
+  zipcodeRef.value.validate();
+  stateRef.value.validate();
+  cityRef.value.validate();
+  birthPlaceRef.value.validate();
+  birthDateRef.value.validate();
+  phoneRef.value.validate();
+  heightRef.value.validate();
+  weightRef.value.validate();
+  bloodTypeRef.value.validate();
+  currentCivilStatusRef.value.validate();
+  roomieRef.value.validate();
+  currentHomeStatusRef.value.validate();
+  goalInLifeRef.value.validate();
+};
 
 onMounted(() => {
   loadLocalStore();
@@ -511,19 +558,19 @@ const setSavedStoredValues = () => {
 };
 
 const checkWeightValidValue = (currentWeight) => {
-  if(currentWeight < 10.0){
-    currentWeight *= 10
+  if (currentWeight < 10.0) {
+    currentWeight *= 10;
 
-    if(currentWeight < 10.0){
-      currentWeight *= 10
+    if (currentWeight < 10.0) {
+      currentWeight *= 10;
       return currentWeight;
     }
 
     return currentWeight;
-  }else{
+  } else {
     return currentWeight;
   }
-}
+};
 
 //Set the stored values in the store (pinia) in the local variables
 const setStoredValues = () => {
@@ -609,9 +656,8 @@ const clean = () => {
 
 //saves in the local storage store called "personalData" the whole object with the data of the user retrieved here
 const saveLocalStore = () => {
-  useLocalStorage.save("personalData", personalData.value);
-
   if (!viewingApplication.value && !updatingApplication.value) {
+    useLocalStorage.save("personalData", personalData.value);
     $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
   }
 };

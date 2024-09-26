@@ -11,7 +11,7 @@ export const useRequisitionStore = defineStore("requisition", () => {
   const ageRequired = ref(18);
   const motiveCreation = ref("");
   
-  const clearStore = () => {
+   const clearStore = () => {
     applicant.value = "";
     applicantId.value = 0;
     job.value = "Puesto solicitado";

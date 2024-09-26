@@ -179,6 +179,8 @@ const deleteLastReference = () => {
 };
 
 const saveLocalStore = () => {
+if(!updatingApplication.value && !viewingApplication.value)
+
  useLocalStorage.save("commercialReferencesData", commercialReferencesData.value);
 }
 

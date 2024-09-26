@@ -200,7 +200,9 @@
           <Tooltip :text="'Ver detalles'" />
         </q-btn>
         <q-btn
-          @click.prevent="createReport(row.numRequisition, addSignsToReport(row))"
+          @click.prevent="
+            createReport(row.numRequisition, addSignsToReport(row))
+          "
           unelevated
           rounded
           class="text-capitalize bg-grey-4"
@@ -215,7 +217,11 @@
           icon="delete"
           color="white"
           @click.prevent="openCancelRequisitionDialogue(row)"
-          :style="row.state === 'C' || row.state === 'PC' || !isRh ? 'visibility:hidden' : ''"
+          :style="
+            row.state === 'C' || row.state === 'PC' || !isRh
+              ? 'visibility:hidden'
+              : ''
+          "
           :class="row.state === 'C' ? 'bg-grey' : 'bg-red-5'"
         >
           <Tooltip :text="'Cancelar requisición'" />
@@ -310,9 +316,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
+import {
+  setSessionStorageItem,
+  removeSessionStorageItem
+} from "src/stores/sessionStorage.js";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useAuthStore } from "src/stores/auth";
 import { notifyPositive } from "src/utils/notifies";
@@ -322,7 +332,10 @@ import { sendCanceledRequisitionEmail } from "src/services/mail";
 import { sendCanceledRequisitionMessage } from "src/services/whatsApp";
 import Tooltip from "src/components/Tooltip.vue";
 import { createRequisitionReport } from "src/services/report";
-import { getCandidatesByRequisitionId, disableAllCandidatesFromRequisition } from "src/services/candidates";
+import {
+  getCandidatesByRequisitionId,
+  disableAllCandidatesFromRequisition,
+} from "src/services/candidates";
 
 import {
   getAllRequisitions,
@@ -356,14 +369,8 @@ const selectedRequisition = ref();
 const selectedRequisitionCandidates = ref([]);
 const isFetchingCandidates = ref(false);
 
-const {
-  isAdmin,
-  isRh,
-  user,
-  hasPermitRequisitionAuthorization,
-  isIng,
-  isLic
-} = storeToRefs(useAuth);
+const { isAdmin, isRh, user, hasPermitRequisitionAuthorization, isIng, isLic } =
+  storeToRefs(useAuth);
 
 const {
   requisitionData,
@@ -394,7 +401,7 @@ const stateRowLabelsColors = {
   APL: "text-green-10",
   AC: "text-green-5",
   P: "text-cyan-5",
-  PC: "text-green"
+  PC: "text-green",
 };
 
 const stateButtonColors = {
@@ -456,8 +463,8 @@ const stateChangeNotifyText = {
 };
 
 const addSignsToReport = (row) => {
-  return row.state === 'AC' || row.state === 'P' || row.state === 'PC'
-}
+  return row.state === "AC" || row.state === "P" || row.state === "PC";
+};
 
 const canEditRequisition = (row) => {
   if (row.state !== "DC") return false;
@@ -491,7 +498,11 @@ const openCancelRequisitionDialogue = (row) => {
 
 const onCancelSendEmailToCandidates = async () => {
   const promises = selectedRequisitionCandidates.value.map((candidate) => {
-    return sendCanceledRequisitionEmail(candidate.email, candidate.name, candidate.jobName);
+    return sendCanceledRequisitionEmail(
+      candidate.email,
+      candidate.name,
+      candidate.jobName
+    );
   });
 
   try {
@@ -499,10 +510,10 @@ const onCancelSendEmailToCandidates = async () => {
 
     const successCount = results.filter((result) => result).length;
     const failureCount = results.length - successCount;
-    if(failureCount === 0){
+    if (failureCount === 0) {
       return true;
-    }else{
-      return false
+    } else {
+      return false;
     }
   } catch (error) {
     console.error("Error al mandar los emails:", error);
@@ -513,7 +524,11 @@ const onCancelSendEmailToCandidates = async () => {
 
 const onCancelSendMessageToCandidates = async () => {
   const promises = selectedRequisitionCandidates.value.map((candidate) => {
-    return sendCanceledRequisitionMessage(candidate.phoneNumber, candidate.name, candidate.jobName);
+    return sendCanceledRequisitionMessage(
+      candidate.phoneNumber,
+      candidate.name,
+      candidate.jobName
+    );
   });
 
   try {
@@ -521,12 +536,11 @@ const onCancelSendMessageToCandidates = async () => {
 
     const successCount = results.filter((result) => result).length;
     const failureCount = results.length - successCount;
-    if(failureCount === 0){
+    if (failureCount === 0) {
       return true;
-    }else{
-      return false
+    } else {
+      return false;
     }
-
   } catch (error) {
     console.error("Error al mandar los mensaje:", error);
     $q.notify(notifyNegative("Error al notificar a los candidatos"));
@@ -601,13 +615,18 @@ const disableRequisition = async (requisition) => {
       if (selectedRequisitionCandidates.value.length > 0) {
         const sendedEmails = await onCancelSendEmailToCandidates();
         const sendedMessages = await onCancelSendMessageToCandidates();
-        const disableCandidates = await disableAllCandidatesFromRequisition(selectedRequisitionCandidates.value[0].requisitionId);
+        const disableCandidates = await disableAllCandidatesFromRequisition(
+          selectedRequisitionCandidates.value[0].requisitionId
+        );
 
-        if(sendedEmails && sendedMessages && disableCandidates){
+        if (sendedEmails && sendedMessages && disableCandidates) {
           requisition.candidatesNumber = 0;
-          $q.notify(notifyPositive("Los candidatos han sido notificados de la cancelación."));
+          $q.notify(
+            notifyPositive(
+              "Los candidatos han sido notificados de la cancelación."
+            )
+          );
         }
-
       }
       updateSelectedRequisition(requisition);
 
@@ -626,6 +645,11 @@ const disableRequisition = async (requisition) => {
 onMounted(() => {
   fetchRequisitions();
 });
+
+onUnmounted(() => {
+  useLocalStorage.remove("idRequisitionDetails");
+  useLocalStorage.remove("numRequisitionDetails");
+})
 
 const getDesignStatusRequisition = (item) => {
   return {
@@ -709,7 +733,9 @@ const columns = [
 const onCancelFetchApplicants = async () => {
   try {
     isFetchingCandidates.value = true;
-    const candidates = await getCandidatesByRequisitionId(selectedRequisition.value.id);
+    const candidates = await getCandidatesByRequisitionId(
+      selectedRequisition.value.id
+    );
 
     if (candidates) {
       selectedRequisitionCandidates.value = candidates;
@@ -724,6 +750,7 @@ const onCancelFetchApplicants = async () => {
 const showApplicants = (row) => {
   numRequisitionDetails.value = row.numRequisition;
   idRequisitionDetails.value = row.id;
+  setSessionStorageItem("idRequisitionDetails", idRequisitionDetails.value);
   if (!numRequisitionDetails.value || !idRequisitionDetails.value) {
     return;
   }
@@ -754,15 +781,23 @@ const showDetails = async (
 
     if (requisitionSearched) {
       requisitionData.value = requisitionSearched;
+
+      const requisitionInformation = {
+        numRequisitionDetails: numRequisitionDetails.value,
+        applicantDetails: applicantDetails.value,
+        jobDetails: jobDetails.value,
+        showingDetails: showingDetails.value,
+        updatingRequisition: updatingRequisition.value,
+        requisitionData: requisitionData.value,
+      };
+      setSessionStorageItem("requisitionInformation", requisitionInformation);
       router.push("nueva-requisicion-1");
     }
   } catch (error) {
     console.log("Error fetching requisition details " + error);
-  }finally{
-    $q.loading.hide()
+  } finally {
+    $q.loading.hide();
   }
-
-
 };
 
 const fetchRequisitions = async () => {

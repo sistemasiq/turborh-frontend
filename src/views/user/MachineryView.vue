@@ -5,11 +5,22 @@
   >
     <q-card flat bordered class="rounded-borders">
       <q-card-section class="title">
-        <p>Maquinaria y herramientas que manejas</p>
+        <p>Maquinaria y herramientas</p>
       </q-card-section>
       <q-card-section class="handling-content">
         <pagination-application :page="8" />
+
+        <p
+          class="text-h5 text-center q-mt-xl text-white"
+          v-if="hasNoMachineryRegistered && viewingApplication"
+        >
+          Sin maquinaría registrada
+        </p>
         <div v-if="!viewingApplication" style="margin-top: 4%">
+         <div class="row items-center q-mb-md q-mx-xl">
+          <div class="text-white text-h6 text-weight-regular">Selecciona la maquinaria y herramienta que manejas</div>
+          <BadgeOptional />
+         </div>
           <q-btn-dropdown
             :disable="machinery.length === 0"
             class="q-mb-md button-dropdown"
@@ -284,7 +295,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
@@ -293,6 +304,7 @@ import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue"
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 import { getAllMachineryActive } from "src/services/machineryTools";
+import BadgeOptional from "src/components/BadgeOptional.vue";
 
 const $q = useQuasar();
 const useRequest = useRequestUser();
@@ -316,11 +328,12 @@ const measuringInstruments = ref([]);
 
 const otherTools = ref([]);
 
-onMounted(() => {
+const hasNoMachineryRegistered = ref(false);
 
+onMounted(() => {
   fillCatalog();
 
-  if(!viewingApplication.value && !updatingApplication.value){
+  if (!viewingApplication.value && !updatingApplication.value) {
     loadLocalStore();
   }
 
@@ -335,41 +348,36 @@ onMounted(() => {
 });
 
 const fillCatalog = async () => {
-
-  if(viewingApplication.value)
-  return;
+  if (viewingApplication.value) return;
 
   try {
-    const catalog = await getAllMachineryActive()
+    const catalog = await getAllMachineryActive();
 
-    if(catalog) {
-      catalog.forEach(element => {
+    if (catalog) {
+      catalog.forEach((element) => {
         switch (element.type) {
           case "MA":
-
             machinery.value.push(element.name);
             break;
           case "HE":
-            tools.value.push(element.name); // Assuming tools is a ref
+            tools.value.push(element.name);
             break;
           case "IN":
-            measuringInstruments.value.push(element.name); // Assuming measuringInstruments is a ref
-            break;
+            measuringInstruments.value.push(element.name);
           case "OT":
-
-          otherTools.value.push(element.name);
+            otherTools.value.push(element.name);
             break;
           default:
             break;
         }
-      })
-
+      });
     }
-  } catch (error) {
 
-  }
 
-}
+  } catch (error) {}
+};
+
+
 
 const setSavedStoredValues = () => {
   if (machineryData.value.length === 0) {
@@ -403,6 +411,9 @@ const setSavedStoredValues = () => {
       }
     });
   }
+
+  hasNoMachineryRegistered.value = machineryData.value.length === 0 && toolsData.value.length === 0 && measuringInstrumentsData.value.length === 0 && otherToolsData.value.length === 0;
+
 };
 
 const setStoredValues = () => {
@@ -416,7 +427,6 @@ const setStoredValues = () => {
     removeRepeatedMeasuringInstrument(element.measuringInstrumentName);
   });
   otherToolsData.value.forEach((element) => {
-
     removeRepeatedOtherTool(element.otherToolName);
   });
 };
@@ -543,9 +553,7 @@ const sortAlphabetical = (array) => {
 };
 
 const saveLocalStore = () => {
-
-  if(viewingApplication.value || updatingApplication.value)
-  return;
+  if (viewingApplication.value || updatingApplication.value) return;
 
   useLocalStorage.save("machineryData", machineryData.value);
   useLocalStorage.save("toolsData", toolsData.value);
@@ -554,10 +562,7 @@ const saveLocalStore = () => {
     "measuringInstrumentsData",
     measuringInstrumentsData.value
   );
-
-  if (!viewingApplication.value && !updatingApplication.value) {
-    $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
-  }
+  $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
 };
 
 const loadLocalStore = () => {

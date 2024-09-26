@@ -1,9 +1,7 @@
 import { defineStore } from "pinia";
-import { useQuasar } from "quasar";
-
 
 export const useLocalStorageStore = defineStore("localStorage", () => {
-  
+
   const save = (key, data) => {
     localStorage.setItem(key, JSON.stringify(data));
   };
@@ -22,7 +20,7 @@ export const useLocalStorageStore = defineStore("localStorage", () => {
     }
 
   }
-  
+
 
   const remove = (key) => localStorage.removeItem(key);
 

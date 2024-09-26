@@ -322,33 +322,42 @@
           <NoteRequisitionComponent :current-note="requisitionData.notes" />
         </q-dialog>
         <q-dialog v-model="openConfirmation" persistent>
-    <q-card rounded style="border-radius: 30px">
-      <q-card-section class="row items-center">
-        <span class="q-ml-sm text-h6 text-weight-regular">
-          {{ !updatingRequisition ? '¿Quieres guardar tu requisición?' : '¿Quieres actualizar tu requisición?' }}
-        </span>
-      </q-card-section>
+          <q-card rounded style="border-radius: 30px">
+            <q-card-section class="row items-center">
+              <span class="q-ml-sm text-h6 text-weight-regular">
+                {{
+                  !updatingRequisition
+                    ? "¿Quieres guardar tu requisición?"
+                    : "¿Quieres actualizar tu requisición?"
+                }}
+              </span>
+            </q-card-section>
 
-      <q-card-actions align="center">
-        <q-btn flat label="Cancelar" color="primary" v-close-popup />
-        <q-btn
-          rounded
-          flat
-          label="OK"
-          v-close-popup
-          class="text-white bg-green-5"
-          @click.prevent="updatingRequisition ? updateRequisitionData() : createNewRequisition()"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+            <q-card-actions align="center">
+              <q-btn flat label="Cancelar" color="primary" v-close-popup />
+              <q-btn
+                rounded
+                flat
+                label="OK"
+                v-close-popup
+                class="text-white bg-green-5"
+                @click.prevent="
+                  updatingRequisition
+                    ? updateRequisitionData()
+                    : createNewRequisition()
+                "
+              />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
       </q-page>
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onBeforeMount, onBeforeUnmount } from "vue";
+import { getSessionStorageItem, removeSessionStorageItem } from "src/stores/sessionStorage.js";
 import { useRequisitionStore } from "src/stores/requisition";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useJobStore } from "src/stores/job";
@@ -358,9 +367,10 @@ import { useAuthStore } from "src/stores/auth";
 import NoteRequisitionComponent from "src/components/NoteRequisitionComponent.vue";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { createRequisition, updateRequisition } from "src/services/requisition";
-import router from "src/router";
+import { useRoute, useRouter } from "vue-router";
 
-
+const router = useRouter();
+const route = useRoute();
 const useAuth = useAuthStore();
 const useRequisition = useRequisitionStore();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -380,8 +390,8 @@ const currentPage = ref(2);
 
 const openNotes = ref(false);
 
-const defaultConditions = ref("")
-const defaultObservations = ref("")
+const defaultConditions = ref("");
+const defaultObservations = ref("");
 
 const { isAdmin, user, isRh, isBoss } = storeToRefs(useAuth);
 
@@ -412,8 +422,13 @@ const {
   jobFunctions,
   jobSkills,
   jobConditions,
-  jobObservations
+  jobObservations,
 } = storeToRefs(useJob);
+
+onBeforeMount(() => {
+  isJobSelected();
+  isRequisitionSelected();
+});
 
 onMounted(() => {
   ageRequired.value =
@@ -424,6 +439,65 @@ onMounted(() => {
     showRequisitionDetails();
   }
 });
+
+onBeforeUnmount(() => {
+     // Check if the current route is different than '/home/nueva-requisicion-1 AND '/home/nueva-requisicion-1 and if it is true then removes the selectedJob and selectedJobData from the session storage'
+  if (route.path !== '/home/nueva-requisicion-1' && route.path !== '/home/nueva-requisicion-2' ) {
+    // Clear the session storage
+    removeSessionStorageItem("selectedJob");
+    removeSessionStorageItem("selectedJobData");
+    removeSessionStorageItem("requisitionInformation")
+    //restore the stores to the initial state
+    useJob.$reset();
+    useRequisition.clearStore();
+    useRequisitionDetails.$reset();
+  }
+})
+
+const isRequisitionSelected = () => {
+  if (getSessionStorageItem("requisitionInformation")) {
+    const requisitionInformation = JSON.parse(getSessionStorageItem(
+      "requisitionInformation"
+    ));
+    //numRequisitionDetails.value = requisitionInformation.numRequisitionDetails;
+    //applicantDetails.value = requisitionInformation.applicantDetails;
+    //jobDetails.value = requisitionInformation.jobDetails;
+    showingDetails.value = requisitionInformation.showingDetails;
+    updatingRequisition.value = requisitionInformation.updatingRequisition;
+    requisitionData.value = requisitionInformation.requisitionData;
+    console.log(requisitionInformation)
+  }
+};
+
+/**
+ * Function to see if the session storage has the specified values, if true, the values are asigned to the needed variables
+ */
+const isJobSelected = () => {
+  if (
+    getSessionStorageItem("selectedJob") &&
+    getSessionStorageItem("selectedJobData")
+  ) {
+    job.value = JSON.parse(getSessionStorageItem("selectedJob"));
+    const jobData = JSON.parse(getSessionStorageItem("selectedJobData"));
+    jobData.value = jobData;
+    jobId.value = jobData.id;
+    jobFunctions.value = jobData.functions;
+    jobSkills.value = jobData.skills;
+    jobObservations.value = jobData.observations;
+    jobConditions.value = jobData.conditions;
+
+    englishLevel.value = jobData.englishLevel;
+    extraHours.value = jobData.extraHours;
+    travelAvailability.value = jobData.travelAvailability;
+    educationRequired.value = jobData.education;
+    experience.value = jobData.experience;
+    gender.value = jobData.gender;
+    civilStatus.value = jobData.civilStatus;
+    ageRequired.value = jobData.ageRequired;
+
+  }
+};
+
 const showRequisitionDetails = () => {
   ageRequired.value = requisitionData.value.age;
   gender.value = requisitionData.value.gender;
@@ -446,13 +520,11 @@ const onNumberTypePaste = (event) => {
 };
 
 const setDefaultJobValues = () => {
+  if(!jobData.value)
+  return;
+
   if (!showingDetails.value && !updatingRequisition.value) {
-    gender.value = jobData.value.gender;
-    ageRequired.value = jobData.value.age;
-    civilStatus.value = jobData.value.civilStatus;
-    englishLevelRequired.value = englishLevel.value;
-    experienceRequired.value = experience.value;
-    extraHoursRequired.value = extraHours.value === 1 ? true : false;
+    console.log("set default value: ", jobData.value);
     travelAvailabilityRequired.value =
       travelAvailability.value === 1 ? true : false;
     defaultConditions.value = jobConditions.value;
@@ -460,7 +532,7 @@ const setDefaultJobValues = () => {
 
     return;
   }
-
+  console.log("Viewing or updating")
   educationRequired.value = requisitionData.value.schooling;
   englishLevelRequired.value = requisitionData.value.englishLevel;
   experienceRequired.value = requisitionData.value.experience;
@@ -483,7 +555,7 @@ const disableSaveRequisitionButton = computed(() => {
     ageRequired.value < 18 ||
     !ageRequired.value
   );
-})
+});
 
 const createNewRequisition = async () => {
   const {
@@ -503,7 +575,7 @@ const createNewRequisition = async () => {
   } = storeToRefs(useJob);
 
   const newRequisition = {
-    createdBy:user.value.id,
+    createdBy: user.value.id,
     jobId: jobId.value,
     personalId: applicantId.value,
     vacancyNumber: vacancyNumbers.value,
@@ -524,7 +596,7 @@ const createNewRequisition = async () => {
 
     const newRequisitionId = await createRequisition(newRequisition);
 
-    if(newRequisitionId && newRequisitionId > 0) {
+    if (newRequisitionId && newRequisitionId > 0) {
       $q.notify(
         notifyPositive(
           `Su requisicion ha sido guardada con el FOLIO: ${newRequisitionId}`,
@@ -534,7 +606,7 @@ const createNewRequisition = async () => {
       resetRequisitionStoreValues();
 
       router.replace("/home/nueva-requisicion-1");
-    }else {
+    } else {
       $q.notify(
         notifyNegative(
           "Hubo un error al crear su requisicion. Intente de nuevo."
@@ -545,7 +617,7 @@ const createNewRequisition = async () => {
     $q.notify(
       notifyNegative("Hubo un error al crear su requisicion. Intente de nuevo.")
     );
-  }finally{
+  } finally {
     $q.loading.hide();
   }
 };
@@ -571,7 +643,9 @@ const updateRequisitionData = async () => {
   try {
     $q.loading.show();
 
-    const updatedRequisitionCorrectly = await updateRequisition(updatedRequisitionData);
+    const updatedRequisitionCorrectly = await updateRequisition(
+      updatedRequisitionData
+    );
 
     if (updatedRequisitionCorrectly) {
       router.replace("/home/historial-requisiciones");

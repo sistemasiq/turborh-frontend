@@ -1,32 +1,52 @@
 <template>
   <q-layout
-    style="background-color: rgb(30, 61, 88)"
+
+    style="background-color: rgb(30, 61, 88);"
     v-on:vnode-unmounted="saveLocalStore()"
   >
     <q-card flat bordered class="rounded-borders">
       <q-card-section class="title"> Documentos </q-card-section>
 
       <q-card-section class="content">
-        <pagination-application :page="4" :required-fields="updatingApplication ? requiredFieldsOnThisPageUpdating : requiredFieldsOnThisPage" />
+        <pagination-application
+          :page="4"
+          :required-fields="
+            updatingApplication
+              ? requiredFieldsOnThisPageUpdating
+              : requiredFieldsOnThisPage
+          "
+          @on-field-validation="validateRequiredFields"
+        />
         <div style="margin-top: 6%">
-          <q-card flat bordered text-color="white"
-  class="q-mb-lg"
-  style="margin-left: 0%; border-color: rgb(255, 248, 43);
-  background-color: transparent; color: white; width: 100%; height: 80px;"
-  v-if="!viewingApplication"
->
-  <q-card-section>
-    <div class="text-body1 text-weight-medium row">
-      <q-icon name="warning" class="q-mr-md q-mt-xs" />
-      Nota
-    </div>
-    <p class="text-body2">
-     Es obligatorio adjuntar su curriculum, así como llenar los campos del RFC y NSS
-    </p>
-  </q-card-section>
-</q-card>
+          <q-card
+            flat
+            bordered
+            text-color="white"
+            class="q-mb-lg"
+            style="
+              margin-left: 0%;
+              border-color: rgb(255, 248, 43);
+              background-color: transparent;
+              color: white;
+              width: 100%;
+              height: 80px;
+            "
+            v-if="!viewingApplication"
+          >
+            <q-card-section>
+              <div class="text-body1 text-weight-medium row">
+                <q-icon name="warning" class="q-mr-md q-mt-xs" />
+                Nota
+              </div>
+              <p class="text-body2">
+                Es obligatorio adjuntar su curriculum, así como llenar los
+                campos del RFC y NSS
+              </p>
+            </q-card-section>
+          </q-card>
           <q-form class="q-gutter-md">
             <q-input
+              ref="rfcRef"
               hint="Ejemplo del formato del RFC: ABCE123456789"
               hide-hint
               dark
@@ -37,10 +57,7 @@
               label="RFC *"
               mask="XXXXXXXXXXXXX"
               label-color="white"
-              lazy-rules
-              :rules="[
-                (value) => !!value || 'La clave RFC es requerida'
-              ]"
+              :rules="[ruleFieldRequired]"
               :readonly="viewingApplication"
               class="input-brand"
               @update:model-value="updateStore()"
@@ -48,6 +65,7 @@
             </q-input>
 
             <q-input
+              ref="imssRef"
               dark
               outlined
               color="cyan-1"
@@ -57,6 +75,7 @@
               label-color="white"
               mask="###########"
               :readonly="viewingApplication"
+              :rules="[ruleFieldRequired]"
               class="input-brand"
               @update:model-value="updateStore()"
             >
@@ -80,6 +99,7 @@
               class="input-brand"
               @update:model-value="updateStore()"
             >
+            <BadgeOptional class="self-center"/>
             </q-input>
 
             <q-input
@@ -94,12 +114,14 @@
               :readonly="viewingApplication"
               @update:model-value="updateStore()"
             >
-            <BadgeOptional></BadgeOptional>
+            <BadgeOptional class="self-center"/>
             </q-input>
 
+            <div class="q-my-lg">
               <q-file
-              style="width: 20%"
-              :disable="viewingApplication"
+                v-if="!isRh"
+                style="width: 22%"
+                :disable="viewingApplication"
                 v-model="curriculumStored"
                 max-files="1"
                 max-file-size="5242880"
@@ -109,33 +131,53 @@
                 label-color="white"
                 use-chips
                 @rejected="onRejectedFile"
-                :label="curriculumStored ? 'Curriculum adjuntado' : 'Adjuntar curriculum (MAX 5MB) *'"
+                :label="checkForCurriculum"
                 class="q-mb-md"
               >
                 <template v-slot:prepend>
-                  <q-icon name="upload" color="white"/>
+                  <q-icon name="upload" color="white" />
                 </template>
-                <q-tooltip
-                v-if="curriculumStored"
-                class="bg-dark text-white text-body2"
-                anchor="top middle"
-                self="center middle"
-                transition-show="slide-up"
-                transition-hide="fade"
-                :delay="300"
-                transition-duration="300"
-                :offset="[10, 25]"
-              >
-                ¿Cambiar curriculum adjuntado?
-              </q-tooltip>
+
+                <Tooltip text="Adjunta tu curriculum en PDF"/>
               </q-file>
+              <q-btn
+               v-if="isRh || isAdmin || isBoss"
+                color="white"
+                text-color="dark"
+                rounded
+                icon="visibility"
+                label="Ver curriculum del solicitante"
+                @click.prevent="downloadDocument(getCurriculum())"
+              />
+            </div>
           </q-form>
-        <TableDriverLicenses/>
+          <TableDriverLicenses />
         </div>
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPageUpdating"/>
+    <ButtonApplicationStatus
+      v-if="updatingApplication"
+      :required-fields="requiredFieldsOnThisPageUpdating"
+    />
+    <q-dialog maximized v-model="showResume">
+    <q-card class="no-scroll">
+      <q-card-actions class="bg-white"  align="right">
+        <q-btn flat label="Cerrar" color="red" v-close-popup />
+      </q-card-actions>
+      <object
+        height="100%"
+        width="100%"
+        v-if="resumeSrc.length > 0"
+        :data="resumeSrc"
+        type="application/pdf"
+      >
+        <iframe :src="resumeViewLink"></iframe>
+      </object>
+    </q-card>
+  </q-dialog>
+
   </q-layout>
+
 </template>
 
 <script setup>
@@ -147,9 +189,15 @@ import { storeToRefs } from "pinia";
 import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
 import TableDriverLicenses from "src/components/TableDriverLicenses.vue";
-import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import { notifyNegative, notifyNegativeField, notifyPositive } from "src/utils/notifies";
 import BadgeOptional from "src/components/BadgeOptional.vue";
+import Tooltip from "src/components/Tooltip.vue";
+import { useAuthStore } from "src/stores/auth";
+import { downloadFile } from "src/services/files";
+import { getUserDocumentsPath } from "src/utils/folderPaths";
+import { ruleFieldRequired } from "src/utils/fieldRules";
 
+const useAuth = useAuthStore();
 const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();
 
@@ -158,16 +206,45 @@ const rfc = ref("");
 const imss = ref("");
 const afore = ref("");
 const fm2 = ref("");
+const resumeSrc = ref("");
 
-const requiredFieldsOnThisPage = computed(() => [rfc.value, imss.value, curriculumStored.value])
-const requiredFieldsOnThisPageUpdating = computed(() => [rfc.value, imss.value])
+const rfcRef = ref(null);
+const imssRef = ref(null);
+
+const validateRequiredFields = () => {
+  if(viewingApplication.value)
+  return;
+
+  rfcRef.value.validate();
+  imssRef.value.validate();
+
+  if(!curriculumStored.value && !updatingApplication.value){
+    $q.notify(notifyNegativeField("Sube tu curriculum por favor"))
+  }
+};
+
+
+const resumeViewLink = ref(resumeSrc.value);
+const showResume = ref(false);
+
+const requiredFieldsOnThisPage = computed(() => [
+  rfc.value,
+  imss.value,
+  curriculumStored.value,
+]);
+const requiredFieldsOnThisPageUpdating = computed(() => [
+  rfc.value,
+  imss.value,
+]);
+
+const { isRh, isBoss, isAdmin } = storeToRefs(useAuth)
 
 const {
   documentsData,
   savedApplication,
   viewingApplication,
   updatingApplication,
-  curriculumStored
+  curriculumStored,
 } = storeToRefs(useRequest);
 
 onMounted(() => {
@@ -178,6 +255,44 @@ onMounted(() => {
     setStoredValues();
   }
 });
+
+
+
+const getCurriculum = () => {
+
+  return savedApplication.value && savedApplication.value.nombre_cv ? savedApplication.value.nombre_cv : '';
+}
+
+const checkForCurriculum = computed(() => {
+  if (!viewingApplication.value && !updatingApplication.value) {
+    return curriculumStored.value
+      ? "Curriculum adjuntado"
+      : "Adjuntar curriculum (MAX 5MB) *";
+  }
+
+  if (savedApplication.value) {
+    return savedApplication.value.nombre_cv
+      ? "Curriculum adjuntado"
+      : "Adjuntar curriculum (MAX 5MB) *";
+  }
+});
+
+const downloadDocument = async (uuid) => {
+  try {
+    $q.loading.show();
+    const fileDownloaded = await downloadFile(uuid, getUserDocumentsPath);
+    if (fileDownloaded) {
+      resumeSrc.value = fileDownloaded;
+      showResume.value = true;
+    } else {
+      $q.notify(notifyNegative("El archivo solicitado no existe "));
+    }
+  } catch (error) {
+    $q.notify(notifyNegative("Hubo un error al obtener el archivo "));
+  } finally {
+    $q.loading.hide();
+  }
+};
 
 const setSavedStoredValues = () => {
   rfc.value = savedApplication.value.rfc;
@@ -191,7 +306,6 @@ const setStoredValues = () => {
   imss.value = documentsData.value.imss;
   afore.value = documentsData.value.afore;
   fm2.value = documentsData.value.fm2;
-
 };
 
 const updateStore = () => {
@@ -200,19 +314,16 @@ const updateStore = () => {
   documentsData.value.imss = imss.value;
   documentsData.value.afore = afore.value;
   documentsData.value.fm2 = fm2.value;
-
 };
-
 
 const onRejectedFile = () => {
   $q.notify(notifyNegative("Solo se aceptan archivos .pdf y tamaño max 5 Mb"));
 };
 
-
 const saveLocalStore = () => {
-  useLocalStorage.save("documentsData", documentsData.value);
   if (!viewingApplication.value && !updatingApplication.value) {
-    $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
+    useLocalStorage.save("documentsData", documentsData.value);
+    $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
   }
 };
 
@@ -221,8 +332,6 @@ const loadLocalStore = () => {
 
   if (localStoreData) documentsData.value = localStoreData;
 };
-
-
 </script>
 
 <style scoped>

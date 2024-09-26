@@ -9,8 +9,21 @@
       </q-card-section>
       <q-card-section class="content">
         <pagination-application :page="9"></pagination-application>
-        <div style="margin-top: 6%">
-          <div class="q-mt-xl">
+        <p
+          class="text-h5 text-center q-mt-xl text-white"
+          v-if="hasNoSkillsRegistered && viewingApplication"
+        >
+          Sin oficios registrados
+        </p>
+
+        <div  class="q-mt-xl">
+          <div>
+            <div v-if="!viewingApplication && !isRh" class="row items-center q-mb-md q-mx-xl">
+              <div class="text-white text-h6 text-weight-regular">
+                Selecciona los oficios que domines
+              </div>
+              <BadgeOptional  />
+            </div>
             <q-btn-dropdown
               v-if="!viewingApplication"
               :disable="offices.length === 0"
@@ -100,10 +113,16 @@ import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
 import { useQuasar } from "quasar";
 import { notifyPositive } from "src/utils/notifies";
+import BadgeOptional from "src/components/BadgeOptional.vue";
+import {useAuthStore} from "src/stores/auth.js";
 
+const authStore = useAuthStore()
+const {isRh} = storeToRefs(authStore);
 const $q = useQuasar();
 const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();
+const hasNoSkillsRegistered = ref(false);
+
 
 const {
   officesData,
@@ -140,6 +159,7 @@ onMounted(() => {
 
 const setSavedStoredValues = () => {
   officesData.value = savedApplication.value.conocimientos_oficios;
+  hasNoSkillsRegistered.value = officesData.value.length === 0;
 };
 
 const setStoredValues = () => {
@@ -180,9 +200,9 @@ const removeOffice = (item) => {
 };
 
 const saveLocalStore = () => {
-  useLocalStorage.save("officesData", officesData.value);
   if (!viewingApplication.value && !updatingApplication.value) {
-    $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
+    useLocalStorage.save("officesData", officesData.value);
+    $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
   }
 };
 

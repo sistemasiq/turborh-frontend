@@ -1,12 +1,12 @@
 <template>
-    <div class="q-pa-md q-gutter-md">
-      <q-badge rounded color="green" :label="variable == true
-       ? 'Opcional'
-       : 'Campo Opcional'
-       " />
-    </div>
+      <q-badge rounded color="green" label="Opcional" :class="extraCssClasses + ' q-pa-xs q-ma-sm'" style="height: fit-content;"/>
   </template>
+
   <script setup>
-  import { ref} from "vue";
-  const variable = ref(true)
-  </script>
+const props = defineProps({
+  extraCssClasses: {
+    type: String,
+    default: ''
+  }
+})
+</script>

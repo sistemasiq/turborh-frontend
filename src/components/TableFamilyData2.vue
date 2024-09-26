@@ -28,6 +28,7 @@
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
+                v-if="!viewingApplication"
                   cover
                   transition-show="scale"
                   transition-hide="scale"
@@ -222,7 +223,9 @@ const deleteLastRelative = () => {
 };
 
 const saveLocalStore = () => {
-  useLocalStorage.save("familySonsData", familySonsData.value);
+  if(!viewingApplication.value && !updatingApplication.value){
+    useLocalStorage.save("familySonsData", familySonsData.value);
+  }
 };
 
 const loadLocalStore = () => {

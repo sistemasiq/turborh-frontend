@@ -438,7 +438,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onBeforeMount, onBeforeUnmount } from "vue";
+import { getSessionStorageItem, setSessionStorageItem, removeSessionStorageItem } from "src/stores/sessionStorage";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { useQuasar } from "quasar";
 import { useJobCatalogStore } from "src/stores/jobCatalog";
@@ -450,7 +451,9 @@ import { getAllDepartments, createJob, updateJob, getJobById } from "src/service
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { updateFile, uploadFile } from "src/services/files";
 import { useAuthStore } from "src/stores/auth";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 const router = useRouter();
 const useAuth = useAuthStore();
 const $q = useQuasar();
@@ -490,6 +493,67 @@ const { jobId, readOnly, updatingJob } = storeToRefs(useJobCatalog);
 
 const { user } = storeToRefs(useAuth)
 
+onBeforeMount(() => {
+  isJobSelected();
+})
+
+onBeforeUnmount(() => {
+  if(route.path !== '/home/edicion-puesto'){
+    removeSessionStorageItem("jobData");
+    removeSessionStorageItem("jobInformation");
+    useJobCatalog.$reset();
+  }
+ 
+
+})
+
+const isJobSelected = () => {
+  if(getSessionStorageItem("jobData")){
+    const jobData = JSON.parse(getSessionStorageItem("jobData"));
+    jobId.value = jobData.jobId;
+    updatingJob.value = jobData.updatingJob;
+    readOnly.value = jobData.readOnly;
+  } 
+  if(getSessionStorageItem("jobInformation")){
+    const jobInformation = JSON.parse(getSessionStorageItem("jobInformation"));
+
+    //See if the job does not have any data, then insert the departments id in the selectedDepartmentsId array
+      if(!selectedDepartmentsId.value) {
+        jobInformation.departmentsId.forEach((element) => {
+        if (element != null) {
+          selectedDepartmentsId.value.push(element);
+        }
+      });
+      } else {
+        console.log("job without departments")
+        return selectedDepartmentsId.value
+      }
+      console.log("selectedDepartmentsId", selectedDepartmentsId.value);
+      name.value = jobInformation.name;
+      key.value = jobInformation.key;
+      mainFunction.value = jobInformation.mainFunction;
+      englishLevel.value = jobInformation.englishLevel;
+      description.value = jobInformation.mainFunction;
+      experience.value = jobInformation.experience;
+      functions.value = jobInformation.functions;
+      skills.value = jobInformation.skills;
+      age.value = jobInformation.age;
+      conditions.value =
+        jobInformation.conditions === "null" ? "" : jobInformation.conditions;
+      observations.value =
+        jobInformation.observations === "null" ? "" : jobInformation.observations;
+      extraHours.value = jobInformation.extraHours === 1 ? true : false;
+      travelAvailability.value =
+        jobInformation.travelAvailability === 1 ? true : false;
+      gender.value = jobInformation.gender;
+      civilStatus.value = jobInformation.civilStatus;
+      education.value = jobInformation.education;
+      jobUUID.value =
+        jobInformation.photo_uuid === null || jobInformation.photo_uuid === "" || jobInformation.photo_uuid === "no_image"
+          ? defaultUUID
+          : jobInformation.photo_uuid;
+  }
+}
 onMounted(() => {
   fetchDepartments();
 
@@ -582,6 +646,7 @@ const getJobData = async (id) => {
     $q.loading.show();
     const jobData = await getJobById(id);
     if (jobData) {
+      setSessionStorageItem("jobInformation", jobData);
       jobData.departmentsId.forEach((element) => {
         if (element != null) {
           selectedDepartmentsId.value.push(element);

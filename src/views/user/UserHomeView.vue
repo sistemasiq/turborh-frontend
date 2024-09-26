@@ -32,7 +32,7 @@
           />
         </div>
 
-        <ApplicationModifications v-if="isRh || isBoss || isAdmin"/>
+        <ApplicationModifications v-if="isRh || isBoss || isAdmin" />
 
         <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
           <div>
@@ -205,7 +205,11 @@
         dense
         icon="arrow_back"
         class="logout-btn z-top"
-        :class="hideUserApplicationInterface ? 'q-ml-md absolute-bottom q-mb-xl q-mr-xl' : 'q-ml-xs'"
+        :class="
+          hideUserApplicationInterface
+            ? 'q-ml-md absolute-bottom q-mb-xl q-mr-xl'
+            : 'q-ml-xs'
+        "
         label="Regresar"
         @click.prevent="goToRequisitionApplicants"
         v-if="hideUserApplicationInterface"
@@ -258,7 +262,7 @@
           <q-btn flat label="Cancelar" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
-    </q-dialog>
+      </q-dialog>
     <router-view class="overflow-hidden-y" :key="componentKeyRouterView" />
   </q-layout>
 </template>
@@ -266,7 +270,14 @@
 <script setup>
 import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
-import { ref, computed, onBeforeMount, watch, onBeforeUnmount } from "vue";
+import {
+  ref,
+  computed,
+  onBeforeMount,
+  watch,
+  onBeforeUnmount
+} from "vue";
+import { getSessionStorageItem, removeSessionStorageItem} from "src/stores/sessionStorage.js";
 import { useAuthStore } from "src/stores/auth";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
@@ -285,7 +296,7 @@ import {
   axiosErrorResponseStatus,
   initInterceptors,
 } from "src/services/setupInterceptors";
-import ApplicationModifications from "src/components/ApplicationModifications.vue"
+import ApplicationModifications from "src/components/ApplicationModifications.vue";
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
@@ -308,14 +319,18 @@ const hoverSeeApplication = ref(false);
 const hoverUpdateApplication = ref(false);
 const hoverDeleteApplication = ref(false);
 const useLocalStorage = useLocalStorageStore();
-const { viewAllRequisitions, viewAllSelectedCandidates } = storeToRefs(useRequisitionDetails);
-const { user, isRh, logged, getUserPhotoUUID, isUser, isBoss, isAdmin } = storeToRefs(useAuth);
+const { viewAllRequisitions, viewAllSelectedCandidates } = storeToRefs(
+  useRequisitionDetails
+);
+const { user, isRh, logged, getUserPhotoUUID, isUser, isBoss, isAdmin } =
+  storeToRefs(useAuth);
 const {
   savedApplication,
   viewingApplication,
   updatingApplication,
   userHasApplication,
 } = storeToRefs(useRequest);
+
 
 const openNote = ref(false);
 
@@ -330,10 +345,14 @@ const toolTipActiveApplicationText = computed(() => {
 });
 
 const hideUserApplicationInterface = computed(() => {
-  return isRh.value || isAdmin.value || isBoss.value
+  return isRh.value || isAdmin.value || isBoss.value;
 });
 
 onBeforeMount(() => {
+  if(getSessionStorageItem("viewAllRequisitions") && getSessionStorageItem("viewAllSelectedCandidates")){
+    viewAllRequisitions.value = getSessionStorageItem("viewAllRequisitions") === "true";
+    viewAllSelectedCandidates.value = getSessionStorageItem("viewAllSelectedCandidates") === "true";
+  }
   loadUserData();
 });
 
@@ -344,34 +363,70 @@ onBeforeUnmount(() => {
 const removeUserApplicationOnAdminUser = () => {
   if (!isRh.value && !isAdmin.value && !isBoss.value) return;
 
+  savedApplication.value = {}
+  useRequest.clearMachinery()
   useLocalStorage.remove("savedApplication");
   useLocalStorage.remove("addingNotesApplicationId");
-
 };
 
 const loadUserData = () => {
+  //Retrieve and assign the user session values from the session storage
+  const userStored = JSON.parse(getSessionStorageItem("user"));
+  const loggedStored = Number(getSessionStorageItem("logged"));
+
+  //if the user session information is correct, then it assigns the user session information to the store and needed data to the local variables
+  if (userStored && loggedStored) {
+    user.value = userStored;
+    logged.value = loggedStored;
+  } else {
+    //If the user session information is incorrect, then it shows a dialog with the error message and sends the user to the login
+    $q.dialog({
+        title: 'Oops! Hubo un problema con tu sesión',
+        message: 'Por favor, vuelve a iniciar sesión',
+        persistent: true,
+        ok: {
+          push: true,
+          color: 'positive',
+          label: 'Iniciar Sesión',
+        },
+      }).onOk(() => {
+        router.replace("/")
+      })
+  }
+
   if (isUser.value) {
     loadLocalStorage();
     initInterceptors(router);
     router.replace("/userHome/perfil");
+  } else {
+    loadApplicationLocalStorage();
   }
-
 };
 
+const loadApplicationLocalStorage = () => {
+  const isViewingApplication = useLocalStorage.load("viewingApplication");
+  const userApplicationStored = useLocalStorage.load("savedApplication");
+  setHeaderAuthorization(user.value.token);
+  settedHeaderAuthorization.value = true;
+
+  if (isViewingApplication) {
+    viewingApplication.value = isViewingApplication;
+  }
+  if (userApplicationStored) {
+    savedApplication.value = userApplicationStored;
+  }
+}
+
 const loadLocalStorage = () => {
-  const userStored = useLocalStorage.load("user");
-  const loggedStored = useLocalStorage.load("logged");
   const isViewingApplication = useLocalStorage.load("viewingApplication");
   const isUpdatingApplication = useLocalStorage.load("updatingApplication");
   const userApplicationStored = useLocalStorage.load("savedApplication");
-  if (userStored) {
-    user.value = userStored;
-    userPhotoUUID.value = user.value.photoUUID;
-    setHeaderAuthorization(userStored.token);
-    settedHeaderAuthorization.value = true;
-    checkUserApplication(false);
-  }
-  if (loggedStored) logged.value = loggedStored;
+
+
+  userPhotoUUID.value = user.value.photoUUID;
+  setHeaderAuthorization(user.value.token);
+  settedHeaderAuthorization.value = true;
+  checkUserApplication(false);
 
   if (isViewingApplication) {
     viewingApplication.value = isViewingApplication;
@@ -383,10 +438,6 @@ const loadLocalStorage = () => {
     savedApplication.value = userApplicationStored;
   }
 
-  if (user.value.role === "u") {
-    initInterceptors(router);
-    router.replace("/userHome/perfil");
-  }
 };
 
 const goToRequisitionApplicants = () => {
@@ -560,6 +611,7 @@ const changeNoteStatus = () => {
   openNote.value = !openNote.value;
 };
 
+//Check if the application is active and if it´s created so the option to create does not appear in the nav bar
 const checkUserApplication = (sendToApplication = true) => {
   if (!userHasApplication.value) return;
 
@@ -638,4 +690,5 @@ const checkUserApplication = (sendToApplication = true) => {
   left: 25%;
   border-radius: 10px;
 }
+
 </style>

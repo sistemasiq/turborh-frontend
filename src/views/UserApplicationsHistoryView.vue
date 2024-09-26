@@ -171,149 +171,12 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog v-model="openPsicometricTestDialog">
-    <q-card>
-      <q-card-section>
-        <div class="text-h6">Enviar test psicometrico</div>
-        <q-checkbox
-          class="absolute-right q-mr-xl"
-          v-model="sendLink"
-          label="Enviar link"
-          @update:model-value="resetPsychTestInformation()"
-        />
-      </q-card-section>
-
-      <q-separator />
-
-      <q-card-section
-        v-if="!sendLink"
-        style="width: 550px; max-width: 90vw; max-height: 50vh"
-        class="justify-between"
-        horizontal
-      >
-        <q-card-section style="width: 50%">
-          <q-btn-dropdown
-            flat
-            auto-close
-            color="white"
-            text-color="grey-9"
-            :icon="
-              selectedPsychTestPlatform === ''
-                ? 'list'
-                : selectedPsychTestPlatform === 'Grupo Arhca'
-                ? 'group'
-                : 'list'
-            "
-            :label="
-              selectedPsychTestPlatform != ''
-                ? selectedPsychTestPlatform
-                : 'plataforma'
-            "
-            class="text-weight-regular"
-            :dropdown-content-class="dropdownContentClass"
-          >
-            <q-list>
-              <q-item
-                v-for="(item, index) in psychTestPlatforms"
-                :key="index"
-                clickable
-                v-close-popup
-                @click.prevent="selectPsychPlatform(item)"
-              >
-                <q-item-section avatar>
-                  <q-avatar
-                    :icon="
-                      item.psychPlatformName != 'Grupo Arhca'
-                        ? 'list'
-                        : 'Google Meet'
-                    "
-                    :color="
-                      item.psychPlatformName === 'Grupo Arhca'
-                        ? 'purple-4'
-                        : 'grey-4'
-                    "
-                    text-color="white"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>{{ item.psychPlatformName }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-btn-dropdown>
-        </q-card-section>
-
-        <q-card-section style="width: 50%">
-          <q-input
-            v-if="psychPlatformRequireCredentials"
-            light
-            outlined
-            color="black"
-            v-model="userNameForPsychTests"
-            label="Nombre"
-            label-color="black"
-            lazy-rules
-            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
-            style="width: 100%"
-          />
-          <q-input
-            v-if="psychPlatformRequireCredentials"
-            light
-            outlined
-            color="black"
-            v-model="passwordForPsychTest"
-            label="Contraseña"
-            label-color="black"
-            lazy-rules
-            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
-            style="width: 100%"
-          />
-        </q-card-section>
-      </q-card-section>
-
-      <q-card-section
-        v-if="sendLink"
-        style="width: 550px; max-width: 90vw; max-height: 50vh"
-        class="justify-between"
-        horizontal
-      >
-        <q-card-section style="width: 100%">
-          <q-input
-            light
-            outlined
-            color="black"
-            v-model="testLink"
-            label="Link del formulario"
-            label-color="black"
-            lazy-rules
-            :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
-          />
-        </q-card-section>
-      </q-card-section>
-      <q-separator />
-
-      <q-card-actions class="justify-end q-pa-md">
-        <q-btn
-          flat
-          label="Cancelar"
-          v-close-popup
-          class="text-red-8 q-mr-sm"
-          style="border-radius: 8px"
-          @click.prevent="resetPsychTestInformation()"
-        />
-        <q-btn
-          flat
-          icon="send"
-          label="Enviar"
-          class="text-white"
-          :class="disableSendPsychTestButton ? 'bg-grey-5' : 'bg-green-13'"
-          style="border-radius: 8px"
-          @click.prevent="sendPsychTestInformation()"
-          :disable="disableSendPsychTestButton"
-        />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+  <PsychometricTestDialog
+    :open="openPsicometricTestDialog"
+    :selected-candidate="selectedUser"
+    @update:open="openPsicometricTestDialog = $event"
+    @update:selectedCandidate="updateRow"
+  />
 
   <q-dialog v-model="openSeeDataPsychTest">
     <q-card style="width: 900px">
@@ -461,6 +324,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import PsychometricTestDialog from "src/components/PsychometricTestDialog.vue";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
@@ -489,6 +353,8 @@ import {
 import UserApplicationHistoryFilter from "src/components/UserApplicationHistoryFilter.vue";
 import { formatDate } from "src/utils/formatDates.js";
 import { andOperation } from "src/utils/logicGatesOperations.js";
+import { setSessionStorageItem, removeSessionStorageItem } from "src/stores/sessionStorage";
+
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -535,7 +401,6 @@ const showResume = ref(false);
 
 const selectedUser = ref();
 const openPsicometricTestDialog = ref(false);
-const dropdownContentClass = "flexible-width";
 const selectedPsychTestPlatform = ref("");
 const userNameForPsychTests = ref("");
 const passwordForPsychTest = ref("");
@@ -545,14 +410,16 @@ const sendLink = ref(false);
 const testLink = ref("");
 const openSeeDataPsychTest = ref(false);
 const candidatesPsychData = ref([]);
-const psychPlatformRequireCredentials = ref(false);
 
 onMounted(() => {
   viewAllRequisitions.value = true;
   viewAllSelectedCandidates.value = false;
+  setSessionStorageItem("viewAllRequisitions", viewAllRequisitions.value);
+  setSessionStorageItem("viewAllSelectedCandidates", viewAllSelectedCandidates.value);
   fetchApplicants();
   getPsychometricPlatformsData();
 });
+
 
 const getPsychometricPlatformsData = async () => {
   try {

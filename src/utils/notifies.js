@@ -19,3 +19,12 @@ export const notifyNegative = (message) => {
     position: "top"
   };
 };
+
+export const notifyNegativeField = (message) => {
+  return {
+    type: "negative",
+    message: `<p style='font-size:medium;' class='q-mt-md'>${message}</p>`,
+    html: true,
+    position: "bottom"
+  };
+};

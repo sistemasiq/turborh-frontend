@@ -4,6 +4,7 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { useRequisitionStore } from "src/stores/requisition";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from "pinia";
+import { removeSessionStorageItem, clearSessionStorage } from "src/stores/sessionStorage.js";
 
 const useLocalStorage = useLocalStorageStore();
 const useAuth = useAuthStore();
@@ -22,10 +23,17 @@ export const setHeaderAuthorization = (token) => {
 export const logOut = () => {
   useLocalStorage.remove("user");
   useLocalStorage.remove("logged");
+  useLocalStorage.remove("updatingApplication")
+  useLocalStorage.remove("viewingApplication")
+  useLocalStorage.remove("savedApplication");
   user.value = {};
   logged.value = false;
   removeHeaderAuthorization();
   useRequisition.clearStore();
+  removeSessionStorageItem("user");
+  removeSessionStorageItem("logged");
+  clearSessionStorage();
+
 };
 
 export const logUser = async (userName, password) => {
@@ -121,6 +129,26 @@ export const createUser = async (userName, email, curp, password) => {
     return null;
   }
 };
+
+export const updateUser = async (userName, email, curp, id) => {
+  const newUserData = {
+    id: id,
+    userName: userName,
+    email: email,
+    curp: curp
+  }
+  try {
+    const request = await axios.put(`users`, newUserData)
+    if(requestSuccessfull(request.status)){
+      return true;
+    }else{
+      return false;
+    }
+  } catch (error) {
+    console.log(error.message)
+    return false;
+  }
+}
 
 export const updateUserImage = async (userId, imageUUID) => {
   try {

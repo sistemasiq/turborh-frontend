@@ -167,10 +167,9 @@
   </q-dialog>
 </template>
 
-/* Script
-==================================================================================================================================================*/
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { setSessionStorageItem } from "src/stores/sessionStorage";
 import Tooltip from "src/components/Tooltip.vue";
 import { useQuasar } from "quasar";
 import { useJobCatalogStore } from "src/stores/jobCatalog";
@@ -252,6 +251,12 @@ const updateJob = async (props) => {
   jobId.value = props.row.id;
   jobName.value = props.row.jobName;
   updatingJob.value = true;
+  const jobData = {
+    jobId: jobId.value,
+    jobName: jobName.value,
+    updatingJob: updatingJob.value
+  }
+  setSessionStorageItem("jobData", jobData);
   router.push("/home/edicion-puesto");
 };
 
@@ -288,6 +293,12 @@ const deleteJob = (props) => {
 const seeJob = (id) => {
   readOnly.value = true;
   jobId.value = id;
+
+  const jobData = {
+    readOnly: readOnly.value,
+    jobId: jobId.value
+  }
+  setSessionStorageItem("jobData", jobData);
   router.push("/home/edicion-puesto");
 };
 

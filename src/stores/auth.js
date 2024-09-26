@@ -7,6 +7,7 @@ export const useAuthStore = defineStore("auth", () => {
   const user = ref();
   const logged = ref(false);
   const isLogged = computed(() => logged.value === 1);
+  //check if the user is admin "l" = licenciado and "i" = ingeniero
   const isAdmin = computed(() => {
     if (user.value) {
       return user.value.role === "l" || user.value.role === "i";

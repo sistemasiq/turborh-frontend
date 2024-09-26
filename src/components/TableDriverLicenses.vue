@@ -43,6 +43,7 @@
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
+                v-if="!viewingApplication"
                   cover
                   transition-show="scale"
                   transition-hide="scale"
@@ -216,6 +217,7 @@ const deleteLastReference = () => {
 };
 
 const saveLocalStore = () => {
+  if(!updatingApplication.value && !viewingApplication.value)
   useLocalStorage.save("drivingLicenceData", drivingLicenceData.value);
 };
 

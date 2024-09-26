@@ -27,7 +27,6 @@
             v-model="fileSelected"
             clearable
             :label="props.fileSelectorLabel"
-
           >
             <template v-slot:prepend
               ><q-icon color="dark" name="folder" />
@@ -95,7 +94,7 @@
           v-close-popup
           class="text-red-8 q-mr-sm"
           style="border-radius: 8px"
-          @click.prevent="$emit('onClose')"
+          @click.prevent="handleOnClose"
         />
         <q-btn
           flat
@@ -104,7 +103,7 @@
           class="text-white"
           :class="disableUploadButton ? 'bg-grey-5' : 'bg-green-13'"
           style="border-radius: 8px"
-          @click.prevent="$emit('onUpload', fileSelected, platformId)"
+          @click.prevent="handleUpload"
           :disable="disableUploadButton"
         />
       </q-card-actions>
@@ -160,5 +159,14 @@ const emit = defineEmits(["onOpenDialog","onUpload", "onClose"]);
 
 const fileSelected = ref();
 
+const handleOnClose = () => {
 
+  emit('onClose');
+  fileSelected.value = null; // Clear the file input after upload
+}
+
+const handleUpload = () => {
+  emit("onUpload", fileSelected.value, platformId.value);
+  fileSelected.value = null; // Clear the file input after upload
+};
 </script>

@@ -2,6 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 
 export const useJobStore = defineStore("job", () => {
+  
   const jobData = ref();
   const jobId = ref();
   const jobFunctions = ref("");
@@ -15,6 +16,22 @@ export const useJobStore = defineStore("job", () => {
   const jobObservations = ref("");
   const jobConditions = ref("");
   const jobStored = ref();
+  
+    const $reset = () => {
+      jobData.value = "";
+      jobId.value = "";
+      jobFunctions.value = "";
+      jobSkills.value = "";
+      englishLevel.value = "";
+      educationRequired.value = "";
+      experience.value = "";
+      extraHours.value = false;
+      travelAvailability.value = false;
+    
+      jobObservations.value = "";
+      jobConditions.value = "";
+      jobStored.value = "";
+    }
 
   return {
     jobData,
@@ -28,6 +45,7 @@ export const useJobStore = defineStore("job", () => {
     travelAvailability,
     jobObservations,
     jobConditions,
-    jobStored
+    jobStored,
+    $reset
   };
 });

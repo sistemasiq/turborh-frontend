@@ -33,24 +33,3 @@ export const getUserRoute = () => {
 export const getAdminRoute = () => {
   return "/home";
 };
-
-
-
-//OLD DEV and Prod configuration in Turbomaquinas´s server
-/*
-export const getAxiosBaseUrl = () => {
-  return dev ? "http://localhost:5000" : "http://192.168.20.59:8181";
-};
-
-export const getS3UploadUrl = () => {
-  return dev
-    ? "http://localhost:5000/upload"
-    : "http://192.168.20.59:8181/upload";
-};
-
-export const getS3FileUrl = (folderPath, fileName) => {
-  return dev
-    ? `http://localhost:5000/files/${fileName}/path/${folderPath}`
-    : `http://192.168.20.59:8181/files/${fileName}/path/${folderPath}`;
-};
-*/
