@@ -34,7 +34,7 @@
                     <q-card-section class="requisition-content">
                         <div class="pagination">
                             <router-link :to="{ path: '/home/nueva-requisicion-' + currentPage }">
-                                <q-pagination v-model="currentPage" color="cyan" :max="2" :max-pages="2" boundary-numbers :disable="job == 'Puesto solicitado' ? true : false"/>
+                                <q-pagination v-model="currentPage" color="cyan" :max="2" :max-pages="2" boundary-numbers :disable="job == 'Puesto solicitado' && !showingDetails && !updatingRequisition ? true : false"/>
                             </router-link>
 
                         </div>
@@ -190,6 +190,7 @@ const { jobData, jobId, jobFunctions, jobSkills, englishLevel, educationRequired
 
 onBeforeMount(() => {
     isJobSelected();
+    isRequisitionSelected();
 })
 
 onMounted(() => {
@@ -208,9 +209,28 @@ onBeforeUnmount(() => {
     // Clear the session storage
     removeSessionStorageItem("selectedJob");
     removeSessionStorageItem("selectedJobData");
+    removeSessionStorageItem("requisitionInformation")
+     //restore the stores to the initial state
+    useJob.$reset();
+    useRequisition.clearStore();
+    useRequisitionDetails.$reset();
   }
 })
 
+const isRequisitionSelected = () => {
+  if (getSessionStorageItem("requisitionInformation")) {
+    const requisitionInformation = JSON.parse(getSessionStorageItem(
+      "requisitionInformation"
+    ));
+    numRequisitionDetails.value = requisitionInformation.numRequisitionDetails;
+    applicantDetails.value = requisitionInformation.applicantDetails;
+    jobDetails.value = requisitionInformation.jobDetails;
+    showingDetails.value = requisitionInformation.showingDetails;
+    updatingRequisition.value = requisitionInformation.updatingRequisition;
+    requisitionData.value = requisitionInformation.requisitionData;
+    console.log(requisitionInformation)
+  }
+};
 const filteredJobs = () => {
 
   if(!searchJob.value){

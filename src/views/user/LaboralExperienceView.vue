@@ -6,6 +6,7 @@
       <q-card-section>
         <PaginationApplication :page="10"></PaginationApplication>
         <div style="margin-top: 6%">
+          
           <LaboralExperienceData></LaboralExperienceData>
         </div>
       </q-card-section>

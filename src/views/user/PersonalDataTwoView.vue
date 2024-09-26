@@ -28,7 +28,7 @@
 
 
           <q-form class="q-gutter-md">
-            <div class="rounded-borders">
+            <div class="rounded-borders row justify-between ">
               <q-checkbox
                 v-model="isCheckedDiseases"
                 @update:model-value="updateStore()"
@@ -42,6 +42,7 @@
                 :disable="viewingApplication"
               >
               </q-checkbox>
+              <BadgeOptional class="self-center"/>
             </div>
             <q-input
               dark
@@ -62,7 +63,7 @@
             >
             </q-input>
 
-            <div class="rounded-borders">
+            <div class="rounded-borders row justify-between">
               <q-checkbox
                 v-model="isCheckedAllergies"
                 @update:model-value="updateStore()"
@@ -75,6 +76,7 @@
                 style="color: black"
                 :disable="viewingApplication"
               ></q-checkbox>
+              <BadgeOptional class="self-center"/>
             </div>
             <q-input
               dark
@@ -95,7 +97,7 @@
             >
             </q-input>
 
-            <div class="rounded-borders">
+            <div class="rounded-borders row justify-between">
               <q-checkbox
                 v-model="isCheckedCar"
                 @update:model-value="updateStore()"
@@ -108,6 +110,7 @@
                 style="color: black"
                 :disable="viewingApplication"
               ></q-checkbox>
+              <BadgeOptional class="self-center"/>
             </div>
 
             <q-input
@@ -129,7 +132,7 @@
             >
             </q-input>
 
-            <div class="rounded-borders">
+            <div class="rounded-borders row justify-between">
               <q-checkbox
                 v-model="isCheckedIncome"
                 @update:model-value="updateStore()"
@@ -142,6 +145,7 @@
                 style="color: black"
                 :disable="viewingApplication"
               ></q-checkbox>
+              <BadgeOptional class="self-center"/>
             </div>
 
             <q-input
@@ -192,6 +196,7 @@ import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
 import { useQuasar } from "quasar";
 import { notifyPositive } from "src/utils/notifies";
+import BadgeOptional from "src/components/BadgeOptional.vue";
 
 const $q = useQuasar();
 

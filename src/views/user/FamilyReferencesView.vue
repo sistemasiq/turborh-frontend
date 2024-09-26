@@ -4,36 +4,27 @@
           <q-card-section class="title"> Referencias familiares y comerciales </q-card-section>
           <q-card-section>
             <PaginationApplication :page="11"/>
-            <p
-              style="
-                font-size: 130%;
-                color: rgb(255, 255, 255);
-                padding-left: 4%;
-                padding-top: 2%;
-                margin-top: 2%;
-              "
-            >
-              Referencias Familiares (max 3)
-            </p>
-            <FamilyReferences class="table-position" />
-            <p
-              style="
-                font-size: 130%;
-                color: rgb(255, 255, 255);
-                padding-left: 4%;
-                padding-top: 2%;
-              "
-            >
-              Referencias Comerciales
-            </p>
-            <CommercialReferences class="table-position" />
+            
+          </q-card-section>
+          <q-card-section class="q-mt-xl column items-start">
+            <div class="row items-center q-mx-xl">
+          <div class="text-white text-h6 text-weight-regular q-mr-md">Referencias Familiares <strong>(max 3)</strong></div>
+          <BadgeOptional />
+         </div>
+            <FamilyReferences class="q-mt-md self-center" style="width: 92%;" />
+          </q-card-section>
+          <q-card-section class="q-mt-lg column items-start">
+            <div class="row items-center q-mx-xl">
+          <div class="text-white text-h6 text-weight-regular q-mr-md">Referencias Comerciales <strong>(max 3)</strong></div>
+          <BadgeOptional />
+         </div>
+            <CommercialReferences class="q-mt-md self-center" style="width: 92%;" />
           </q-card-section>
         </q-card>
         <ButtonApplicationStatus v-if="updatingApplication"/>
   </q-layout>
 </template>
 
-<!-- SCRIPT BEGINS ............................................................................................................................ -->
 <script setup>
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
@@ -41,6 +32,7 @@ import FamilyReferences from "src/components/TableFamilyReferences.vue";
 import CommercialReferences from "src/components/TableComercialReferences.vue";
 import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
+import BadgeOptional from "src/components/BadgeOptional.vue";
 
 const useApplication = useRequestUser();
 
@@ -104,10 +96,5 @@ const { updatingApplication } = storeToRefs(useApplication);
   margin-left: 20%;
 }
 
-.table-position {
-  position: relative;
-  margin-top: 2%;
-  width: 92%;
-  left: 4%;
-}
+
 </style>

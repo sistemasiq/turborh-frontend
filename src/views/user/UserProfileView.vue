@@ -135,7 +135,7 @@
               color="white"
               icon="edit"
               label="Editar información"
-              @click.prevent="openEditInfo = true"
+              @click.prevent="onEditDialog"
             />
           </q-card-section>
         </div>
@@ -155,7 +155,7 @@
     </q-page-container>
   </q-layout>
 
-  <q-dialog v-model="openEditInfo" persistent>
+  <q-dialog v-model="openEditInfo" persistent class="z-max">
     <q-card style="width: 100%">
       <q-card-section class="column items-left q-pa-md">
         <q-input
@@ -188,11 +188,7 @@
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat label="Cancelar" color="primary" v-close-popup />
-        <q-btn
-          label="Editar"
-          color="primary"
-          @click.prevent="updateUserData"
-        />
+        <q-btn label="Guardar" color="primary" @click.prevent="updateUserData" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -216,13 +212,14 @@ import {
   ruleFieldRequired,
   ruleFieldMinLength,
   ruleFieldIsEmail,
+  checkNonEmptyFields
 } from "src/utils/fieldRules";
 import {
   getUserByUserName,
   getUserByCurp,
   getUserByEmail,
 } from "src/services/user";
-import { curpRegex } from "src/utils/fieldRegex";
+import { curpRegex, emailRegex } from "src/utils/fieldRegex";
 
 const $q = useQuasar();
 const useLocalStorage = useLocalStorageStore();
@@ -261,16 +258,13 @@ onMounted(() => {
   setUserInfo();
 });
 
-const disableEditButton = computed(() => {
-  return (
-    !emailEdit.value ||
-    !curpEdit.value ||
-    !userNameEdit.value ||
-    !userNameValidation.value ||
-    !emailValidation.value ||
-    !curpValidation.value
-  );
-});
+const onEditDialog = () => {
+  openEditInfo.value = true;
+  userNameEdit.value = user.value.userName;
+  curpEdit.value = user.value.curp;
+  emailEdit.value = user.value.email;
+
+}
 
 const checkIfUserNameAlreadyExists = async () => {
   if (userNameEdit.value.length < 6) {
@@ -314,13 +308,14 @@ const checkIfCurpAlreadyExists = async () => {
 };
 
 const checkIfEmailAlreadyExists = async () => {
+  if(!emailEdit.value){
+    return;
+  }
   const emailExists = await getUserByEmail(emailEdit.value);
 
   emailValidation.value =
-    emailExists && user.value.email !== emailEdit.value ? false : true;
-  console.log("USER NAME VALIDATION ", userNameValidation.value);
-  console.log("EMAIL VALIDATION ", emailValidation.value);
-  console.log("CURP VALIDATION ", curpValidation.value);
+    emailExists && user.value.email !== emailEdit.value && emailRegex.test(emailEdit.value) ? false : true;
+    
 
   if (!emailValidation.value) {
     $q.notify(notifyNegative("Este correo electrónico ya está registrado"));
@@ -328,7 +323,15 @@ const checkIfEmailAlreadyExists = async () => {
 };
 
 const updateUserData = async () => {
-  try {
+
+  const areFieldsNotEmpty = checkNonEmptyFields([userNameEdit.value, curpEdit.value, emailEdit.value])
+
+  const isUserNameValid = checkIfUserNameAlreadyExists(userNameEdit.value);
+  const isCurpValid = curpRegex.test(curpEdit.value);
+  const isEmailValid = emailRegex.test(emailEdit.value);
+
+  if(isUserNameValid && isCurpValid && isEmailValid && areFieldsNotEmpty){
+    try {
     $q.loading.show();
 
     await checkIfCurpAlreadyExists();
@@ -362,6 +365,10 @@ const updateUserData = async () => {
   } finally {
     $q.loading.hide();
   }
+  } else {
+    $q.notify(notifyNegative("Todos los campos deben ser llenados"));
+  }
+
 };
 
 const updateSelectedImageURL = () => {

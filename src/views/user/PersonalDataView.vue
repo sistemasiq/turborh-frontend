@@ -142,6 +142,7 @@
               <q-input
                 ref="birthDateRef"
                 class="full-width q-pl-md"
+                mask="####-##-##"
                 hint="AAAA-MM-DD"
                 hide-hint
                 label="Fecha de nacimiento *"
@@ -153,9 +154,10 @@
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
               >
-                <template v-if="!viewingApplication" v-slot:append>
+                <template v-slot:append>
                   <q-icon name="event" class="cursor-pointer">
                     <q-popup-proxy
+                      v-if="!viewingApplication"
                       cover
                       transition-show="scale"
                       transition-hide="scale"
@@ -298,7 +300,7 @@
                 class="full-width q-pl-md"
                 @update:model-value="updateStore()"
               >
-                <BadgeOptional></BadgeOptional>
+                <BadgeOptional class="self-center" />
               </q-input>
 
               <q-input
@@ -371,7 +373,7 @@
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
               >
-                <BadgeOptional></BadgeOptional>
+                <BadgeOptional class="self-center" />
               </q-input>
             </div>
 

@@ -28,6 +28,7 @@
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
+                v-if="!viewingApplication"
                   cover
                   transition-show="scale"
                   transition-hide="scale"

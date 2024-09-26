@@ -14,6 +14,18 @@ export const useRequisitionDetailsStore = defineStore(
     const viewAllRequisitions = ref(false);
     const viewAllSelectedCandidates = ref(false);
 
+    const $reset = () => {
+      requisitionData.value = {}
+    showingDetails.value = false
+    numRequisitionDetails.value = 0
+    idRequisitionDetails.value = 0
+    applicantDetails.value = ""
+    jobDetails.value = ""
+    updatingRequisition.value = false
+    viewAllRequisitions.value = false
+    viewAllSelectedCandidates.value = false
+    }
+
     return {
       requisitionData,
       numRequisitionDetails,
@@ -23,7 +35,8 @@ export const useRequisitionDetailsStore = defineStore(
       showingDetails,
       updatingRequisition,
       viewAllRequisitions,
-      viewAllSelectedCandidates
+      viewAllSelectedCandidates,
+      $reset
     };
   }
 );

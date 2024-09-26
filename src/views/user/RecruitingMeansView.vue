@@ -6,27 +6,38 @@
     <q-card>
       <q-card-section class="tittle"> Medios de reclutamiento </q-card-section>
       <q-card-section>
-        <pagination-application :page="5" :required-fields="requiredFieldsOnThisPage" @on-field-validation="validateRequiredFields"></pagination-application>
+        <pagination-application
+          :page="5"
+          :required-fields="requiredFieldsOnThisPage"
+          @on-field-validation="validateRequiredFields"
+        ></pagination-application>
 
         <div style="margin-top: 6%">
-
-          <q-card flat bordered text-color="white"
-  class="q-mb-lg"
-  style="margin-left: 0%; border-color: rgb(255, 248, 43);
-  background-color: transparent; color: white; width: 100%; height: 80px;"
-  v-if="!viewingApplication"
->
-  <q-card-section>
-    <div class="text-body1 text-weight-medium row">
-      <q-icon name="warning" class="q-mr-md q-mt-xs" />
-      Nota
-    </div>
-    <p class="text-body2">
-      Seleccione las opciones solo en caso de que sea necesario
-    </p>
-  </q-card-section>
-</q-card>
-
+          <q-card
+            flat
+            bordered
+            text-color="white"
+            class="q-mb-lg"
+            style="
+              margin-left: 0%;
+              border-color: rgb(255, 248, 43);
+              background-color: transparent;
+              color: white;
+              width: 100%;
+              height: 80px;
+            "
+            v-if="!viewingApplication"
+          >
+            <q-card-section>
+              <div class="text-body1 text-weight-medium row">
+                <q-icon name="warning" class="q-mr-md q-mt-xs" />
+                Nota
+              </div>
+              <p class="text-body2">
+                Seleccione las opciones solo en caso de que sea necesario
+              </p>
+            </q-card-section>
+          </q-card>
 
           <q-form class="q-gutter-md">
             <q-input
@@ -44,11 +55,11 @@
               class="input-brand"
               @update:model-value="updateStore()"
             >
-            <BadgeRequired></BadgeRequired>
             </q-input>
 
-            <div class="home-content rounded-borders" style="display: flex">
-              <div class="home-content rounded-borders" style="display: flex">
+              <div
+                class="home-content rounded-borders row justify-between bg-white"
+              >
                 <q-checkbox
                   v-model="isCheckedFamiliar"
                   @update:model-value="updateStore()"
@@ -62,8 +73,8 @@
                   :disable="viewingApplication"
                 >
                 </q-checkbox>
+                <BadgeOptional class="self-center" />
               </div>
-            </div>
             <q-input
               dark
               outlined
@@ -83,8 +94,9 @@
             >
             </q-input>
 
-            <div class="home-content rounded-borders" style="display: flex">
-              <div class="home-content rounded-borders" style="display: flex">
+              <div
+                class="home-content rounded-borders row justify-between"
+              >
                 <q-checkbox
                   v-model="isCheckedDepartment"
                   @update:model-value="updateStore()"
@@ -97,8 +109,8 @@
                   style="color: black"
                   :disable="viewingApplication"
                 ></q-checkbox>
+                <BadgeOptional class="self-center" />
               </div>
-            </div>
             <q-input
               dark
               outlined
@@ -130,6 +142,7 @@
               :readonly="viewingApplication"
               @update:model-value="updateStore()"
             >
+              <BadgeOptional class="self-center" />
             </q-input>
           </q-form>
         </div>
@@ -145,7 +158,10 @@
         />
       </q-card-section>
     </q-card>
-    <ButtonApplicationStatus v-if="updatingApplication" :required-fields="requiredFieldsOnThisPage"/>
+    <ButtonApplicationStatus
+      v-if="updatingApplication"
+      :required-fields="requiredFieldsOnThisPage"
+    />
   </q-layout>
 </template>
 
@@ -156,10 +172,10 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
 import PaginationApplication from "src/components/PaginationApplication.vue";
 import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue";
-import BadgeRequired from "src/components/BadgeRequired.vue";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 import { ruleFieldRequired } from "src/utils/fieldRules";
+import BadgeOptional from "src/components/BadgeOptional.vue";
 
 const $q = useQuasar();
 const useRequest = useRequestUser();
@@ -187,7 +203,7 @@ const validateRequiredFields = () => {
   mediumRef.value.validate();
 };
 
-const requiredFieldsOnThisPage = computed(() => [medium.value])
+const requiredFieldsOnThisPage = computed(() => [medium.value]);
 
 onMounted(() => {
   loadLocalStore();
@@ -244,7 +260,7 @@ const clean = () => {
 const saveLocalStore = () => {
   if (!viewingApplication.value && !updatingApplication.value) {
     useLocalStorage.save("recruitingMeansData", recruitingMeansData.value);
-    $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
+    $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
   }
 };
 
@@ -268,9 +284,7 @@ const loadLocalStore = () => {
 }
 
 .home-content {
-  background-color: #ffffff;
-  height: 10%;
-  width: 100%;
+  width: 99%;
 }
 
 .tittle {

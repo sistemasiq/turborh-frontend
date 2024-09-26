@@ -5,7 +5,7 @@
   >
     <q-card flat bordered class="rounded-borders">
       <q-card-section class="title">
-        <p>Maquinaria y herramientas que manejas</p>
+        <p>Maquinaria y herramientas</p>
       </q-card-section>
       <q-card-section class="handling-content">
         <pagination-application :page="8" />
@@ -17,7 +17,10 @@
           Sin maquinaría registrada
         </p>
         <div v-if="!viewingApplication" style="margin-top: 4%">
-          <p>Maquinaria y herramientas que manejas</p>
+         <div class="row items-center q-mb-md q-mx-xl">
+          <div class="text-white text-h6 text-weight-regular">Selecciona la maquinaria y herramienta que manejas</div>
+          <BadgeOptional />
+         </div>
           <q-btn-dropdown
             :disable="machinery.length === 0"
             class="q-mb-md button-dropdown"
@@ -301,6 +304,7 @@ import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue"
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 import { getAllMachineryActive } from "src/services/machineryTools";
+import BadgeOptional from "src/components/BadgeOptional.vue";
 
 const $q = useQuasar();
 const useRequest = useRequestUser();

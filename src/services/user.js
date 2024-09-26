@@ -4,6 +4,7 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { useRequisitionStore } from "src/stores/requisition";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from "pinia";
+import { removeSessionStorageItem, clearSessionStorage } from "src/stores/sessionStorage.js";
 
 const useLocalStorage = useLocalStorageStore();
 const useAuth = useAuthStore();
@@ -24,10 +25,15 @@ export const logOut = () => {
   useLocalStorage.remove("logged");
   useLocalStorage.remove("updatingApplication")
   useLocalStorage.remove("viewingApplication")
+  useLocalStorage.remove("savedApplication");
   user.value = {};
   logged.value = false;
   removeHeaderAuthorization();
   useRequisition.clearStore();
+  removeSessionStorageItem("user");
+  removeSessionStorageItem("logged");
+  clearSessionStorage();
+
 };
 
 export const logUser = async (userName, password) => {

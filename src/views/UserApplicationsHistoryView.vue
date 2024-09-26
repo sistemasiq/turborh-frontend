@@ -353,6 +353,8 @@ import {
 import UserApplicationHistoryFilter from "src/components/UserApplicationHistoryFilter.vue";
 import { formatDate } from "src/utils/formatDates.js";
 import { andOperation } from "src/utils/logicGatesOperations.js";
+import { setSessionStorageItem, removeSessionStorageItem } from "src/stores/sessionStorage";
+
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -399,7 +401,6 @@ const showResume = ref(false);
 
 const selectedUser = ref();
 const openPsicometricTestDialog = ref(false);
-const dropdownContentClass = "flexible-width";
 const selectedPsychTestPlatform = ref("");
 const userNameForPsychTests = ref("");
 const passwordForPsychTest = ref("");
@@ -409,14 +410,16 @@ const sendLink = ref(false);
 const testLink = ref("");
 const openSeeDataPsychTest = ref(false);
 const candidatesPsychData = ref([]);
-const psychPlatformRequireCredentials = ref(false);
 
 onMounted(() => {
   viewAllRequisitions.value = true;
   viewAllSelectedCandidates.value = false;
+  setSessionStorageItem("viewAllRequisitions", viewAllRequisitions.value);
+  setSessionStorageItem("viewAllSelectedCandidates", viewAllSelectedCandidates.value);
   fetchApplicants();
   getPsychometricPlatformsData();
 });
+
 
 const getPsychometricPlatformsData = async () => {
   try {

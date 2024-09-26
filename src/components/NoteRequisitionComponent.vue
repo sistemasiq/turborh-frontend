@@ -62,6 +62,7 @@ const { isRh, isAdmin } = storeToRefs(useAuth);
 
 const savingNote = ref(false);
 
+
 onMounted(() => {
   note.value = props.currentNote;
 });

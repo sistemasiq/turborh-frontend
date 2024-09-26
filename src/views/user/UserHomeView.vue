@@ -277,7 +277,7 @@ import {
   watch,
   onBeforeUnmount
 } from "vue";
-import { getSessionStorageItem } from "src/stores/sessionStorage.js";
+import { getSessionStorageItem, removeSessionStorageItem} from "src/stores/sessionStorage.js";
 import { useAuthStore } from "src/stores/auth";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
@@ -297,7 +297,6 @@ import {
   initInterceptors,
 } from "src/services/setupInterceptors";
 import ApplicationModifications from "src/components/ApplicationModifications.vue";
-
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
@@ -350,6 +349,10 @@ const hideUserApplicationInterface = computed(() => {
 });
 
 onBeforeMount(() => {
+  if(getSessionStorageItem("viewAllRequisitions") && getSessionStorageItem("viewAllSelectedCandidates")){
+    viewAllRequisitions.value = getSessionStorageItem("viewAllRequisitions") === "true";
+    viewAllSelectedCandidates.value = getSessionStorageItem("viewAllSelectedCandidates") === "true";
+  }
   loadUserData();
 });
 

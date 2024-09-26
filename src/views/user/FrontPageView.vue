@@ -59,6 +59,7 @@
                 @update:modelValue="updateStore()"
                 class="input-brand"
               >
+              
               </q-input>
 
               <q-input

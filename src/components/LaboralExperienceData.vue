@@ -4,35 +4,34 @@
       <div
         style="display: flex; flex-grow: 1; margin-left: 2%; margin-right: 2%"
       >
-        <q-card
-          flat
-          bordered
-          rounded
-          text-color="white"
-          class="q-mb-lg"
-          style="
-            margin-left: 0%;
-            border-color: rgb(255, 248, 43);
-            background-color: transparent;
-            color: white;
-            width: 100%;
-            height: 80px;
-          "
-          v-if="!viewingApplication"
-        >
-          <q-card-section>
-            <div class="text-body1 text-weight-medium row">
-              <q-icon name="warning" class="q-mr-md q-mt-xs" />
-              Nota
-            </div>
-            <p class="text-body2">
-              Ordena tu experiencia laboral comenzando por añadir tu último
-              empleo que tuviste hasta el primero
-            </p>
-          </q-card-section>
-        </q-card>
+          <q-card
+            flat
+            bordered
+            rounded
+            text-color="white"
+            class="q-mb-lg"
+            style="
+              margin-left: 0%;
+              border-color: rgb(255, 248, 43);
+              background-color: transparent;
+              color: white;
+              width: 100%;
+              height: 80px;
+            "
+            v-if="!viewingApplication"
+          >
+            <q-card-section>
+              <div class="text-body1 text-weight-medium row">
+                <q-icon name="warning" class="q-mr-md q-mt-xs" />
+                Nota
+              </div>
+              <p class="text-body2">
+                Ordena tu experiencia laboral comenzando por añadir tu último empleo que tuviste hasta el primero, <strong>si buscas tu primer empleo puedes saltar este paso</strong>
+              </p>
+            </q-card-section>
+          </q-card>
+        </div>
       </div>
-    </div>
     <q-expansion-item
       v-for="(item, index) in laboralExperienceData"
       :key="index"
@@ -145,10 +144,11 @@
             style="width: 17%"
             label="Fecha de inicio"
           >
-            <template v-if="!viewingApplication" v-slot:append>
+            <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
-                  cover
+                v-if="!viewingApplication"  
+                cover
                   transition-show="scale"
                   transition-hide="scale"
                 >
@@ -185,10 +185,11 @@
             style="width: 17%"
             label="Fecha de fin"
           >
-            <template v-if="!viewingApplication" v-slot:append>
+            <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
-                  cover
+                v-if="!viewingApplication"  
+                cover
                   transition-show="scale"
                   transition-hide="scale"
                 >

@@ -363,6 +363,7 @@ import {
 import { postUserPsychTestData, putUserPsychTestData } from "src/services/user";
 import FileUploader from "src/components/FileUploader.vue";
 import UserApplicationHistoryFilter from "src/components/UserApplicationHistoryFilter.vue";
+import { setSessionStorageItem, getSessionStorageItem } from "src/stores/sessionStorage";
 
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
@@ -1029,6 +1030,7 @@ const selectPsychPlatform = (data) => {
 
 onMounted(() => {
   viewAllRequisitions.value = false;
+  setSessionStorageItem("viewAllRequisitions", viewAllRequisitions.value);
   loadLocalStore();
   fetchApplicants();
   getPsychPlatformsData();
@@ -1036,7 +1038,8 @@ onMounted(() => {
 
 const loadLocalStore = () => {
   const numRequisitionStored = useLocalStorage.load("numRequisitionDetails");
-  const idRequisitionStored = useLocalStorage.load("idRequisitionDetails");
+  const idRequisitionStored = Number(getSessionStorageItem("idRequisitionDetails"))
+  
 
   if (numRequisitionStored) {
     numRequisitionDetails.value = numRequisitionStored;
@@ -1045,6 +1048,7 @@ const loadLocalStore = () => {
   if (idRequisitionStored) {
     idRequisitionDetails.value = idRequisitionStored;
   }
+ 
 };
 
 const setSelectedCandidate = (
@@ -1053,9 +1057,6 @@ const setSelectedCandidate = (
   openSendPsychTestDialog = false
 ) => {
   selectedCandidate.value = row;
-  console.log("CANDIDATE DATA IN ENVIAR TEST PSICOMETRICO AND THE ROW");
-  console.log(selectedCandidate.value);
-  console.log(row);
   openSelectCandidateDialog.value = openSelectDialog;
   openPsicometricTestDialog.value = openSendPsychTestDialog;
   resetPsychTestInformation();

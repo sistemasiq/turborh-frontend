@@ -358,7 +358,7 @@
 <script setup>
 import { ref, onMounted, computed, onBeforeMount, onBeforeUnmount } from "vue";
 import { getSessionStorageItem, removeSessionStorageItem } from "src/stores/sessionStorage.js";
-import { useRequisitionStore, clearStore } from "src/stores/requisition";
+import { useRequisitionStore } from "src/stores/requisition";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useJobStore } from "src/stores/job";
 import { storeToRefs } from "pinia";
@@ -427,6 +427,7 @@ const {
 
 onBeforeMount(() => {
   isJobSelected();
+  isRequisitionSelected();
 });
 
 onMounted(() => {
@@ -445,8 +446,28 @@ onBeforeUnmount(() => {
     // Clear the session storage
     removeSessionStorageItem("selectedJob");
     removeSessionStorageItem("selectedJobData");
+    removeSessionStorageItem("requisitionInformation")
+    //restore the stores to the initial state
+    useJob.$reset();
+    useRequisition.clearStore();
+    useRequisitionDetails.$reset();
   }
 })
+
+const isRequisitionSelected = () => {
+  if (getSessionStorageItem("requisitionInformation")) {
+    const requisitionInformation = JSON.parse(getSessionStorageItem(
+      "requisitionInformation"
+    ));
+    //numRequisitionDetails.value = requisitionInformation.numRequisitionDetails;
+    //applicantDetails.value = requisitionInformation.applicantDetails;
+    //jobDetails.value = requisitionInformation.jobDetails;
+    showingDetails.value = requisitionInformation.showingDetails;
+    updatingRequisition.value = requisitionInformation.updatingRequisition;
+    requisitionData.value = requisitionInformation.requisitionData;
+    console.log(requisitionInformation)
+  }
+};
 
 /**
  * Function to see if the session storage has the specified values, if true, the values are asigned to the needed variables

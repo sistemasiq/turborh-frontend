@@ -99,6 +99,7 @@
               class="input-brand"
               @update:model-value="updateStore()"
             >
+            <BadgeOptional class="self-center"/>
             </q-input>
 
             <q-input
@@ -113,10 +114,10 @@
               :readonly="viewingApplication"
               @update:model-value="updateStore()"
             >
-              <BadgeOptional></BadgeOptional>
+            <BadgeOptional class="self-center"/>
             </q-input>
 
-            <div class="row items-center q-mb-lg">
+            <div class="q-my-lg">
               <q-file
                 v-if="!isRh"
                 style="width: 22%"
@@ -141,7 +142,6 @@
               </q-file>
               <q-btn
                v-if="isRh || isAdmin || isBoss"
-                class="q-ml-xl "
                 color="white"
                 text-color="dark"
                 rounded

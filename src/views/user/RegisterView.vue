@@ -235,6 +235,7 @@ import {
 } from "src/services/user";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import { setSessionStorageItem } from "src/stores/sessionStorage";
 
 const useLocalStorage = useLocalStorageStore();
 const $q = useQuasar();
@@ -315,6 +316,9 @@ const checkIfCurpAlreadyExists = async () => {
 };
 
 const checkIfEmailAlreadyExists = async () => {
+  if(!email.value){
+    return;
+  }
   const emailExists = await getUserByEmail(email.value);
 
   userEmailExistValidation.value = emailExists ? false : true;
@@ -368,6 +372,9 @@ const addUser = async () => {
       localStorage.clear();
       useLocalStorage.save("logged", logged.value);
       useLocalStorage.save("user", user.value);
+      setSessionStorageItem("logged", logged.value);
+      setSessionStorageItem("user", user.value);
+      
       $q.notify(notifyPositive("Te has registrado correctamente"));
       router.replace("/userHome/perfil");
     } else {

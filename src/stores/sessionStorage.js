@@ -27,6 +27,6 @@ export const removeSessionStorageItem = (key) => {
 /**
  * Clear all items from the session storage
  */
-export const clearSessionStorage = (key) => {
-    sessionStorage.clear(key);
+export const clearSessionStorage = () => {
+    sessionStorage.clear();
 }

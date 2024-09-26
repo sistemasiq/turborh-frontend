@@ -34,32 +34,23 @@
                 Debe ingresar al menos 2 familiares en la tabla de padres o
                 esposa(o) para poder avanzar a la siguiente pantalla
               </p>
+              
             </q-card-section>
           </q-card>
         </div>
-        <p
-          style="
-            font-size: 130%;
-            color: rgb(255, 255, 255);
-            padding-left: 4%;
-            padding-top: 2%;
-          "
-        >
-          Datos de Padres y Esposa(o) * Es obligatorio ingresar mínimo 2
-          personas *
-        </p>
+              
+              <div class="q-mt-xl q-ml-xl">
+                <p class="text-h6 text-weight-regular text-white">
+                Datos de Padres y Esposa(o) 
+              </p>
+              </div>
         <FamilyFathers ref="familyFathersDataRef" class="table-position" />
         <br />
-        <p
-          style="
-            font-size: 130%;
-            color: rgb(255, 255, 255);
-            padding-left: 4%;
-            padding-top: 2%;
-          "
-        >
-          Datos de Hijas(os)
-        </p>
+        <div class="row items-center q-ml-xl " style="width: 93%;">
+        
+         <div class="text-white text-h6 text-weight-regular"> Datos de Hijas(os)</div>
+        <BadgeOptional />
+        </div>
         <FamilySons class="table-position" />
       </q-card-section>
     </q-card>
@@ -82,6 +73,7 @@ import ButtonApplicationStatus from "src/components/ButtonApplicationStatus.vue"
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { notifyNegativeField } from "src/utils/notifies";
 import { useQuasar } from "quasar";
+import BadgeOptional from "src/components/BadgeOptional.vue";
 
 const $q = useQuasar()
 const useLocalStorage = useLocalStorageStore();

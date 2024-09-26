@@ -218,7 +218,7 @@ const useLocalStorage = useLocalStorageStore();
 const drawer = ref(false);
 const componentKey = ref(0);
 const userName = ref("");
-const { showingDetails, updatingRequisition } = storeToRefs(
+const { showingDetails, updatingRequisition} = storeToRefs(
   useRequisitionDetails
 );
 const { user, logged, isRh, hasPermitRequisitionCreation } =
@@ -226,10 +226,10 @@ const { user, logged, isRh, hasPermitRequisitionCreation } =
 const settedHeaderAuthorization = ref(false);
 
 onBeforeMount(() => {
-
   loadLocalStorage();
   initInterceptors(router);
 })
+
 
 const selectedImage = ref();
 

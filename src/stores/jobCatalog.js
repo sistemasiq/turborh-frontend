@@ -2,7 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 
 export const useJobCatalogStore = defineStore("jobCatalog", () => {
-  const jobId = ref();
+  const jobId = ref(0);
   const jobActivated = ref();
   const jobName = ref("");
   const jobKey = ref("");
@@ -13,6 +13,13 @@ export const useJobCatalogStore = defineStore("jobCatalog", () => {
   const readOnly = ref(false);
   const updatingJob = ref(false);
 
+  const $reset = () => {
+    jobId.value = 0;
+    jobName.value = "";
+    readOnly.value = false;
+    updatingJob.value = false;
+  };
+
   return {
     jobId,
     jobActivated,
@@ -22,6 +29,7 @@ export const useJobCatalogStore = defineStore("jobCatalog", () => {
     departmentName,
     departmentKey,
     readOnly,
-    updatingJob
+    updatingJob,
+    $reset,
   };
 });
