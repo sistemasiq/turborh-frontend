@@ -155,7 +155,9 @@
                   ligth
                   outlined
                   color="grey-7"
-                  :rules="[ruleFieldRequired]"
+                  :rules="[ruleFieldRequired, (val) => dateStartSecondary < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"  
+                  reactive-rules
+                  lazy-rules
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
@@ -348,6 +350,9 @@
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
+                  :rules="[(val) => dateStartHighSchool < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
+                  reactive-rules
+                  lazy-rules
                 >
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -533,6 +538,9 @@
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
+                  :rules="[(val) => dateStartProfessional < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
+                  reactive-rules
+                  lazy-rules
                 >
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -720,6 +728,9 @@
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
+                  :rules="[(val) => dateStartMaster < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
+                  reactive-rules
+                  lazy-rules
                 >
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -907,6 +918,9 @@
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
+                  :rules="[(val) => dateStartOther < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
+                  reactive-rules
+                  lazy-rules
                 >
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -1222,6 +1236,7 @@ import { storeToRefs } from "pinia";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 import { ruleFieldRequired } from "src/utils/fieldRules";
+import { dateRelationshipRule } from "src/utils/fieldRules.js";
 
 const $q = useQuasar();
 const useRequest = useRequestUser();

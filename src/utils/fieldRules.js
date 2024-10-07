@@ -32,3 +32,20 @@ export const checkNonEmptyFields = (val) => {
   }
   return true; // Return true if all fields are valid
 };
+
+/**
+ * Validates that a start date is before to an end date.
+ * @param {string} startDateVal - The start date in a valid date format.
+ * @param {string} endDateVal - The end date in a valid date format.
+ * @returns {boolean|string} - Returns true if the start date is before or equal to the end date, otherwise returns an error message.
+ */
+export const dateRelationshipRule = (startDateVal, endDateVal) => {
+  const startDate = new Date(startDateVal);
+  const endDate = new Date(endDateVal);
+  if (startDate && endDate) {
+    return (
+      startDate < endDate ||
+      "La fecha de fin debe ser despues a la fecha de inicio"
+    );
+  }
+};

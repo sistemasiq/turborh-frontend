@@ -280,7 +280,6 @@ const isJobSelected = () => {
 
             jobFunctionsRequired.value = jobData.functions;
             jobSkillsRequired.value = jobData.skills;
-    console.log(jobData)
    } 
 }
 
