@@ -140,15 +140,6 @@
 
                 <Tooltip text="Adjunta tu curriculum en PDF"/>
               </q-file>
-              <q-btn
-               v-if="isRh || isAdmin || isBoss"
-                color="white"
-                text-color="dark"
-                rounded
-                icon="visibility"
-                label="Ver curriculum del solicitante"
-                @click.prevent="downloadDocument(getCurriculum())"
-              />
             </div>
           </q-form>
           <TableDriverLicenses />
@@ -259,7 +250,6 @@ onMounted(() => {
 
 
 const getCurriculum = () => {
-
   return savedApplication.value && savedApplication.value.nombre_cv ? savedApplication.value.nombre_cv : '';
 }
 
@@ -328,6 +318,9 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
+  if(updatingApplication.value)
+  return;
+
   const localStoreData = useLocalStorage.load("documentsData");
 
   if (localStoreData) documentsData.value = localStoreData;

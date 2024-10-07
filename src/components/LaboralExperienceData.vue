@@ -4,34 +4,38 @@
       <div
         style="display: flex; flex-grow: 1; margin-left: 2%; margin-right: 2%"
       >
-          <q-card
-            flat
-            bordered
-            rounded
-            text-color="white"
-            class="q-mb-lg"
-            style="
-              margin-left: 0%;
-              border-color: rgb(255, 248, 43);
-              background-color: transparent;
-              color: white;
-              width: 100%;
-              height: 80px;
-            "
-            v-if="!viewingApplication"
-          >
-            <q-card-section>
-              <div class="text-body1 text-weight-medium row">
-                <q-icon name="warning" class="q-mr-md q-mt-xs" />
-                Nota
-              </div>
-              <p class="text-body2">
-                Ordena tu experiencia laboral comenzando por añadir tu último empleo que tuviste hasta el primero, <strong>si buscas tu primer empleo puedes saltar este paso</strong>
-              </p>
-            </q-card-section>
-          </q-card>
-        </div>
+        <q-card
+          flat
+          bordered
+          rounded
+          text-color="white"
+          class="q-mb-lg"
+          style="
+            margin-left: 0%;
+            border-color: rgb(255, 248, 43);
+            background-color: transparent;
+            color: white;
+            width: 100%;
+            height: 80px;
+          "
+          v-if="!viewingApplication"
+        >
+          <q-card-section>
+            <div class="text-body1 text-weight-medium row">
+              <q-icon name="warning" class="q-mr-md q-mt-xs" />
+              Nota
+            </div>
+            <p class="text-body2">
+              Ordena tu experiencia laboral comenzando por añadir tu último
+              empleo que tuviste hasta el primero,
+              <strong
+                >si buscas tu primer empleo puedes saltar este paso</strong
+              >
+            </p>
+          </q-card-section>
+        </q-card>
       </div>
+    </div>
     <q-expansion-item
       v-for="(item, index) in laboralExperienceData"
       :key="index"
@@ -47,6 +51,7 @@
           style="padding-left: 1.3%; padding-top: 25px"
         >
           <q-input
+            autogrow
             dark
             outlined
             v-model="item.company"
@@ -147,8 +152,8 @@
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
-                v-if="!viewingApplication"  
-                cover
+                  v-if="!viewingApplication"
+                  cover
                   transition-show="scale"
                   transition-hide="scale"
                 >
@@ -188,8 +193,8 @@
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
-                v-if="!viewingApplication"  
-                cover
+                  v-if="!viewingApplication"
+                  cover
                   transition-show="scale"
                   transition-hide="scale"
                 >
@@ -214,7 +219,9 @@
             v-model="item.currentlyWorking"
             label="Aún trabajo aquí"
             class="text-white"
-            @update:model-value="onCurrentlyWorking(item.currentlyWorking, item)"
+            @update:model-value="
+              onCurrentlyWorking(item.currentlyWorking, item)
+            "
           />
         </div>
 
@@ -290,6 +297,7 @@
 
         <q-input
           dark
+          autogrow
           outlined
           v-model="item.functionsPerformed"
           color="cyan-1"
@@ -314,6 +322,7 @@
           lazy-rules
           :rules="[separationCauseRule]"
           :readonly="viewingApplication"
+          autogrow
           type="text"
           label="Causas de separación"
           label-color="white"
@@ -397,16 +406,15 @@ const onCurrentlyWorking = (currentlyWorking, item) => {
 };
 
 const onEndDateEmpty = (item) => {
-
-  item.currentlyWorking = item.endDate === "" ? true: false;
-}
+  item.currentlyWorking = item.endDate === "" ? true : false;
+};
 
 const setSavedStoredValues = () => {
   laboralExperienceData.value = savedApplication.value.experiencia_laboral;
 
   laboralExperienceData.value.forEach((item) => {
     onEndDateEmpty(item);
-  })
+  });
 };
 
 //TODO: Encontrar una mejor manera para checar cada campo del objeto en el arreglo
@@ -419,7 +427,10 @@ const disableAddButton = computed(() => {
     !laboralExperienceData.value[currentIndex.value].lastBossName ||
     !laboralExperienceData.value[currentIndex.value].lastBossPosition ||
     !laboralExperienceData.value[currentIndex.value].startDate ||
-    !(laboralExperienceData.value[currentIndex.value].endDate || laboralExperienceData.value[currentIndex.value].currentlyWorking) ||
+    !(
+      laboralExperienceData.value[currentIndex.value].endDate ||
+      laboralExperienceData.value[currentIndex.value].currentlyWorking
+    ) ||
     !laboralExperienceData.value[currentIndex.value].startingPosition ||
     !laboralExperienceData.value[currentIndex.value].endingPosition ||
     !laboralExperienceData.value[currentIndex.value].startMontlySalary ||

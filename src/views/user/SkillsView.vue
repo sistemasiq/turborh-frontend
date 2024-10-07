@@ -69,6 +69,7 @@
               />
             </div>
             <q-input
+              autogrow
               v-model="item.time"
               class="q-pa-sm q-pb-lg"
               outlined
@@ -86,6 +87,7 @@
               v-model="item.description"
               class="q-pa-sm q-pb-lg"
               outlined
+              autogrow
               type="text"
               color="blue-grey"
               label="Especifica tus principales logros o proyectos en el oficio seleccionado"

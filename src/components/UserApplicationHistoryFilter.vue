@@ -5,15 +5,14 @@
     :color="filterActive ? 'red' : 'black'"
     @click.prevent="openFilter = true"
   >
-
-  <div class="text-black">
-    <q-icon name="filter_list" />
-    {{ filterActive ? 'Ver filtros activos' : 'Activar Filtros' }}
-  </div>
+    <div class="text-black">
+      <q-icon name="filter_list" />
+      {{ filterActive ? "Ver filtros activos" : "Activar Filtros" }}
+    </div>
   </q-btn>
 
   <q-dialog position="top" v-model="openFilter">
-    <q-card style="width:80vw" >
+    <q-card style="width: 80vw">
       <q-card-section>
         <div class="text-h6">Filtros</div>
       </q-card-section>
@@ -29,7 +28,6 @@
         <q-btn-dropdown
           v-if="enableFilfterByGender"
           class="q-mr-xl"
-
           outline
           :label="genderChoosed.name"
           text-color="black"
@@ -120,7 +118,6 @@
         <q-btn-dropdown
           v-if="enableFilfterByCivilStatus"
           class="q-mr-xl"
-
           outline
           :label="civilStatusChoosed.name"
           text-color="black"
@@ -161,7 +158,6 @@
           :options="licenceTypeFilterList"
           label="Tipo de licencia/s"
           class="q-mr-xl"
-
         />
       </q-card-section>
 
@@ -171,29 +167,21 @@
           v-model="enableFilfterByScholarity"
           label="Por nivel de escolaridad"
         />
-        <q-btn-dropdown
-          v-if="enableFilfterByScholarity"
-          class="q-mr-xl"
 
-          outline
-          :label="scholarityChoosed"
-          text-color="black"
-          color="white"
-        >
-          <q-list>
-            <q-item
-              v-for="(item, index) in scholarityFilterList"
-              :key="index"
-              clickable
-              v-close-popup
-              @click.prevent="onScholarityChoosed(item)"
-            >
-              <q-item-section>
-                <q-item-label>{{ item }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
+        <q-select
+          v-if="enableFilfterByScholarity"
+          outlined
+          color="blue"
+          label-color="black"
+          v-model="scholarityChoosed"
+          multiple
+          use-chips
+          emit-value
+          map-options
+          :options="scholarityFilterList"
+          label="Escolaridad"
+          class="q-mr-xl"
+        />
       </q-card-section>
 
       <q-card-section class="justify-between q-mt-md" horizontal>
@@ -217,7 +205,6 @@
           label="Maquinaria/herramientas"
           class="q-mr-xl"
         />
-
       </q-card-section>
 
       <q-card-section class="justify-between q-mt-md" horizontal>
@@ -239,7 +226,6 @@
           :options="skillFilterList"
           label="Maquinaria/herramientas"
           class="q-mr-xl"
-
         />
       </q-card-section>
 
@@ -268,8 +254,9 @@
 <script setup>
 import { ref, watch, computed, onMounted } from "vue";
 import { getAllMachineryActive } from "src/services/machineryTools";
+import { getSessionStorageItem } from "src/stores/sessionStorage";
 
-const emit = defineEmits(['filtersChanged']);
+const emit = defineEmits(["filtersChanged"]);
 
 const filters = ref({
   gender: null,
@@ -281,7 +268,6 @@ const filters = ref({
   machineryUse: [],
   skills: [],
 });
-
 
 const openFilter = ref(false);
 
@@ -295,7 +281,7 @@ const enableFilfterByMachineryUse = ref(false);
 const enableFilfterBySkill = ref(false);
 
 const genderChoosed = ref("sexo");
-const scholarityChoosed = ref("escolaridad");
+const scholarityChoosed = ref([]);
 const civilStatusChoosed = ref("estado civil");
 const licencesTypeChoosed = ref([]);
 const machineryChoosed = ref([]);
@@ -341,65 +327,81 @@ const civilStatusFilterList = [
   },
 ];
 
-const filterActive = computed (() => {
-  return enableFilfterByGender.value ||
-  enableFilfterByAge.value ||
-  enableFilfterBySalary.value ||
-  enableFilfterByCivilStatus.value ||
-  enableFilfterByLicenceType.value ||
-  enableFilfterByScholarity.value ||
-  enableFilfterByMachineryUse.value ||
-  enableFilfterBySkill.value
-})
-
-watch([
-  enableFilfterByGender,
-  enableFilfterByAge,
-  enableFilfterBySalary,
-  enableFilfterByCivilStatus,
-  enableFilfterByLicenceType,
-  enableFilfterByScholarity,
-  enableFilfterByMachineryUse,
-  enableFilfterBySkill,
-  genderChoosed,
-  scholarityChoosed,
-  civilStatusChoosed,
-  licencesTypeChoosed,
-  machineryChoosed,
-  skillsChoosed,
-  initialAgeValue,
-  finalAgeValue,
-  initialSalaryValue,
-  finalSalaryValue
-  // ... add watchers for other filter values
-], () => {
-  filters.value = {
-    gender: enableFilfterByGender.value ? genderChoosed.value.val : null,
-    ageRange: enableFilfterByAge.value ? { min: initialAgeValue.value, max: finalAgeValue.value } : null,
-    salaryRange: enableFilfterBySalary.value ? { min: initialSalaryValue.value, max: finalSalaryValue.value } : null,
-    civilStatus: enableFilfterByCivilStatus.value ? civilStatusChoosed.value.val : null,
-    licenceTypes: enableFilfterByLicenceType.value ? licencesTypeChoosed.value : [],
-    scholarity: enableFilfterByScholarity.value ? scholarityChoosed.value : null,
-    machineryUse: enableFilfterByMachineryUse.value ? machineryChoosed.value : [],
-    skills: enableFilfterBySkill.value ? skillsChoosed.value : [],
-  };
-
-  emit('filtersChanged', filters.value);
+const filterActive = computed(() => {
+  return (
+    enableFilfterByGender.value ||
+    enableFilfterByAge.value ||
+    enableFilfterBySalary.value ||
+    enableFilfterByCivilStatus.value ||
+    enableFilfterByLicenceType.value ||
+    enableFilfterByScholarity.value ||
+    enableFilfterByMachineryUse.value ||
+    enableFilfterBySkill.value
+  );
 });
+
+watch(
+  [
+    enableFilfterByGender,
+    enableFilfterByAge,
+    enableFilfterBySalary,
+    enableFilfterByCivilStatus,
+    enableFilfterByLicenceType,
+    enableFilfterByScholarity,
+    enableFilfterByMachineryUse,
+    enableFilfterBySkill,
+    genderChoosed,
+    scholarityChoosed,
+    civilStatusChoosed,
+    licencesTypeChoosed,
+    machineryChoosed,
+    skillsChoosed,
+    initialAgeValue,
+    finalAgeValue,
+    initialSalaryValue,
+    finalSalaryValue,
+    // ... add watchers for other filter values
+  ],
+  () => {
+    filters.value = {
+      gender: enableFilfterByGender.value ? genderChoosed.value.val : null,
+      ageRange: enableFilfterByAge.value
+        ? { min: initialAgeValue.value, max: finalAgeValue.value }
+        : null,
+      salaryRange: enableFilfterBySalary.value
+        ? { min: initialSalaryValue.value, max: finalSalaryValue.value }
+        : null,
+      civilStatus: enableFilfterByCivilStatus.value
+        ? civilStatusChoosed.value.val
+        : null,
+      licenceTypes: enableFilfterByLicenceType.value
+        ? licencesTypeChoosed.value
+        : [],
+      scholarity: enableFilfterByScholarity.value
+        ? scholarityChoosed.value
+        : [],
+      machineryUse: enableFilfterByMachineryUse.value
+        ? machineryChoosed.value
+        : [],
+      skills: enableFilfterBySkill.value ? skillsChoosed.value : [],
+    };
+
+    emit("filtersChanged", filters.value);
+  }
+);
 
 const licenceTypeFilterList = ["Automovil", "Chofer", "Moto", "Otro"];
 
 const scholarityFilterList = [
   "Secundaria",
-  "Bachillerato",
+  "Bachillerato sin certificado",
+  "Bachillerato con certificado",
   "Profesional",
   "Maestria",
   "Otro",
 ];
 
-const machineryFilterListNames = ref([])
-const machineryData = ref();
-
+const machineryFilterListNames = ref([]);
 
 const skillFilterList = [
   "Mécanico Automotríz",
@@ -416,16 +418,56 @@ const skillFilterList = [
 ];
 
 onMounted(() => {
-  fetchMachinery()
-  skillFilterList.sort();
-})
+  checkFiltersInSession(); // Check if filters are stored in session
+  fetchMachinery(); // Fetch the machinery filter list
+  skillFilterList.sort(); // Sort the skills list
+});
+
+const checkFiltersInSession = () => {
+  const filtersInSession = JSON.parse(getSessionStorageItem("filters"));
+
+  if (filtersInSession) {
+    // Set the general filters object
+    filters.value = filtersInSession;
+
+    // Set individual filters
+    enableFilfterByGender.value = !!filtersInSession.gender;
+    genderChoosed.value = filtersInSession.gender
+      ? genderFilterList.find((g) => g.val === filtersInSession.gender)
+      : "sexo";
+
+    enableFilfterByAge.value = !!filtersInSession.ageRange;
+    initialAgeValue.value = filtersInSession.ageRange?.min || 0;
+    finalAgeValue.value = filtersInSession.ageRange?.max || 0;
+
+    enableFilfterBySalary.value = !!filtersInSession.salaryRange;
+    initialSalaryValue.value = filtersInSession.salaryRange?.min || 0;
+    finalSalaryValue.value = filtersInSession.salaryRange?.max || 0;
+
+    enableFilfterByCivilStatus.value = !!filtersInSession.civilStatus;
+    civilStatusChoosed.value = filtersInSession.civilStatus
+      ? civilStatusFilterList.find(
+          (cs) => cs.val === filtersInSession.civilStatus
+        )
+      : "estado civil";
+
+    enableFilfterByLicenceType.value = !!filtersInSession.licenceTypes.length;
+    licencesTypeChoosed.value = filtersInSession.licenceTypes || [];
+
+    enableFilfterByScholarity.value = !!filtersInSession.scholarity.length;
+    scholarityChoosed.value = filtersInSession.scholarity || [];
+
+    enableFilfterByMachineryUse.value = !!filtersInSession.machineryUse.length;
+    machineryChoosed.value = filtersInSession.machineryUse || [];
+
+    enableFilfterBySkill.value = !!filtersInSession.skills.length;
+    skillsChoosed.value = filtersInSession.skills || [];
+  }
+};
+
 
 const onGenderChoosed = (item) => {
   genderChoosed.value = item;
-};
-
-const onScholarityChoosed = (item) => {
-  scholarityChoosed.value = item;
 };
 
 const onCivilStatusChoosed = (item) => {
@@ -455,31 +497,25 @@ const clearFilters = () => {
   initialSalaryValue.value = 0;
   finalSalaryValue.value = 0;
 
-  emit('filtersChanged', filters.value);
+  emit("filtersChanged", filters.value);
 };
 
 const machineryFetched = ref(false);
 const fetchMachinery = async () => {
-
   try {
-
     machineryFetched.value = false;
     const machineryCatalog = await getAllMachineryActive();
 
-    if(machineryCatalog){
-      machineryCatalog.forEach(element => {
+    if (machineryCatalog) {
+      machineryCatalog.forEach((element) => {
         machineryFilterListNames.value.push(element.name);
       });
 
       machineryFilterListNames.value.sort();
-
     }
-
   } catch (error) {
-
-  } finally{
-    machineryFetched.value = true
+  } finally {
+    machineryFetched.value = true;
   }
-}
-
+};
 </script>

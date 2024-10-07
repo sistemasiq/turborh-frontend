@@ -378,6 +378,7 @@
             </div>
 
             <q-input
+              autogrow
               ref="goalInLifeRef"
               dark
               outlined
@@ -519,7 +520,7 @@ const validateRequiredFields = () => {
 
 onMounted(() => {
   loadLocalStore();
-  if (viewingApplication.value || updatingApplication.value) {
+  if (viewingApplication.value) {
     setSavedStoredValues();
   } else {
     setStoredValues();
@@ -528,6 +529,9 @@ onMounted(() => {
 
 //This method set the values saved in the local storage into the variables
 const setSavedStoredValues = () => {
+
+  console.log("SET SAVED STORED VALUES CALLED");
+
   civilStatus.value.forEach((element) => {
     if (element.charAt(0) === savedApplication.value.estado_civil) {
       currentCivilStatus.value = element;
@@ -574,6 +578,7 @@ const checkWeightValidValue = (currentWeight) => {
 
 //Set the stored values in the store (pinia) in the local variables
 const setStoredValues = () => {
+  console.log("SET STORED VALUES");
   civilStatus.value.forEach((element) => {
     if (element.charAt(0) === personalData.value.civilStatus) {
       currentCivilStatus.value = element;
@@ -664,6 +669,9 @@ const saveLocalStore = () => {
 
 //Loads the data in the local storage store "personalData"
 const loadLocalStore = () => {
+  if(updatingApplication.value)
+  return;
+
   const localStoreData = useLocalStorage.load("personalData");
 
   if (localStoreData) personalData.value = localStoreData;

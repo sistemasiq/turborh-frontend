@@ -55,6 +55,7 @@
                 Secundaria
               </div>
               <q-input
+              autogrow
                 ref="secondaryRef"
                 ligth
                 outlined
@@ -76,6 +77,7 @@
                 ¿Qué estudió?
               </div>
               <q-input
+              autogrow
                 ref="secondarySpecialityRef"
                 ligth
                 outlined
@@ -153,7 +155,7 @@
                   ligth
                   outlined
                   color="grey-7"
-                  :rules="[ruleFieldRequired]"  
+                  :rules="[ruleFieldRequired]"
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
@@ -251,6 +253,7 @@
                 Bachillerato
               </div>
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -270,6 +273,7 @@
                 ¿Qué estudió?
               </div>
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -437,6 +441,7 @@
                 Profesional
               </div>
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -620,6 +625,7 @@
               <div class="q-mb-md text-body1 text-weight-medium">Maestría</div>
 
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -639,6 +645,7 @@
               </div>
 
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -805,6 +812,7 @@
               <div class="q-mb-md text-body1 text-weight-medium">Otro</div>
 
               <q-input
+              autogrow
                 light
                 outlined
                 color="cyan-1"
@@ -824,6 +832,7 @@
               </div>
 
               <q-input
+              autogrow
                 light
                 outlined
                 color="cyan-1"
@@ -1016,6 +1025,7 @@
                 Especialidad
               </div>
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -1656,6 +1666,9 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
+  if(updatingApplication.value)
+  return;
+
   const localStoreData = useLocalStorage.load("educationData");
 
   if (localStoreData) educationData.value = localStoreData;
