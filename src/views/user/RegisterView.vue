@@ -374,7 +374,7 @@ const addUser = async () => {
       useLocalStorage.save("user", user.value);
       setSessionStorageItem("logged", logged.value);
       setSessionStorageItem("user", user.value);
-      
+
       $q.notify(notifyPositive("Te has registrado correctamente"));
       router.replace("/userHome/perfil");
     } else {

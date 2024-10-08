@@ -5,7 +5,6 @@
       :columns="columns"
       :rows="familyFathersData"
       :rows-per-page-options="[0]"
-      row-key="index"
       no-data-label="Sin datos"
     >
       <template v-slot:body-cell-relationship="{ row }">
@@ -25,6 +24,7 @@
       <template v-slot:body-cell-name="{ row }">
         <q-td>
           <q-input
+            autogrow
             ref="nameRef"
             v-model="row.name"
             :readonly="viewingApplication"
@@ -65,6 +65,7 @@
       <template v-slot:body-cell-job="{ row }">
         <q-td>
           <q-input
+            autogrow
             v-model="row.job"
             :readonly="viewingApplication"
             :rules="[ruleFieldRequired]"
@@ -75,6 +76,7 @@
       <template v-slot:body-cell-jobAddress="{ row }">
         <q-td>
           <q-input
+            autogrow
             v-model="row.jobAddress"
             :readonly="viewingApplication"
             :rules="[ruleFieldRequired]"
@@ -124,7 +126,6 @@ const useRequest = useRequestUser();
 
 const relationOptions = ["Padre", "Madre", "Esposo/a"];
 
-
 const disableDeleteButton = ref(true);
 const nameRef = ref(null);
 
@@ -136,11 +137,6 @@ const {
 } = storeToRefs(useRequest);
 
 const columns = [
-{
-    name: 'index',
-    label: '#',
-    field: 'index'
-  },
   {
     name: "relationship",
     align: "left",
@@ -170,9 +166,7 @@ onMounted(() => {
 
   disableDeleteButton.value =
     familyFathersData.value.length === 2 ? true : false;
-
 });
-
 
 const setSavedStoredValues = () => {
   if (!savedApplication.value) return;
@@ -188,7 +182,6 @@ const setSavedStoredValues = () => {
 const validateRequiredFields = () => {
   nameRef.value.validate();
 };
-
 
 defineExpose({ validateRequiredFields });
 

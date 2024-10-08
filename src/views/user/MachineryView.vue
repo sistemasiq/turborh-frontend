@@ -157,6 +157,7 @@
             color="blue-grey"
             label="Especifica cuanto tiempo de experiencia con la maquinaria seleccionada"
             label-color="black"
+            autogrow
             :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
             :readonly="viewingApplication"
           >
@@ -166,6 +167,7 @@
             class="q-pa-sm q-pb-lg"
             outlined
             type="textarea"
+            autogrow
             color="blue-grey"
             label="Especifica que proyecto realizaste con la maquinaria seleccionada"
             label-color="black"
@@ -282,6 +284,7 @@
             type="text"
             color="blue-grey"
             label="Especifica que software has usado"
+            autogrow
             label-color="black"
             :rules="[(value) => !!value || 'Este campo no puede estar vacío.']"
             :readonly="viewingApplication"

@@ -17,19 +17,22 @@
       <q-separator />
 
       <q-card-section class="justify-between" horizontal>
-        <div class="row items-center">
+        <div class="row justify-center items-center full-width">
           <q-card-section>
           <q-file
             rounded
             standout
             accept=".pdf, pdf/*"
-            bg-color="white"
+            :label-color="fileSelected ? 'white' : 'dark'"
+            :bg-color="fileSelected ? 'teal-5' : 'white'"
             v-model="fileSelected"
             clearable
             :label="props.fileSelectorLabel"
+            input-style="color: #ffffff"
+            style="min-width: fit-content; width: 400px;"
           >
             <template v-slot:prepend
-              ><q-icon color="dark" name="folder" />
+              ><q-icon :color="fileSelected ? 'white' : 'dark'" name="folder" />
             </template>
           </q-file>
 
@@ -48,7 +51,7 @@
             :label="
               selectedPlatform != ''
                 ? selectedPlatform
-                : 'plataforma'
+                : 'seleccionar plataforma'
             "
             class="text-weight-regular q-mt-lg"
           >
@@ -118,7 +121,7 @@ import { getPsychometricPlatforms } from "src/services/user";
 
 const psychometricPlatforms = ref();
 const platformId = ref(0);
-const selectedPlatform = ref();
+const selectedPlatform = ref('');
 
 
 const props = defineProps([
@@ -135,7 +138,6 @@ const disableUploadButton = computed(() => {
 })
 
 onMounted(() => {
-  console.log("FILE SELECTED "+fileSelected.value)
   getPsychPlatformsData();
 })
 
@@ -163,6 +165,8 @@ const handleOnClose = () => {
 
   emit('onClose');
   fileSelected.value = null; // Clear the file input after upload
+  selectedPlatform.value = ''; // Clear the selected platform after upload
+  platformId.value = 0; // Clear the selected platform ID after upload
 }
 
 const handleUpload = () => {

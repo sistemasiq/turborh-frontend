@@ -41,6 +41,7 @@
 
           <q-form class="q-gutter-md">
             <q-input
+              autogrow
               ref="mediumRef"
               dark
               outlined
@@ -57,24 +58,24 @@
             >
             </q-input>
 
-              <div
-                class="home-content rounded-borders row justify-between bg-white"
+            <div
+              class="home-content rounded-borders row justify-between bg-white"
+            >
+              <q-checkbox
+                v-model="isCheckedFamiliar"
+                @update:model-value="updateStore()"
+                color="cyan"
+                unchecked-icon="radio_button_unchecked"
+                checked-icon="radio_button_checked"
+                size="lg"
+                class="checkbox"
+                label="Trabaja con nosotros algún familiar de usted"
+                style="color: black"
+                :disable="viewingApplication"
               >
-                <q-checkbox
-                  v-model="isCheckedFamiliar"
-                  @update:model-value="updateStore()"
-                  color="cyan"
-                  unchecked-icon="radio_button_unchecked"
-                  checked-icon="radio_button_checked"
-                  size="lg"
-                  class="checkbox"
-                  label="Trabaja con nosotros algún familiar de usted"
-                  style="color: black"
-                  :disable="viewingApplication"
-                >
-                </q-checkbox>
-                <BadgeOptional class="self-center" />
-              </div>
+              </q-checkbox>
+              <BadgeOptional class="self-center" />
+            </div>
             <q-input
               dark
               outlined
@@ -94,23 +95,21 @@
             >
             </q-input>
 
-              <div
-                class="home-content rounded-borders row justify-between"
-              >
-                <q-checkbox
-                  v-model="isCheckedDepartment"
-                  @update:model-value="updateStore()"
-                  color="cyan"
-                  unchecked-icon="radio_button_unchecked"
-                  checked-icon="radio_button_checked"
-                  size="lg"
-                  class="checkbox"
-                  label="¿Trabajó con nosotros anteriormente?"
-                  style="color: black"
-                  :disable="viewingApplication"
-                ></q-checkbox>
-                <BadgeOptional class="self-center" />
-              </div>
+            <div class="home-content rounded-borders row justify-between">
+              <q-checkbox
+                v-model="isCheckedDepartment"
+                @update:model-value="updateStore()"
+                color="cyan"
+                unchecked-icon="radio_button_unchecked"
+                checked-icon="radio_button_checked"
+                size="lg"
+                class="checkbox"
+                label="¿Trabajó con nosotros anteriormente?"
+                style="color: black"
+                :disable="viewingApplication"
+              ></q-checkbox>
+              <BadgeOptional class="self-center" />
+            </div>
             <q-input
               dark
               outlined
@@ -265,6 +264,9 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
+  if(updatingApplication.value)
+  return;
+
   const localStoreData = useLocalStorage.load("recruitingMeansData");
 
   if (localStoreData) recruitingMeansData.value = localStoreData;

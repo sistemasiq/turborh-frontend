@@ -55,6 +55,7 @@
                 Secundaria
               </div>
               <q-input
+              autogrow
                 ref="secondaryRef"
                 ligth
                 outlined
@@ -76,6 +77,7 @@
                 ¿Qué estudió?
               </div>
               <q-input
+              autogrow
                 ref="secondarySpecialityRef"
                 ligth
                 outlined
@@ -153,7 +155,9 @@
                   ligth
                   outlined
                   color="grey-7"
-                  :rules="[ruleFieldRequired]"  
+                  :rules="[ruleFieldRequired, (val) => dateStartSecondary < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"  
+                  reactive-rules
+                  lazy-rules
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
@@ -251,6 +255,7 @@
                 Bachillerato
               </div>
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -270,6 +275,7 @@
                 ¿Qué estudió?
               </div>
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -344,6 +350,9 @@
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
+                  :rules="[(val) => dateStartHighSchool < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
+                  reactive-rules
+                  lazy-rules
                 >
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -437,6 +446,7 @@
                 Profesional
               </div>
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -528,6 +538,9 @@
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
+                  :rules="[(val) => dateStartProfessional < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
+                  reactive-rules
+                  lazy-rules
                 >
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -620,6 +633,7 @@
               <div class="q-mb-md text-body1 text-weight-medium">Maestría</div>
 
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -639,6 +653,7 @@
               </div>
 
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -713,6 +728,9 @@
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
+                  :rules="[(val) => dateStartMaster < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
+                  reactive-rules
+                  lazy-rules
                 >
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -805,6 +823,7 @@
               <div class="q-mb-md text-body1 text-weight-medium">Otro</div>
 
               <q-input
+              autogrow
                 light
                 outlined
                 color="cyan-1"
@@ -824,6 +843,7 @@
               </div>
 
               <q-input
+              autogrow
                 light
                 outlined
                 color="cyan-1"
@@ -898,6 +918,9 @@
                   style="width: 45%"
                   :readonly="viewingApplication"
                   @update:model-value="updateStore()"
+                  :rules="[(val) => dateStartOther < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
+                  reactive-rules
+                  lazy-rules
                 >
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -1016,6 +1039,7 @@
                 Especialidad
               </div>
               <q-input
+              autogrow
                 ligth
                 outlined
                 color="cyan-1"
@@ -1212,6 +1236,7 @@ import { storeToRefs } from "pinia";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
 import { ruleFieldRequired } from "src/utils/fieldRules";
+import { dateRelationshipRule } from "src/utils/fieldRules.js";
 
 const $q = useQuasar();
 const useRequest = useRequestUser();
@@ -1656,6 +1681,9 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
+  if(updatingApplication.value)
+  return;
+
   const localStoreData = useLocalStorage.load("educationData");
 
   if (localStoreData) educationData.value = localStoreData;

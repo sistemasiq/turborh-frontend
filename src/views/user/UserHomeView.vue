@@ -31,7 +31,15 @@
             @click.prevent="changeNoteStatus"
           />
         </div>
-
+        <q-btn
+               v-if="isRh || isAdmin || isBoss"
+                class="q-mr-xl q-mt-lg"
+                color="white"
+                text-color="dark"
+                rounded
+                label="Ver curriculum del solicitante"
+                @click.prevent="downloadDocument(getCurriculum)"
+              />
         <ApplicationModifications v-if="isRh || isBoss || isAdmin" />
 
         <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
@@ -263,6 +271,23 @@
         </q-card-actions>
       </q-card>
       </q-dialog>
+
+      <q-dialog maximized v-model="showResume">
+    <q-card class="no-scroll">
+      <q-card-actions class="bg-white"  align="right">
+        <q-btn flat label="Cerrar" color="red" v-close-popup />
+      </q-card-actions>
+      <object
+        height="100%"
+        width="100%"
+        v-if="resumeSrc.length > 0"
+        :data="resumeSrc"
+        type="application/pdf"
+      >
+        <iframe :src="resumeViewLink"></iframe>
+      </object>
+    </q-card>
+  </q-dialog>
     <router-view class="overflow-hidden-y" :key="componentKeyRouterView" />
   </q-layout>
 </template>
@@ -297,6 +322,8 @@ import {
   initInterceptors,
 } from "src/services/setupInterceptors";
 import ApplicationModifications from "src/components/ApplicationModifications.vue";
+import { downloadFile } from "src/services/files";
+import { getUserDocumentsPath } from "src/utils/folderPaths";
 
 const useAuth = useAuthStore();
 const useRequest = useRequestUser();
@@ -337,6 +364,10 @@ const openNote = ref(false);
 const activeApplication = ref(false);
 const userPhotoUUID = ref("");
 const settedHeaderAuthorization = ref(false);
+
+const resumeSrc = ref("");
+const resumeViewLink = ref(resumeSrc.value);
+const showResume = ref(false);
 
 const toolTipActiveApplicationText = computed(() => {
   return activeApplication.value
@@ -438,6 +469,32 @@ const loadLocalStorage = () => {
     savedApplication.value = userApplicationStored;
   }
 
+};
+
+
+const getCurriculum = computed(() => {
+  if(!savedApplication.value)
+  return '';
+
+
+  return savedApplication.value.nombre_cv ? savedApplication.value.nombre_cv : '';
+})
+
+const downloadDocument = async (uuid) => {
+  try {
+    $q.loading.show();
+    const fileDownloaded = await downloadFile(uuid, getUserDocumentsPath);
+    if (fileDownloaded) {
+      resumeSrc.value = fileDownloaded;
+      showResume.value = true;
+    } else {
+      $q.notify(notifyNegative("El archivo solicitado no existe "));
+    }
+  } catch (error) {
+    $q.notify(notifyNegative("Hubo un error al obtener el archivo "));
+  } finally {
+    $q.loading.hide();
+  }
 };
 
 const goToRequisitionApplicants = () => {

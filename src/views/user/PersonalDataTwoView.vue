@@ -288,6 +288,9 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
+  if(updatingApplication.value)
+  return;
+
   const localStoreData = useLocalStorage.load("personalData");
 
   if (localStoreData) personalData.value = localStoreData;

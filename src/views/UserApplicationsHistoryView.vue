@@ -323,7 +323,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, onBeforeUnmount } from "vue";
 import PsychometricTestDialog from "src/components/PsychometricTestDialog.vue";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useLocalStorageStore } from "src/stores/localStorage";
@@ -332,30 +332,31 @@ import { getAge } from "src/utils/operations";
 import { getUserImagesPath, getUserDocumentsPath } from "src/utils/folderPaths";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { useQuasar } from "quasar";
-import { notifyNegative, notifyPositive } from "src/utils/notifies";
+import { notifyNegative } from "src/utils/notifies";
 import { useRequestUser } from "src/stores/requestUser";
 import { useNotesStore } from "src/stores/notes";
 import Tooltip from "src/components/Tooltip.vue";
 import { createUserApplicationReport } from "src/services/report";
 import router from "src/router";
+import { useRoute } from "vue-router";
 import { downloadFile } from "src/services/files";
 import {
   getUserApplicationById,
   getUserApplicationNotesById,
   getAllUserApplications,
 } from "src/services/userApplication";
-import { sendPsychTestMessage, sendLinkMessage } from "src/services/whatsApp";
-import { sendPsychometricTestEmail } from "src/services/mail";
-import {
-  updatePsychTestCredentials,
-  getPsychometricPlatforms,
-} from "src/services/user";
+import { getPsychometricPlatforms } from "src/services/user";
 import UserApplicationHistoryFilter from "src/components/UserApplicationHistoryFilter.vue";
 import { formatDate } from "src/utils/formatDates.js";
 import { andOperation } from "src/utils/logicGatesOperations.js";
-import { setSessionStorageItem, removeSessionStorageItem } from "src/stores/sessionStorage";
+import {
+  setSessionStorageItem,
+  removeSessionStorageItem,
+  getSessionStorageItem,
+} from "src/stores/sessionStorage";
 
 
+const route = useRoute();
 const $q = useQuasar();
 const useRequisitionDetails = useRequisitionDetailsStore();
 const useLocalStorage = useLocalStorageStore();
@@ -405,8 +406,6 @@ const selectedPsychTestPlatform = ref("");
 const userNameForPsychTests = ref("");
 const passwordForPsychTest = ref("");
 const psychTestPlatforms = ref([]);
-const psychTestPlatformId = ref(0);
-const sendLink = ref(false);
 const testLink = ref("");
 const openSeeDataPsychTest = ref(false);
 const candidatesPsychData = ref([]);
@@ -415,11 +414,20 @@ onMounted(() => {
   viewAllRequisitions.value = true;
   viewAllSelectedCandidates.value = false;
   setSessionStorageItem("viewAllRequisitions", viewAllRequisitions.value);
-  setSessionStorageItem("viewAllSelectedCandidates", viewAllSelectedCandidates.value);
+  setSessionStorageItem(
+    "viewAllSelectedCandidates",
+    viewAllSelectedCandidates.value
+  );
   fetchApplicants();
   getPsychometricPlatformsData();
 });
 
+
+onBeforeUnmount(() => {
+  if(route.path === "/home/historial-requisiciones"){
+    removeSessionStorageItem("filters");
+  }
+})
 
 const getPsychometricPlatformsData = async () => {
   try {
@@ -438,6 +446,7 @@ const gendersParsed = {
 
 const applyFilters = (newFilters) => {
   filters.value = newFilters;
+  setSessionStorageItem("filters", filters.value);
 };
 
 const filteredApplicants = computed(() => {
@@ -493,27 +502,81 @@ const filteredApplicants = computed(() => {
     }
 
     // Scholarity filter
-    if (filters.value.scholarity) {
-      switch (filters.value.scholarity) {
-        case "Secundaria":
-          if (applicant.secundaria.length === 0) return false;
+    if (filters.value.scholarity && filters.value.scholarity.length > 0) {
+      // Map scholarity conditions with validation logic
 
-          break;
-        case "Bachillerato":
-          if (applicant.bachillerato.length === 0) return false;
-          break;
-        case "Profesional":
-          if (applicant.profesional.length === 0) return false;
-          break;
-        case "Maestria":
-          if (applicant.maestria.length === 0) return false;
-          break;
-        case "Otro":
-          if (applicant.otro.length === 0) return false;
-          break;
+      const scholarityConditions = filters.value.scholarity.map(
+        (scholarity) => {
+          switch (scholarity) {
+            case "Secundaria":
+              return {
+                name: "Secundaria",
+                validation: applicant.secundaria.length > 0,
+              };
+            case "Bachillerato sin certificado":
+              // Check if bachillerato exists and has no certificate
+              return {
+                name: "Bachillerato sin certificado",
+                validation:
+                  applicant.bachillerato.length > 0 &&
+                  applicant.bachillerato_certificado === 0,
+              };
+            case "Bachillerato con certificado":
+              // Check if bachillerato exists and has a certificate
 
-        default:
-          break;
+              return {
+                name: "Bachillerato con certificado",
+                validation:
+                  applicant.bachillerato.length > 0 &&
+                  applicant.bachillerato_certificado === 1,
+              };
+            case "Profesional":
+              return {
+                name: "Profesional",
+                validation: applicant.profesional.length > 0,
+              };
+            case "Maestria":
+              return {
+                name: "Maestria",
+                validation: applicant.maestria.length > 0,
+              };
+            case "Otro":
+              return { name: "Otro", validation: applicant.otro.length > 0 };
+            default:
+              return { name: scholarity, validation: false }; // Default to false if unknown scholarity
+          }
+        }
+      );
+
+      // Count how many Bachillerato options are selected
+      let edBachCounter = 0;
+      filters.value.scholarity.forEach((item) => {
+        if (
+          item === "Bachillerato sin certificado" ||
+          item === "Bachillerato con certificado"
+        ) {
+          edBachCounter++;
+        }
+      });
+
+      // If both "Bachillerato con certificado" and "Bachillerato sin certificado" are selected
+      if (edBachCounter === 2) {
+        // Override validation for both Bachillerato options
+        scholarityConditions.forEach((condition) => {
+          const selectedBothEdBach =
+            condition.name === "Bachillerato sin certificado" ||
+            condition.name === "Bachillerato con certificado";
+
+          if (selectedBothEdBach) {
+            // Treat both as valid if edBach.length > 0
+            condition.validation = applicant.bachillerato.length > 0;
+          }
+        });
+      }
+
+      // Check that ALL selected scholarity conditions are true (AND logic)
+      if (!scholarityConditions.every((item) => item.validation)) {
+        return false;
       }
     }
 
@@ -566,11 +629,6 @@ const filteredApplicants = computed(() => {
   });
 });
 
-const selectPsychPlatform = (data) => {
-  selectedPsychTestPlatform.value = data.psychPlatformName;
-  psychTestPlatformId.value = data.id;
-};
-
 const setSelectedUser = (row) => {
   selectedUser.value = row;
   console.log(selectedUser.value);
@@ -602,96 +660,6 @@ const getTestResultsFileUUID = (platformId) => {
   }
 
   return null;
-};
-
-const disableSendPsychTestButton = computed(() => {
-  if (sendLink.value) {
-    return testLink.value === "" ? true : false;
-  } else {
-    return selectedPsychTestPlatform.value === "" ||
-      userNameForPsychTests.value === "" ||
-      passwordForPsychTest.value === ""
-      ? true
-      : false;
-  }
-});
-
-const sendPsychTestInformation = async () => {
-  if (sendLink.value) {
-    await sendPsychTestLink();
-  } else {
-    await sendPsychTestCredentials();
-  }
-};
-
-const sendPsychTestCredentials = async () => {
-  try {
-    $q.loading.show();
-
-    const updatedPsychCredentials = await updatePsychTestCredentials(
-      userNameForPsychTests.value,
-      passwordForPsychTest.value,
-      psychTestPlatformId.value,
-      selectedUser.value.userId
-    );
-
-    if (updatedPsychCredentials) {
-      selectedUser.value.test_psicometrico_id = psychTestPlatformId.value;
-      selectedUser.value.test_psicometrico_nombre_usuario =
-        userNameForPsychTests.value;
-      selectedUser.value.test_psicometrico_password =
-        passwordForPsychTest.value;
-      selectedUser.value.test_psicometrico_estado = "E";
-
-      updateRow(selectedUser.value);
-
-      const sendedEmail = await sendPsychometricTestEmail(
-        selectedUser.value.email,
-        selectedUser.value.nombre,
-        userNameForPsychTests.value,
-        passwordForPsychTest.value
-      );
-
-      if (sendedEmail) {
-        const sendedMessage = await sendPsychTestMessage(
-          selectedUser.value.telefono,
-          selectedUser.value.nombre,
-          userNameForPsychTests.value,
-          passwordForPsychTest.value
-        );
-        if (sendedMessage) {
-          $q.notify(
-            notifyPositive("Enviada prueba psicométrica correctamente")
-          );
-        }
-      }
-    }
-  } catch (error) {
-    console.log(error);
-  } finally {
-    openPsicometricTestDialog.value = false;
-    $q.loading.hide();
-  }
-};
-
-const sendPsychTestLink = async () => {
-  try {
-    $q.loading.show();
-
-    const sendedMessage = await sendLinkMessage(
-      selectedUser.value.telefono,
-      selectedUser.value.nombre,
-      testLink.value
-    );
-    if (sendedMessage) {
-      $q.notify(notifyPositive("Enviado link correctamente"));
-    }
-  } catch (error) {
-    console.log(error);
-  } finally {
-    openPsicometricTestDialog.value = false;
-    $q.loading.hide();
-  }
 };
 
 const seePsychTestData = (row) => {
@@ -727,7 +695,6 @@ const fetchApplicants = async () => {
 
     if (totalApplicants) {
       currentApplicants.value = totalApplicants;
-      console.log("Current Applicants ", currentApplicants.value);
     }
   } catch (error) {
     console.log(`Error fetching applicants ${error}`);

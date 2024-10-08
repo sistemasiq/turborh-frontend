@@ -18,6 +18,7 @@
       <template v-slot:body-cell-job="{ row }">
         <q-td>
           <q-input
+            autogrow
             v-model="row.job"
             :readonly="viewingApplication"
             :rules="[lettersRule]"
@@ -39,7 +40,9 @@
     <q-btn
       v-if="!viewingApplication"
       rounded
-      :style="{ background: disableAddButton() ? 'grey' : 'rgb(104, 192, 197)' }"
+      :style="{
+        background: disableAddButton() ? 'grey' : 'rgb(104, 192, 197)',
+      }"
       style="position: relative; bottom: 2%; left: 2%"
       icon="add"
       label="Agregar familiar"
@@ -175,14 +178,14 @@ const deleteLastReference = () => {
 };
 
 const setCurrentIndex = () => {
-  if(familyReferencesData.value.length > 0)
-  currentIndex.value = familyReferencesData.value.length - 1;
+  if (familyReferencesData.value.length > 0)
+    currentIndex.value = familyReferencesData.value.length - 1;
 };
 
 const saveLocalStore = () => {
   if (!viewingApplication.value && !updatingApplication.value) {
     useLocalStorage.save("familyReferencesData", familyReferencesData.value);
-    $q.notify(notifyPositive("Se ha guardado su progreso.",1000));
+    $q.notify(notifyPositive("Se ha guardado su progreso.", 1000));
   }
 };
 

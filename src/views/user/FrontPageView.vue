@@ -59,7 +59,7 @@
                 @update:modelValue="updateStore()"
                 class="input-brand"
               >
-              
+
               </q-input>
 
               <q-input
@@ -554,6 +554,9 @@ const saveLocalStore = () => {
 };
 
 const loadLocalStore = () => {
+  if(updatingApplication.value)
+  return;
+
   const localStoreData = useLocalStorage.load("frontpage");
 
   if (localStoreData) frontPageData.value = localStoreData;

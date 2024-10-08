@@ -9,6 +9,7 @@
       <template v-slot:body-cell-son="{ row }">
         <q-td>
           <q-input
+            autogrow
             v-model="row.son"
             :readonly="viewingApplication"
             :rules="[lettersRule]"
@@ -28,7 +29,7 @@
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
                 <q-popup-proxy
-                v-if="!viewingApplication"
+                  v-if="!viewingApplication"
                   cover
                   transition-show="scale"
                   transition-hide="scale"
@@ -50,6 +51,7 @@
       <template v-slot:body-cell-sonStudyPlace="{ row }">
         <q-td>
           <q-input
+            autogrow
             v-model="row.sonStudyPlace"
             :readonly="viewingApplication"
             :rules="[studyPlaceRule]"
@@ -61,12 +63,10 @@
     <q-btn
       v-if="!viewingApplication"
       rounded
-      style="
-        position: relative;
-        bottom: 2%;
-        left: 2%;
-      "
-      :style="{ background: disableAddButton() ? 'grey' : 'rgb(104, 192, 197)' }"
+      style="position: relative; bottom: 2%; left: 2%"
+      :style="{
+        background: disableAddButton() ? 'grey' : 'rgb(104, 192, 197)',
+      }"
       icon="add"
       label="Agregar familiar"
       @click.prevent="addNewRelative"
@@ -98,9 +98,9 @@ const useAuth = useAuthStore();
 
 const disableDeleteButton = ref(true);
 
-const currentIndex = ref(0)
+const currentIndex = ref(0);
 
-const { isRh } = storeToRefs(useAuth)
+const { isRh } = storeToRefs(useAuth);
 
 const {
   familySonsData,
@@ -151,7 +151,7 @@ const disableAddButton = () => {
 
 const setSavedStoredValues = () => {
   if (!savedApplication.value) return;
-  familySonsData.value = []
+  familySonsData.value = [];
 
   savedApplication.value.datos_familiares.forEach((element) => {
     if (element.son != null) {
@@ -223,18 +223,17 @@ const deleteLastRelative = () => {
 };
 
 const saveLocalStore = () => {
-  if(!viewingApplication.value && !updatingApplication.value){
+  if (!viewingApplication.value && !updatingApplication.value) {
     useLocalStorage.save("familySonsData", familySonsData.value);
   }
 };
 
 const loadLocalStore = () => {
-  if(viewingApplication.value)
-  return;
+  if (viewingApplication.value) return;
 
   const localStoreData = useLocalStorage.load("familySonsData");
 
-  if (localStoreData){
+  if (localStoreData) {
     familySonsData.value = localStoreData;
   }
 };
@@ -242,5 +241,4 @@ const loadLocalStore = () => {
 const setCurrentIndex = () => {
   currentIndex.value = familySonsData.value.length - 1;
 };
-
 </script>
