@@ -336,6 +336,10 @@ const passwordMatching = () => {
 };
 
 const registerUser = async () => {
+
+
+  $q.loading.show();
+
   await checkIfCurpAlreadyExists();
 
   await checkIfUserNameAlreadyExists();
@@ -353,7 +357,6 @@ const registerUser = async () => {
 
 const addUser = async () => {
   try {
-    $q.loading.show();
     const trimmedUserName = userName.value.trim();
     const trimmedEmail = email.value.trim();
     const trimmedCurp = curp.value.trim();
