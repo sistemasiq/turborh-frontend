@@ -143,8 +143,34 @@
                 spinner-color="cyan-2"
               />
             </div>
+            <q-dialog v-model="isHelpDialogOpen" persistent style="z-index: 10">
+              <q-card>
+                <q-card-section class="row items-center">
+                  <q-avatar icon="info" color="yellow-7" text-color="white" />
+                  <span class="q-ml-sm text-weight-medium text-h6"
+                    >¿Necesitas ayuda o tienes preguntas? </span
+                  >
+                </q-card-section>
+                <q-card-section>
+                  <div>Si tienes dudas o
+                    necesitas asistencia adicional, no dudes en contactarnos.
+                    Puedes escribirnos al siguiente correo detallando tus dudas, problemas
+                    o comentarios siendo lo más claro posible:
+                    <strong>reclutamiento@turbomaquinas.com</strong></div>
+                    <div>¡Con gusto resolveremos tus dudas y te atenderemos lo antes posible!</div>
+                </q-card-section>
+                <q-card-actions align="right">
+                  <q-btn flat label="Entendido" color="primary" v-close-popup />
+                </q-card-actions>
+              </q-card>
+            </q-dialog>
           </div>
         </div>
+        <HelpBtnComponent
+          @click="onClickHelp"
+          class="fixed-bottom-right q-ma-lg"
+          style="z-index: 1"
+        />
       </q-page>
     </q-page-container>
   </q-layout>
@@ -168,7 +194,7 @@ import { getAssetsPath } from "src/utils/folderPaths";
 import { useRequestUser } from "src/stores/requestUser";
 import { logUser } from "src/services/user";
 import { getUserApplicationById } from "src/services/userApplication";
-
+import HelpBtnComponent from "src/components/HelpBtnComponent.vue";
 const useAuth = useAuthStore();
 const useLocalStorage = useLocalStorageStore();
 const useRequest = useRequestUser();
@@ -177,6 +203,12 @@ const $q = useQuasar();
 const userName = ref("");
 const password = ref("");
 const isPasswordVisible = ref(false);
+const isHelpDialogOpen = ref(false);
+
+const onClickHelp = () => {
+  isHelpDialogOpen.value = true;
+  console.log("khe");
+};
 
 const getLoginMainImage = computed(() =>
   getS3FileUrl(getAssetsPath, "login-main.jpg")
