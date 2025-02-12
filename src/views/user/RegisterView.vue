@@ -395,23 +395,8 @@ const addUser = async () => {
   }
 };
 
-const isRegisterPage = ref(true);
 
-const keyDownHandler = (event) => {
-  if (event.key === "Enter") {
-    if (isRegisterPage.value) {
-      registerUser();
-    }
-  }
-};
 
-onMounted(() => {
-  window.addEventListener("keydown", keyDownHandler);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("keydown", keyDownHandler);
-});
 </script>
 
 <style scoped>
