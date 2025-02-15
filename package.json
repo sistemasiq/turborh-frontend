@@ -1,7 +1,7 @@
 {
   "name": "turbo-rh-app",
   "version": "0.0.1",
-  "description": "Proyecto de recursos humanos para Turbomaquinas.",
+  "description": "Página web para reclutamiento de personal",
   "productName": "Turbo-RH-app",
   "author": "Skyre1 <cl4t4p@gmail.com>",
   "private": true,
