@@ -233,6 +233,35 @@ const userEmailExistValidation = ref(false);
 const { logged, user } = storeToRefs(useAuth);
 
 const disableRegisterButton = () => {
+  // Si algún campo está vacío, deshabilitar
+  if (!userName.value || !email.value || !curp.value || !password.value || !confirmPassword.value) {
+    return true;
+  }
+
+  // Valida formato de email
+  const emailValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.value);
+  if (!emailValid) return true;
+
+  // Valida nombre de usuario (mínimo 6 caracteres y solo letras, números, punto y guion bajo)
+  const userNameValid = userName.value.length >= 6 && /^[a-zA-Z0-9._]+$/.test(userName.value);
+  if (!userNameValid) return true;
+
+  // Valida CURP
+  if (!curpRegex.test(curp.value)) return true;
+
+  // Valida que las contraseñas coincidan
+  if (password.value !== confirmPassword.value) return true;
+
+  // Valida que no existan duplicados en la base de datos
+  if (!userNameExistsValidation.value || !curpExistsValidation.value || !userEmailExistValidation.value) {
+    return true;
+  }
+
+  // Si pasa todas las validaciones, habilitar el botón
+  return false;
+};
+
+/* const disableRegisterButton = () => {
   return (
     !userName.value ||
     !email.value ||
@@ -244,7 +273,7 @@ const disableRegisterButton = () => {
     !userNameExistsValidation.value ||
     !userEmailExistValidation.value
   );
-};
+}; */
 
 const changePasswordVisibility = () => {
   if (password.value) {
