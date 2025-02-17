@@ -5,30 +5,31 @@ export const states = [
   "Campeche",
   "Chiapas",
   "Chihuahua",
+  "Ciudad de México",
   "Coahuila",
   "Colima",
   "Durango",
-  "Estado de Mexico",
+  "Estado de México",
   "Guanajuato",
   "Guerrero",
   "Hidalgo",
   "Jalisco",
-  "Michoacan",
+  "Michoacán",
   "Morelos",
   "Nayarit",
-  "Nuevo Leon",
+  "Nuevo León",
   "Oaxaca",
   "Puebla",
-  "Queretaro",
+  "Querétaro",
   "Quintana Roo",
-  "San Luis Potosi",
+  "San Luis Potosí",
   "Sinaloa",
   "Sonora",
   "Tabasco",
   "Tamaulipas",
   "Tlaxcala",
   "Veracruz",
-  "Yucatan",
+  "Yucatán",
   "Zacatecas",
 ];
 
@@ -313,7 +314,7 @@ export const cities = {
     "Uruachi",
     "Valle de Zaragoza",
   ],
-  "Ciudad de Mexico": [
+  "Ciudad de México": [
     "Alvaro Obregon",
     "Azcapotzalco",
     "Benito Juarez",
@@ -716,7 +717,7 @@ export const cities = {
     "Zapotlan el Grande",
     "Zapotlanejo",
   ],
-  "Estado de Mexico": [
+  "Estado de México": [
     "Acambay de Ruiz Castaneda",
     "Acolman",
     "Aculco",
@@ -843,7 +844,7 @@ export const cities = {
     "Zumpahuacan",
     "Zumpango",
   ],
-  Michoacan: [
+  Michoacán: [
     "Acuitzio",
     "Aguililla",
     "Alvaro Obregon",
@@ -1015,7 +1016,7 @@ export const cities = {
     "Tuxpan",
     "Xalisco",
   ],
-  "Nuevo Leon": [
+  "Nuevo León": [
     "Abasolo",
     "Agualeguas",
     "Allende",
@@ -1860,7 +1861,7 @@ export const cities = {
     "Zoquiapan",
     "Zoquitlan",
   ],
-  Queretaro: [
+  Querétaro: [
     "Amealco de Bonfil",
     "Arroyo Seco",
     "Cadereyta de Montes",
@@ -1893,7 +1894,7 @@ export const cities = {
     "Solidaridad",
     "Tulum",
   ],
-  "San Luis Potosi": [
+  "San Luis Potosí": [
     "Ahualulco",
     "Alaquines",
     "Aquismon",
@@ -2387,7 +2388,7 @@ export const cities = {
     "Zontecomatlan de Lopez y Fuentes",
     "Zozocolco de Hidalgo",
   ],
-  Yucatan: [
+  Yucatán: [
     "Abala",
     "Acanceh",
     "Akil",

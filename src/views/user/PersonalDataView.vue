@@ -41,7 +41,7 @@
             </q-card-section>
           </q-card>
 
-          <q-form class="q-gutter-md">
+          <q-form class="q-gutter-md" ref="form">
             <div style="display: flex; flex-grow: 1" class="q-ml-md">
               <q-input
                 ref="homeAddressRef"
@@ -142,15 +142,15 @@
               <q-input
                 ref="birthDateRef"
                 class="full-width q-pl-md"
-                mask="####-##-##"
-                hint="AAAA-MM-DD"
+                mask="####/##/##"
+                hint="AAAA/MM/DD"
                 hide-hint
                 label="Fecha de nacimiento *"
                 v-model="birthDate"
                 dark
                 outlined
                 color="cyan-1"
-                :rules="[ruleFieldRequired]"
+                :rules="[ruleFieldRequired, ruleValidDate]"
                 :readonly="viewingApplication"
                 @update:model-value="updateStore()"
               >
@@ -411,7 +411,7 @@
       </q-card-section>
     </q-card>
     <ButtonApplicationStatus
-      v-if="updatingApplication"
+      v-if="updatingApplication && isFormInvalid"
       :required-fields="requiredFieldsOnThisPage"
     />
   </q-layout>
@@ -428,7 +428,7 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { useQuasar } from "quasar";
 import { notifyPositive } from "src/utils/notifies";
 import { states, cities } from "src/utils/citiesStates.js";
-import { ruleFieldRequired } from "src/utils/fieldRules";
+import { ruleFieldRequired, ruleValidDate } from "src/utils/fieldRules";
 
 const $q = useQuasar();
 
@@ -440,6 +440,9 @@ const currentCivilStatus = ref("");
 
 const homeStatus = ref(["Propia", "De su familia", "Paga renta"]);
 const currentHomeStatus = ref("");
+
+const form = ref(null);
+const isFormInvalid = ref(false);
 
 const homeAddress = ref("");
 const state = ref("");
@@ -519,6 +522,7 @@ const validateRequiredFields = () => {
 };
 
 onMounted(() => {
+  validate();
   loadLocalStore();
   if (viewingApplication.value) {
     setSavedStoredValues();
@@ -527,9 +531,18 @@ onMounted(() => {
   }
 });
 
+const validate = () => {
+  form.value.validate().then((success) => {
+    if (success) {
+      isFormInvalid.value = true;
+    } else {
+      isFormInvalid.value = false;
+    }
+  });
+};
+
 //This method set the values saved in the local storage into the variables
 const setSavedStoredValues = () => {
-
   console.log("SET SAVED STORED VALUES CALLED");
 
   civilStatus.value.forEach((element) => {
@@ -608,6 +621,7 @@ const setStoredValues = () => {
 
 //Updates the store (pinia) values with the new ones
 const updateStore = () => {
+  validate();
   if (viewingApplication.value) return;
 
   console.log("UPDATE STORE CALLED");
@@ -669,8 +683,7 @@ const saveLocalStore = () => {
 
 //Loads the data in the local storage store "personalData"
 const loadLocalStore = () => {
-  if(updatingApplication.value)
-  return;
+  if (updatingApplication.value) return;
 
   const localStoreData = useLocalStorage.load("personalData");
 

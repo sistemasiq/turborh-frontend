@@ -24,7 +24,7 @@
             :readonly="viewingApplication"
             mask="####/##/##"
             lazy-rules
-            :rules="[dateRule]"
+            :rules="[ruleValidDate]"
           >
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
@@ -91,6 +91,7 @@ import { useRequestUser } from "src/stores/requestUser";
 import { useAuthStore } from "src/stores/auth";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
+import { ruleValidDate } from "src/utils/fieldRules";
 
 const useLocalStorage = useLocalStorageStore();
 const useRequest = useRequestUser();
@@ -166,19 +167,6 @@ const lettersRule = (value) => {
 
   if (!charactersValid) {
     return "Ingresa solo letras";
-  } else if (!requiredValid) {
-    return "Este campo es requerido";
-  }
-
-  return true; // La validación pasa
-};
-
-const dateRule = (value) => {
-  const dateValid = /^\d{4}\/\d{2}\/\d{2}$/.test(value);
-  const requiredValid = !!value;
-
-  if (!dateValid) {
-    return "Ingresa una fecha válida en el formato AAAA/MM/DD";
   } else if (!requiredValid) {
     return "Este campo es requerido";
   }

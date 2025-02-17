@@ -41,7 +41,7 @@
             :readonly="viewingApplication"
             mask="####/##/##"
             class="q-mt-xs"
-            :rules="[ruleFieldRequired]"
+            :rules="[ruleFieldRequired, ruleValidDate]"
           >
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer">
@@ -118,7 +118,7 @@ import { useLocalStorageStore } from "src/stores/localStorage";
 import { storeToRefs } from "pinia";
 import { notifyPositive } from "src/utils/notifies";
 import { useQuasar } from "quasar";
-import { ruleFieldRequired } from "src/utils/fieldRules";
+import { ruleFieldRequired, ruleValidDate } from "src/utils/fieldRules";
 
 const $q = useQuasar();
 const useLocalStorage = useLocalStorageStore();

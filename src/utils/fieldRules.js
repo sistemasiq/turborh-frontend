@@ -1,7 +1,29 @@
-import { emailRegex } from "./fieldRegex";
+import { emailRegex, dateRegex } from "./fieldRegex";
 
 export const ruleFieldRequired = (value) => {
-    return !!value || 'El campo es obligatorio *'
+  return !!value || 'El campo es obligatorio *'
+}
+
+export const ruleValidDate = (value) => {
+
+  if (!dateRegex.test(value)) {
+    return 'Formato inválido (AAAA/MM/DD)';
+  }
+
+  // Verificar si es una fecha válida
+  const [year, month, day] = value.split('/').map(Number);
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() + 1 !== month ||
+    date.getDate() !== day
+  ) {
+    return 'Fecha inválida';
+  }
+
+  return true;
+
 }
 
 export const ruleFieldMinLength = (minLength) => {
