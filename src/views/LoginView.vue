@@ -4,99 +4,171 @@
       <q-page>
         <div class="login-background">
           <div class="row q-ma-auto" style="padding-left: 15%">
-            <div class="col-12 col-md-5 col-lg6 q-ma-auto" style="
+            <div
+              class="col-12 col-md-5 col-lg6 q-ma-auto"
+              style="
                 padding-top: 5%;
                 padding-right: 5%;
                 z-index: 10;
                 position: relative;
-              ">
-
+              "
+            >
               <q-card class="q-pa-lg login-card">
-                <div class="row q-ma-auto" style="
-                  justify-content: center;
-                  align-items: center;
-                  padding-left: 3%;
-                ">
-                  <q-img :src="getLogoImage" alt="Logo" title="Turbomaquinas S.A. de C.V."
-                    style="width: 30%; height: 10%" spinner-color="cyan-2" />
+                <div
+                  class="row q-ma-auto"
+                  style="
+                    justify-content: center;
+                    align-items: center;
+                    padding-left: 3%;
+                  "
+                >
+                  <q-img
+                    :src="getLogoImage"
+                    alt="Logo"
+                    title="Turbomaquinas S.A. de C.V."
+                    style="width: 30%; height: 10%"
+                    spinner-color="cyan-2"
+                  />
                 </div>
-                <div class="row q-ma-auto" style="justify-content: center; align-items: center">
+                <div
+                  class="row q-ma-auto"
+                  style="justify-content: center; align-items: center"
+                >
                   <h5 class="text-h5 text-white q-my-md">Iniciar Sesión</h5>
                 </div>
                 <q-card-section>
                   <q-form class="q-gutter-md">
-                    <q-input dark outlined color="cyan-1" v-model="userName" type="text"
-                      label="Usuario o Correo electrónico" label-color="white" lazy-rules :rules="[
+                    <q-input
+                      dark
+                      outlined
+                      color="cyan-1"
+                      v-model="userName"
+                      type="text"
+                      label="Usuario o Correo electrónico"
+                      label-color="white"
+                      lazy-rules
+                      :rules="[
                         (value) =>
                           !!value || 'Este campo no puede estar vacío.',
-                      ]" class="input-brand">
+                      ]"
+                      class="input-brand"
+                    >
                       <template v-slot:prepend>
                         <q-icon name="person_outline" class="color-brand" />
                       </template>
                     </q-input>
-                    <q-input dark outlined color="cyan-1" v-model="password"
-                      :type="isPasswordVisible ? 'text' : 'password'" label="Contraseña" label-color="white" :rules="[
+                    <q-input
+                      dark
+                      outlined
+                      color="cyan-1"
+                      v-model="password"
+                      :type="isPasswordVisible ? 'text' : 'password'"
+                      label="Contraseña"
+                      label-color="white"
+                      :rules="[
                         (value) =>
                           !!value || 'Este campo no puede estar vacío.',
                         (value) =>
                           value === password || 'La contraseña es incorrecta',
-                      ]" class="input-brand">
+                      ]"
+                      class="input-brand"
+                    >
                       <template v-slot:prepend>
                         <q-icon name="lock" class="color-brand" />
                       </template>
                       <template v-slot:append>
-                        <q-btn class="card-transparent color-brand" flat no-border v-if="!isPasswordVisible && password"
-                          icon="visibility_off" @click="changePasswordVisibility" />
-                        <q-btn class="card-transparent color-brand" flat no-border v-if="isPasswordVisible && password"
-                          icon="visibility" @click="changePasswordVisibility" />
+                        <q-btn
+                          class="card-transparent color-brand"
+                          flat
+                          no-border
+                          v-if="!isPasswordVisible && password"
+                          icon="visibility_off"
+                          @click="changePasswordVisibility"
+                        />
+                        <q-btn
+                          class="card-transparent color-brand"
+                          flat
+                          no-border
+                          v-if="isPasswordVisible && password"
+                          icon="visibility"
+                          @click="changePasswordVisibility"
+                        />
                       </template>
                     </q-input>
                   </q-form>
                 </q-card-section>
                 <div>
-                  <center><q-btn color="primary" @click.prevent="onLoginClick" style="width: 90%;"
-                      :disabled="disableLoginButton()">
+                  <div style="text-align: center">
+                    <q-btn
+                      color="primary"
+                      @click.prevent="onLoginClick"
+                      style="width: 90%"
+                      :disabled="disableLoginButton()"
+                    >
                       Ingresar
-                    </q-btn></center>
+                    </q-btn>
+                  </div>
                   <!-- 
                     <q-btn class="btn-text text-capitalize" flat @click.prevent="onRegisterClick">
                       Registrate
                     </q-btn> -->
                 </div>
                 <div class="q-mt-lg">
-                  <center>
-                    <q-btn flat class="text-white" @click="toRestorePassword()" style="font-size: 13px;">¿Has
-                      olvidado tu usuario o contraseña?</q-btn>
-                  </center>
+                  <div style="text-align: center">
+                    <q-btn
+                      flat
+                      class="text-white"
+                      @click="toRestorePassword()"
+                      style="font-size: 13px"
+                      >¿Has olvidado tu usuario o contraseña?</q-btn
+                    >
+                  </div>
                 </div>
                 <div class="q-mt-lg">
-                  <center>
-                    <span style="font-size: 15px; color: white;">¿No tienes una cuenta? <a href=""
-                        style="color: #1d9bf0; text-decoration: none;" @click.prevent="onRegisterClick">Registrate</a>
+                  <div style="text-align: center">
+                    <span style="font-size: 15px; color: white">
+                      ¿No tienes una cuenta?
+                      <a
+                        href=""
+                        style="color: #1d9bf0; text-decoration: none"
+                        @click.prevent="onRegisterClick"
+                      >
+                        Regístrate
+                      </a>
                     </span>
-                  </center>
+                  </div>
                 </div>
               </q-card>
             </div>
 
             <div class="col-md-7 q-ma-auto">
               <div class="login-image-overlay"></div>
-              <q-img :src="getLoginMainImage" class="login-image" spinner-color="cyan-2" />
+              <q-img
+                :src="getLoginMainImage"
+                class="login-image"
+                spinner-color="cyan-2"
+              />
             </div>
             <q-dialog v-model="isHelpDialogOpen" persistent style="z-index: 10">
               <q-card>
                 <q-card-section class="row items-center">
                   <q-avatar icon="info" color="yellow-7" text-color="white" />
-                  <span class="q-ml-sm text-weight-medium text-h6">¿Necesitas ayuda o tienes preguntas? </span>
+                  <span class="q-ml-sm text-weight-medium text-h6"
+                    >¿Necesitas ayuda o tienes preguntas?
+                  </span>
                 </q-card-section>
                 <q-card-section>
-                  <div>Si tienes dudas o
-                    necesitas asistencia adicional, no dudes en contactarnos.
-                    Puedes escribirnos al siguiente correo detallando tus dudas, problemas
-                    o comentarios siendo lo más claro posible:
+                  <div>
+                    Si tienes dudas o necesitas asistencia adicional, no dudes
+                    en contactarnos. Puedes escribirnos al siguiente correo
+                    detallando tus dudas, problemas o comentarios siendo lo más
+                    claro posible:
                     <strong>reclutamiento@turbomaquinas.com</strong>
                   </div>
-                  <div>¡Con gusto resolveremos tus dudas y te atenderemos lo antes posible!</div>
+                  <div>
+                    ¡Con gusto resolveremos tus dudas y te atenderemos lo antes
+                    posible!
+                  </div>
                 </q-card-section>
                 <q-card-actions align="right">
                   <q-btn flat label="Entendido" color="primary" v-close-popup />
@@ -105,7 +177,11 @@
             </q-dialog>
           </div>
         </div>
-        <HelpBtnComponent @click="onClickHelp" class="fixed-bottom-right q-ma-lg" style="z-index: 1" />
+        <HelpBtnComponent
+          @click="onClickHelp"
+          class="fixed-bottom-right q-ma-lg"
+          style="z-index: 1"
+        />
       </q-page>
     </q-page-container>
   </q-layout>
@@ -306,11 +382,13 @@ onBeforeUnmount(() => {
 
 .login-background {
   position: relative;
-  background: linear-gradient(to right,
-      rgba(22, 48, 70, 1) 100%,
-      rgba(22, 48, 70, 0.9) 100%,
-      rgba(22, 48, 70, 0.8) 100%,
-      rgba(22, 48, 70, 0.7) 100%);
+  background: linear-gradient(
+    to right,
+    rgba(22, 48, 70, 1) 100%,
+    rgba(22, 48, 70, 0.9) 100%,
+    rgba(22, 48, 70, 0.8) 100%,
+    rgba(22, 48, 70, 0.7) 100%
+  );
 }
 
 .login-image {
@@ -327,10 +405,12 @@ onBeforeUnmount(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(to right,
-      rgba(22, 48, 70, 1) 50%,
-      rgba(22, 48, 70, 0.8) 70%,
-      rgba(22, 48, 70, 0.7) 100%);
+  background: linear-gradient(
+    to right,
+    rgba(22, 48, 70, 1) 50%,
+    rgba(22, 48, 70, 0.8) 70%,
+    rgba(22, 48, 70, 0.7) 100%
+  );
   opacity: 1;
 }
 
