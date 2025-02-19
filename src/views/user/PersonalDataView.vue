@@ -11,7 +11,6 @@
         <pagination-application
           :page="2"
           :required-fields="requiredFieldsOnThisPage"
-          @on-field-validation="validateRequiredFields"
         ></pagination-application>
         <div style="margin-top: 6%">
           <q-card
@@ -41,7 +40,7 @@
             </q-card-section>
           </q-card>
 
-          <q-form class="q-gutter-md" ref="form">
+          <q-form class="q-gutter-md">
             <div style="display: flex; flex-grow: 1" class="q-ml-md">
               <q-input
                 ref="homeAddressRef"
@@ -411,7 +410,7 @@
       </q-card-section>
     </q-card>
     <ButtonApplicationStatus
-      v-if="updatingApplication && isFormInvalid"
+      v-if="updatingApplication"
       :required-fields="requiredFieldsOnThisPage"
     />
   </q-layout>
@@ -440,9 +439,6 @@ const currentCivilStatus = ref("");
 
 const homeStatus = ref(["Propia", "De su familia", "Paga renta"]);
 const currentHomeStatus = ref("");
-
-const form = ref(null);
-const isFormInvalid = ref(false);
 
 const homeAddress = ref("");
 const state = ref("");
@@ -492,7 +488,7 @@ const requiredFieldsOnThisPage = computed(() => [
   state.value,
   city.value,
   birthPlace.value,
-  birthDate.value,
+  birthDate.value.length == 10,
   phone.value,
   height.value,
   weight.value,
@@ -503,26 +499,7 @@ const requiredFieldsOnThisPage = computed(() => [
   goalInLife.value,
 ]);
 
-const validateRequiredFields = () => {
-  homeAddressRef.value.validate();
-  colonyRef.value.validate();
-  zipcodeRef.value.validate();
-  stateRef.value.validate();
-  cityRef.value.validate();
-  birthPlaceRef.value.validate();
-  birthDateRef.value.validate();
-  phoneRef.value.validate();
-  heightRef.value.validate();
-  weightRef.value.validate();
-  bloodTypeRef.value.validate();
-  currentCivilStatusRef.value.validate();
-  roomieRef.value.validate();
-  currentHomeStatusRef.value.validate();
-  goalInLifeRef.value.validate();
-};
-
 onMounted(() => {
-  validate();
   loadLocalStore();
   if (viewingApplication.value) {
     setSavedStoredValues();
@@ -530,16 +507,6 @@ onMounted(() => {
     setStoredValues();
   }
 });
-
-const validate = () => {
-  form.value.validate().then((success) => {
-    if (success) {
-      isFormInvalid.value = true;
-    } else {
-      isFormInvalid.value = false;
-    }
-  });
-};
 
 //This method set the values saved in the local storage into the variables
 const setSavedStoredValues = () => {
@@ -621,7 +588,6 @@ const setStoredValues = () => {
 
 //Updates the store (pinia) values with the new ones
 const updateStore = () => {
-  validate();
   if (viewingApplication.value) return;
 
   console.log("UPDATE STORE CALLED");
