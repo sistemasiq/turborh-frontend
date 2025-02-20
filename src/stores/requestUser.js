@@ -199,6 +199,156 @@ export const useRequestUser = defineStore("requestUser", () => {
   const updatingApplication = ref(false);
 
 
+  const clearStore = () => {
+    frontPageData.value = {
+      name: "",
+      firstLastName: "",
+      secondLastName: "",
+      wantedSalary: 0,
+      gender: "",
+      photo: "",
+    };
+  
+    personalData.value = {
+      homeAddress: "",
+      colony: "",
+      zipcode: "",
+      state: "",
+      city: "",
+      birthPlace: "",
+      birthDate: "",
+      phone: "",
+      email: "",
+      height: 0,
+      weight: 0,
+      civilStatus: "",
+      homeProperty: "",
+      bloodType: "",
+      roomie: "",
+      dependents: "",
+      kinship: "",
+      amount: 0,
+      clubs: "",
+      goalInLife: "",
+      diseases: "",
+      allergies: "",
+      brand: "",
+      incomesConcept: 0,
+      isCheckedDiseases: false,
+      isCheckedAllergies: false,
+      isCheckedCar: false,
+      isCheckedIncome: false,
+    };
+  
+    documentsData.value = {
+      rfc: "",
+      imss: "",
+      afore: "",
+      fm2: "",
+      curriculumUUID: "",
+    };
+  
+    curriculumStored.value = null;
+    drivingLicenceData.value = [];
+    recruitingMeansData.value = {
+      medium: "",
+      relative: "",
+      department: "",
+      sindicate: "",
+      isCheckedFamiliar: false,
+      isCheckedDepartment: false,
+    };
+  
+    familyReferencesData.value = [];
+    commercialReferencesData.value = [];
+  
+    familyFathersData.value = [
+      { relationship: "", name: "", birthdate: "", job: "", jobAddress: "" },
+      { relationship: "", name: "", birthdate: "", job: "", jobAddress: "" },
+    ];
+    familySonsData.value = [];
+  
+    educationData.value = {
+      secondary: "",
+      highSchool: "",
+      master: "",
+      other: "",
+      professional: "",
+      speciality: "",
+      languages: "",
+      schedules: "",
+      secondarySpeciality: "",
+      highSchoolSpeciality: "",
+      professionalSpeciality: "",
+      masterSpeciality: "",
+      otherSpeciality: "",
+      currentInstitution: "",
+      currentSpeciality: "",
+      dateStartSecondary: "",
+      dateEndSecondary: "",
+      dateStartHighSchool: "",
+      dateEndHighSchool: "",
+      dateStartProfessional: "",
+      dateEndProfessional: "",
+      dateStartMaster: "",
+      dateEndMaster: "",
+      dateStartOther: "",
+      dateEndOther: "",
+      isPublicSecondary: false,
+      isPublicHighSchool: false,
+      isPublicProfessional: false,
+      isPublicMaster: false,
+      isPublicOther: false,
+      isPublicCurrent: false,
+      certifiedSecondary: false,
+      notCertifiedSecondary: false,
+      certifiedHighSchool: false,
+      notCertifiedHighSchool: false,
+      certifiedProfessional: false,
+      notCertifiedProfessional: false,
+      certifiedMaster: false,
+      notCertifiedMaster: false,
+      certifiedOther: false,
+      notCertifiedOther: false,
+      currentlyStudying: false,
+      currentlyNotStudying: false,
+      selectedProfesional: "",
+      professionalLicence: null,
+    };
+  
+    machineryData.value = [];
+    toolsData.value = [];
+    measuringInstrumentsData.value = [];
+    otherToolsData.value = [];
+    officesData.value = [];
+    laboralExperienceData.value = [
+      {
+        company: "",
+        address: "",
+        job: "",
+        phone: "",
+        lastBossName: "",
+        lastBossPosition: "",
+        startDate: "",
+        endDate: "",
+        currentlyWorking: false,
+        startingPosition: "",
+        endingPosition: "",
+        startMontlySalary: "",
+        endingMontlySalary: "",
+        functionsPerformed: "",
+        separationCause: "",
+        inmediateLastBossName: "",
+        inmediateLastBossPosition: "",
+      },
+    ];
+  
+    savedApplication.value = null;
+    viewingApplication.value = false;
+    updatingApplication.value = false;
+  };
+
+
 
   return {
     frontPageData,
@@ -224,6 +374,7 @@ export const useRequestUser = defineStore("requestUser", () => {
     fullName,
     userHasApplication,
     curriculumStored,
-    clearMachinery
+    clearMachinery, 
+    clearStore
   };
 });

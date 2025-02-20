@@ -5,10 +5,12 @@ import { useRequisitionStore } from "src/stores/requisition";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from "pinia";
 import { removeSessionStorageItem, clearSessionStorage } from "src/stores/sessionStorage.js";
+import { useRequestUser } from "src/stores/requestUser";
 
 const useLocalStorage = useLocalStorageStore();
 const useAuth = useAuthStore();
 const useRequisition = useRequisitionStore();
+const useRequest = useRequestUser();
 
 const { user, logged } = storeToRefs(useAuth);
 
@@ -30,6 +32,7 @@ export const logOut = () => {
   logged.value = false;
   removeHeaderAuthorization();
   useRequisition.clearStore();
+  useRequest.clearStore();
   removeSessionStorageItem("user");
   removeSessionStorageItem("logged");
   clearSessionStorage();
