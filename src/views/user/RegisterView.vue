@@ -445,15 +445,14 @@ const addUser = async () => {
 }
 
 .q-card {
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14),
-    0 3px 1px -2px rgba(0, 0, 0, 0.12);
   border-radius: 10px;
   vertical-align: top;
-  background: rgba(49, 49, 49, 0.5) 51%;
+  background: rgba(49, 49, 49, 0.473) 51%;
   position: relative;
-  height: 50%;
-  width: 50%;
-  margin-left: 33%;
+  height: 75%;
+  width: 89%;
+  margin-left: 6%;
+  margin-top: 2%;
 }
 
 .card-register {

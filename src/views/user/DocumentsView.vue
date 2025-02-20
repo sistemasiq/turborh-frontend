@@ -350,8 +350,8 @@ const loadLocalStore = () => {
   background: rgba(49, 49, 49, 0.473) 51%;
   position: relative;
   height: 75%;
-  width: 75%;
-  margin-left: 23.5%;
+  width: 89%;
+  margin-left: 6%;
   margin-top: 2%;
 }
 
