@@ -123,6 +123,7 @@
                   : fullName
               }}
             </p>
+
             <p class="text-h5 text-weight-regular">{{ userName }}</p>
             <p v-if="specialization !== ''" class="text-h6">
               Especialidad: {{ specialization }}
@@ -137,6 +138,12 @@
               label="Editar información"
               @click.prevent="onEditDialog"
             />
+            <div class="row items-center justify-between q-pt-lg">
+            <q-banner v-if="!userHasApplication" class="bg-orange-2 text-orange-8 pt">
+              <q-icon name="info" />
+              No tienes una solicitud activa. Para aplicar a vacantes, primero crea una solicitud.
+            </q-banner>
+            </div>
           </q-card-section>
         </div>
 
@@ -157,13 +164,42 @@
 
   <q-dialog v-model="openEditInfo" persistent class="z-max">
     <q-card style="width: 100%">
+      <q-banner 
+        v-if="showSuggestion" 
+        class="bg-custom-warning text-white q-pa-md"
+        rounded
+      >
+        <div class="row items-center justify-between">
+          <div class="row items-center">
+            <q-icon name="warning" color="white" size="xs" class="q-mr-sm"/>
+            <span>
+              El nombre de usuario no puede contener espacios.
+              <br/>
+              Sugerencia: <strong>"{{ suggestedUserName }}"</strong>
+            </span>
+          </div>
+          <q-btn
+            flat
+            color="white"
+            label="Usar sugerencia"
+            class="q-ml-md"
+            @click="userNameEdit = suggestedUserName"
+          />
+        </div>
+      </q-banner>
+
       <q-card-section class="column items-left q-pa-md">
         <q-input
+          ref="userNameRef"
           outlined
           v-model="userNameEdit"
           type="text"
-          @blur="checkIfUserNameAlreadyExists"
-          :rules="[ruleFieldRequired, ruleFieldMinLength(6)]"
+          :rules="[
+            ruleFieldRequired,
+            (value) => value.length >= 6 || 'El nombre debe ser minimo de 6 letras',
+            (value) => /^[a-zA-Z0-9._]+$/.test(value) || 'Solo se permiten letras, números, punto (.) y guion bajo (_), no se permiten espacios',
+            (value) => !/\s/.test(value) || 'No se permiten espacios'
+          ]"
           label="Nombre de usuario"
         />
         <q-input
@@ -173,7 +209,10 @@
           mask="AAAA######AAAAAAX#"
           @blur="checkIfCurpAlreadyExists"
           type="text"
-          :rules="[ruleFieldRequired]"
+          :rules="[
+            ruleFieldRequired,
+            (value) => value.length === 18 || 'La CURP debe tener 18 caracteres'
+          ]"
           label="CURP"
         />
         <q-input
@@ -188,7 +227,7 @@
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat label="Cancelar" color="primary" v-close-popup />
-        <q-btn label="Guardar" color="primary" @click.prevent="updateUserData" />
+        <q-btn :disable="!isFormValid" label="Guardar" color="primary" @click.prevent="updateUserData" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -200,7 +239,7 @@ import { getS3FileUrl } from "src/services/profiles.js";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from "pinia";
 import { useRequestUser } from "src/stores/requestUser";
-import { ref, onMounted, computed, watch, onUnmounted } from "vue";
+import { ref, onMounted, computed, watch, onUnmounted, nextTick } from "vue";
 import { useLocalStorageStore } from "src/stores/localStorage";
 import { getUserImagesPath } from "src/utils/folderPaths";
 import { getAge } from "src/utils/operations";
@@ -229,18 +268,23 @@ const selectedImage = ref();
 const newImage = ref();
 
 const userNameEdit = ref("");
+const userNameRef = ref(null);
 const curpEdit = ref("");
 const emailEdit = ref("");
 
 const openEditInfo = ref(false);
+const showSuggestion = ref(false);
+const suggestedUserName = ref('');
 
 const { user, getUserPhotoUUID } = storeToRefs(useAuth);
-const { savedApplication } = storeToRefs(useRequest);
+const { savedApplication, userHasApplication } = storeToRefs(useRequest);
+
+const tieneSolicitud = userHasApplication
 
 const fixed = ref(false);
 const userName = ref("");
 const userApplicationId = ref(0);
-const fullName = ref("Nombre completo");
+const fullName = ref("");
 const specialization = ref("");
 const age = ref(0);
 
@@ -264,6 +308,22 @@ const onEditDialog = () => {
   curpEdit.value = user.value.curp;
   emailEdit.value = user.value.email;
 
+  if (userNameEdit.value && /\s/.test(userNameEdit.value)) {
+    // Convertir a PascalCase
+    suggestedUserName.value = userNameEdit.value
+      .toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join('');
+    
+    showSuggestion.value = true;
+    
+    setTimeout(() => {
+      if (userNameRef.value) {
+        userNameRef.value.focus();
+      }
+    }, 300);
+  }
 }
 
 const checkIfUserNameAlreadyExists = async () => {
@@ -485,6 +545,24 @@ const updateUserImageInDatabase = async (imageUUID) => {
     photoUUID.value = imageUUID;
   }
 };
+
+const isFormValid = computed(() => {
+  // Validar nombre de usuario
+  const isUserNameValid = userNameEdit.value && 
+    userNameEdit.value.length >= 6 && 
+    /^[a-zA-Z0-9._]+$/.test(userNameEdit.value) && 
+    !/\s/.test(userNameEdit.value);
+
+  // Validar CURP (18 caracteres)
+  const isCurpValid = curpEdit.value && 
+    curpEdit.value.length === 18;
+
+  // Validar email
+  const isEmailValid = emailEdit.value && 
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEdit.value);
+
+  return isUserNameValid && isCurpValid && isEmailValid;
+});
 </script>
 
 <style scoped>
@@ -500,5 +578,9 @@ const updateUserImageInDatabase = async (imageUUID) => {
   left: 50px;
   margin-bottom: 20px;
   margin-top: 20px;
+}
+
+.bg-custom-warning {
+  background-color: #e6a224; /* Un color naranja más oscuro */
 }
 </style>
