@@ -1,240 +1,260 @@
 <template>
-  <q-layout view="hHr LpR lFf">
-    <q-drawer show-if-above class="menu">
-      <div class="q-ml-lg">
-        <q-img
-          class="logo-turbo"
-          :src="getLogoImage"
-          style="width: 30%; height: 10%"
-        />
-      </div>
-      <div class="q-ml-lg">
-        <p class="turbo">Turbomáquinas</p>
-      </div>
-
-      <p class="text-h6 text-white q-ml-xl q-mt-md text-weight-bold">
-        Opciones de usuario
-      </p>
-      <q-item-section class="text-center column q-ml-xl q-mt-xl">
-        <div class="q-mr-xl" v-if="hideUserApplicationInterface">
-          <p class="text-subtitle2 text-white text-weight-regular">
-            Añadir nota
-          </p>
-          <q-btn
-            @mouseover="hoverHome = true"
-            @mouseleave="hoverHome = false"
-            class="q-mb-lg drawer-button"
-            icon="note_alt"
-            :style="{
-              color: hoverHome ? '#1CABC1' : 'darkslategrey',
-            }"
-            @click.prevent="changeNoteStatus"
+  <q-layout view="hHh Lpr lff">
+    <q-header elevated v-if="$q.screen.width < 1030" class="menu">
+      <q-toolbar>
+        <q-btn flat @click="drawer = !drawer" round dense icon="menu">
+          &nbsp; Menú
+        </q-btn>
+      </q-toolbar>
+    </q-header>
+    <q-drawer v-model="drawer" class="menu" :mini="miniState">
+      <q-btn
+        v-if="$q.screen.width > 1030"
+        class="q-mt-md text-white"
+        style="margin-left: 10px"
+        flat
+        @click="miniState = !miniState"
+        round
+        dense
+        icon="menu"
+      />
+      <div v-if="$q.screen.width < 1030 || !miniState" class="custom-style">
+        <div class="q-ml-lg">
+          <q-img
+            class="logo-turbo"
+            :src="getLogoImage"
+            style="width: 30%; height: 10%"
           />
         </div>
-        <q-btn
-               v-if="isRh || isAdmin || isBoss"
-                class="q-mr-xl q-mt-lg"
-                color="white"
-                text-color="dark"
-                rounded
-                label="Ver curriculum del solicitante"
-                @click.prevent="downloadDocument(getCurriculum)"
-              />
-        <ApplicationModifications v-if="isRh || isBoss || isAdmin" />
+        <div class="q-ml-lg">
+          <p class="turbo">Turbomaquinas</p>
+        </div>
 
-        <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
-          <div>
-            <p class="text-subtitle2 q-mr-lg text-white text-weight-regular">
-              Inicio
+        <p class="text-h6 text-white q-ml-xl q-mt-md text-weight-bold">
+          Opciones de usuario
+        </p>
+        <q-item-section class="text-center column q-ml-xl q-mt-xl">
+          <div class="q-mr-xl" v-if="hideUserApplicationInterface">
+            <p class="text-subtitle2 text-white text-weight-regular">
+              Añadir nota
             </p>
             <q-btn
               @mouseover="hoverHome = true"
               @mouseleave="hoverHome = false"
-              to="/userHome/perfil"
-              class="q-mr-lg drawer-button"
-              icon="home"
+              class="q-mb-lg drawer-button"
+              icon="note_alt"
               :style="{
                 color: hoverHome ? '#1CABC1' : 'darkslategrey',
               }"
-            >
-              <Tooltip :text="'Volver a inicio'" />
-            </q-btn>
+              @click.prevent="changeNoteStatus"
+            />
           </div>
-          <div>
-            <p
-              class="text-subtitle2 text-white text-weight-regular"
-              :style="!userHasApplication ? '' : 'visibility:hidden'"
-            >
-              Crear
-            </p>
-            <q-btn
-              @mouseover="hoverNewApplication = true"
-              @mouseleave="hoverNewApplication = false"
-              @click.prevent="onCreateApplication"
-              class="q-mb-lg drawer-button"
-              icon="description"
-              :style="!userHasApplication ? '' : 'visibility:hidden'"
-              :disable="
-                userHasApplication || getUserPhotoUUID === 'default.png'
-              "
-            >
-              <Tooltip
-                v-if="!userHasApplication"
-                :text="'Crea tu solicitud de trabajo'"
-              />
-            </q-btn>
-          </div>
-        </div>
-        <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
-          <div>
-            <p
-              class="text-subtitle2 q-mr-lg text-weight-regular"
-              :class="activeApplication ? 'text-white' : 'text-grey'"
-            >
-              Modificar
-            </p>
-            <q-btn
-              @mouseover="hoverUpdateApplication = true"
-              @mouseleave="hoverUpdateApplication = false"
-              @click.prevent="onUpdateApplication"
-              class="q-mr-lg q-mb-lg drawer-button"
-              icon="edit"
-              :style="{
-                color:
-                  hoverUpdateApplication && activeApplication
-                    ? '#1CABC1'
-                    : 'darkslategrey',
-              }"
-              :disable="!activeApplication"
-              ><Tooltip
-                v-if="activeApplication"
-                :text="'Modifica tu solicitud de trabajo'"
-              />
-            </q-btn>
-          </div>
-          <div>
-            <p
-              class="text-subtitle2 q-mr-lg text-center text-weight-regular"
-              :class="activeApplication ? 'text-white' : 'text-grey'"
-            >
-              Aplicar
-            </p>
-            <q-btn
-              @mouseover="hoverApplyVacant = true"
-              @mouseleave="hoverApplyVacant = false"
-              to="/userHome/vacantes"
-              class="q-mr-lg q-mb-lg drawer-button"
-              icon="add"
-              :style="{
-                color:
-                  hoverApplyVacant && activeApplication
-                    ? '#1CABC1'
-                    : 'darkslategrey',
-              }"
-              :disable="!activeApplication"
-            >
-              <Tooltip
-                v-if="activeApplication"
-                :text="'Aplica a un puesto de trabajo'"
-              />
-            </q-btn>
-          </div>
-        </div>
+          <q-btn
+            v-if="isRh || isAdmin || isBoss"
+            class="q-mr-xl q-mt-lg"
+            color="white"
+            text-color="dark"
+            rounded
+            label="Ver curriculum del solicitante"
+            @click.prevent="downloadDocument(getCurriculum)"
+          />
+          <ApplicationModifications v-if="isRh || isBoss || isAdmin" />
 
-        <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
-          <div>
-            <p
-              class="text-subtitle2 q-mr-lg text-center text-weight-regular"
-              :class="!userHasApplication ? 'text-grey' : 'text-white'"
-            >
-              {{ activeApplication ? "Eliminar" : "Activar" }}
-            </p>
-            <q-btn
-              @mouseover="hoverDeleteApplication = true"
-              @mouseleave="hoverDeleteApplication = false"
-              @click.prevent="onClickDeleteApplication()"
-              class="q-mr-lg q-mb-lg drawer-button"
-              :icon="activeApplication ? 'delete' : 'autorenew'"
-              :style="{
-                color:
-                  hoverDeleteApplication && activeApplication
-                    ? '#C11C1C'
-                    : 'darkslategrey',
-              }"
-              :disable="!userHasApplication"
-            >
-              <q-tooltip
-                v-if="userHasApplication"
-                class="bg-dark text-white text-body2"
-                anchor="top middle"
-                self="center middle"
-                transition-show="slide-up"
-                transition-hide="fade"
-                :delay="300"
-                transition-duration="300"
-                :offset="[10, 25]"
+          <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
+            <div>
+              <p class="text-subtitle2 q-mr-lg text-white text-weight-regular">
+                Inicio
+              </p>
+              <q-btn
+                @mouseover="hoverHome = true"
+                @mouseleave="hoverHome = false"
+                to="/userHome/perfil"
+                class="q-mr-lg drawer-button"
+                icon="home"
+                :style="{
+                  color: hoverHome ? '#1CABC1' : 'darkslategrey',
+                }"
               >
-                {{ toolTipActiveApplicationText }}
-              </q-tooltip></q-btn
-            >
+                <Tooltip :text="'Volver a inicio'" />
+              </q-btn>
+            </div>
+            <div>
+              <p
+                class="text-subtitle2 text-white text-weight-regular"
+                :style="!userHasApplication ? '' : 'visibility:hidden'"
+              >
+                Crear
+              </p>
+              <q-btn
+                @mouseover="hoverNewApplication = true"
+                @mouseleave="hoverNewApplication = false"
+                @click.prevent="onCreateApplication"
+                class="q-mb-lg drawer-button"
+                icon="description"
+                :style="!userHasApplication ? '' : 'visibility:hidden'"
+                :disable="
+                  userHasApplication || getUserPhotoUUID === 'default.png'
+                "
+              >
+                <Tooltip
+                  v-if="!userHasApplication"
+                  :text="'Crea tu solicitud de trabajo'"
+                />
+              </q-btn>
+            </div>
           </div>
-          <div>
-            <p
-              class="text-subtitle2 q-mr-lg text-center text-weight-regular"
-              :class="activeApplication ? 'text-white' : 'text-grey'"
-            >
-              Ver
-            </p>
-            <q-btn
-              @mouseover="hoverSeeApplication = true"
-              @mouseleave="hoverSeeApplication = false"
-              @click.prevent="onViewApplication"
-              class="q-mr-lg q-mb-lg drawer-button"
-              icon="visibility"
-              :style="{
-                color:
-                  hoverSeeApplication && activeApplication
-                    ? '#1CABC1'
-                    : 'darkslategrey',
-              }"
-              :disable="!activeApplication"
-            >
-              <Tooltip
-                v-if="activeApplication"
-                :text="'Ve tu solicitud de trabajo'"
-              />
-            </q-btn>
+          <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
+            <div>
+              <p
+                class="text-subtitle2 q-mr-lg text-weight-regular"
+                :class="activeApplication ? 'text-white' : 'text-grey'"
+              >
+                Modificar
+              </p>
+              <q-btn
+                @mouseover="hoverUpdateApplication = true"
+                @mouseleave="hoverUpdateApplication = false"
+                @click.prevent="onUpdateApplication"
+                class="q-mr-lg q-mb-lg drawer-button"
+                icon="edit"
+                :style="{
+                  color:
+                    hoverUpdateApplication && activeApplication
+                      ? '#1CABC1'
+                      : 'darkslategrey',
+                }"
+                :disable="!activeApplication"
+                ><Tooltip
+                  v-if="activeApplication"
+                  :text="'Modifica tu solicitud de trabajo'"
+                />
+              </q-btn>
+            </div>
+            <div>
+              <p
+                class="text-subtitle2 q-mr-lg text-center text-weight-regular"
+                :class="activeApplication ? 'text-white' : 'text-grey'"
+              >
+                Aplicar
+              </p>
+              <q-btn
+                @mouseover="hoverApplyVacant = true"
+                @mouseleave="hoverApplyVacant = false"
+                to="/userHome/vacantes"
+                class="q-mr-lg q-mb-lg drawer-button"
+                icon="add"
+                :style="{
+                  color:
+                    hoverApplyVacant && activeApplication
+                      ? '#1CABC1'
+                      : 'darkslategrey',
+                }"
+                :disable="!activeApplication"
+              >
+                <Tooltip
+                  v-if="activeApplication"
+                  :text="'Aplica a un puesto de trabajo'"
+                />
+              </q-btn>
+            </div>
           </div>
-        </div>
-      </q-item-section>
 
-      <q-btn
-        flat
-        dense
-        icon="arrow_back"
-        class="logout-btn z-top"
-        :class="
-          hideUserApplicationInterface
-            ? 'q-ml-md absolute-bottom q-mb-xl q-mr-xl'
-            : 'q-ml-xs'
-        "
-        label="Regresar"
-        @click.prevent="goToRequisitionApplicants"
-        v-if="hideUserApplicationInterface"
-      >
-      </q-btn>
+          <div class="row q-ml-md" v-if="!hideUserApplicationInterface">
+            <div>
+              <p
+                class="text-subtitle2 q-mr-lg text-center text-weight-regular"
+                :class="!userHasApplication ? 'text-grey' : 'text-white'"
+              >
+                {{ activeApplication ? "Eliminar" : "Activar" }}
+              </p>
+              <q-btn
+                @mouseover="hoverDeleteApplication = true"
+                @mouseleave="hoverDeleteApplication = false"
+                @click.prevent="onClickDeleteApplication()"
+                class="q-mr-lg q-mb-lg drawer-button"
+                :icon="activeApplication ? 'delete' : 'autorenew'"
+                :style="{
+                  color:
+                    hoverDeleteApplication && activeApplication
+                      ? '#C11C1C'
+                      : 'darkslategrey',
+                }"
+                :disable="!userHasApplication"
+              >
+                <q-tooltip
+                  v-if="userHasApplication"
+                  class="bg-dark text-white text-body2"
+                  anchor="top middle"
+                  self="center middle"
+                  transition-show="slide-up"
+                  transition-hide="fade"
+                  :delay="300"
+                  transition-duration="300"
+                  :offset="[10, 25]"
+                >
+                  {{ toolTipActiveApplicationText }}
+                </q-tooltip></q-btn
+              >
+            </div>
+            <div>
+              <p
+                class="text-subtitle2 q-mr-lg text-center text-weight-regular"
+                :class="activeApplication ? 'text-white' : 'text-grey'"
+              >
+                Ver
+              </p>
+              <q-btn
+                @mouseover="hoverSeeApplication = true"
+                @mouseleave="hoverSeeApplication = false"
+                @click.prevent="onViewApplication"
+                class="q-mr-lg q-mb-lg drawer-button"
+                icon="visibility"
+                :style="{
+                  color:
+                    hoverSeeApplication && activeApplication
+                      ? '#1CABC1'
+                      : 'darkslategrey',
+                }"
+                :disable="!activeApplication"
+              >
+                <Tooltip
+                  v-if="activeApplication"
+                  :text="'Ve tu solicitud de trabajo'"
+                />
+              </q-btn>
+            </div>
+          </div>
+        </q-item-section>
 
-      <q-btn
-        flat
-        dense
-        icon="logout"
-        class="logout-btn z-top q-mb-sm"
-        label="Cerrar Sesión"
-        @click.prevent="redirectToLogin"
-        v-if="!hideUserApplicationInterface"
-      >
-      </q-btn>
+        <q-btn
+          flat
+          dense
+          icon="arrow_back"
+          class="logout-btn z-top"
+          :class="
+            hideUserApplicationInterface
+              ? 'q-ml-md absolute-bottom q-mb-xl q-mr-xl'
+              : 'q-ml-xs'
+          "
+          label="Regresar"
+          @click.prevent="goToRequisitionApplicants"
+          v-if="hideUserApplicationInterface"
+        >
+        </q-btn>
+
+        <q-btn
+          flat
+          dense
+          icon="logout"
+          class="logout-btn z-top q-mb-sm"
+          label="Cerrar Sesión"
+          @click.prevent="redirectToLogin"
+          v-if="!hideUserApplicationInterface"
+        >
+        </q-btn>
+      </div>
     </q-drawer>
+
     <q-dialog v-model="openNote">
       <note-component :currentRoute="currentPath" class="note"></note-component>
     </q-dialog>
@@ -270,39 +290,38 @@
           <q-btn flat label="Cancelar" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
-      </q-dialog>
+    </q-dialog>
 
-      <q-dialog maximized v-model="showResume">
-    <q-card class="no-scroll">
-      <q-card-actions class="bg-white"  align="right">
-        <q-btn flat label="Cerrar" color="red" v-close-popup />
-      </q-card-actions>
-      <object
-        height="100%"
-        width="100%"
-        v-if="resumeSrc.length > 0"
-        :data="resumeSrc"
-        type="application/pdf"
-      >
-        <iframe :src="resumeViewLink"></iframe>
-      </object>
-    </q-card>
-  </q-dialog>
-    <router-view class="overflow-hidden-y" :key="componentKeyRouterView" />
+    <q-dialog maximized v-model="showResume">
+      <q-card class="no-scroll">
+        <q-card-actions class="bg-white" align="right">
+          <q-btn flat label="Cerrar" color="red" v-close-popup />
+        </q-card-actions>
+        <object
+          height="100%"
+          width="100%"
+          v-if="resumeSrc.length > 0"
+          :data="resumeSrc"
+          type="application/pdf"
+        >
+          <iframe :src="resumeViewLink"></iframe>
+        </object>
+      </q-card>
+    </q-dialog>
+    <q-page-container>
+      <router-view class="overflow-hidden-y" :key="componentKeyRouterView" />
+    </q-page-container>
   </q-layout>
 </template>
 
 <script setup>
 import { useRoute } from "vue-router";
 import { useRouter } from "vue-router";
+import { ref, computed, onBeforeMount, watch, onBeforeUnmount } from "vue";
 import {
-  ref,
-  computed,
-  onBeforeMount,
-  watch,
-  onBeforeUnmount
-} from "vue";
-import { getSessionStorageItem, removeSessionStorageItem} from "src/stores/sessionStorage.js";
+  getSessionStorageItem,
+  removeSessionStorageItem,
+} from "src/stores/sessionStorage.js";
 import { useAuthStore } from "src/stores/auth";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
@@ -330,6 +349,8 @@ const useRequest = useRequestUser();
 const useRequisitionDetails = useRequisitionDetailsStore();
 
 const openStatusApplicationDialog = ref(false);
+const drawer = ref(true);
+const miniState = ref(false);
 
 const $q = useQuasar();
 
@@ -358,7 +379,6 @@ const {
   userHasApplication,
 } = storeToRefs(useRequest);
 
-
 const openNote = ref(false);
 
 const activeApplication = ref(false);
@@ -380,9 +400,14 @@ const hideUserApplicationInterface = computed(() => {
 });
 
 onBeforeMount(() => {
-  if(getSessionStorageItem("viewAllRequisitions") && getSessionStorageItem("viewAllSelectedCandidates")){
-    viewAllRequisitions.value = getSessionStorageItem("viewAllRequisitions") === "true";
-    viewAllSelectedCandidates.value = getSessionStorageItem("viewAllSelectedCandidates") === "true";
+  if (
+    getSessionStorageItem("viewAllRequisitions") &&
+    getSessionStorageItem("viewAllSelectedCandidates")
+  ) {
+    viewAllRequisitions.value =
+      getSessionStorageItem("viewAllRequisitions") === "true";
+    viewAllSelectedCandidates.value =
+      getSessionStorageItem("viewAllSelectedCandidates") === "true";
   }
   loadUserData();
 });
@@ -394,8 +419,8 @@ onBeforeUnmount(() => {
 const removeUserApplicationOnAdminUser = () => {
   if (!isRh.value && !isAdmin.value && !isBoss.value) return;
 
-  savedApplication.value = {}
-  useRequest.clearMachinery()
+  savedApplication.value = {};
+  useRequest.clearMachinery();
   useLocalStorage.remove("savedApplication");
   useLocalStorage.remove("addingNotesApplicationId");
 };
@@ -412,17 +437,17 @@ const loadUserData = () => {
   } else {
     //If the user session information is incorrect, then it shows a dialog with the error message and sends the user to the login
     $q.dialog({
-        title: 'Oops! Hubo un problema con tu sesión',
-        message: 'Por favor, vuelve a iniciar sesión',
-        persistent: true,
-        ok: {
-          push: true,
-          color: 'positive',
-          label: 'Iniciar Sesión',
-        },
-      }).onOk(() => {
-        router.replace("/")
-      })
+      title: "Oops! Hubo un problema con tu sesión",
+      message: "Por favor, vuelve a iniciar sesión",
+      persistent: true,
+      ok: {
+        push: true,
+        color: "positive",
+        label: "Iniciar Sesión",
+      },
+    }).onOk(() => {
+      router.replace("/");
+    });
   }
 
   if (isUser.value) {
@@ -446,13 +471,12 @@ const loadApplicationLocalStorage = () => {
   if (userApplicationStored) {
     savedApplication.value = userApplicationStored;
   }
-}
+};
 
 const loadLocalStorage = () => {
   const isViewingApplication = useLocalStorage.load("viewingApplication");
   const isUpdatingApplication = useLocalStorage.load("updatingApplication");
   const userApplicationStored = useLocalStorage.load("savedApplication");
-
 
   userPhotoUUID.value = user.value.photoUUID;
   setHeaderAuthorization(user.value.token);
@@ -468,17 +492,15 @@ const loadLocalStorage = () => {
   if (userApplicationStored) {
     savedApplication.value = userApplicationStored;
   }
-
 };
 
-
 const getCurriculum = computed(() => {
-  if(!savedApplication.value)
-  return '';
+  if (!savedApplication.value) return "";
 
-
-  return savedApplication.value.nombre_cv ? savedApplication.value.nombre_cv : '';
-})
+  return savedApplication.value.nombre_cv
+    ? savedApplication.value.nombre_cv
+    : "";
+});
 
 const downloadDocument = async (uuid) => {
   try {
@@ -748,4 +770,9 @@ const checkUserApplication = (sendToApplication = true) => {
   border-radius: 10px;
 }
 
+@media (min-width: 1031px) {
+  .custom-style {
+    margin-top: -20%;
+  }
+}
 </style>

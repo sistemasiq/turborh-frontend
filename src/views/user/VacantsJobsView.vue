@@ -1,7 +1,7 @@
 <template>
   <q-layout>
     <q-page-container>
-      <q-page style="margin-left: 300px">
+      <q-page>
         <p
           class="text-h4 text-weight-bold"
           style="margin-left: 40px; margin-top: 40px; color: rgb(100, 95, 95)"

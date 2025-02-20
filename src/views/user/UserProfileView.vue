@@ -1,7 +1,7 @@
 <template>
   <q-layout class="main-layout overflow-hidden-y">
     <q-page-container>
-      <q-page style="position: relative; right: 0px; margin-left: 300px">
+      <q-page style="position: relative;">
         <div class="personaldata-background">
           <div
             class="justify-between row"
