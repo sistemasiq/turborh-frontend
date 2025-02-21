@@ -131,7 +131,7 @@
                 Bachillerato
               </div>
               <q-input autogrow ligth outlined color="cyan-1" v-model="highSchool" label="Nombre" label-color="grey-8"
-                class="input-brand" style="width: 100%" :readonly="viewingApplication"
+              :rules="[ruleFieldRequired]" class="input-brand" style="width: 100%" :readonly="viewingApplication"
                 @update:model-value="updateStore()">
               </q-input>
             </q-card-section>
@@ -569,7 +569,9 @@
     <br />
     <br />
     <br />
-    <ButtonApplicationStatus v-if="updatingApplication" />
+    <ButtonApplicationStatus 
+      v-if="updatingApplication" 
+      :required-fields="requiredFieldsOnThisPage"/>
   </q-layout>
 </template>
 
@@ -692,6 +694,10 @@ const requiredFieldsOnThisPage = computed(() => [
   secondarySpeciality.value,
   dateStartSecondary.value,
   dateEndSecondary.value,
+  highSchool.value,
+  highSchoolSpeciality.value,
+  dateStartHighSchool.value,
+  dateEndHighSchool.value,
 ]);
 
 onMounted(() => {

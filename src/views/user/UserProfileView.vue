@@ -138,24 +138,32 @@
               label="Editar información"
               @click.prevent="onEditDialog"
             />
-            <div class="row items-center justify-between q-pt-lg">
-            <q-banner v-if="!userHasApplication" class="bg-orange-2 text-orange-8 pt">
-              <q-icon name="info" />
-              No tienes una solicitud activa. Para aplicar a vacantes, primero crea una solicitud.
-            </q-banner>
-            </div>
+            <!-- <div class="row items-center justify-between q-pt-lg">
+              <q-banner v-if="!userHasApplication && photoUUID" class="bg-orange-2 text-orange-8 pt">
+                <q-icon name="info" size="sm"/>
+                <span class="text-h6"> No tienes una solicitud activa. Para aplicar a vacantes, primero crea una solicitud.</span>
+              </q-banner>
+            </div> -->
           </q-card-section>
         </div>
 
         <div class="row" style="margin-left: 30px; margin-top: 10px">
-          <p
+          <!-- <p
             v-if="
               photoUUID === null || photoUUID === undefined || photoUUID === ''
             "
             class="text-h4 q-ml-xl text-grey-8 text-weight-bold"
           >
             Sube tu foto para poder crear tu solicitud de trabajo.
-          </p>
+          </p> -->
+          <q-banner v-if="!userHasApplication && photoUUID" rounded class="bg-light-blue-2 text-grey-8 pt">
+              <q-icon name="info" size="sm"/>
+              <span class="text-h6"> No tienes una solicitud activa. Para aplicar a vacantes, primero crea una solicitud.</span>
+          </q-banner>
+          <q-banner v-if="photoUUID === null || photoUUID === undefined || photoUUID === ''" rounded class="text-h4 q-ml-xl bg-light-blue-2 text-grey-8 text-weight-bold">
+              <q-icon name="info" size="sm"/>
+              <span class="text-h6"> Sube tu foto para poder crear tu solicitud de trabajo.</span>
+          </q-banner>
           <ApplicationsCard v-if="userApplicationId != 0" />
         </div>
       </q-page>
@@ -231,6 +239,44 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <q-dialog v-model="openAlertNameUser" persistent class="z-max">
+    <q-card style="width: 100%">
+      <q-banner 
+        class="bg-custom-warning text-white q-pa-md"
+        rounded
+      >
+        <div class="row items-center justify-between">
+          <div class="row items-center">
+            <q-icon name="warning" color="white" size="md" class="q-mr-sm"/>
+            <span>
+              El nombre de usuario no puede contener espacios.
+              <br/>
+              Se recomienda actualizarlo en  
+              <q-btn 
+                flat 
+                dense 
+                color="primary" 
+                label="Editar información" 
+                @click="onEditDialog"
+                class="q-ml-xs"
+              />
+            </span>
+          </div>
+          <q-btn
+            flat
+            color="white"
+            label="Cerrar"
+            class="q-ml-md"
+            @click="openAlertNameUser = false"
+          />
+        </div>
+      </q-banner>
+      <!-- <q-card-actions align="right">
+        <q-btn label="Cerrar" color="primary" @click.prevent="updateUserData" />
+      </q-card-actions> -->
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
@@ -275,11 +321,10 @@ const emailEdit = ref("");
 const openEditInfo = ref(false);
 const showSuggestion = ref(false);
 const suggestedUserName = ref('');
+const openAlertNameUser = ref(false);
 
 const { user, getUserPhotoUUID } = storeToRefs(useAuth);
 const { savedApplication, userHasApplication } = storeToRefs(useRequest);
-
-const tieneSolicitud = userHasApplication
 
 const fixed = ref(false);
 const userName = ref("");
@@ -300,6 +345,9 @@ const emailValidation = ref(true);
 
 onMounted(() => {
   setUserInfo();
+  if (userNameEdit.value && /\s/.test(userNameEdit.value)) {
+    openAlertNameUser.value = true;
+  }
 });
 
 const onEditDialog = () => {
@@ -309,21 +357,30 @@ const onEditDialog = () => {
   emailEdit.value = user.value.email;
 
   if (userNameEdit.value && /\s/.test(userNameEdit.value)) {
-    // Convertir a PascalCase
-    suggestedUserName.value = userNameEdit.value
-      .toLowerCase()
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join('');
+    openAlertNameUser.value = false;
+    
+    // Función para quitar acentos
+    const removeAccents = (str) => {
+        return str.normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Elimina diacríticos
+            .replace(/[^a-zA-Z0-9\s]/g, ""); // Solo permite letras, números y espacios
+    };
+    
+    // Convertir a PascalCase y quitar acentos
+    suggestedUserName.value = removeAccents(userNameEdit.value)
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('');
     
     showSuggestion.value = true;
     
     setTimeout(() => {
-      if (userNameRef.value) {
-        userNameRef.value.focus();
-      }
+        if (userNameRef.value) {
+            userNameRef.value.focus();
+        }
     }, 300);
-  }
+}
 }
 
 const checkIfUserNameAlreadyExists = async () => {

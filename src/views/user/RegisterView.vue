@@ -1,20 +1,11 @@
 <template>
   <q-layout class="layout_background" view="hHr LpR lFf">
     <q-toolbar> </q-toolbar>
-    <q-drawer
-      side="left"
-      show-if-above
-      bordered
-      style="background: rgba(30, 61, 88)"
-      class="menu"
-      :breakpoint="800"
-      content-class="bg-grey-1"
-    >
+    <q-drawer side="left" show-if-above bordered style="background: rgba(30, 61, 88)" class="menu" :breakpoint="800"
+      content-class="bg-grey-1">
       <div class="q-mt-sm">
-        <q-img
-          :src="getS3FileUrl(getAssetsPath, 'logo-turbomaquinas.png')"
-          style="width: 30%; height: 10%; margin-left: 33%"
-        />
+        <q-img :src="getS3FileUrl(getAssetsPath, 'logo-turbomaquinas.png')"
+          style="width: 30%; height: 10%; margin-left: 33%" />
         <p class="turbo q-ml-xl">Turbomáquinas</p>
       </div>
 
@@ -22,14 +13,11 @@
         <div style="position: absolute; top: 20%; left: 5%">
           <q-item v-ripple class="drawer-item">
             <q-item-section avatar class="text-center">
-              <q-avatar class="text-center drawer-avatar" style="color: #1cabc1"
-                >1</q-avatar
-              >
+              <q-avatar class="text-center drawer-avatar" style="color: #1cabc1">1</q-avatar>
             </q-item-section>
 
             <q-item-section style="font-size: x-large; color: #1cabc1">
-              Registro</q-item-section
-            >
+              Registro</q-item-section>
           </q-item>
         </div>
       </q-list>
@@ -39,153 +27,71 @@
       <q-card-section class="tittle"> Registro de usuario </q-card-section>
       <q-card-section class="card-register">
         <q-form class="q-gutter-md">
-          <q-input
-            dark
-            outlined
-            color="cyan-1"
-            v-model="userName"
-            type="text"
-            label="Nombre de usuario"
-            @blur="checkIfUserNameAlreadyExists"
-            label-color="white"
-            lazy-rules
-            :rules="[
+          <q-input dark outlined color="cyan-1" v-model="userName" type="text" label="Nombre de usuario"
+            @blur="checkIfUserNameAlreadyExists" label-color="white" lazy-rules :rules="[
               (value) => value.length >= 6 || 'El nombre debe ser minimo de 6 letras',
               (value) => /^[a-zA-Z0-9._]+$/.test(value) || 'Solo se permiten letras, números, punto (.) y guion bajo (_), no se permiten espacios',
               (value) => !/\s/.test(value) || 'No se permiten espacios'
-            ]"
-            class="input-brand"
-          >
+            ]" class="input-brand">
           </q-input>
-          <q-input
-            dark
-            outlined
-            color="cyan-1"
-            v-model="email"
-            @blur="checkIfEmailAlreadyExists"
-            type="text"
-            label="Correo electrónico"
-            label-color="white"
-            lazy-rules
-            :rules="[
+          <q-input dark outlined color="cyan-1" v-model="email" @blur="checkIfEmailAlreadyExists" type="text"
+            label="Correo electrónico" label-color="white" lazy-rules :rules="[
               (value) => !!value || 'El correo electrónico es requerido',
               (value) =>
                 /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
                   value
                 ) || 'El correo electrónico debe ser válido',
-            ]"
-            class="input-brand"
-          >
+            ]" class="input-brand">
           </q-input>
-          <q-input
-            dark
-            outlined
-            color="cyan-1"
-            v-model="curp"
-            @blur="checkIfCurpAlreadyExists"
-            mask="AAAA######AAAAAAX#"
-            label="CURP"
-            label-color="white"
-            lazy-rules
-            :rules="[
+          <q-input dark outlined color="cyan-1" v-model="curp" @blur="checkIfCurpAlreadyExists"
+            mask="AAAA######AAAAAAX#" label="CURP" label-color="white" lazy-rules :rules="[
               (value) => !!value || 'La clave CURP es requerida',
               (value) =>
                 /^[A-Z]{4}[0-9]{6}(H|M)[A-Z]{5}[A-Z0-9][0-9]$/.test(value) ||
                 'La clave CURP debe ser válida',
-            ]"
-            class="input-brand"
-          >
+            ]" class="input-brand">
           </q-input>
 
-          <q-input
-            dark
-            outlined
-            color="cyan-1"
-            v-model="password"
-            :type="isPasswordVisible ? 'text' : 'password'"
-            label="Contraseña"
-            label-color="white"
-            lazy-rules
-            :rules="[
+          <q-input dark outlined color="cyan-1" v-model="password" :type="isPasswordVisible ? 'text' : 'password'"
+            label="Contraseña" label-color="white" lazy-rules :rules="[
               (value) =>
                 (value && value.length > 0) ||
                 'Este campo no puede estar vacío.',
-            ]"
-            class="input-brand"
-          >
+            ]" class="input-brand">
             <template v-slot:prepend>
               <q-icon name="lock" class="color-brand" />
             </template>
             <template v-slot:append>
-              <q-btn
-                class="card-transparent color-brand"
-                flat
-                no-border
-                v-if="!isPasswordVisible && password"
-                icon="visibility_off"
-                @click.prevent="changePasswordVisibility"
-              />
-              <q-btn
-                class="card-transparent color-brand"
-                flat
-                no-border
-                v-if="isPasswordVisible && password"
-                icon="visibility"
-                @click.prevent="changePasswordVisibility"
-              />
+              <q-btn class="card-transparent color-brand" flat no-border v-if="!isPasswordVisible && password"
+                icon="visibility_off" @click.prevent="changePasswordVisibility" />
+              <q-btn class="card-transparent color-brand" flat no-border v-if="isPasswordVisible && password"
+                icon="visibility" @click.prevent="changePasswordVisibility" />
             </template>
           </q-input>
 
-          <q-input
-            dark
-            outlined
-            color="cyan-1"
-            v-model="confirmPassword"
-            @blur="passwordMatching"
-            :type="isConfirmPasswordVisible ? 'text' : 'password'"
-            label="Confirmar Contraseña"
-            label-color="white"
-            lazy-rules
-            :rules="[
+          <q-input dark outlined color="cyan-1" v-model="confirmPassword" @blur="passwordMatching"
+            :type="isConfirmPasswordVisible ? 'text' : 'password'" label="Confirmar Contraseña" label-color="white"
+            lazy-rules :rules="[
               (value) =>
                 (value && value.length > 0) ||
                 'Este campo no puede estar vacío.',
-            ]"
-            class="input-brand"
-          >
+            ]" class="input-brand">
             <template v-slot:prepend>
               <q-icon name="lock" class="color-brand" />
             </template>
             <template v-slot:append>
-              <q-btn
-                class="card-transparent color-brand"
-                flat
-                no-border
-                v-if="!isConfirmPasswordVisible && confirmPassword"
-                icon="visibility_off"
-                @click.prevent="changeConfirmPasswordVisibility"
-              />
-              <q-btn
-                class="card-transparent color-brand"
-                flat
-                no-border
-                v-if="isConfirmPasswordVisible && confirmPassword"
-                icon="visibility"
-                @click="changeConfirmPasswordVisibility"
-              />
+              <q-btn class="card-transparent color-brand" flat no-border
+                v-if="!isConfirmPasswordVisible && confirmPassword" icon="visibility_off"
+                @click.prevent="changeConfirmPasswordVisibility" />
+              <q-btn class="card-transparent color-brand" flat no-border
+                v-if="isConfirmPasswordVisible && confirmPassword" icon="visibility"
+                @click="changeConfirmPasswordVisibility" />
             </template>
           </q-input>
 
           <div class="column" style="padding-left: 5px">
-            <q-btn
-              class="btn-register"
-              rounded
-              text-color="black"
-              color="white"
-              label="Registrarse"
-              @click.prevent="registerUser"
-              :disable="disableRegisterButton()"
-            />
+            <q-btn class="btn-register" rounded text-color="black" color="white" label="Registrarse"
+              @click.prevent="registerUser" :disable="disableRegisterButton()" />
           </div>
         </q-form>
       </q-card-section>
@@ -341,18 +247,33 @@ const passwordMatching = () => {
 const registerUser = async () => {
   $q.loading.show();
 
-  await checkIfCurpAlreadyExists();
+  try {
+    await checkIfCurpAlreadyExists();
+    await checkIfUserNameAlreadyExists();
+    await checkIfEmailAlreadyExists();
 
-  await checkIfUserNameAlreadyExists();
+    if (
+      userNameExistsValidation.value &&
+      curpExistsValidation.value &&
+      userEmailExistValidation.value
+    ) {
+      await addUser();
 
-  await checkIfEmailAlreadyExists();
+      /* showCredentialsDialog.value = true;
 
-  if (
-    userNameExistsValidation.value &&
-    curpExistsValidation.value &&
-    userEmailExistValidation.value
-  ) {
-    addUser();
+      $q.notify({
+        type: 'positive',
+        message: 'Usuario registrado con éxito'
+      }); */
+    }
+  } catch (error) {
+    console.error('Error en registro:', error);
+    $q.notify({
+      type: 'negative',
+      message: 'Error al registrar usuario'
+    });
+  } finally {
+    $q.loading.hide();
   }
 };
 
@@ -363,24 +284,80 @@ const addUser = async () => {
     const trimmedCurp = curp.value.trim();
     const trimmedPassword = password.value.trim();
 
-    // Pass the trimmed values to the createUser function
     const newUserData = await createUser(
       trimmedUserName,
       trimmedEmail,
       trimmedCurp,
       trimmedPassword
     );
-    if (newUserData) {
-      logged.value = 1;
-      user.value = newUserData;
-      localStorage.clear();
-      useLocalStorage.save("logged", logged.value);
-      useLocalStorage.save("user", user.value);
-      setSessionStorageItem("logged", logged.value);
-      setSessionStorageItem("user", user.value);
 
-      $q.notify(notifyPositive("Te has registrado correctamente"));
-      router.replace("/userHome/perfil");
+    if (newUserData) {
+      // Usar correctamente el $q.dialog
+      await $q.dialog({
+        card: true,
+        html: true,
+        style: {
+          width: '400px',
+          maxWidth: '90vw'
+        },
+        message: `
+          <div class="q-pa-md">
+            <div class="text-center text-h6 text-weight-bold q-mb-md">¡Registro exitoso!</div>
+
+            <div class="text-center q-mb-md">
+              <i class="material-icons text-positive" style="font-size: 4em;">check_circle</i>
+            </div>
+            
+            <div class="text-center text-body1 q-mb-md">
+              Tu cuenta ha sido creada con éxito.
+            </div>
+
+            <div class="q-pa-md bg-blue-1" style="border-radius: 8px; border: 1px solid #1976d2">
+              <div class="text-subtitle1 text-weight-bold text-primary q-mb-sm">
+                Tus credenciales de acceso:
+              </div>
+              
+              <div class="q-px-sm">
+                <div class="row items-center q-mb-sm">
+                  <i class="material-icons text-primary q-mr-sm" style="font-size: 1.2em;">person</i>
+                  <span class="text-subtitle2">Usuario:</span>
+                  <span class="text-weight-bold q-ml-sm">${trimmedUserName}</span>
+                </div>
+                
+                <div class="row items-center">
+                  <i class="material-icons text-primary q-mr-sm" style="font-size: 1.2em;">key</i>
+                  <span class="text-subtitle2">Contraseña:</span>
+                  <span class="text-weight-bold q-ml-sm">${trimmedPassword}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-caption text-weight-medium text-center q-mt-md text-negative">
+              <i class="material-icons q-mr-xs" style="font-size: 1.2em;">warning</i>
+              Es muy importante que guardes estas credenciales en un lugar seguro.
+              Las necesitarás para acceder a tu cuenta.
+            </div>
+          </div>
+        `,
+        persistent: true,
+        ok: {
+          label: 'Entendido',
+          color: 'primary',
+          flat: true,
+          class: 'q-px-md q-py-sm text-weight-bold'
+        }
+      }).onOk(() => {
+        logged.value = 1;
+        user.value = newUserData;
+        localStorage.clear();
+        useLocalStorage.save("logged", logged.value);
+        useLocalStorage.save("user", user.value);
+        setSessionStorageItem("logged", logged.value);
+        setSessionStorageItem("user", user.value);
+
+        $q.notify(notifyPositive("Bienvenido al portal de reclutamiento de Turbomáquinas"));
+        router.replace("/userHome/perfil");
+      });
     } else {
       $q.notify(
         notifyNegative("Hubo un error en el registro. Intenta de nuevo")
@@ -450,8 +427,8 @@ const addUser = async () => {
   background: rgba(49, 49, 49, 0.473) 51%;
   position: relative;
   height: 75%;
-  width: 89%;
-  margin-left: 6%;
+  width: 75%;
+  margin-left: 23.5%;
   margin-top: 2%;
 }
 
