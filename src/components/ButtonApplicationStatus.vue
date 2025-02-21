@@ -1,5 +1,5 @@
 <template>
-  <q-page-sticky position="bottom-right" :offset="[300, 1]">
+  <q-page-sticky position="bottom-right" class="q-mr-md q-mb-md">
     <q-btn
       v-if="!viewingApplication"
       @mouseover="hoverCreateApplication = true"
