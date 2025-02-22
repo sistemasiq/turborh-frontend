@@ -130,7 +130,7 @@
               <div class="q-mb-md text-body1 text-weight-medium">
                 Bachillerato
               </div>
-              <q-input autogrow ligth outlined color="cyan-1" v-model="highSchool" label="Nombre" label-color="grey-8"
+              <q-input ref="highSchoolyRef" autogrow ligth outlined color="cyan-1" v-model="highSchool" label="Nombre" label-color="grey-8"
               :rules="[ruleFieldRequired]" class="input-brand" style="width: 100%" :readonly="viewingApplication"
                 @update:model-value="updateStore()">
               </q-input>
@@ -140,8 +140,8 @@
               <div class="q-mb-md text-body1 text-weight-medium">
                 ¿Qué estudió?
               </div>
-              <q-input autogrow ligth outlined color="cyan-1" v-model="highSchoolSpeciality" label="Especificar"
-                label-color="grey-8" class="input-brand" style="width: 100%" :readonly="viewingApplication"
+              <q-input ref="highSchoolSpecialityRef" autogrow ligth outlined color="cyan-1" v-model="highSchoolSpeciality" label="Especificar"
+                :rules="[ruleFieldRequired]" label-color="grey-8" class="input-brand" style="width: 100%" :readonly="viewingApplication"
                 @update:model-value="updateStore()" />
             </q-card-section>
 
@@ -150,7 +150,7 @@
                 Fecha de inicio a fin
               </div>
               <q-card-section horizontal style="width: 100%" class="row justify-between">
-                <q-input filled v-model="dateStartHighSchool" label="AAAA/MM/DD" ligth outlined color="grey-7"
+                <q-input ref="dateStartHighSchoolRef" :rules="[ruleFieldRequired]" filled v-model="dateStartHighSchool" label="AAAA/MM/DD" ligth outlined color="grey-7"
                   style="width: 45%" :readonly="viewingApplication" @update:model-value="updateStore()">
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -166,9 +166,9 @@
                   </template>
                 </q-input>
 
-                <q-input filled v-model="dateEndHighSchool" label="AAAA/MM/DD" ligth outlined color="grey-7"
+                <q-input ref="dateEndHighSchoolRef" filled v-model="dateEndHighSchool" label="AAAA/MM/DD" ligth outlined color="grey-7"
                   style="width: 45%" :readonly="viewingApplication" @update:model-value="updateStore()"
-                  :rules="[(val) => dateStartHighSchool < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
+                  :rules="[ruleFieldRequired, (val) => dateStartHighSchool < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
                   reactive-rules lazy-rules>
                   <template v-slot:append>
                     <q-icon name="event" class="cursor-pointer">
@@ -682,11 +682,20 @@ const secondarySpecialityRef = ref(null);
 const dateStartSecondaryRef = ref(null);
 const dateEndSecondaryRef = ref(null);
 
+const highSchoolyRef = ref(null);
+const highSchoolSpecialityRef = ref(null);
+const dateStartHighSchoolRef = ref(null);
+const dateEndHighSchoolRef = ref(null);
+
 const validateRequiredFields = () => {
   secondaryRef.value.validate();
   secondarySpecialityRef.value.validate();
   dateEndSecondaryRef.value.validate();
   dateStartSecondaryRef.value.validate();
+  highSchoolyRef.value.validate();
+  highSchoolSpecialityRef.value.validate();
+  dateStartHighSchoolRef.value.validate();
+  dateEndHighSchoolRef.value.validate();
 };
 
 const requiredFieldsOnThisPage = computed(() => [
