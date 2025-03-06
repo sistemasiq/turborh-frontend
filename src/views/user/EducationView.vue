@@ -56,44 +56,43 @@
 
             <q-card-section vertical style="width: 30%">
               <div class="q-mb-md text-body1 flex flex-center text-weight-medium">
-                Fecha de inicio a fin
+                Año de inicio a fin
               </div>
               <q-card-section horizontal style="width: 100%" class="row justify-between">
-                <q-input ref="dateStartSecondaryRef" filled v-model="dateStartSecondary" label="AAAA/MM/DD *" light
-                  outlined :rules="[ruleFieldRequired]" color="grey-7" style="width: 45%" :readonly="viewingApplication"
-                  @update:model-value="updateStore()">
-                  <template v-slot:append>
-                    <q-icon name="event" class="cursor-pointer">
-                      <q-popup-proxy v-if="!viewingApplication" cover transition-show="scale" transition-hide="scale">
-                        <q-date locale="es" mask="YYYY-MM-DD" v-model="dateStartSecondary"
-                          :readonly="viewingApplication" @update:model-value="updateStore()">
-                          <div class="row items-center justify-end">
-                            <q-btn v-close-popup label="Cerrar" color="primary" flat />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
-
-                <q-input ref="dateEndSecondaryRef" filled v-model="dateEndSecondary" label="AAAA/MM/DD *" ligth outlined
+                <!-- Año de inicio -->
+                <q-select
+                  ref="dateStartSecondaryRef"
+                  filled
+                  v-model="dateStartSecondary"
+                  :options="yearOptions"
+                  label="Año de inicio *"
+                  outlined
+                  :rules="[ruleFieldRequired]"
                   color="grey-7"
-                  :rules="[ruleFieldRequired, (val) => dateStartSecondary < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
-                  reactive-rules lazy-rules style="width: 45%" :readonly="viewingApplication"
-                  @update:model-value="updateStore()">
-                  <template v-slot:append>
-                    <q-icon name="event" class="cursor-pointer">
-                      <q-popup-proxy v-if="!viewingApplication" cover transition-show="scale" transition-hide="scale">
-                        <q-date locale="es" mask="YYYY-MM-DD" v-model="dateEndSecondary" :readonly="viewingApplication"
-                          @update:model-value="updateStore()">
-                          <div class="row items-center justify-end">
-                            <q-btn v-close-popup label="Cerrar" color="primary" flat />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                />
+
+                <!-- Año de fin -->
+                <q-select
+                  ref="dateEndSecondaryRef"
+                  filled
+                  v-model="dateEndSecondary"
+                  :options="yearOptions"
+                  label="Año de fin *"
+                  outlined
+                  color="grey-7"
+                  :rules="[
+                    ruleFieldRequired,
+                    (val) => dateStartSecondary <= val || 'El año de fin debe ser posterior o igual al año de inicio'
+                  ]"
+                  reactive-rules
+                  lazy-rules
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                />
               </q-card-section>
             </q-card-section>
 
@@ -150,39 +149,42 @@
                 Fecha de inicio a fin
               </div>
               <q-card-section horizontal style="width: 100%" class="row justify-between">
-                <q-input ref="dateStartHighSchoolRef" :rules="[ruleFieldRequired]" filled v-model="dateStartHighSchool" label="AAAA/MM/DD" ligth outlined color="grey-7"
-                  style="width: 45%" :readonly="viewingApplication" @update:model-value="updateStore()">
-                  <template v-slot:append>
-                    <q-icon name="event" class="cursor-pointer">
-                      <q-popup-proxy v-if="!viewingApplication" cover transition-show="scale" transition-hide="scale">
-                        <q-date locale="es" mask="YYYY-MM-DD" v-model="dateStartHighSchool"
-                          :readonly="viewingApplication" @update:model-value="updateStore()">
-                          <div class="row items-center justify-end">
-                            <q-btn v-close-popup label="Cerrar" color="primary" flat />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
+                <!-- Año de inicio -->
+                <q-select
+                  ref="dateStartHighSchoolRef"
+                  filled
+                  v-model="dateStartHighSchool"
+                  :options="yearOptions"
+                  label="Año de inicio *"
+                  outlined
+                  :rules="[ruleFieldRequired]"
+                  color="grey-7"
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                />
 
-                <q-input ref="dateEndHighSchoolRef" filled v-model="dateEndHighSchool" label="AAAA/MM/DD" ligth outlined color="grey-7"
-                  style="width: 45%" :readonly="viewingApplication" @update:model-value="updateStore()"
-                  :rules="[ruleFieldRequired, (val) => dateStartHighSchool < val || 'La fecha de fin debe ser posterior a la fecha de inicio']"
-                  reactive-rules lazy-rules>
-                  <template v-slot:append>
-                    <q-icon name="event" class="cursor-pointer">
-                      <q-popup-proxy v-if="!viewingApplication" cover transition-show="scale" transition-hide="scale">
-                        <q-date locale="es" mask="YYYY-MM-DD" v-model="dateEndHighSchool" :readonly="viewingApplication"
-                          @update:model-value="updateStore()">
-                          <div class="row items-center justify-end">
-                            <q-btn v-close-popup label="Cerrar" color="primary" flat />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
+                <!-- Año de fin -->
+                <q-select
+                  ref="dateEndHighSchoolRef"
+                  filled
+                  v-model="dateEndHighSchool"
+                  :options="yearOptions"
+                  label="Año de fin *"
+                  outlined
+                  color="grey-7"
+                  :rules="[
+                    ruleFieldRequired,
+                    (val) => dateStartHighSchool <= val || 'El año de fin debe ser posterior o igual al año de inicio'
+                  ]"
+                  reactive-rules
+                  lazy-rules
+                  style="width: 45%"
+                  :readonly="viewingApplication"
+                  @update:model-value="updateStore()"
+                />
+
+                
               </q-card-section>
             </q-card-section>
 
@@ -591,6 +593,17 @@ const $q = useQuasar();
 const useRequest = useRequestUser();
 const useLocalStorage = useLocalStorageStore();
 
+const currentYear = new Date().getFullYear();
+
+// Lista de años (desde 1950 hasta el año actual)
+const yearOptions = computed(() => {
+  const years = [];
+  for (let year = currentYear; year >= 1950; year--) {
+    years.push(year.toString());
+  }
+  return years;
+});
+
 const {
   educationData,
   savedApplication,
@@ -716,6 +729,23 @@ onMounted(() => {
     setSavedStoredValues();
   } else {
     setStoredValues();
+  }
+
+  // Si tienes datos previos en formato YYYY-MM-DD, extrae solo el año
+  if (dateStartSecondary.value && dateStartSecondary.value.includes('-')) {
+    dateStartSecondary.value = dateStartSecondary.value.split('-')[0];
+  }
+  
+  if (dateEndSecondary.value && dateEndSecondary.value.includes('-')) {
+    dateEndSecondary.value = dateEndSecondary.value.split('-')[0];
+  }
+
+  if (dateStartHighSchool.value && dateStartHighSchool.value.includes('-')) {
+    dateStartHighSchool.value = dateStartHighSchool.value.split('-')[0];
+  }
+  
+  if (dateEndHighSchool.value && dateEndHighSchool.value.includes('-')) {
+    dateEndHighSchool.value = dateEndHighSchool.value.split('-')[0];
   }
 });
 

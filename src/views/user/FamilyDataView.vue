@@ -31,8 +31,7 @@
                 Nota
               </div>
               <p class="text-body2">
-                Debe ingresar al menos 2 familiares en la tabla de padres o
-                esposa(o) para poder avanzar a la siguiente pantalla
+                Debe ingresar los datos de los padres{{ isCasadoOrUnionLibre ? ' y esposo/a' : '' }} para poder avanzar a la siguiente pantalla
               </p>
               
             </q-card-section>
@@ -63,7 +62,7 @@
 
 <!-- SCRIPT BEGGINS ............................................................................................................................ -->
 <script setup>
-import { computed, onBeforeMount, ref } from "vue";
+import { computed, onBeforeMount, onMounted, onBeforeUnmount, ref, watch } from "vue";
 import { useRequestUser } from "src/stores/requestUser";
 import { storeToRefs } from "pinia";
 import FamilyFathers from "src/components/TableFamilyData.vue";
@@ -81,38 +80,128 @@ const useApplication = useRequestUser();
 
 const familyFathersDataRef = ref(null);
 
-
-
 const {
   updatingApplication,
   familyFathersData,
-  viewingApplication
+  viewingApplication,
+  savedApplication
 } = storeToRefs(useApplication);
 
+// Verificar si el estado civil es casado (C) o unión libre (U)
+const currentCivilStatus = ref("");
+
+// Actualizar estado civil desde localStorage o savedApplication
+const updateCivilStatus = () => {
+  console.log("Actualizando estado civil");
+  
+  // Si tenemos savedApplication, usamos el valor de ahí
+  if (savedApplication.value) {
+    currentCivilStatus.value = savedApplication.value.estado_civil;
+    console.log("Estado civil desde savedApplication:", currentCivilStatus.value);
+  } else {
+    // Si no, intentamos obtenerlo del localStorage
+    try {
+      const personalDataStr = localStorage.getItem("personalData");
+      if (personalDataStr) {
+        const personalData = JSON.parse(personalDataStr);
+        currentCivilStatus.value = personalData.civilStatus;
+        console.log("Estado civil desde localStorage:", currentCivilStatus.value);
+      }
+    } catch (e) {
+      console.error("Error al leer el estado civil:", e);
+    }
+  }
+};
+
+// Actualizar estado civil cuando cambie savedApplication
+watch(() => savedApplication.value, (newValue) => {
+  if (newValue) {
+    updateCivilStatus();
+  }
+}, { immediate: true });
+
+// Verificar regularmente localStorage por cambios en el estado civil
+onMounted(() => {
+  updateCivilStatus();
+  
+  // Verificar cambios cada 2 segundos
+  const intervalId = setInterval(() => {
+    try {
+      const personalDataStr = localStorage.getItem("personalData");
+      if (personalDataStr) {
+        const personalData = JSON.parse(personalDataStr);
+        if (personalData.civilStatus && personalData.civilStatus !== currentCivilStatus.value) {
+          console.log("Estado civil cambió en localStorage:", personalData.civilStatus);
+          currentCivilStatus.value = personalData.civilStatus;
+        }
+      }
+    } catch (e) {
+      console.error("Error al verificar estado civil:", e);
+    }
+  }, 2000);
+  
+  // Limpiar intervalo cuando se desmonte el componente
+  onBeforeUnmount(() => {
+    clearInterval(intervalId);
+  });
+});
+
+const isCasadoOrUnionLibre = computed(() => {
+  return currentCivilStatus.value === "C" || currentCivilStatus.value === "U";
+});
+
+// Recalcular los campos requeridos para incluir esposo/a si corresponde
 const requiredFieldsOnThisPage = computed(() => {
-  if (familyFathersData.value[0] && familyFathersData.value[1]) {
-    return [
+  const fields = [];
+  
+  // Siempre requerir los datos de los padres (índices 0 y 1)
+  if (familyFathersData.value[0]) {
+    fields.push(
       familyFathersData.value[0].job,
       familyFathersData.value[0].jobAddress,
       familyFathersData.value[0].name,
       familyFathersData.value[0].relationship,
-      familyFathersData.value[0].birthdate,
+      familyFathersData.value[0].birthdate
+    );
+  }
+  
+  if (familyFathersData.value[1]) {
+    fields.push(
       familyFathersData.value[1].job,
       familyFathersData.value[1].jobAddress,
       familyFathersData.value[1].name,
       familyFathersData.value[1].relationship,
-      familyFathersData.value[1].birthdate,
-    ];
+      familyFathersData.value[1].birthdate
+    );
   }
+  
+  // Incluir los datos del esposo/a solo si es casado o unión libre
+  if (isCasadoOrUnionLibre.value && familyFathersData.value[2]) {
+    fields.push(
+      familyFathersData.value[2].job,
+      familyFathersData.value[2].jobAddress,
+      familyFathersData.value[2].name,
+      familyFathersData.value[2].relationship,
+      familyFathersData.value[2].birthdate
+    );
+  }
+  
+  return fields;
 });
 
 const validateRequiredFields = () => {
-  if(familyFathersData.value.length === 3 || viewingApplication.value)
-  return;
+  if (viewingApplication.value) return;
 
   let missingFields = [];
 
-  for (let index = 0; index < familyFathersData.value.length; index++) {
+  // Determinar cuántas filas validar (2 padres o 3 si incluye esposo/a)
+  const rowsToValidate = isCasadoOrUnionLibre.value ? 
+    Math.min(3, familyFathersData.value.length) : 
+    Math.min(2, familyFathersData.value.length);
+
+  for (let index = 0; index < rowsToValidate; index++) {
+    if (!familyFathersData.value[index]) continue;
+    
     let rowMissingFields = [];
 
     // Check each field in the current row
@@ -134,7 +223,8 @@ const validateRequiredFields = () => {
 
     // If there are missing fields for this row, add them to the missingFields array
     if (rowMissingFields.length > 0) {
-      missingFields.push(`Fila ${index + 1}: ${rowMissingFields.join(", ")}`);
+      let rowLabel = index === 0 ? "Padre" : (index === 1 ? "Madre" : "Esposo/a");
+      missingFields.push(`${rowLabel}: ${rowMissingFields.join(", ")}`);
     }
   }
 
@@ -143,10 +233,16 @@ const validateRequiredFields = () => {
     let message = `Campos faltantes:\n\n${missingFields.join("\n\n")}`;
     $q.notify(notifyNegativeField(message));
   }
+
+  // Si hay llamada al componente hijo, delegar la validación también allí
+  if (familyFathersDataRef.value && familyFathersDataRef.value.validateRequiredFields) {
+    familyFathersDataRef.value.validateRequiredFields();
+  }
 };
 
 onBeforeMount(() => {
   loadLocalStore();
+  updateCivilStatus(); // Asegurarse de que el estado civil esté actualizado
 });
 
 const loadLocalStore = () => {

@@ -5,7 +5,7 @@
       content-class="bg-grey-1">
       <div class="q-mt-sm">
         <q-img :src="getS3FileUrl(getAssetsPath, 'logo-turbomaquinas.png')"
-          style="width: 30%; height: 10%; margin-left: 33%" />
+          style="width: 30%; height: 10%; margin-left: 30%" />
         <p class="turbo q-ml-xl">Turbomáquinas</p>
       </div>
 
@@ -13,10 +13,10 @@
         <div style="position: absolute; top: 20%; left: 5%">
           <q-item v-ripple class="drawer-item">
             <q-item-section avatar class="text-center">
-              <q-avatar class="text-center drawer-avatar" style="color: #1cabc1">1</q-avatar>
+              <q-avatar class="text-center drawer-avatar" style="color: #f6f7f8d0">1</q-avatar>
             </q-item-section>
 
-            <q-item-section style="font-size: x-large; color: #1cabc1">
+            <q-item-section style="font-size: x-large; color: #f6f7f8d0">
               Registro</q-item-section>
           </q-item>
         </div>
@@ -27,39 +27,39 @@
       <q-card-section class="tittle"> Registro de usuario </q-card-section>
       <q-card-section class="card-register">
         <q-form class="q-gutter-md">
-          <q-input dark outlined color="cyan-1" v-model="userName" type="text" label="Nombre de usuario"
-            @blur="checkIfUserNameAlreadyExists" label-color="white" lazy-rules :rules="[
+          <q-input outlined color="black" v-model="userName" type="text" label="Nombre de usuario"
+            @blur="checkIfUserNameAlreadyExists" label-color="black" lazy-rules :rules="[
               (value) => value.length >= 6 || 'El nombre debe ser minimo de 6 letras',
               (value) => /^[a-zA-Z0-9._]+$/.test(value) || 'Solo se permiten letras, números, punto (.) y guion bajo (_), no se permiten espacios',
               (value) => !/\s/.test(value) || 'No se permiten espacios'
-            ]" class="input-brand">
+            ]">
           </q-input>
-          <q-input dark outlined color="cyan-1" v-model="email" @blur="checkIfEmailAlreadyExists" type="text"
-            label="Correo electrónico" label-color="white" lazy-rules :rules="[
+          <q-input outlined color="black" v-model="email" @blur="checkIfEmailAlreadyExists" type="text"
+            label="Correo electrónico" label-color="black" lazy-rules :rules="[
               (value) => !!value || 'El correo electrónico es requerido',
               (value) =>
                 /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
                   value
                 ) || 'El correo electrónico debe ser válido',
-            ]" class="input-brand">
+            ]">
           </q-input>
-          <q-input dark outlined color="cyan-1" v-model="curp" @blur="checkIfCurpAlreadyExists"
-            mask="AAAA######AAAAAAX#" label="CURP" label-color="white" lazy-rules :rules="[
+          <q-input outlined color="black" v-model="curp" @blur="checkIfCurpAlreadyExists"
+            mask="AAAA######AAAAAAX#" label="CURP" label-color="black" lazy-rules :rules="[
               (value) => !!value || 'La clave CURP es requerida',
               (value) =>
                 /^[A-Z]{4}[0-9]{6}(H|M)[A-Z]{5}[A-Z0-9][0-9]$/.test(value) ||
                 'La clave CURP debe ser válida',
-            ]" class="input-brand">
+            ]">
           </q-input>
 
-          <q-input dark outlined color="cyan-1" v-model="password" :type="isPasswordVisible ? 'text' : 'password'"
-            label="Contraseña" label-color="white" lazy-rules :rules="[
+          <q-input outlined color="black" v-model="password" :type="isPasswordVisible ? 'text' : 'password'"
+            label="Contraseña" label-color="black" lazy-rules :rules="[
               (value) =>
                 (value && value.length > 0) ||
                 'Este campo no puede estar vacío.',
-            ]" class="input-brand">
+            ]">
             <template v-slot:prepend>
-              <q-icon name="lock" class="color-brand" />
+              <q-icon name="lock" />
             </template>
             <template v-slot:append>
               <q-btn class="card-transparent color-brand" flat no-border v-if="!isPasswordVisible && password"
@@ -69,13 +69,13 @@
             </template>
           </q-input>
 
-          <q-input dark outlined color="cyan-1" v-model="confirmPassword" @blur="passwordMatching"
-            :type="isConfirmPasswordVisible ? 'text' : 'password'" label="Confirmar Contraseña" label-color="white"
+          <q-input outlined color="black" v-model="confirmPassword" @blur="passwordMatching"
+            :type="isConfirmPasswordVisible ? 'text' : 'password'" label="Confirmar Contraseña" label-color="black"
             lazy-rules :rules="[
               (value) =>
                 (value && value.length > 0) ||
                 'Este campo no puede estar vacío.',
-            ]" class="input-brand">
+            ]">
             <template v-slot:prepend>
               <q-icon name="lock" class="color-brand" />
             </template>
@@ -410,8 +410,8 @@ const addUser = async () => {
 }
 
 .tittle {
-  background: rgb(255, 255, 255);
-  color: rgb(40, 55, 68);
+  background: rgba(31, 40, 54, 0.507);
+  color: rgb(236, 239, 241);
   font-size: 120%;
   margin-bottom: 25px;
 }
@@ -424,7 +424,7 @@ const addUser = async () => {
 .q-card {
   border-radius: 10px;
   vertical-align: top;
-  background: rgba(49, 49, 49, 0.473) 51%;
+  background: rgba(246, 247, 248, 0.692) 51%;
   position: relative;
   height: 75%;
   width: 75%;
