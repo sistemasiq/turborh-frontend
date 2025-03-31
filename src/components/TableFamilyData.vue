@@ -1,4 +1,3 @@
-<!--This is a component to get the information of the family data of the users-->
 <template>
   <div v-on:vnode-unmounted="saveLocalStore()">
     <q-table
@@ -8,6 +7,7 @@
       no-data-label="Sin datos"
     >
       <template v-slot:body-cell-relationship="{ row }">
+        <!-- Eliminamos la impresión de datos que causa confusión -->
         <q-td>
           <q-select
             v-model="row.relationship"
@@ -70,7 +70,7 @@
             :readonly="viewingApplication"
             :rules="[ruleFieldRequired]"
             class="q-mt-xs"
-          /><!--  checar rules ocupacion -->
+          />
         </q-td>
       </template>
       <template v-slot:body-cell-jobAddress="{ row }">
@@ -143,32 +143,30 @@ const isCasadoOrUnionLibre = computed(() => {
   return civilStatus.value === "C" || civilStatus.value === "U";
 });
 
-// Función para actualizar los datos familiares según el estado civil
-function updateFamilyData(isCasadoOrUnion) {
-  console.log("Actualizando datos familiares. Estado civil casado/unión libre:", isCasadoOrUnion);
-  console.log("Datos actuales:", JSON.stringify(familyFathersData.value));
-  
-  // Asegurarse de que siempre existan al menos los padres
-  if (familyFathersData.value.length === 0) {
-    familyFathersData.value.push(
-      {
-        relationship: "Padre",
-        name: "",
-        birthdate: "",
-        job: "",
-        jobAddress: "",
-      },
-      {
-        relationship: "Madre",
-        name: "",
-        birthdate: "",
-        job: "",
-        jobAddress: "",
-      }
-    );
-  } else if (familyFathersData.value.length === 1) {
-    familyFathersData.value.push({
+// Función para inicializar correctamente los datos familiares según el parentesco
+function initializeFamilyData() {
+  // Crear un array con padre y madre siempre
+  const initialData = [
+    {
+      relationship: "Padre",
+      name: "",
+      birthdate: "",
+      job: "",
+      jobAddress: "",
+    },
+    {
       relationship: "Madre",
+      name: "",
+      birthdate: "",
+      job: "",
+      jobAddress: "",
+    }
+  ];
+  
+  // Si es casado/unión libre, agregar esposo/a
+  if (isCasadoOrUnionLibre.value) {
+    initialData.push({
+      relationship: "Esposo/a",
       name: "",
       birthdate: "",
       job: "",
@@ -176,60 +174,64 @@ function updateFamilyData(isCasadoOrUnion) {
     });
   }
   
-  // Establecer los valores correctos de parentesco para los padres
-  if (familyFathersData.value[0]) {
-    familyFathersData.value[0].relationship = "Padre";
-  }
+  // Asignar los datos iniciales
+  familyFathersData.value = initialData;
+  console.log("Datos inicializados:", JSON.stringify(familyFathersData.value));
+}
+
+// Función para actualizar los datos según el estado civil, manteniendo la integridad de los datos
+function updateFamilyData(isCasadoOrUnion) {
+  console.log("Actualizando datos familiares. Estado civil casado/unión libre:", isCasadoOrUnion);
   
-  if (familyFathersData.value[1]) {
-    familyFathersData.value[1].relationship = "Madre";
-  }
+  // Crear un nuevo array para mantener la integridad de los datos
+  let updatedData = [];
   
-  // Si es casado o unión libre, asegurarse de que esté el esposo/a
+  // Buscar registros por tipo de relación (no por posición) para evitar confusiones
+  const padreData = familyFathersData.value.find(item => item.relationship === "Padre") || {
+    relationship: "Padre",
+    name: "",
+    birthdate: "",
+    job: "",
+    jobAddress: "",
+  };
+  
+  const madreData = familyFathersData.value.find(item => item.relationship === "Madre") || {
+    relationship: "Madre",
+    name: "",
+    birthdate: "",
+    job: "",
+    jobAddress: "",
+  };
+  
+  // Agregar padre y madre al arreglo actualizado
+  updatedData.push(padreData);
+  updatedData.push(madreData);
+  
+  // Si es casado o unión libre, buscar o crear el registro de Esposo/a
   if (isCasadoOrUnion) {
-    console.log("Usuario casado/unión libre, agregando esposo/a");
-    // Si no existe el tercer elemento (esposo/a), lo agregamos
-    if (familyFathersData.value.length < 3) {
-      familyFathersData.value.push({
-        relationship: "Esposo/a",
-        name: "",
-        birthdate: "",
-        job: "",
-        jobAddress: "",
-      });
-    } else {
-      // Si existe, asegurarse de que sea esposo/a
-      familyFathersData.value[2].relationship = "Esposo/a";
-    }
-  } else {
-    console.log("Usuario soltero, eliminando esposo/a si existe");
-    // Si no es casado ni unión libre, eliminar el esposo/a si existe
-    if (familyFathersData.value.length > 2) {
-      familyFathersData.value.splice(2, 1);
-    }
+    const esposoData = familyFathersData.value.find(item => item.relationship === "Esposo/a") || {
+      relationship: "Esposo/a",
+      name: "",
+      birthdate: "",
+      job: "",
+      jobAddress: "",
+    };
+    updatedData.push(esposoData);
   }
+  
+  // Actualizar el arreglo de datos
+  familyFathersData.value = updatedData;
   
   console.log("Datos actualizados:", JSON.stringify(familyFathersData.value));
 }
 
-// Verificar si es una relación fija (Padre, Madre, Esposo/a)
+// Verificar si es una relación fija
 const isFixedRelationship = (row) => {
-  const index = familyFathersData.value.indexOf(row);
-  // Primera fila siempre es Padre, segunda siempre es Madre
-  if (index === 0) {
-    row.relationship = row.relationship || "Padre";
-    return true;
-  } 
-  if (index === 1) {
-    row.relationship = row.relationship || "Madre";
-    return true;
-  }
-  // Tercera fila es Esposo/a si es casado o unión libre
-  if (index === 2 && isCasadoOrUnionLibre.value) {
-    row.relationship = "Esposo/a";
-    return true;
-  }
-  return false;
+  const relationship = row.relationship;
+  // Verificar por tipo de relación, no por índice
+  return relationship === "Padre" || 
+         relationship === "Madre" || 
+         (relationship === "Esposo/a" && isCasadoOrUnionLibre.value);
 };
 
 const columns = [
@@ -255,61 +257,74 @@ const columns = [
   },
 ];
 
-const initializeFamilyData = () => {
-  // Inicializar con padre y madre
-  if (familyFathersData.value.length === 0) {
-    familyFathersData.value = [
-      {
-        relationship: "Padre",
-        name: "",
-        birthdate: "",
-        job: "",
-        jobAddress: "",
-      },
-      {
-        relationship: "Madre",
-        name: "",
-        birthdate: "",
-        job: "",
-        jobAddress: "",
-      }
-    ];
-  }
-  
-  // Actualizar según el estado civil
-  updateFamilyData(isCasadoOrUnionLibre.value);
-};
-
+// Función mejorada para cargar datos guardados
 const setSavedStoredValues = () => {
   if (!savedApplication.value) return;
   
   const savedFamilyData = savedApplication.value.datos_familiares;
   if (savedFamilyData && savedFamilyData.length) {
     // Filtrar entradas con trabajo (elimina entradas nulas/vacías)
-    familyFathersData.value = savedFamilyData.filter(element => element.job !== null);
+    const validEntries = savedFamilyData.filter(element => element.job !== null);
     
-    // Asegurarse de que los datos estén bien formados
-    if (familyFathersData.value.length < 2) {
-      // Si faltan entradas, inicializar con los valores por defecto
-      initializeFamilyData();
-    } else {
-      // Actualizar según el estado civil
-      updateFamilyData(isCasadoOrUnionLibre.value);
+    // Crear un nuevo array con las relaciones correctas
+    const correctedData = [];
+    
+    // Buscar y asignar el padre específicamente por relación
+    const padre = validEntries.find(item => item.relationship === "Padre");
+    correctedData.push(padre || {
+      relationship: "Padre",
+      name: "",
+      birthdate: "",
+      job: "",
+      jobAddress: "",
+    });
+    
+    // Buscar y asignar la madre específicamente por relación
+    const madre = validEntries.find(item => item.relationship === "Madre");
+    correctedData.push(madre || {
+      relationship: "Madre",
+      name: "",
+      birthdate: "",
+      job: "",
+      jobAddress: "",
+    });
+    
+    // Si es casado/unión libre, buscar y asignar el esposo/a
+    if (isCasadoOrUnionLibre.value) {
+      const esposo = validEntries.find(item => item.relationship === "Esposo/a");
+      if (esposo) {
+        correctedData.push(esposo);
+      } else {
+        correctedData.push({
+          relationship: "Esposo/a",
+          name: "",
+          birthdate: "",
+          job: "",
+          jobAddress: "",
+        });
+      }
     }
+    
+    // Asignar los datos corregidos
+    familyFathersData.value = correctedData;
+    console.log("Datos cargados desde aplicación guardada:", JSON.stringify(familyFathersData.value));
   } else {
+    // Inicializar con valores por defecto si no hay datos guardados
     initializeFamilyData();
   }
 };
 
+// Validar campos requeridos
 const validateRequiredFields = () => {
   if (nameRef.value) {
     nameRef.value.validate();
   }
   
   // Verificar todos los campos obligatorios
-  return familyFathersData.value.every((relative, index) => {
-    // Si es el tercer elemento (esposo/a) y no es casado/unión libre, no validar
-    if (index === 2 && !isCasadoOrUnionLibre.value) {
+  return familyFathersData.value.every((relative) => {
+    const isEsposo = relative.relationship === "Esposo/a";
+    // Si es esposo/a y no es casado/unión libre, no validar
+    if (isEsposo && !isCasadoOrUnionLibre.value) {
       return true;
     }
     
@@ -322,6 +337,7 @@ const validateRequiredFields = () => {
   });
 };
 
+// Guardar en localStorage
 const saveLocalStore = () => {
   if (!viewingApplication.value && !updatingApplication.value) {
     useLocalStorage.save("familyFathersData", familyFathersData.value);
@@ -330,34 +346,39 @@ const saveLocalStore = () => {
 };
 
 // Observar cambios en el estado civil para actualizar los datos familiares
-// Importante: este watch debe estar después de definir updateFamilyData
-watch(isCasadoOrUnionLibre, (newValue, oldValue) => {
-  console.log("Estado civil cambió:", oldValue, "->", newValue);
+watch(isCasadoOrUnionLibre, (newValue) => {
+  console.log("Estado civil cambió a casado/unión libre:", newValue);
   updateFamilyData(newValue);
 });
+
+// Función para cargar correctamente los datos al iniciar
+const loadFamilyData = () => {
+  // Determinar qué datos cargar según el modo de la aplicación
+  if (updatingApplication.value || viewingApplication.value) {
+    console.log("Cargando datos guardados (modo edición/visualización)");
+    setSavedStoredValues();
+  } else {
+    console.log("Inicializando datos nuevos");
+    initializeFamilyData();
+  }
+};
 
 onMounted(() => {
   console.log("Componente montado");
   console.log("Estado aplicación - updatingApplication:", updatingApplication.value);
   console.log("Estado aplicación - viewingApplication:", viewingApplication.value);
   
-  // Verificar el estado civil
+  // Esperar un momento para asegurar que todas las propiedades computadas estén actualizadas
   setTimeout(() => {
     console.log("Estado civil:", civilStatus.value);
     console.log("¿Es casado o unión libre?:", isCasadoOrUnionLibre.value);
     
-    if (updatingApplication.value || viewingApplication.value) {
-      setSavedStoredValues();
-    } else {
-      initializeFamilyData();
-    }
+    // Cargar los datos
+    loadFamilyData();
     
-    // Forzar actualización de datos según estado civil
+    // Forzar una actualización final para asegurar consistencia
     updateFamilyData(isCasadoOrUnionLibre.value);
-    
-    // Verificar que se actualizó correctamente
-    console.log("Después de actualizar - Datos familiares:", JSON.stringify(familyFathersData.value));
-  }, 100); // Pequeño retraso para asegurar que el estado esté actualizado
+  }, 100);
 });
 
 defineExpose({ validateRequiredFields });
