@@ -625,6 +625,21 @@ const filteredApplicants = computed(() => {
       }
     }
 
+    //Functions filter
+    if(filters.value.functions && filters.value.functions.length > 1){
+      var applicantFunction = applicant.conocimientos_oficios.some(element => {
+         if(element.description.toLowerCase().includes(filters.value.functions.toLowerCase())){
+          return true;
+         }
+      });
+      applicantFunction = applicant.experiencia_laboral.some(element => {
+        if(element.functionsPerformed.toLowerCase().includes(filters.value.functions.toLowerCase())){
+          return true;
+        }
+      });
+      return applicantFunction;
+    } 
+
     return true;
   });
 });

@@ -22,11 +22,11 @@
       <q-card-section class="justify-between q-mt-md" horizontal>
         <q-checkbox
           class="q-ml-md"
-          v-model="enableFilfterByGender"
+          v-model="enableFilterByGender"
           label="Por sexo"
         />
         <q-btn-dropdown
-          v-if="enableFilfterByGender"
+          v-if="enableFilterByGender"
           class="q-mr-xl"
           outline
           :label="genderChoosed.name"
@@ -52,10 +52,10 @@
       <q-card-section class="justify-between q-mt-md" horizontal>
         <q-checkbox
           class="q-ml-md"
-          v-model="enableFilfterByAge"
+          v-model="enableFilterByAge"
           label="Por edad"
         />
-        <q-card-section v-if="enableFilfterByAge">
+        <q-card-section v-if="enableFilterByAge">
           <q-input
             class="q-mr-sm"
             outlined
@@ -82,10 +82,10 @@
       <q-card-section class="justify-between q-mt-md" horizontal>
         <q-checkbox
           class="q-ml-md"
-          v-model="enableFilfterBySalary"
+          v-model="enableFilterBySalary"
           label="Por salario"
         />
-        <q-card-section v-if="enableFilfterBySalary">
+        <q-card-section v-if="enableFilterBySalary">
           <q-input
             class="q-mr-sm"
             outlined
@@ -112,11 +112,11 @@
       <q-card-section class="justify-between q-mt-md" horizontal>
         <q-checkbox
           class="q-ml-md"
-          v-model="enableFilfterByCivilStatus"
+          v-model="enableFilterByCivilStatus"
           label="Por estado civil"
         />
         <q-btn-dropdown
-          v-if="enableFilfterByCivilStatus"
+          v-if="enableFilterByCivilStatus"
           class="q-mr-xl"
           outline
           :label="civilStatusChoosed.name"
@@ -142,11 +142,11 @@
       <q-card-section class="justify-between q-mt-md" horizontal>
         <q-checkbox
           class="q-ml-md"
-          v-model="enableFilfterByLicenceType"
+          v-model="enableFilterByLicenceType"
           label="Por tipo de licencia"
         />
         <q-select
-          v-if="enableFilfterByLicenceType"
+          v-if="enableFilterByLicenceType"
           outlined
           color="blue"
           label-color="black"
@@ -164,12 +164,12 @@
       <q-card-section class="justify-between q-mt-md" horizontal>
         <q-checkbox
           class="q-ml-md"
-          v-model="enableFilfterByScholarity"
+          v-model="enableFilterByScholarity"
           label="Por nivel de escolaridad"
         />
 
         <q-select
-          v-if="enableFilfterByScholarity"
+          v-if="enableFilterByScholarity"
           outlined
           color="blue"
           label-color="black"
@@ -187,11 +187,11 @@
       <q-card-section class="justify-between q-mt-md" horizontal>
         <q-checkbox
           class="q-ml-md"
-          v-model="enableFilfterByMachineryUse"
+          v-model="enableFilterByMachineryUse"
           label="Por uso de maquinaria/herramientas"
         />
         <q-select
-          v-if="enableFilfterByMachineryUse"
+          v-if="enableFilterByMachineryUse"
           outlined
           color="blue"
           label-color="black"
@@ -210,11 +210,11 @@
       <q-card-section class="justify-between q-mt-md" horizontal>
         <q-checkbox
           class="q-ml-md"
-          v-model="enableFilfterBySkill"
+          v-model="enableFilterBySkill"
           label="Por oficios"
         />
         <q-select
-          v-if="enableFilfterBySkill"
+          v-if="enableFilterBySkill"
           outlined
           color="blue"
           label-color="black"
@@ -229,6 +229,24 @@
         />
       </q-card-section>
 
+      <q-card-section class="justify-between q-mt-md" horizontal>
+        <q-checkbox
+          class="q-ml-md"
+          v-model="enableFilterByFunctions"
+          label="Función Desempeñada"
+        />
+        <q-input
+          v-if="enableFilterByFunctions"
+          class="q-mr-sm q-mt-md"
+          outlined
+          label="Funciones"
+          label-color="black"
+          text-color="black"
+          color="black"
+          v-model="functionChoosed"
+        />
+      </q-card-section>
+      <br />
       <q-separator />
 
       <q-card-actions class="justify-end q-pa-md">
@@ -267,18 +285,20 @@ const filters = ref({
   scholarity: null,
   machineryUse: [],
   skills: [],
+  functions: null,
 });
 
 const openFilter = ref(false);
 
-const enableFilfterByGender = ref(false);
-const enableFilfterByAge = ref(false);
-const enableFilfterBySalary = ref(false);
-const enableFilfterByCivilStatus = ref(false);
-const enableFilfterByLicenceType = ref(false);
-const enableFilfterByScholarity = ref(false);
-const enableFilfterByMachineryUse = ref(false);
-const enableFilfterBySkill = ref(false);
+const enableFilterByGender = ref(false);
+const enableFilterByAge = ref(false);
+const enableFilterBySalary = ref(false);
+const enableFilterByCivilStatus = ref(false);
+const enableFilterByLicenceType = ref(false);
+const enableFilterByScholarity = ref(false);
+const enableFilterByMachineryUse = ref(false);
+const enableFilterBySkill = ref(false);
+const enableFilterByFunctions = ref(false);
 
 const genderChoosed = ref("sexo");
 const scholarityChoosed = ref([]);
@@ -286,6 +306,7 @@ const civilStatusChoosed = ref("estado civil");
 const licencesTypeChoosed = ref([]);
 const machineryChoosed = ref([]);
 const skillsChoosed = ref([]);
+const functionChoosed = ref("");
 
 const initialAgeValue = ref(0);
 const finalAgeValue = ref(0);
@@ -329,27 +350,29 @@ const civilStatusFilterList = [
 
 const filterActive = computed(() => {
   return (
-    enableFilfterByGender.value ||
-    enableFilfterByAge.value ||
-    enableFilfterBySalary.value ||
-    enableFilfterByCivilStatus.value ||
-    enableFilfterByLicenceType.value ||
-    enableFilfterByScholarity.value ||
-    enableFilfterByMachineryUse.value ||
-    enableFilfterBySkill.value
+    enableFilterByGender.value ||
+    enableFilterByAge.value ||
+    enableFilterBySalary.value ||
+    enableFilterByCivilStatus.value ||
+    enableFilterByLicenceType.value ||
+    enableFilterByScholarity.value ||
+    enableFilterByMachineryUse.value ||
+    enableFilterBySkill.value ||
+    enableFilterByFunctions.value
   );
 });
 
 watch(
   [
-    enableFilfterByGender,
-    enableFilfterByAge,
-    enableFilfterBySalary,
-    enableFilfterByCivilStatus,
-    enableFilfterByLicenceType,
-    enableFilfterByScholarity,
-    enableFilfterByMachineryUse,
-    enableFilfterBySkill,
+    enableFilterByGender,
+    enableFilterByAge,
+    enableFilterBySalary,
+    enableFilterByCivilStatus,
+    enableFilterByLicenceType,
+    enableFilterByScholarity,
+    enableFilterByMachineryUse,
+    enableFilterBySkill,
+    enableFilterByFunctions,
     genderChoosed,
     scholarityChoosed,
     civilStatusChoosed,
@@ -360,30 +383,30 @@ watch(
     finalAgeValue,
     initialSalaryValue,
     finalSalaryValue,
+    functionChoosed,
     // ... add watchers for other filter values
   ],
   () => {
     filters.value = {
-      gender: enableFilfterByGender.value ? genderChoosed.value.val : null,
-      ageRange: enableFilfterByAge.value
+      gender: enableFilterByGender.value ? genderChoosed.value.val : null,
+      ageRange: enableFilterByAge.value
         ? { min: initialAgeValue.value, max: finalAgeValue.value }
         : null,
-      salaryRange: enableFilfterBySalary.value
+      salaryRange: enableFilterBySalary.value
         ? { min: initialSalaryValue.value, max: finalSalaryValue.value }
         : null,
-      civilStatus: enableFilfterByCivilStatus.value
+      civilStatus: enableFilterByCivilStatus.value
         ? civilStatusChoosed.value.val
         : null,
-      licenceTypes: enableFilfterByLicenceType.value
+      licenceTypes: enableFilterByLicenceType.value
         ? licencesTypeChoosed.value
         : [],
-      scholarity: enableFilfterByScholarity.value
-        ? scholarityChoosed.value
-        : [],
-      machineryUse: enableFilfterByMachineryUse.value
+      scholarity: enableFilterByScholarity.value ? scholarityChoosed.value : [],
+      machineryUse: enableFilterByMachineryUse.value
         ? machineryChoosed.value
         : [],
-      skills: enableFilfterBySkill.value ? skillsChoosed.value : [],
+      skills: enableFilterBySkill.value ? skillsChoosed.value : [],
+      functions: enableFilterByFunctions.value ? functionChoosed.value : null,
     };
 
     emit("filtersChanged", filters.value);
@@ -431,40 +454,42 @@ const checkFiltersInSession = () => {
     filters.value = filtersInSession;
 
     // Set individual filters
-    enableFilfterByGender.value = !!filtersInSession.gender;
+    enableFilterByGender.value = !!filtersInSession.gender;
     genderChoosed.value = filtersInSession.gender
       ? genderFilterList.find((g) => g.val === filtersInSession.gender)
       : "sexo";
 
-    enableFilfterByAge.value = !!filtersInSession.ageRange;
+    enableFilterByAge.value = !!filtersInSession.ageRange;
     initialAgeValue.value = filtersInSession.ageRange?.min || 0;
     finalAgeValue.value = filtersInSession.ageRange?.max || 0;
 
-    enableFilfterBySalary.value = !!filtersInSession.salaryRange;
+    enableFilterBySalary.value = !!filtersInSession.salaryRange;
     initialSalaryValue.value = filtersInSession.salaryRange?.min || 0;
     finalSalaryValue.value = filtersInSession.salaryRange?.max || 0;
 
-    enableFilfterByCivilStatus.value = !!filtersInSession.civilStatus;
+    enableFilterByCivilStatus.value = !!filtersInSession.civilStatus;
     civilStatusChoosed.value = filtersInSession.civilStatus
       ? civilStatusFilterList.find(
           (cs) => cs.val === filtersInSession.civilStatus
         )
       : "estado civil";
 
-    enableFilfterByLicenceType.value = !!filtersInSession.licenceTypes.length;
+    enableFilterByLicenceType.value = !!filtersInSession.licenceTypes.length;
     licencesTypeChoosed.value = filtersInSession.licenceTypes || [];
 
-    enableFilfterByScholarity.value = !!filtersInSession.scholarity.length;
+    enableFilterByScholarity.value = !!filtersInSession.scholarity.length;
     scholarityChoosed.value = filtersInSession.scholarity || [];
 
-    enableFilfterByMachineryUse.value = !!filtersInSession.machineryUse.length;
+    enableFilterByMachineryUse.value = !!filtersInSession.machineryUse.length;
     machineryChoosed.value = filtersInSession.machineryUse || [];
 
-    enableFilfterBySkill.value = !!filtersInSession.skills.length;
+    enableFilterBySkill.value = !!filtersInSession.skills.length;
     skillsChoosed.value = filtersInSession.skills || [];
+
+    enableFilterByFunctions.value = !!filtersInSession.functions;
+    functionChoosed.value = filtersInSession.functions || null;
   }
 };
-
 
 const onGenderChoosed = (item) => {
   genderChoosed.value = item;
@@ -475,14 +500,15 @@ const onCivilStatusChoosed = (item) => {
 };
 
 const clearFilters = () => {
-  enableFilfterByGender.value = false;
-  enableFilfterByAge.value = false;
-  enableFilfterBySalary.value = false;
-  enableFilfterByCivilStatus.value = false;
-  enableFilfterByLicenceType.value = false;
-  enableFilfterByScholarity.value = false;
-  enableFilfterByMachineryUse.value = false;
-  enableFilfterBySkill.value = false;
+  enableFilterByGender.value = false;
+  enableFilterByAge.value = false;
+  enableFilterBySalary.value = false;
+  enableFilterByCivilStatus.value = false;
+  enableFilterByLicenceType.value = false;
+  enableFilterByScholarity.value = false;
+  enableFilterByMachineryUse.value = false;
+  enableFilterBySkill.value = false;
+  enableFilterByFunctions.value = false;
 
   genderChoosed.value = "sexo";
   scholarityChoosed.value = "escolaridad";
@@ -496,6 +522,8 @@ const clearFilters = () => {
 
   initialSalaryValue.value = 0;
   finalSalaryValue.value = 0;
+
+  functionChoosed.value = null;
 
   emit("filtersChanged", filters.value);
 };
