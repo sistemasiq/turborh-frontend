@@ -17,6 +17,7 @@
     "pinia": "^2.0.34",
     "pinia-plugin-persist": "^1.0.0",
     "quasar": "^2.11.10",
+    "turbo-rh-app": "file:",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0",
     "vue-simple-calendar": "^6.3.1"

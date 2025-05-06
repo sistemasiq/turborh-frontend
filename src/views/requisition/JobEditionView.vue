@@ -118,7 +118,8 @@
       class="q-ml-lg q-mt-lg"
       :readonly="readOnly"
     />
-    <q-input
+    
+    <!-- <q-input
       dark
       outlined
       color="cyan-1"
@@ -131,7 +132,7 @@
       class="q-ml-lg q-mt-lg"
       :readonly="readOnly"
     />
-
+ -->
     <div class="justify-between row q-mt-xl q-pa-sm">
       <q-card
         flat
@@ -533,7 +534,7 @@ const isJobSelected = () => {
       key.value = jobInformation.key;
       mainFunction.value = jobInformation.mainFunction;
       englishLevel.value = jobInformation.englishLevel;
-      description.value = jobInformation.mainFunction;
+      description.value = jobInformation.functions;
       experience.value = jobInformation.experience;
       functions.value = jobInformation.functions;
       skills.value = jobInformation.skills;
@@ -657,7 +658,7 @@ const getJobData = async (id) => {
       key.value = jobData.key;
       mainFunction.value = jobData.mainFunction;
       englishLevel.value = jobData.englishLevel;
-      description.value = jobData.mainFunction;
+      description.value = jobData.functions;
       experience.value = jobData.experience;
       functions.value = jobData.functions;
       skills.value = jobData.skills;
