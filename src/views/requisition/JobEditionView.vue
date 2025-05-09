@@ -118,7 +118,7 @@
       class="q-ml-lg q-mt-lg"
       :readonly="readOnly"
     />
-    
+
     <!-- <q-input
       dark
       outlined
@@ -138,7 +138,7 @@
         flat
         bordered
         class="q-mb-sm q-ml-md"
-        style="height: 30%; width: 40%; border-radius: 20px"
+        style="height: 30%; width: 45%; border-radius: 20px"
       >
         <q-card-section style="background: rgb(21, 21, 21)">
           <p class="text-h6 text-center text-white">Funciones del puesto</p>
@@ -161,7 +161,7 @@
         flat
         bordered
         class="q-mb-sm q-ml-xl"
-        style="height: 30%; width: 40%;border-radius: 20px"
+        style="height: 30%; width: 45%; border-radius: 20px"
       >
         <q-card-section style="background: rgb(21, 21, 21)">
           <p class="text-h6 text-center text-white">
@@ -184,172 +184,137 @@
       </q-card>
     </div>
 
-    <div class="justify-between row q-mt-xl q-mr-lg">
-      <q-input
-        v-model="age"
-        dark
-        outlined
-        color="cyan-1"
-        label="Edad"
-        label-color="white"
-        style="width: 7%"
-        type="number"
-        min="18"
-        max="65"
-        step="1"
-        class="q-ml-lg"
-        :readonly="readOnly"
-      >
-      </q-input>
-      <q-input
-        v-model="englishLevel"
-        dark
-        outlined
-        color="cyan-1"
-        label="Inglés"
-        label-color="white"
-        class="q-ml-xl"
-        style="width: 20%"
-        :readonly="readOnly"
-      >
-      </q-input>
+    <div class="row q-mt-lg">
+      <div class="col-3">
+        <q-input
+          v-model="age"
+          dark
+          outlined
+          color="cyan-1"
+          label="Edad"
+          label-color="white"
+          type="number"
+          min="18"
+          max="65"
+          step="1"
+          :readonly="readOnly"
+          class="q-ml-md"
+        />
+      </div>
+      <div class="col-3">
+        <q-input
+          v-model="englishLevel"
+          dark
+          outlined
+          color="cyan-1"
+          label="Inglés"
+          label-color="white"
+          :readonly="readOnly"
+          class="q-ml-md"
+        />
+      </div>
 
-      <div class="gender-content">
-        <div class="gender-title">
-          <p>Sexo:</p>
-        </div>
-        <div style="display: flex">
-          <q-radio
-            color="cyan"
-            unchecked-icon="radio_button_unchecked"
-            checked-icon="radio_button_checked"
-            size="lg"
-            class="checkbox"
-            val="M"
-            v-model="gender"
-            label="Masculino"
-            style="color: white"
+      <div class="col-3">
+        <q-select
+          v-model="gender"
+          :options="genderOptions"
+          dark
+          outlined
+          color="cyan-1"
+          label="Seleccione el sexo"
+          label-color="white"
+          :disable="readOnly"
+          emit-value
+          map-options
+          class="q-ml-md"
+        />
+      </div>
+
+      <div class="col-3">
+        <q-select
+          v-model="civilStatus"
+          :options="civilStatusOptions"
+          dark
+          outlined
+          color="cyan-1"
+          label="Seleccione el estado civil"
+          label-color="white"
+          :disable="readOnly"
+          emit-value
+          map-options
+          class="q-ml-md"
+        />
+      </div>
+    </div>
+
+    <div class="row q-mt-lg">
+      <div class="col-7">
+        <p class="title">Escolaridad:</p>
+      <div class="schooling-content rounded-borders q-ml-lg bg-white">
+        <q-radio
+          color="cyan"
+          unchecked-icon="radio_button_unchecked"
+          checked-icon="radio_button_checked"
+          size="lg"
+          class="checkbox"
+          val="S"
+          v-model="education"
+          label="Secundaria"
+          :disable="readOnly"
+        />
+        <q-radio
+          color="cyan"
+          unchecked-icon="radio_button_unchecked"
+          checked-icon="radio_button_checked"
+          size="lg"
+          class="checkbox"
+          val="B"
+          v-model="education"
+          label="Bachillerato"
+          :disable="readOnly"
+        />
+        <q-radio
+          color="cyan"
+          unchecked-icon="radio_button_unchecked"
+          checked-icon="radio_button_checked"
+          size="lg"
+          class="checkbox"
+          val="P"
+          v-model="education"
+          label="Profesional"
+          :disable="readOnly"
+        />
+        <q-radio
+          color="cyan"
+          unchecked-icon="radio_button_unchecked"
+          checked-icon="radio_button_checked"
+          size="lg"
+          class="checkbox"
+          val="M"
+          v-model="education"
+          label="Maestria"
+          :disable="readOnly"
+        />
+      </div>
+      </div>
+      <div class="col-5 q-mt-md">
+        <div class="rounded-borders q-mt-lg q-ml-lg bg-white">
+          <q-checkbox
+            light
+            v-model="extraHours"
+            label="Derecho a tiempo extra"
+            color="blue"
             :disable="readOnly"
           />
-          <q-radio
-            color="cyan"
-            unchecked-icon="radio_button_unchecked"
-            checked-icon="radio_button_checked"
-            size="lg"
-            val="F"
-            class="checkbox"
-            v-model="gender"
-            label="Femenino"
-            style="color: white"
-            :disable="readOnly"
-          />
-          <q-radio
-            color="cyan"
-            unchecked-icon="radio_button_unchecked"
-            checked-icon="radio_button_checked"
-            size="lg"
-            class="checkbox"
-            val="I"
-            v-model="gender"
-            label="Indistinto"
-            style="color: white"
+          <q-checkbox
+            light
+            v-model="travelAvailability"
+            label="Disponibilidad para viajar"
+            color="blue"
             :disable="readOnly"
           />
         </div>
       </div>
-      <div class="gender-content">
-        <div class="gender-title">
-          <p>Estado civil</p>
-        </div>
-        <div style="display: flex">
-          <q-radio
-            color="cyan"
-            unchecked-icon="radio_button_unchecked"
-            checked-icon="radio_button_checked"
-            size="lg"
-            class="checkbox"
-            val="C"
-            v-model="civilStatus"
-            label="Casado"
-            style="color: white"
-            :disable="readOnly"
-          />
-          <q-radio
-            color="cyan"
-            unchecked-icon="radio_button_unchecked"
-            checked-icon="radio_button_checked"
-            size="lg"
-            class="checkbox"
-            val="S"
-            v-model="civilStatus"
-            label="Soltero"
-            style="color: white"
-            :disable="readOnly"
-          />
-          <q-radio
-            color="cyan"
-            unchecked-icon="radio_button_unchecked"
-            checked-icon="radio_button_checked"
-            size="lg"
-            class="checkbox"
-            val="I"
-            v-model="civilStatus"
-            label="Indistinto"
-            style="color: white"
-            :disable="readOnly"
-          />
-        </div>
-      </div>
-    </div>
-
-    <div class="title">
-      <p>Escolaridad:</p>
-    </div>
-    <div class="schooling-content rounded-borders q-ml-lg bg-white">
-      <q-radio
-        color="cyan"
-        unchecked-icon="radio_button_unchecked"
-        checked-icon="radio_button_checked"
-        size="lg"
-        class="checkbox"
-        val="S"
-        v-model="education"
-        label="Secundaria"
-        :disable="readOnly"
-      />
-      <q-radio
-        color="cyan"
-        unchecked-icon="radio_button_unchecked"
-        checked-icon="radio_button_checked"
-        size="lg"
-        class="checkbox"
-        val="B"
-        v-model="education"
-        label="Bachillerato"
-        :disable="readOnly"
-      />
-      <q-radio
-        color="cyan"
-        unchecked-icon="radio_button_unchecked"
-        checked-icon="radio_button_checked"
-        size="lg"
-        class="checkbox"
-        val="P"
-        v-model="education"
-        label="Profesional"
-        :disable="readOnly"
-      />
-      <q-radio
-        color="cyan"
-        unchecked-icon="radio_button_unchecked"
-        checked-icon="radio_button_checked"
-        size="lg"
-        class="checkbox"
-        val="M"
-        v-model="education"
-        label="Maestria"
-        :disable="readOnly"
-      />
     </div>
     <q-input
       v-model="experience"
@@ -375,22 +340,6 @@
       :readonly="readOnly"
     >
     </q-input>
-    <div class="rounded-borders q-mt-lg q-ml-lg bg-white">
-      <q-checkbox
-        light
-        v-model="extraHours"
-        label="Derecho a tiempo extra"
-        color="blue"
-        :disable="readOnly"
-      />
-      <q-checkbox
-        light
-        v-model="travelAvailability"
-        label="Disponibilidad para viajar"
-        color="blue"
-        :disable="readOnly"
-      />
-    </div>
 
     <q-input
       v-model="conditions"
@@ -440,7 +389,11 @@
 
 <script setup>
 import { ref, onMounted, computed, onBeforeMount, onBeforeUnmount } from "vue";
-import { getSessionStorageItem, setSessionStorageItem, removeSessionStorageItem } from "src/stores/sessionStorage";
+import {
+  getSessionStorageItem,
+  setSessionStorageItem,
+  removeSessionStorageItem,
+} from "src/stores/sessionStorage";
 import { getS3FileUrl } from "src/services/profiles.js";
 import { useQuasar } from "quasar";
 import { useJobCatalogStore } from "src/stores/jobCatalog";
@@ -448,7 +401,12 @@ import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { getS3UploadUrl } from "src/services/profiles.js";
 import { getJobImagesPath } from "src/utils/folderPaths";
-import { getAllDepartments, createJob, updateJob, getJobById } from "src/services/jobs";
+import {
+  getAllDepartments,
+  createJob,
+  updateJob,
+  getJobById,
+} from "src/services/jobs";
 import { notifyNegative, notifyPositive } from "src/utils/notifies";
 import { updateFile, uploadFile } from "src/services/files";
 import { useAuthStore } from "src/stores/auth";
@@ -489,72 +447,71 @@ const defaultUUID = "default.png";
 
 const jobUUID = ref(defaultUUID);
 
-
 const { jobId, readOnly, updatingJob } = storeToRefs(useJobCatalog);
 
-const { user } = storeToRefs(useAuth)
+const { user } = storeToRefs(useAuth);
 
 onBeforeMount(() => {
   isJobSelected();
-})
+});
 
 onBeforeUnmount(() => {
-  if(route.path !== '/home/edicion-puesto'){
+  if (route.path !== "/home/edicion-puesto") {
     removeSessionStorageItem("jobData");
     removeSessionStorageItem("jobInformation");
     useJobCatalog.$reset();
   }
- 
-
-})
+});
 
 const isJobSelected = () => {
-  if(getSessionStorageItem("jobData")){
+  if (getSessionStorageItem("jobData")) {
     const jobData = JSON.parse(getSessionStorageItem("jobData"));
     jobId.value = jobData.jobId;
     updatingJob.value = jobData.updatingJob;
     readOnly.value = jobData.readOnly;
-  } 
-  if(getSessionStorageItem("jobInformation")){
+  }
+  if (getSessionStorageItem("jobInformation")) {
     const jobInformation = JSON.parse(getSessionStorageItem("jobInformation"));
 
     //See if the job does not have any data, then insert the departments id in the selectedDepartmentsId array
-      if(!selectedDepartmentsId.value) {
-        jobInformation.departmentsId.forEach((element) => {
+    if (!selectedDepartmentsId.value) {
+      jobInformation.departmentsId.forEach((element) => {
         if (element != null) {
           selectedDepartmentsId.value.push(element);
         }
       });
-      } else {
-        console.log("job without departments")
-        return selectedDepartmentsId.value
-      }
-      console.log("selectedDepartmentsId", selectedDepartmentsId.value);
-      name.value = jobInformation.name;
-      key.value = jobInformation.key;
-      mainFunction.value = jobInformation.mainFunction;
-      englishLevel.value = jobInformation.englishLevel;
-      description.value = jobInformation.functions;
-      experience.value = jobInformation.experience;
-      functions.value = jobInformation.functions;
-      skills.value = jobInformation.skills;
-      age.value = jobInformation.age;
-      conditions.value =
-        jobInformation.conditions === "null" ? "" : jobInformation.conditions;
-      observations.value =
-        jobInformation.observations === "null" ? "" : jobInformation.observations;
-      extraHours.value = jobInformation.extraHours === 1 ? true : false;
-      travelAvailability.value =
-        jobInformation.travelAvailability === 1 ? true : false;
-      gender.value = jobInformation.gender;
-      civilStatus.value = jobInformation.civilStatus;
-      education.value = jobInformation.education;
-      jobUUID.value =
-        jobInformation.photo_uuid === null || jobInformation.photo_uuid === "" || jobInformation.photo_uuid === "no_image"
-          ? defaultUUID
-          : jobInformation.photo_uuid;
+    } else {
+      console.log("job without departments");
+      return selectedDepartmentsId.value;
+    }
+    console.log("selectedDepartmentsId", selectedDepartmentsId.value);
+    name.value = jobInformation.name;
+    key.value = jobInformation.key;
+    mainFunction.value = jobInformation.mainFunction;
+    englishLevel.value = jobInformation.englishLevel;
+    description.value = jobInformation.functions;
+    experience.value = jobInformation.experience;
+    functions.value = jobInformation.functions;
+    skills.value = jobInformation.skills;
+    age.value = jobInformation.age;
+    conditions.value =
+      jobInformation.conditions === "null" ? "" : jobInformation.conditions;
+    observations.value =
+      jobInformation.observations === "null" ? "" : jobInformation.observations;
+    extraHours.value = jobInformation.extraHours === 1 ? true : false;
+    travelAvailability.value =
+      jobInformation.travelAvailability === 1 ? true : false;
+    gender.value = jobInformation.gender;
+    civilStatus.value = jobInformation.civilStatus;
+    education.value = jobInformation.education;
+    jobUUID.value =
+      jobInformation.photo_uuid === null ||
+      jobInformation.photo_uuid === "" ||
+      jobInformation.photo_uuid === "no_image"
+        ? defaultUUID
+        : jobInformation.photo_uuid;
   }
-}
+};
 onMounted(() => {
   fetchDepartments();
 
@@ -564,7 +521,6 @@ onMounted(() => {
 });
 
 const getJobImage = computed(() =>
-
   getS3FileUrl(getJobImagesPath, jobUUID.value)
 );
 
@@ -575,15 +531,15 @@ const handleSelectedImage = (files) => {
 const uploadUserFiles = async () => {
   const updateWithoutImage = jobUUID.value === defaultUUID && !jobImg.value;
 
-  if(updateWithoutImage){
+  if (updateWithoutImage) {
     changeJobState("");
     return;
   }
 
   const updateJobWithSameImage = jobUUID.value !== defaultUUID && !jobImg.value;
 
-  if(updateJobWithSameImage){
-    changeJobState(jobUUID.value)
+  if (updateJobWithSameImage) {
+    changeJobState(jobUUID.value);
     return;
   }
 
@@ -593,7 +549,7 @@ const uploadUserFiles = async () => {
 
     if (jobUUID.value === defaultUUID) {
       file = await uploadFile(jobImg.value, getJobImagesPath);
-    } else{
+    } else {
       file = await updateFile(jobUUID.value, jobImg.value, getJobImagesPath);
     }
 
@@ -674,7 +630,9 @@ const getJobData = async (id) => {
       civilStatus.value = jobData.civilStatus;
       education.value = jobData.education;
       jobUUID.value =
-        jobData.photo_uuid === null || jobData.photo_uuid === "" || jobData.photo_uuid === "no_image"
+        jobData.photo_uuid === null ||
+        jobData.photo_uuid === "" ||
+        jobData.photo_uuid === "no_image"
           ? defaultUUID
           : jobData.photo_uuid;
     }
@@ -751,13 +709,15 @@ const updateJobData = async (photoName) => {
 
   try {
     $q.loading.show();
-    const updatedJob = await updateJob(updatedJobData)
+    const updatedJob = await updateJob(updatedJobData);
     if (updatedJob) {
       $q.notify(notifyPositive("El puesto ha sido actualizado correctamente"));
       goToJobsCatalog();
     }
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al actualizar el puesto, intenta de nuevo"));
+    $q.notify(
+      notifyNegative("Hubo un error al actualizar el puesto, intenta de nuevo")
+    );
     console.log(error);
     goToJobsCatalog();
   } finally {
@@ -796,13 +756,34 @@ const createNewJob = async (photoName) => {
       goToJobsCatalog();
     }
   } catch (error) {
-    $q.notify(notifyNegative("Hubo un error al crear el puesto, intenta de nuevo"));
+    $q.notify(
+      notifyNegative("Hubo un error al crear el puesto, intenta de nuevo")
+    );
   } finally {
     $q.loading.hide();
   }
 };
 
 const selectedImage = ref();
+
+const genderOptions = [
+  { label: "Masculino", value: "M" },
+  { label: "Femenino", value: "F" },
+  { label: "Indistinto", value: "I" },
+];
+
+const civilStatusOptions = [
+  { label: "Casado", value: "C" },
+  { label: "Soltero", value: "S" },
+  { label: "Indistinto", value: "I" },
+];
+
+const educationOptions = [
+  { label: "Secundaria", value: "S" },
+  { label: "Bachillerato", value: "B" },
+  { label: "Profesional", value: "P" },
+  { label: "Maestría", value: "M" },
+];
 </script>
 
 <style scoped>

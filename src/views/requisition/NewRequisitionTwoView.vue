@@ -47,170 +47,147 @@
               </router-link>
             </div>
             <div class="row items-center">
-              <q-input
-                v-model="ageRequired"
-                dark
-                outlined
-                color="cyan-1"
-                label="Edad"
-                class="q-ml-md"
-                label-color="white"
-                type="number"
-                min="18"
-                max="65"
-                @paste="onNumberTypePaste"
-                step="1"
-                :readonly="showingDetails"
-              >
-              </q-input>
-              <q-input
-                v-model="englishLevelRequired"
-                dark
-                outlined
-                color="cyan-1"
-                label="Inglés"
-                label-color="white"
-                class="q-ml-xl"
-                readonly
-              >
-              </q-input>
-
-              <div class="column q-ml-xl">
-                <p class="text-body2 text-white q-ml-md">Sexo:</p>
-                <div>
-                  <q-radio
-                    val="M"
-                    color="cyan"
-                    unchecked-icon="radio_button_unchecked"
-                    checked-icon="radio_button_checked"
-                    size="lg"
-                    class="text-white"
-                    v-model="gender"
-                    dark
-                    label="Masculino"
-                    :disable="showingDetails"
-                  />
-                  <q-radio
-                    val="F"
-                    color="cyan"
-                    unchecked-icon="radio_button_unchecked"
-                    checked-icon="radio_button_checked"
-                    size="lg"
-                    class="text-white"
-                    v-model="gender"
-                    dark
-                    label="Femenino"
-                    :disable="showingDetails"
-                  />
-                  <q-radio
-                    val="I"
-                    color="cyan"
-                    unchecked-icon="radio_button_unchecked"
-                    checked-icon="radio_button_checked"
-                    size="lg"
-                    class="text-white"
-                    v-model="gender"
-                    dark
-                    label="Indistinto"
-                    :disable="showingDetails"
-                  />
-                </div>
+              <div class="col-3">
+                <q-input
+                  v-model="ageRequired"
+                  dark
+                  outlined
+                  color="cyan-1"
+                  label="Edad"
+                  class="q-ml-md"
+                  label-color="white"
+                  type="number"
+                  min="18"
+                  max="65"
+                  @paste="onNumberTypePaste"
+                  step="1"
+                  :readonly="showingDetails"
+                >
+                </q-input>
               </div>
-              <div class="column q-ml-xl">
-                <div>
-                  <p class="text-white text-body2 q-ml-md">Estado civil</p>
-                </div>
-                <div>
-                  <q-radio
-                    val="C"
-                    color="cyan"
-                    unchecked-icon="radio_button_unchecked"
-                    checked-icon="radio_button_checked"
-                    size="lg"
-                    class="text-white"
-                    v-model="civilStatus"
-                    dark
-                    label="Casado"
-                    :disable="showingDetails"
-                  />
-                  <q-radio
-                    val="S"
-                    color="cyan"
-                    unchecked-icon="radio_button_unchecked"
-                    checked-icon="radio_button_checked"
-                    size="lg"
-                    class="text-white"
-                    dark
-                    v-model="civilStatus"
-                    label="Soltero"
-                    :disable="showingDetails"
-                  />
-                  <q-radio
-                    val="I"
-                    color="cyan"
-                    unchecked-icon="radio_button_unchecked"
-                    checked-icon="radio_button_checked"
-                    size="lg"
-                    class="text-white"
-                    v-model="civilStatus"
-                    dark
-                    label="Indistinto"
-                    :disable="showingDetails"
-                  />
-                </div>
+              <div class="col-3">
+                <q-input
+                  v-model="englishLevelRequired"
+                  dark
+                  outlined
+                  color="cyan-1"
+                  label="Inglés"
+                  label-color="white"
+                  class="q-ml-md"
+                  readonly
+                >
+                </q-input>
+              </div>
+
+              <div class="col-3">
+                <q-select
+                  v-model="gender"
+                  :options="genderOptions"
+                  dark
+                  outlined
+                  color="cyan-1"
+                  label="Seleccione el sexo"
+                  label-color="white"
+                  :disable="showingDetails"
+                  emit-value
+                  map-options
+                  class="q-ml-md"
+                />
+              </div>
+              <div class="col-3">
+                <q-select
+                  v-model="civilStatus"
+                  :options="civilStatusOptions"
+                  dark
+                  outlined
+                  color="cyan-1"
+                  label="Seleccione el estado civil"
+                  label-color="white"
+                  :disable="showingDetails"
+                  emit-value
+                  map-options
+                  class="q-ml-md"
+                />
               </div>
             </div>
 
-            <q-card class="column q-ma-md transparent" flat>
-              <q-card-section class="text-body2 text-white">
-                Escolaridad:
-              </q-card-section>
-              <q-card-section
-                style="width: 80%"
-                class="bg-white rounded-borders"
-              >
-                <q-radio
-                  val="S"
-                  color="cyan"
-                  unchecked-icon="radio_button_unchecked"
-                  checked-icon="radio_button_checked"
-                  size="lg"
-                  v-model="educationRequired"
-                  label="Secundaria"
-                  disable
-                />
-                <q-radio
-                  val="B"
-                  color="cyan"
-                  unchecked-icon="radio_button_unchecked"
-                  checked-icon="radio_button_checked"
-                  size="lg"
-                  v-model="educationRequired"
-                  label="Bachillerato"
-                  disable
-                />
-                <q-radio
-                  val="P"
-                  color="cyan"
-                  unchecked-icon="radio_button_unchecked"
-                  checked-icon="radio_button_checked"
-                  size="lg"
-                  v-model="educationRequired"
-                  label="Profesional"
-                  disable
-                />
-                <q-radio
-                  val="M"
-                  color="cyan"
-                  unchecked-icon="radio_button_unchecked"
-                  checked-icon="radio_button_checked"
-                  size="lg"
-                  v-model="educationRequired"
-                  label="Maestria"
-                  disable
-                />
-              </q-card-section>
-            </q-card>
+            <div class="row">
+              <div class="col-7">
+                <q-card class="column q-ma-md transparent" flat>
+                  <q-card-section class="bg-white rounded-borders">
+                    <p>Escolaridad:</p>
+                    <q-radio
+                      val="S"
+                      color="cyan"
+                      unchecked-icon="radio_button_unchecked"
+                      checked-icon="radio_button_checked"
+                      size="lg"
+                      v-model="educationRequired"
+                      label="Secundaria"
+                      disable
+                    />
+                    <q-radio
+                      val="B"
+                      color="cyan"
+                      unchecked-icon="radio_button_unchecked"
+                      checked-icon="radio_button_checked"
+                      size="lg"
+                      v-model="educationRequired"
+                      label="Bachillerato"
+                      disable
+                    />
+                    <q-radio
+                      val="P"
+                      color="cyan"
+                      unchecked-icon="radio_button_unchecked"
+                      checked-icon="radio_button_checked"
+                      size="lg"
+                      v-model="educationRequired"
+                      label="Profesional"
+                      disable
+                    />
+                    <q-radio
+                      val="M"
+                      color="cyan"
+                      unchecked-icon="radio_button_unchecked"
+                      checked-icon="radio_button_checked"
+                      size="lg"
+                      v-model="educationRequired"
+                      label="Maestria"
+                      disable
+                    />
+                  </q-card-section>
+                </q-card>
+              </div>
+              <div class="col-5">
+                <q-card class="column q-ma-md transparent" flat>
+                  <q-card-section
+                    class="bg-white rounded-borders"
+                  >
+                    <q-checkbox
+                      color="cyan"
+                      unchecked-icon="radio_button_unchecked"
+                      checked-icon="radio_button_checked"
+                      size="lg"
+                      class="checkbox"
+                      v-model="extraHoursRequired"
+                      label="Derecho a tiempo extra"
+                      disable
+                    />
+                    <q-checkbox
+                      color="cyan"
+                      unchecked-icon="radio_button_unchecked"
+                      checked-icon="radio_button_checked"
+                      size="lg"
+                      class="checkbox"
+                      v-model="travelAvailabilityRequired"
+                      label="Disponibilidad para viajar"
+                      disable
+                    />
+                  </q-card-section>
+                </q-card>
+              </div>
+            </div>
 
             <q-input
               class="q-ma-md"
@@ -245,33 +222,6 @@
               :readonly="showingDetails"
             >
             </q-input>
-            <q-card class="column q-ma-md transparent" flat>
-              <q-card-section
-                style="width: 40%"
-                class="bg-white rounded-borders"
-              >
-                <q-checkbox
-                  color="cyan"
-                  unchecked-icon="radio_button_unchecked"
-                  checked-icon="radio_button_checked"
-                  size="lg"
-                  class="checkbox"
-                  v-model="extraHoursRequired"
-                  label="Derecho a tiempo extra"
-                  disable
-                />
-                <q-checkbox
-                  color="cyan"
-                  unchecked-icon="radio_button_unchecked"
-                  checked-icon="radio_button_checked"
-                  size="lg"
-                  class="checkbox"
-                  v-model="travelAvailabilityRequired"
-                  label="Disponibilidad para viajar"
-                  disable
-                />
-              </q-card-section>
-            </q-card>
             <q-input
               class="q-ma-md"
               v-model="defaultConditions"
@@ -357,7 +307,10 @@
 
 <script setup>
 import { ref, onMounted, computed, onBeforeMount, onBeforeUnmount } from "vue";
-import { getSessionStorageItem, removeSessionStorageItem } from "src/stores/sessionStorage.js";
+import {
+  getSessionStorageItem,
+  removeSessionStorageItem,
+} from "src/stores/sessionStorage.js";
 import { useRequisitionStore } from "src/stores/requisition";
 import { useRequisitionDetailsStore } from "src/stores/requisitionDetails";
 import { useJobStore } from "src/stores/job";
@@ -425,6 +378,25 @@ const {
   jobObservations,
 } = storeToRefs(useJob);
 
+const genderOptions = [
+  { label: "Masculino", value: "M" },
+  { label: "Femenino", value: "F" },
+  { label: "Indistinto", value: "I" },
+];
+
+const civilStatusOptions = [
+  { label: "Casado", value: "C" },
+  { label: "Soltero", value: "S" },
+  { label: "Indistinto", value: "I" },
+];
+
+const educationOptions = [
+  { label: "Secundaria", value: "S" },
+  { label: "Bachillerato", value: "B" },
+  { label: "Profesional", value: "P" },
+  { label: "Maestría", value: "M" },
+];
+
 onBeforeMount(() => {
   isJobSelected();
   isRequisitionSelected();
@@ -441,31 +413,34 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-     // Check if the current route is different than '/home/nueva-requisicion-1 AND '/home/nueva-requisicion-1 and if it is true then removes the selectedJob and selectedJobData from the session storage'
-  if (route.path !== '/home/nueva-requisicion-1' && route.path !== '/home/nueva-requisicion-2' ) {
+  // Check if the current route is different than '/home/nueva-requisicion-1 AND '/home/nueva-requisicion-1 and if it is true then removes the selectedJob and selectedJobData from the session storage'
+  if (
+    route.path !== "/home/nueva-requisicion-1" &&
+    route.path !== "/home/nueva-requisicion-2"
+  ) {
     // Clear the session storage
     removeSessionStorageItem("selectedJob");
     removeSessionStorageItem("selectedJobData");
-    removeSessionStorageItem("requisitionInformation")
+    removeSessionStorageItem("requisitionInformation");
     //restore the stores to the initial state
     useJob.$reset();
     useRequisition.clearStore();
     useRequisitionDetails.$reset();
   }
-})
+});
 
 const isRequisitionSelected = () => {
   if (getSessionStorageItem("requisitionInformation")) {
-    const requisitionInformation = JSON.parse(getSessionStorageItem(
-      "requisitionInformation"
-    ));
+    const requisitionInformation = JSON.parse(
+      getSessionStorageItem("requisitionInformation")
+    );
     //numRequisitionDetails.value = requisitionInformation.numRequisitionDetails;
     //applicantDetails.value = requisitionInformation.applicantDetails;
     //jobDetails.value = requisitionInformation.jobDetails;
     showingDetails.value = requisitionInformation.showingDetails;
     updatingRequisition.value = requisitionInformation.updatingRequisition;
     requisitionData.value = requisitionInformation.requisitionData;
-    console.log(requisitionInformation)
+    /* console.log(requisitionInformation) */
   }
 };
 
@@ -486,15 +461,15 @@ const isJobSelected = () => {
     jobObservations.value = jobData.observations;
     jobConditions.value = jobData.conditions;
 
-    englishLevel.value = jobData.englishLevel;
+    ageRequired.value = jobData.age;
+    englishLevelRequired.value = jobData.englishLevel;
     extraHours.value = jobData.extraHours;
     travelAvailability.value = jobData.travelAvailability;
     educationRequired.value = jobData.education;
-    experience.value = jobData.experience;
+    experienceRequired.value = jobData.experience;
     gender.value = jobData.gender;
     civilStatus.value = jobData.civilStatus;
-    ageRequired.value = jobData.ageRequired;
-
+    conditions.value = jobData.conditions;
   }
 };
 
@@ -520,11 +495,11 @@ const onNumberTypePaste = (event) => {
 };
 
 const setDefaultJobValues = () => {
-  if(!jobData.value)
-  return;
+  if (!jobData.value) return;
 
   if (!showingDetails.value && !updatingRequisition.value) {
     console.log("set default value: ", jobData.value);
+    extraHoursRequired.value = extraHours.value === 1 ? true : false;
     travelAvailabilityRequired.value =
       travelAvailability.value === 1 ? true : false;
     defaultConditions.value = jobConditions.value;
@@ -532,12 +507,11 @@ const setDefaultJobValues = () => {
 
     return;
   }
-  console.log("Viewing or updating")
+  /* console.log("Viewing or updating") */
   educationRequired.value = requisitionData.value.schooling;
   englishLevelRequired.value = requisitionData.value.englishLevel;
   experienceRequired.value = requisitionData.value.experience;
-  extraHoursRequired.value =
-    requisitionData.value.extraHours === 1 ? true : false;
+  extraHoursRequired.value = extraHours.value === 1 ? true : false;
   travelAvailabilityRequired.value =
     requisitionData.value.travelAvailability === 1 ? true : false;
   defaultObservations.value = requisitionData.value.jobObservations;

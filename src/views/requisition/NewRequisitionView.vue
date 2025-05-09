@@ -208,10 +208,10 @@ const {
   jobObservations,
 } = storeToRefs(useJob);
 
-onBeforeMount(() => {
+/* onBeforeMount(() => {
   isJobSelected();
   isRequisitionSelected();
-});
+}); */
 
 onMounted(() => {
   vacancyNumbers.value = vacancyNumbers.value === 0 ? 1 : vacancyNumbers.value;
@@ -250,7 +250,6 @@ const isRequisitionSelected = () => {
     showingDetails.value = requisitionInformation.showingDetails;
     updatingRequisition.value = requisitionInformation.updatingRequisition;
     requisitionData.value = requisitionInformation.requisitionData;
-    console.log(requisitionInformation);
   }
 };
 const filteredJobs = () => {
@@ -274,7 +273,7 @@ const showRequisitionDetails = () => {
   motiveCreation.value = requisitionData.value.motiveCreation;
   vacancyNumbers.value = requisitionData.value.vacancyNumber;
   note.value = requisitionData.value.notes;
-  console.log(note.value);
+  /* console.log(note.value); */
   fetchJobDataDetails();
 };
 
@@ -370,7 +369,7 @@ const fetchJobData = async (id) => {
   try {
     const job = await getJobById(id);
     if (job) {
-      console.log("the job data: ", job);
+      /* console.log("the job data: ", job); */
       setSessionStorageItem("selectedJobData", job);
       jobData.value = job;
       jobId.value = job.id;
