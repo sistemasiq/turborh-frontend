@@ -564,19 +564,7 @@ const uploadUserFiles = async () => {
 
 const disableJobStateButton = () => {
   if (updatingJob.value) return false;
-  console.log(
-    name.value,
-    key.value,
-    mainFunction.value,
-    selectedDepartmentsId.value,
-    functions.value,
-    skills.value,
-    education.value,
-    englishLevel.value,
-    age.value,
-    gender.value,
-    civilStatus.value
-  );
+  
   return (
     !name.value ||
     !key.value ||
