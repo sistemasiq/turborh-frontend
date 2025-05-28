@@ -250,52 +250,52 @@
     <div class="row q-mt-lg">
       <div class="col-7">
         <p class="title">Escolaridad:</p>
-      <div class="schooling-content rounded-borders q-ml-lg bg-white">
-        <q-radio
-          color="cyan"
-          unchecked-icon="radio_button_unchecked"
-          checked-icon="radio_button_checked"
-          size="lg"
-          class="checkbox"
-          val="S"
-          v-model="education"
-          label="Secundaria"
-          :disable="readOnly"
-        />
-        <q-radio
-          color="cyan"
-          unchecked-icon="radio_button_unchecked"
-          checked-icon="radio_button_checked"
-          size="lg"
-          class="checkbox"
-          val="B"
-          v-model="education"
-          label="Bachillerato"
-          :disable="readOnly"
-        />
-        <q-radio
-          color="cyan"
-          unchecked-icon="radio_button_unchecked"
-          checked-icon="radio_button_checked"
-          size="lg"
-          class="checkbox"
-          val="P"
-          v-model="education"
-          label="Profesional"
-          :disable="readOnly"
-        />
-        <q-radio
-          color="cyan"
-          unchecked-icon="radio_button_unchecked"
-          checked-icon="radio_button_checked"
-          size="lg"
-          class="checkbox"
-          val="M"
-          v-model="education"
-          label="Maestria"
-          :disable="readOnly"
-        />
-      </div>
+        <div class="schooling-content rounded-borders q-ml-lg bg-white">
+          <q-radio
+            color="cyan"
+            unchecked-icon="radio_button_unchecked"
+            checked-icon="radio_button_checked"
+            size="lg"
+            class="checkbox"
+            val="S"
+            v-model="education"
+            label="Secundaria"
+            :disable="readOnly"
+          />
+          <q-radio
+            color="cyan"
+            unchecked-icon="radio_button_unchecked"
+            checked-icon="radio_button_checked"
+            size="lg"
+            class="checkbox"
+            val="B"
+            v-model="education"
+            label="Bachillerato"
+            :disable="readOnly"
+          />
+          <q-radio
+            color="cyan"
+            unchecked-icon="radio_button_unchecked"
+            checked-icon="radio_button_checked"
+            size="lg"
+            class="checkbox"
+            val="P"
+            v-model="education"
+            label="Profesional"
+            :disable="readOnly"
+          />
+          <q-radio
+            color="cyan"
+            unchecked-icon="radio_button_unchecked"
+            checked-icon="radio_button_checked"
+            size="lg"
+            class="checkbox"
+            val="M"
+            v-model="education"
+            label="Maestria"
+            :disable="readOnly"
+          />
+        </div>
       </div>
       <div class="col-5 q-mt-md">
         <div class="rounded-borders q-mt-lg q-ml-lg bg-white">
@@ -421,7 +421,7 @@ const drawer = ref(false);
 const name = ref();
 const key = ref();
 const mainFunction = ref("");
-const description = ref("");
+/* const description = ref(""); */
 const age = ref();
 const skills = ref("");
 const functions = ref("");
@@ -564,13 +564,24 @@ const uploadUserFiles = async () => {
 
 const disableJobStateButton = () => {
   if (updatingJob.value) return false;
-
+  console.log(
+    name.value,
+    key.value,
+    mainFunction.value,
+    selectedDepartmentsId.value,
+    functions.value,
+    skills.value,
+    education.value,
+    englishLevel.value,
+    age.value,
+    gender.value,
+    civilStatus.value
+  );
   return (
     !name.value ||
     !key.value ||
     !mainFunction.value ||
     !selectedDepartmentsId.value ||
-    !description.value ||
     !functions.value ||
     !skills.value ||
     !education.value ||
@@ -614,7 +625,6 @@ const getJobData = async (id) => {
       key.value = jobData.key;
       mainFunction.value = jobData.mainFunction;
       englishLevel.value = jobData.englishLevel;
-      description.value = jobData.functions;
       experience.value = jobData.experience;
       functions.value = jobData.functions;
       skills.value = jobData.skills;
