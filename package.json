@@ -11,21 +11,21 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "@quasar/extras": "^1.0.0",
-    "@quasar/quasar-ui-qcalendar": "^4.0.0-beta.15",
-    "axios": "^1.4.0",
-    "pinia": "^2.0.34",
+    "@quasar/extras": "^1.17.0",
+    "@quasar/quasar-ui-qcalendar": "^4.1.2",
+    "axios": "^1.9.0",
+    "pinia": "^2.3.1",
     "pinia-plugin-persist": "^1.0.0",
-    "quasar": "^2.11.10",
+    "quasar": "^2.18.1",
     "turbo-rh-app": "file:",
-    "vue": "^3.0.0",
-    "vue-router": "^4.0.0",
+    "vue": "^3.5.16",
+    "vue-router": "^4.5.1",
     "vue-simple-calendar": "^6.3.1"
   },
   "devDependencies": {
-    "@quasar/app-vite": "^1.0.0",
-    "autoprefixer": "^10.4.2",
-    "postcss": "^8.4.14"
+    "@quasar/app-vite": "^1.11.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.4"
   },
   "engines": {
     "node": "^18 || ^16 || ^14.19",

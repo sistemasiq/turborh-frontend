@@ -1679,11 +1679,8 @@ import {
   today,
   parseDate,
   parseTimestamp,
-  /*--------*/
-} from "@quasar/quasar-ui-qcalendar/src/index.js";
-import "@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass";
-import "@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass";
-import "@quasar/quasar-ui-qcalendar/src/QCalendarMonth.sass";
+} from '@quasar/quasar-ui-qcalendar';
+import '@quasar/quasar-ui-qcalendar/dist/index.css';
 import prev from "../components/Prev.vue";
 import next from "../components/Next.vue";
 import todayComponent from "../components/Today.vue";
@@ -2525,6 +2522,7 @@ const updateAppointment = async () => {
   if (selectedModality.value === "Virtual" && checkVariablesToUpdateMethod()) {
     putVirtualApppointment();
   } else if (
+   
     selectedModality.value === "Presencial" &&
     checkVariablesToUpdateMethod()
   ) {
@@ -2591,7 +2589,7 @@ const setDefaultIfNull = (data) => {
 
 }
 
-//the modality selection checks the platform selected and defines the varible with the selected platform and defines a virtual modality
+//the modality selection checks the platform selected and defines varible with the selected platform and defines a virtual modality
 const onModalitySelection = (data) => {
   selectedPlatform.value = data.platformName;
   platformSelectedID.value = data.id;
