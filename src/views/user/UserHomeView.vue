@@ -835,8 +835,6 @@ const checkUserApplication = (sendToApplication = true) => {
   if (!userHasApplication.value) return;
 
   activeApplication.value = savedApplication.value.activo === 1 ? true : false;
-  userHasApplication.value =
-    savedApplication.value.solicitud_id !== 0 ? true : false;
 
   if (sendToApplication) {
     router.push("/userHome/solicitud-1");

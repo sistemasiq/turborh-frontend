@@ -1,5 +1,5 @@
 <template>
-  <q-layout v-on:vnode-unmounted="saveLocalStore()">
+  <q-layout v-on:vue:unmounted="saveLocalStore()">
     <div style="margin-top: 6%">
       <div
         style="display: flex; flex-grow: 1; margin-left: 2%; margin-right: 2%"

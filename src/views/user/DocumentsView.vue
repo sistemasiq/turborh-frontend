@@ -2,7 +2,7 @@
   <q-layout
 
     style="background-color: rgb(30, 61, 88);"
-    v-on:vnode-unmounted="saveLocalStore()"
+    v-on:vue:unmounted="saveLocalStore()"
   >
     <q-card flat bordered class="rounded-borders">
       <q-card-section class="title"> Documentos </q-card-section>

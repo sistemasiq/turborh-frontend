@@ -1,7 +1,7 @@
 <template>
   <q-card
     v-draggable
-    v-on:vnode-unmounted="saveNote(currentRoute)"
+    v-on:vue:unmounted="saveNote(currentRoute)"
     flat
     bordered
     class="rounded-borders bg-white fit"

@@ -1,6 +1,6 @@
 <template>
   <q-layout
-    v-on:vnode-unmounted="saveLocalStore()"
+    v-on:vue:unmounted="saveLocalStore()"
     style="background-color: rgb(30, 61, 88)"
   >
     <q-card flat bordered class="rounded-borders">

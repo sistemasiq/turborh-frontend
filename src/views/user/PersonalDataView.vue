@@ -1,7 +1,7 @@
 <template>
   <q-layout
     style="background-color: rgb(30, 61, 88)"
-    v-on:vnode-unmounted="saveLocalStore()"
+    v-on:vue:unmounted="saveLocalStore()"
   >
     <q-card>
       <q-card-section class="title">

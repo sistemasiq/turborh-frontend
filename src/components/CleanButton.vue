@@ -1,6 +1,6 @@
 <template>
   <q-btn
-    v-on:vnode-mounted="setFields(fields)"
+    v-on:vue:mounted="setFields(fields)"
     size="md"
     class="btn-clean q-mt-xl"
     rounded

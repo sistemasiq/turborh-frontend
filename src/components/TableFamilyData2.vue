@@ -1,5 +1,5 @@
 <template>
-  <div v-on:vnode-unmounted="saveLocalStore()">
+  <div v-on:vue:unmounted="saveLocalStore()">
     <q-table
       :columns="columns"
       :rows="familySonsData"

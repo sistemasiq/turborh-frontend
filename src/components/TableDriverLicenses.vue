@@ -1,6 +1,6 @@
 <!--This component is used to get the info about driver´s licences of the users-->
 <template>
-  <div v-on:vnode-unmounted="saveLocalStore()">
+  <div v-on:vue:unmounted="saveLocalStore()">
     <q-table
       no-data-label="Sin Licencias de Manejo"
       :rows="drivingLicenceData"

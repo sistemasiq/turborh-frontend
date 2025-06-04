@@ -1,5 +1,5 @@
 <template>
-  <q-layout style="background-color: rgb(30, 61, 88)" v-on:vnode-unmounted="saveLocalStore()">
+  <q-layout style="background-color: rgb(30, 61, 88)" v-on:vue:unmounted="saveLocalStore()">
     <q-card class="card-education">
       <q-card-section class="title"> Información Escolar</q-card-section>
       <q-card-section>
