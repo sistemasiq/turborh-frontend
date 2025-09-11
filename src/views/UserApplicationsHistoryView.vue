@@ -62,6 +62,13 @@
         {{ row.nombre }}
         {{ row.apellido_paterno }}
         {{ row.apellido_materno }}
+        <q-icon
+          name="gpp_good"
+          color="green"
+          size="25px"
+          class="q-ml-sm"
+          :title="'Acepto terminos y condiciones de privacidad'"
+        />
       </q-td>
     </template>
 
