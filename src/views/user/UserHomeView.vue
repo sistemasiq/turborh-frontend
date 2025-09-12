@@ -438,7 +438,7 @@
           <q-btn flat label="Cerrar" color="red" v-close-popup />
         </q-card-actions>
         <object
-          height="100%"
+          height="93%"
           width="100%"
           v-if="resumeSrc.length > 0"
           :data="resumeSrc"

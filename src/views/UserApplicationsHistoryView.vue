@@ -67,7 +67,7 @@
           color="green"
           size="25px"
           class="q-ml-sm"
-          :title="'Acepto terminos y condiciones de privacidad'"
+          :title="'Aceptó términos y condiciones de privacidad'"
         />
       </q-td>
     </template>
@@ -150,7 +150,7 @@
         <q-btn flat label="Cerrar" color="red" v-close-popup />
       </q-card-actions>
       <object
-        height="100%"
+        height="93%"
         width="100%"
         v-if="reportSrc.length > 0"
         :data="reportSrc"
@@ -167,7 +167,7 @@
         <q-btn flat label="Cerrar" color="red" v-close-popup />
       </q-card-actions>
       <object
-        height="95%"
+        height="93%"
         width="100%"
         v-if="resumeSrc.length > 0"
         :data="resumeSrc"
@@ -645,7 +645,7 @@ const filteredApplicants = computed(() => {
         }
       });
       return applicantFunction;
-    } 
+    }
 
     return true;
   });
