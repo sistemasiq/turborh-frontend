@@ -106,6 +106,16 @@
                 <q-item-label caption>Modifica los nombres y links de las pruebas psicométricas</q-item-label>
               </q-item-section>
             </q-item>
+
+            <q-item clickable to="/home/aviso-privacidad" :inset-level="1" class="custom-item">
+              <q-item-section avatar class="items-seleccion-elements">
+                <q-icon name="privacy_tip" class="icon-user" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Aviso de privacidad</q-item-label>
+                <q-item-label caption>Consulta de avisos de privasidad para empleados y candidatos</q-item-label>
+              </q-item-section>
+            </q-item>
           </div>
         </q-expansion-item>
 

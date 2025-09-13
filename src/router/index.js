@@ -77,6 +77,7 @@ const router = createRouter({
         { path: "catalogo-puestos", component: () => import('/src/views/requisition/JobCatalog.vue') },
         { path: "edicion-puesto", component: () => import('/src/views/requisition/JobEditionView.vue') },
         { path: "catalogo-maquinaria", component: () => import('/src/views/requisition/MachineryCatalogView.vue') },
+        { path: "aviso-privacidad", component: () => import('/src/views/requisition/AvisoPrivacidadView.vue') },
 
       ],
       beforeEnter: authGuard
